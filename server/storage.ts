@@ -1,0 +1,340 @@
+import {
+  users,
+  trailers,
+  shares,
+  payments,
+  trackingData,
+  documents,
+  auditLogs,
+  financialRecords,
+  type User,
+  type InsertUser,
+  type Trailer,
+  type InsertTrailer,
+  type Share,
+  type InsertShare,
+  type Payment,
+  type InsertPayment,
+  type TrackingData,
+  type InsertTrackingData,
+  type Document,
+  type InsertDocument,
+  type AuditLog,
+  type InsertAuditLog,
+  type FinancialRecord,
+  type InsertFinancialRecord,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
+
+export interface IStorage {
+  // User operations
+  getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Trailer operations
+  getTrailer(id: string): Promise<Trailer | undefined>;
+  getTrailerByTrailerId(trailerId: string): Promise<Trailer | undefined>;
+  getAllTrailers(): Promise<Trailer[]>;
+  createTrailer(trailer: InsertTrailer): Promise<Trailer>;
+  updateTrailer(id: string, trailer: Partial<Trailer>): Promise<Trailer>;
+  
+  // Share operations
+  getShare(id: string): Promise<Share | undefined>;
+  getSharesByUserId(userId: string): Promise<Share[]>;
+  getSharesByTrailerId(trailerId: string): Promise<Share[]>;
+  getAllShares(): Promise<Share[]>;
+  createShare(share: InsertShare): Promise<Share>;
+  updateShare(id: string, share: Partial<Share>): Promise<Share>;
+  
+  // Payment operations
+  getPayment(id: string): Promise<Payment | undefined>;
+  getPaymentsByUserId(userId: string): Promise<Payment[]>;
+  getPaymentsByShareId(shareId: string): Promise<Payment[]>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  
+  // Tracking operations
+  getLatestTrackingByTrailerId(trailerId: string): Promise<TrackingData | undefined>;
+  getTrackingHistory(trailerId: string, limit?: number): Promise<TrackingData[]>;
+  getAllLatestTracking(): Promise<TrackingData[]>;
+  createTrackingData(data: InsertTrackingData): Promise<TrackingData>;
+  
+  // Document operations
+  getDocumentsByUserId(userId: string): Promise<Document[]>;
+  getDocumentsByShareId(shareId: string): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  
+  // Audit log operations
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getRecentAuditLogs(limit?: number): Promise<AuditLog[]>;
+  
+  // Financial operations
+  getFinancialRecordByMonth(month: string): Promise<FinancialRecord | undefined>;
+  getAllFinancialRecords(): Promise<FinancialRecord[]>;
+  createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord>;
+  
+  // Dashboard data
+  getDashboardStats(userId: string): Promise<any>;
+  getPortfolioData(userId: string): Promise<any>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const [user] = await db
+      .insert(users)
+      .values({ ...insertUser, password: hashedPassword })
+      .returning();
+    return user;
+  }
+
+  // Trailer operations
+  async getTrailer(id: string): Promise<Trailer | undefined> {
+    const [trailer] = await db.select().from(trailers).where(eq(trailers.id, id));
+    return trailer;
+  }
+
+  async getTrailerByTrailerId(trailerId: string): Promise<Trailer | undefined> {
+    const [trailer] = await db.select().from(trailers).where(eq(trailers.trailerId, trailerId));
+    return trailer;
+  }
+
+  async getAllTrailers(): Promise<Trailer[]> {
+    return await db.select().from(trailers).orderBy(desc(trailers.createdAt));
+  }
+
+  async createTrailer(trailer: InsertTrailer): Promise<Trailer> {
+    const [newTrailer] = await db.insert(trailers).values(trailer).returning();
+    return newTrailer;
+  }
+
+  async updateTrailer(id: string, trailer: Partial<Trailer>): Promise<Trailer> {
+    const [updated] = await db
+      .update(trailers)
+      .set({ ...trailer, updatedAt: new Date() })
+      .where(eq(trailers.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Share operations
+  async getShare(id: string): Promise<Share | undefined> {
+    const [share] = await db.select().from(shares).where(eq(shares.id, id));
+    return share;
+  }
+
+  async getSharesByUserId(userId: string): Promise<Share[]> {
+    return await db.select().from(shares).where(eq(shares.userId, userId));
+  }
+
+  async getSharesByTrailerId(trailerId: string): Promise<Share[]> {
+    return await db.select().from(shares).where(eq(shares.trailerId, trailerId));
+  }
+
+  async getAllShares(): Promise<Share[]> {
+    return await db.select().from(shares).orderBy(desc(shares.createdAt));
+  }
+
+  async createShare(share: InsertShare): Promise<Share> {
+    const [newShare] = await db.insert(shares).values(share).returning();
+    return newShare;
+  }
+
+  async updateShare(id: string, share: Partial<Share>): Promise<Share> {
+    const [updated] = await db
+      .update(shares)
+      .set({ ...share, updatedAt: new Date() })
+      .where(eq(shares.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Payment operations
+  async getPayment(id: string): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+    return payment;
+  }
+
+  async getPaymentsByUserId(userId: string): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.userId, userId))
+      .orderBy(desc(payments.paymentDate));
+  }
+
+  async getPaymentsByShareId(shareId: string): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.shareId, shareId))
+      .orderBy(desc(payments.paymentDate));
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [newPayment] = await db.insert(payments).values(payment).returning();
+    return newPayment;
+  }
+
+  // Tracking operations
+  async getLatestTrackingByTrailerId(trailerId: string): Promise<TrackingData | undefined> {
+    const [tracking] = await db
+      .select()
+      .from(trackingData)
+      .where(eq(trackingData.trailerId, trailerId))
+      .orderBy(desc(trackingData.timestamp))
+      .limit(1);
+    return tracking;
+  }
+
+  async getTrackingHistory(trailerId: string, limit: number = 50): Promise<TrackingData[]> {
+    return await db
+      .select()
+      .from(trackingData)
+      .where(eq(trackingData.trailerId, trailerId))
+      .orderBy(desc(trackingData.timestamp))
+      .limit(limit);
+  }
+
+  async getAllLatestTracking(): Promise<TrackingData[]> {
+    const latestTracking = await db
+      .select()
+      .from(trackingData)
+      .orderBy(desc(trackingData.timestamp));
+    
+    const trackingMap = new Map<string, TrackingData>();
+    latestTracking.forEach(track => {
+      if (!trackingMap.has(track.trailerId)) {
+        trackingMap.set(track.trailerId, track);
+      }
+    });
+    
+    return Array.from(trackingMap.values());
+  }
+
+  async createTrackingData(data: InsertTrackingData): Promise<TrackingData> {
+    const [tracking] = await db.insert(trackingData).values(data).returning();
+    return tracking;
+  }
+
+  // Document operations
+  async getDocumentsByUserId(userId: string): Promise<Document[]> {
+    return await db
+      .select()
+      .from(documents)
+      .where(eq(documents.userId, userId))
+      .orderBy(desc(documents.uploadedAt));
+  }
+
+  async getDocumentsByShareId(shareId: string): Promise<Document[]> {
+    return await db
+      .select()
+      .from(documents)
+      .where(eq(documents.shareId, shareId))
+      .orderBy(desc(documents.uploadedAt));
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const [newDocument] = await db.insert(documents).values(document).returning();
+    return newDocument;
+  }
+
+  // Audit log operations
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [auditLog] = await db.insert(auditLogs).values(log).returning();
+    return auditLog;
+  }
+
+  async getRecentAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(limit);
+  }
+
+  // Financial operations
+  async getFinancialRecordByMonth(month: string): Promise<FinancialRecord | undefined> {
+    const [record] = await db
+      .select()
+      .from(financialRecords)
+      .where(eq(financialRecords.month, month));
+    return record;
+  }
+
+  async getAllFinancialRecords(): Promise<FinancialRecord[]> {
+    return await db
+      .select()
+      .from(financialRecords)
+      .orderBy(desc(financialRecords.createdAt));
+  }
+
+  async createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord> {
+    const [newRecord] = await db.insert(financialRecords).values(record).returning();
+    return newRecord;
+  }
+
+  // Dashboard data
+  async getDashboardStats(userId: string): Promise<any> {
+    const userShares = await this.getSharesByUserId(userId);
+    const userPayments = await this.getPaymentsByUserId(userId);
+    
+    const totalValue = userShares.reduce((sum, share) => 
+      sum + parseFloat(share.purchaseValue || "0"), 0);
+    
+    const monthlyReturn = userShares.reduce((sum, share) => {
+      const value = parseFloat(share.purchaseValue || "0");
+      return sum + (value * parseFloat(share.monthlyReturn || "0") / 100);
+    }, 0);
+
+    const totalReturns = userShares.reduce((sum, share) =>
+      sum + parseFloat(share.totalReturns || "0"), 0);
+
+    return {
+      totalValue,
+      activeShares: userShares.filter(s => s.status === "active").length,
+      monthlyReturn,
+      totalReturns,
+      nextPayment: monthlyReturn,
+      recentPayments: userPayments.slice(0, 5),
+    };
+  }
+
+  async getPortfolioData(userId: string): Promise<any> {
+    const userShares = await this.getSharesByUserId(userId);
+    const userPayments = await this.getPaymentsByUserId(userId);
+    
+    const sharesWithTrailers = await Promise.all(
+      userShares.map(async (share) => {
+        const trailer = await this.getTrailer(share.trailerId);
+        return { ...share, trailer };
+      })
+    );
+
+    return {
+      shares: sharesWithTrailers,
+      payments: userPayments,
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();
