@@ -246,9 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shares routes
   app.get("/api/shares", isAuthenticated, async (req, res) => {
     try {
-      console.log("[DEBUG] Fetching shares for userId:", req.session.userId);
       const shares = await storage.getSharesByUserId(req.session.userId!);
-      console.log("[DEBUG] Found shares:", shares.length);
       res.json(shares);
     } catch (error) {
       console.error("Shares error:", error);

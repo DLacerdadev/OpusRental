@@ -48,48 +48,47 @@ export function Sidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <div className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border w-64 min-h-screen flex flex-col">
-      <div className="p-4 border-b border-sidebar-border flex items-center space-x-3">
-        <img src={logoPath} alt="Opus Rental Capital" className="h-12 w-12 rounded-full" />
+    <div className="bg-primary text-white border-r border-primary w-64 min-h-screen flex flex-col">
+      <div className="p-4 border-b border-white/10 flex items-center space-x-3">
+        <img src={logoPath} alt="Opus Rental Capital" className="h-10 w-10 rounded-full" />
         <div>
-          <h1 className="text-lg font-bold">Opus Rental Capital</h1>
-          <p className="text-xs text-sidebar-foreground/70 capitalize">{user?.role || "Investidor"}</p>
+          <h1 className="text-base font-bold text-white">Opus Rental Capital</h1>
+          <p className="text-xs text-white/70 capitalize">{user?.role || "Investidor"}</p>
         </div>
       </div>
 
-      <nav className="p-4 space-y-2 flex-1">
+      <nav className="p-3 space-y-1 flex-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.path;
           
           return (
             <Link key={item.path} href={item.path}>
-              <Button
-                variant={isActive ? "default" : "ghost"}
-                className={isActive 
-                  ? "w-full justify-start bg-sidebar-accent hover:bg-sidebar-accent/90" 
-                  : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }
+              <button
+                className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive 
+                    ? "bg-accent text-white" 
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                }`}
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <Icon className="mr-2 h-4 w-4" />
+                <Icon className="mr-3 h-4 w-4" />
                 {item.label}
-              </Button>
+              </button>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive"
+      <div className="p-3 border-t border-white/10">
+        <button
+          className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:bg-destructive/20 hover:text-white transition-colors"
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-3 h-4 w-4" />
           Sair
-        </Button>
+        </button>
       </div>
     </div>
   );
