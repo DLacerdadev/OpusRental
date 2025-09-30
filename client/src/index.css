@@ -3,42 +3,42 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(210, 30%, 97%);
-  --foreground: hsl(210, 65%, 15%);
+  --background: hsl(210, 25%, 95%);
+  --foreground: hsl(210, 70%, 12%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(210, 65%, 15%);
+  --card-foreground: hsl(210, 70%, 12%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(210, 65%, 15%);
-  --primary: hsl(210, 65%, 15%);
+  --popover-foreground: hsl(210, 70%, 12%);
+  --primary: hsl(210, 70%, 16%);
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(348, 83%, 47%);
   --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(210, 30%, 92%);
-  --muted-foreground: hsl(210, 20%, 45%);
+  --muted: hsl(210, 20%, 88%);
+  --muted-foreground: hsl(210, 15%, 40%);
   --accent: hsl(207, 90%, 54%);
   --accent-foreground: hsl(0, 0%, 100%);
-  --destructive: hsl(0, 84%, 60%);
+  --destructive: hsl(348, 83%, 47%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(210, 20%, 88%);
-  --input: hsl(210, 20%, 88%);
-  --ring: hsl(210, 65%, 15%);
+  --border: hsl(210, 20%, 85%);
+  --input: hsl(0, 0%, 100%);
+  --ring: hsl(210, 70%, 16%);
   --chart-1: hsl(207, 90%, 54%);
   --chart-2: hsl(348, 83%, 47%);
-  --chart-3: hsl(159.7826, 100%, 36.0784%);
-  --chart-4: hsl(42.0290, 92.8251%, 56.2745%);
-  --chart-5: hsl(210, 65%, 15%);
-  --sidebar: hsl(210, 65%, 15%);
-  --sidebar-foreground: hsl(0, 0%, 100%);
+  --chart-3: hsl(142, 71%, 45%);
+  --chart-4: hsl(45, 93%, 47%);
+  --chart-5: hsl(210, 70%, 16%);
+  --sidebar: hsl(210, 70%, 16%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
   --sidebar-primary: hsl(207, 90%, 54%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(210, 65%, 20%);
+  --sidebar-accent: hsl(207, 90%, 54%);
   --sidebar-accent-foreground: hsl(0, 0%, 100%);
-  --sidebar-border: hsl(210, 65%, 20%);
+  --sidebar-border: hsl(210, 70%, 12%);
   --sidebar-ring: hsl(207, 90%, 54%);
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 }
 
 .dark {
@@ -75,5 +75,31 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-foreground;
+  }
+
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-2xl;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+}
+
+@layer components {
+  .card {
+    @apply shadow-md border-border/60;
+  }
+
+  .card:hover {
+    @apply shadow-lg;
   }
 }

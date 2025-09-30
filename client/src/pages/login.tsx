@@ -43,20 +43,22 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary p-4">
-      <Card className="w-full max-w-md shadow-2xl border-primary/20">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0">
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <img src={logoPath} alt="Opus Rental Capital" className="h-24 w-24 rounded-full shadow-lg" />
+              <div className="bg-white p-2 rounded-full shadow-lg">
+                <img src={logoPath} alt="Opus Rental Capital" className="h-20 w-20 rounded-full" />
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-primary mb-2">Opus Rental Capital</h1>
-            <p className="text-muted-foreground">Acesso ao Sistema de Investimentos</p>
+            <h1 className="text-3xl font-bold text-primary mb-2">Opus Rental Capital</h1>
+            <p className="text-sm text-muted-foreground">Acesso ao Sistema de Investimentos</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-semibold text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -65,11 +67,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-11 border-2 focus:border-primary"
               />
             </div>
 
-            <div>
-              <Label htmlFor="password">Senha</Label>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-semibold text-foreground">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -78,20 +81,21 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-11 border-2 focus:border-primary"
               />
             </div>
 
             <Button
               type="submit"
               data-testid="button-login"
-              className="w-full bg-primary hover:bg-primary/90"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold text-base mt-6"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? "Entrando..." : "Entrar no Sistema"}
             </Button>
 
-            <div className="text-center">
-              <a href="#" className="text-sm text-primary hover:underline">
+            <div className="text-center pt-2">
+              <a href="#" className="text-sm text-primary hover:underline font-medium">
                 Esqueci minha senha
               </a>
             </div>
