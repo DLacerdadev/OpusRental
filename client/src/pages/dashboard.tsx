@@ -24,7 +24,7 @@ export default function Dashboard() {
     queryKey: ["/api/dashboard/stats"],
   });
 
-  const { data: shares } = useQuery({
+  const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
   });
 
@@ -59,81 +59,79 @@ export default function Dashboard() {
   })) || [];
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Visão geral da sua carteira de investimentos</p>
+    <div className="p-8 space-y-8">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Visão geral da sua carteira de investimentos</p>
+        </div>
+        <div className="bg-accent px-4 py-2 rounded-lg">
+          <p className="text-xs font-medium text-primary">Último acesso</p>
+          <p className="text-sm font-bold text-primary">{format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</p>
+        </div>
       </div>
 
       {/* Performance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">Carteira Total</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="text-total-value">
-                  ${stats?.totalValue?.toFixed(2) || "0.00"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Valor total investido</p>
-              </div>
-              <div className="bg-primary/10 p-2 rounded-md">
-                <Wallet className="h-5 w-5 text-primary" />
+        <Card className="border-t-4 border-t-accent shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-accent/10 p-3 rounded-xl">
+                <Wallet className="h-6 w-6 text-accent" />
               </div>
             </div>
+            <p className="text-sm font-medium text-muted-foreground mb-1">Carteira Total</p>
+            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-total-value">
+              ${stats?.totalValue?.toFixed(2) || "0.00"}
+            </p>
+            <p className="text-xs text-green-600 font-medium">↑ Valor total investido</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">Cotas Ativas</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="text-active-shares">
-                  {stats?.activeShares || 0}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Rendimento: 2% a.m.</p>
-              </div>
-              <div className="bg-accent/10 p-2 rounded-md">
-                <TrendingUp className="h-5 w-5 text-accent" />
+        <Card className="border-t-4 border-t-primary shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-primary/10 p-3 rounded-xl">
+                <TrendingUp className="h-6 w-6 text-primary" />
               </div>
             </div>
+            <p className="text-sm font-medium text-muted-foreground mb-1">Cotas Ativas</p>
+            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-active-shares">
+              {stats?.activeShares || 0}
+            </p>
+            <p className="text-xs text-muted-foreground">Rendimento: 2% a.m.</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">Retorno Mensal</p>
-                <p className="text-2xl font-bold text-green-600" data-testid="text-monthly-return">
-                  ${stats?.monthlyReturn?.toFixed(2) || "0.00"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">2% sobre carteira</p>
-              </div>
-              <div className="bg-green-100 p-2 rounded-md">
-                <DollarSign className="h-5 w-5 text-green-600" />
+        <Card className="border-t-4 border-t-green-500 shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-green-100 p-3 rounded-xl">
+                <DollarSign className="h-6 w-6 text-green-600" />
               </div>
             </div>
+            <p className="text-sm font-medium text-muted-foreground mb-1">Retorno Mensal</p>
+            <p className="text-3xl font-bold text-green-600 mb-2" data-testid="text-monthly-return">
+              ${stats?.monthlyReturn?.toFixed(2) || "0.00"}
+            </p>
+            <p className="text-xs text-green-600 font-medium">↑ 2% sobre carteira</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">Próximo Pagamento</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="text-next-payment">
-                  ${stats?.nextPayment?.toFixed(2) || "0.00"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Previsão: {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM/yyyy")}
-                </p>
-              </div>
-              <div className="bg-secondary/10 p-2 rounded-md">
-                <Calendar className="h-5 w-5 text-secondary" />
+        <Card className="border-t-4 border-t-blue-500 shadow-lg hover:shadow-xl transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="bg-blue-100 p-3 rounded-xl">
+                <Calendar className="h-6 w-6 text-blue-600" />
               </div>
             </div>
+            <p className="text-sm font-medium text-muted-foreground mb-1">Próximo Pagamento</p>
+            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-next-payment">
+              ${stats?.nextPayment?.toFixed(2) || "0.00"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Previsão: {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM/yyyy")}
+            </p>
           </CardContent>
         </Card>
       </div>

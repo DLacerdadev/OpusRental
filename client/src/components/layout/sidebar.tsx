@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import logoPath from "@assets/Imagem do WhatsApp de 2025-09-30 à(s) 11.49.20_a02dcb9b_1759262288763.jpg";
+import logoPath from "@assets/image_1759264185138.png";
 import {
   LayoutDashboard,
   Briefcase,
@@ -48,16 +48,21 @@ export function Sidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <div className="bg-primary text-white border-r border-primary w-64 min-h-screen flex flex-col">
-      <div className="p-4 border-b border-white/10 flex items-center space-x-3">
-        <img src={logoPath} alt="Opus Rental Capital" className="h-10 w-10 rounded-full" />
-        <div>
-          <h1 className="text-base font-bold text-white">Opus Rental Capital</h1>
-          <p className="text-xs text-white/70 capitalize">{user?.role || "Investidor"}</p>
+    <div className="bg-primary text-white border-r border-border w-72 min-h-screen flex flex-col shadow-xl">
+      <div className="p-6 border-b border-white/10">
+        <div className="flex items-center space-x-3 mb-4">
+          <img src={logoPath} alt="Opus Rental Capital" className="h-12 w-12" />
+          <div>
+            <h1 className="text-lg font-bold text-white">Opus Rental Capital</h1>
+          </div>
+        </div>
+        <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
+          <p className="text-xs text-accent font-medium mb-1">Perfil</p>
+          <p className="text-sm text-white capitalize">{user?.role || "Investidor"}</p>
         </div>
       </div>
 
-      <nav className="p-3 space-y-1 flex-1">
+      <nav className="p-4 space-y-1 flex-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.path;
@@ -65,14 +70,14 @@ export function Sidebar({ user }: SidebarProps) {
           return (
             <Link key={item.path} href={item.path}>
               <button
-                className={`w-full flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                   isActive 
-                    ? "bg-accent text-white" 
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                    ? "bg-accent text-primary shadow-lg" 
+                    : "text-white/80 hover:bg-white/5 hover:text-white"
                 }`}
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className="mr-3 h-5 w-5" />
                 {item.label}
               </button>
             </Link>
@@ -80,13 +85,13 @@ export function Sidebar({ user }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/10">
+      <div className="p-4 border-t border-white/10">
         <button
-          className="w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:bg-destructive/20 hover:text-white transition-colors"
+          className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-white/80 hover:bg-destructive/20 hover:text-white transition-all"
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >
-          <LogOut className="mr-3 h-4 w-4" />
+          <LogOut className="mr-3 h-5 w-5" />
           Sair
         </button>
       </div>
