@@ -26,34 +26,39 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Minha Carteira</h1>
+        <p className="text-sm text-muted-foreground mt-1">Acompanhe seus investimentos e retornos</p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Histórico de Retornos</CardTitle>
+          <Card className="shadow-lg">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="text-lg font-bold">Histórico de Retornos</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-3">Mês/Ano</th>
-                      <th className="text-left py-3">Valor Pago</th>
-                      <th className="text-left py-3">Data Pagamento</th>
-                      <th className="text-left py-3">Status</th>
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">MÊS/ANO</th>
+                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VALOR PAGO</th>
+                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">DATA</th>
+                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
                     </tr>
                   </thead>
                   <tbody>
                     {portfolio?.payments?.map((payment: any) => (
-                      <tr key={payment.id} className="border-b border-border" data-testid={`payment-${payment.id}`}>
-                        <td className="py-3">{payment.referenceMonth}</td>
-                        <td className="py-3 font-medium text-green-600">
+                      <tr key={payment.id} className="border-b border-border hover:bg-muted/20 transition-colors" data-testid={`payment-${payment.id}`}>
+                        <td className="py-4 px-6 font-medium">{payment.referenceMonth}</td>
+                        <td className="py-4 px-6 font-bold text-green-600">
                           ${parseFloat(payment.amount).toFixed(2)}
                         </td>
-                        <td className="py-3">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
-                        <td className="py-3">
-                          <Badge variant={payment.status === "paid" ? "default" : "secondary"}>
+                        <td className="py-4 px-6">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
+                        <td className="py-4 px-6">
+                          <Badge variant={payment.status === "paid" ? "default" : "secondary"} className="rounded-full">
                             {payment.status === "paid" ? "Pago" : "Pendente"}
                           </Badge>
                         </td>
@@ -61,7 +66,7 @@ export default function Portfolio() {
                     ))}
                     {(!portfolio?.payments || portfolio.payments.length === 0) && (
                       <tr>
-                        <td colSpan={4} className="text-center py-8 text-muted-foreground">
+                        <td colSpan={4} className="text-center py-12 text-muted-foreground">
                           Nenhum pagamento registrado
                         </td>
                       </tr>
@@ -74,34 +79,34 @@ export default function Portfolio() {
         </div>
 
         <div className="space-y-6">
-          <Card>
+          <Card className="shadow-lg border-l-4 border-l-accent">
             <CardHeader>
-              <CardTitle>Projeção de Ganhos</CardTitle>
+              <CardTitle className="text-lg font-bold">Projeção de Ganhos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Próximos 3 meses</span>
-                    <span className="font-medium">
+              <div className="space-y-5">
+                <div className="bg-muted/30 p-4 rounded-xl">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-semibold text-muted-foreground">Próximos 3 meses</span>
+                    <span className="font-bold text-accent">
                       ${calculateProjection(portfolio?.shares || [], 3).toFixed(2)}
                     </span>
                   </div>
-                  <Progress value={25} className="h-2" />
+                  <Progress value={25} className="h-2 bg-accent/20" />
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Próximos 6 meses</span>
-                    <span className="font-medium">
+                <div className="bg-muted/30 p-4 rounded-xl">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-semibold text-muted-foreground">Próximos 6 meses</span>
+                    <span className="font-bold text-accent">
                       ${calculateProjection(portfolio?.shares || [], 6).toFixed(2)}
                     </span>
                   </div>
-                  <Progress value={50} className="h-2" />
+                  <Progress value={50} className="h-2 bg-accent/20" />
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Próximos 12 meses</span>
-                    <span className="font-medium">
+                <div className="bg-muted/30 p-4 rounded-xl">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-semibold text-muted-foreground">Próximos 12 meses</span>
+                    <span className="font-bold text-accent">
                       ${calculateProjection(portfolio?.shares || [], 12).toFixed(2)}
                     </span>
                   </div>

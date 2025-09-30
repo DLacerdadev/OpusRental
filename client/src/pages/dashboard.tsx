@@ -60,77 +60,77 @@ export default function Dashboard() {
 
   return (
     <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">Visão geral da sua carteira de investimentos</p>
         </div>
-        <div className="bg-accent px-4 py-2 rounded-lg">
-          <p className="text-xs font-medium text-primary">Último acesso</p>
-          <p className="text-sm font-bold text-primary">{format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</p>
+        <div className="bg-accent/10 border border-accent/30 px-4 py-2 rounded-xl">
+          <p className="text-xs font-semibold text-accent">ÚLTIMO ACESSO</p>
+          <p className="text-sm font-bold text-foreground">{format(new Date(), "dd/MM/yyyy • HH:mm")}</p>
         </div>
       </div>
 
       {/* Performance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-t-4 border-t-accent shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
           <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-accent/10 p-3 rounded-xl">
-                <Wallet className="h-6 w-6 text-accent" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-accent/10 p-3 rounded-2xl">
+                <Wallet className="h-7 w-7 text-accent" />
               </div>
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+0%</span>
             </div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Carteira Total</p>
-            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-total-value">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">CARTEIRA TOTAL</p>
+            <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
               ${stats?.totalValue?.toFixed(2) || "0.00"}
             </p>
-            <p className="text-xs text-green-600 font-medium">↑ Valor total investido</p>
           </CardContent>
         </Card>
 
-        <Card className="border-t-4 border-t-primary shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="border-l-4 border-l-primary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
           <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-primary/10 p-3 rounded-xl">
-                <TrendingUp className="h-6 w-6 text-primary" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-primary/10 p-3 rounded-2xl">
+                <TrendingUp className="h-7 w-7 text-primary" />
               </div>
+              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">ATIVO</span>
             </div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Cotas Ativas</p>
-            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-active-shares">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">COTAS ATIVAS</p>
+            <p className="text-3xl font-bold text-foreground" data-testid="text-active-shares">
               {stats?.activeShares || 0}
             </p>
-            <p className="text-xs text-muted-foreground">Rendimento: 2% a.m.</p>
           </CardContent>
         </Card>
 
-        <Card className="border-t-4 border-t-green-500 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
           <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-green-100 p-3 rounded-xl">
-                <DollarSign className="h-6 w-6 text-green-600" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-green-50 p-3 rounded-2xl">
+                <DollarSign className="h-7 w-7 text-green-600" />
               </div>
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">2% a.m.</span>
             </div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Retorno Mensal</p>
-            <p className="text-3xl font-bold text-green-600 mb-2" data-testid="text-monthly-return">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">RETORNO MENSAL</p>
+            <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
               ${stats?.monthlyReturn?.toFixed(2) || "0.00"}
             </p>
-            <p className="text-xs text-green-600 font-medium">↑ 2% sobre carteira</p>
           </CardContent>
         </Card>
 
-        <Card className="border-t-4 border-t-blue-500 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="border-l-4 border-l-secondary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
           <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <Calendar className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-secondary/10 p-3 rounded-2xl">
+                <Calendar className="h-7 w-7 text-secondary" />
               </div>
+              <span className="text-xs font-semibold text-secondary bg-secondary/10 px-2 py-1 rounded-full">
+                {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM")}
+              </span>
             </div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Próximo Pagamento</p>
-            <p className="text-3xl font-bold text-foreground mb-2" data-testid="text-next-payment">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">PRÓXIMO PAGAMENTO</p>
+            <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
               ${stats?.nextPayment?.toFixed(2) || "0.00"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Previsão: {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM/yyyy")}
             </p>
           </CardContent>
         </Card>
