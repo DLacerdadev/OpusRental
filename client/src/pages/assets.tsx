@@ -40,34 +40,37 @@ export default function Assets() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Gestão de Ativos</h3>
-        <div className="flex space-x-2">
-          <Button data-testid="button-new-asset">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Gestão de Ativos</h1>
+          <p className="text-sm text-muted-foreground mt-1">Controle e monitore seus trailers</p>
+        </div>
+        <div className="flex gap-3">
+          <Button className="bg-accent hover:bg-accent/90 shadow-lg" data-testid="button-new-asset">
             <Plus className="mr-2 h-4 w-4" />
             Novo Ativo
           </Button>
-          <Button variant="outline" data-testid="button-export">
+          <Button variant="outline" className="border-2" data-testid="button-export">
             <Download className="mr-2 h-4 w-4" />
             Exportar
           </Button>
         </div>
       </div>
 
-      <Card>
+      <Card className="shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left py-4 px-4">ID</th>
-                  <th className="text-left py-4 px-4">Status</th>
-                  <th className="text-left py-4 px-4">Farol</th>
-                  <th className="text-left py-4 px-4">Valor</th>
-                  <th className="text-left py-4 px-4">Aquisição</th>
-                  <th className="text-left py-4 px-4">Localização</th>
-                  <th className="text-left py-4 px-4">Ações</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">FAROL</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VALOR</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">AQUISIÇÃO</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">LOCALIZAÇÃO</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">AÇÕES</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,25 +79,38 @@ export default function Assets() {
                   return (
                     <tr
                       key={trailer.id}
-                      className="border-b border-border hover:bg-muted/30"
+                      className="border-b border-border hover:bg-accent/5 transition-colors"
                       data-testid={`trailer-${trailer.id}`}
                     >
-                      <td className="py-4 px-4 font-medium">{trailer.trailerId}</td>
-                      <td className="py-4 px-4">
-                        <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                      <td className="py-4 px-6">
+                        <span className="font-bold text-primary">{trailer.trailerId}</span>
                       </td>
-                      <td className="py-4 px-4">
-                        <div className={`w-3 h-3 ${getTrafficLight(trailer.purchaseDate)} rounded-full`}></div>
+                      <td className="py-4 px-6">
+                        <Badge variant={statusInfo.variant} className="rounded-full">
+                          {statusInfo.label}
+                        </Badge>
                       </td>
-                      <td className="py-4 px-4 font-medium">
-                        ${parseFloat(trailer.currentValue).toFixed(2)}
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-4 h-4 ${getTrafficLight(trailer.purchaseDate)} rounded-full shadow-lg`}></div>
+                        </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-6">
+                        <span className="font-bold text-foreground">
+                          ${parseFloat(trailer.currentValue).toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-muted-foreground">
                         {format(new Date(trailer.purchaseDate), "dd/MM/yyyy")}
                       </td>
-                      <td className="py-4 px-4">{trailer.location || "—"}</td>
-                      <td className="py-4 px-4">
-                        <Button variant="ghost" size="icon" data-testid={`button-view-${trailer.id}`}>
+                      <td className="py-4 px-6 text-muted-foreground">{trailer.location || "—"}</td>
+                      <td className="py-4 px-6">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="hover:bg-accent/20 hover:text-accent" 
+                          data-testid={`button-view-${trailer.id}`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                       </td>
@@ -103,7 +119,7 @@ export default function Assets() {
                 })}
                 {(!trailers || trailers.length === 0) && (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={7} className="text-center py-12 text-muted-foreground">
                       Nenhum ativo cadastrado
                     </td>
                   </tr>

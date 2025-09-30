@@ -29,50 +29,53 @@ export default function Tracking() {
   })) || [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Monitoramento GPS em Tempo Real</h3>
-        <div className="flex space-x-2">
-          <Button variant="outline" data-testid="button-refresh">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Rastreamento GPS</h1>
+          <p className="text-sm text-muted-foreground mt-1">Monitore seus ativos em tempo real</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" className="border-2" data-testid="button-refresh">
             <RefreshCw className="mr-2 h-4 w-4" />
             Atualizar
           </Button>
-          <Button variant="outline" data-testid="button-export-tracking">
+          <Button variant="outline" className="border-2" data-testid="button-export-tracking">
             <Download className="mr-2 h-4 w-4" />
-            Exportar Dados
+            Exportar
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
-          <Card>
-            <CardContent className="p-0 h-96">
+          <Card className="shadow-lg overflow-hidden">
+            <CardContent className="p-0 h-[500px]">
               <TrackingMap markers={markers} />
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-4">
-          <Card>
+          <Card className="shadow-lg border-l-4 border-l-accent">
             <CardHeader>
-              <CardTitle className="text-base">Atividade Recente</CardTitle>
+              <CardTitle className="text-lg font-bold">Atividade Recente</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3 text-sm">
                 {trackingData?.slice(0, 5).map((track: any) => (
-                  <div key={track.id} className="flex items-center space-x-2" data-testid={`tracking-${track.id}`}>
-                    <div className={`w-2 h-2 ${track.status === "moving" ? "bg-green-500 animate-pulse" : "bg-yellow-500"} rounded-full`}></div>
-                    <div>
-                      <p className="font-medium">{track.trailerId}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {track.status === "moving" ? "Em movimento" : "Parado"} - {track.location}
-                      </p>
+                  <div key={track.id} className="bg-muted/30 p-3 rounded-xl hover:bg-muted/50 transition-colors" data-testid={`tracking-${track.id}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className={`w-3 h-3 ${track.status === "moving" ? "bg-green-500 animate-pulse" : "bg-yellow-500"} rounded-full shadow-lg`}></div>
+                      <p className="font-bold text-foreground">{track.trailerId}</p>
                     </div>
+                    <p className="text-xs text-muted-foreground ml-5">
+                      {track.status === "moving" ? "Em movimento" : "Parado"} • {track.location}
+                    </p>
                   </div>
                 ))}
                 {(!trackingData || trackingData.length === 0) && (
-                  <div className="text-center text-muted-foreground py-4">
+                  <div className="text-center text-muted-foreground py-8">
                     Nenhum dado de rastreamento
                   </div>
                 )}
@@ -82,45 +85,46 @@ export default function Tracking() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Detalhes de Localização</CardTitle>
+      <Card className="shadow-lg">
+        <CardHeader className="border-b bg-muted/30">
+          <CardTitle className="text-lg font-bold">Detalhes de Localização</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left py-3 px-4">ID</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Localização Atual</th>
-                  <th className="text-left py-3 px-4">Última Atualização</th>
-                  <th className="text-left py-3 px-4">Velocidade</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">LOCALIZAÇÃO</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ATUALIZAÇÃO</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VELOCIDADE</th>
                 </tr>
               </thead>
               <tbody>
                 {trackingData?.map((track: any) => (
-                  <tr key={track.id} className="border-b border-border hover:bg-muted/30">
-                    <td className="py-3 px-4 font-medium">{track.trailerId}</td>
-                    <td className="py-3 px-4">
-                      <span className="flex items-center space-x-1">
-                        <div className={`w-2 h-2 ${track.status === "moving" ? "bg-green-500 animate-pulse" : "bg-yellow-500"} rounded-full`}></div>
-                        <span className={track.status === "moving" ? "text-green-600" : "text-yellow-600"}>
+                  <tr key={track.id} className="border-b border-border hover:bg-accent/5 transition-colors">
+                    <td className="py-4 px-6">
+                      <span className="font-bold text-primary">{track.trailerId}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="flex items-center gap-2">
+                        <div className={`w-3 h-3 ${track.status === "moving" ? "bg-green-500 animate-pulse" : "bg-yellow-500"} rounded-full shadow-lg`}></div>
+                        <span className={`font-semibold ${track.status === "moving" ? "text-green-600" : "text-yellow-600"}`}>
                           {track.status === "moving" ? "Em movimento" : "Parado"}
                         </span>
                       </span>
                     </td>
-                    <td className="py-3 px-4">
-                      {track.location}
-                      <br />
-                      <span className="text-xs text-muted-foreground">
+                    <td className="py-4 px-6">
+                      <div className="font-medium">{track.location}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
                         {parseFloat(track.latitude).toFixed(4)}, {parseFloat(track.longitude).toFixed(4)}
-                      </span>
+                      </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6 text-muted-foreground font-mono">
                       {format(new Date(track.timestamp), "HH:mm:ss")}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-6 font-bold">
                       {track.speed ? `${parseFloat(track.speed).toFixed(0)} km/h` : "—"}
                     </td>
                   </tr>
