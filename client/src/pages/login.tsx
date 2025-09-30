@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import logoPath from "@assets/Imagem do WhatsApp de 2025-09-30 à(s) 11.49.20_a02dcb9b_1759262288763.jpg";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -42,10 +43,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-primary p-4">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20">
         <CardContent className="p-8">
-          <div className="text-center mb-6">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <img src={logoPath} alt="Opus Rental Capital" className="h-24 w-24 rounded-full shadow-lg" />
+            </div>
             <h1 className="text-2xl font-bold text-primary mb-2">Opus Rental Capital</h1>
             <p className="text-muted-foreground">Acesso ao Sistema de Investimentos</p>
           </div>
@@ -80,7 +84,7 @@ export default function Login() {
             <Button
               type="submit"
               data-testid="button-login"
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? "Entrando..." : "Entrar no Sistema"}

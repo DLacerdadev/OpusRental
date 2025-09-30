@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import logoPath from "@assets/Imagem do WhatsApp de 2025-09-30 à(s) 11.49.20_a02dcb9b_1759262288763.jpg";
 import {
   LayoutDashboard,
   Briefcase,
@@ -47,10 +48,13 @@ export function Sidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <div className="bg-card border-r border-border w-64 min-h-screen flex flex-col">
-      <div className="p-4 border-b border-border">
-        <h1 className="text-xl font-bold text-primary">Opus Rental Capital</h1>
-        <p className="text-sm text-muted-foreground capitalize">{user?.role || "Investidor"}</p>
+    <div className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border w-64 min-h-screen flex flex-col">
+      <div className="p-4 border-b border-sidebar-border flex items-center space-x-3">
+        <img src={logoPath} alt="Opus Rental Capital" className="h-12 w-12 rounded-full" />
+        <div>
+          <h1 className="text-lg font-bold">Opus Rental Capital</h1>
+          <p className="text-xs text-sidebar-foreground/70 capitalize">{user?.role || "Investidor"}</p>
+        </div>
       </div>
 
       <nav className="p-4 space-y-2 flex-1">
@@ -61,8 +65,11 @@ export function Sidebar({ user }: SidebarProps) {
           return (
             <Link key={item.path} href={item.path}>
               <Button
-                variant={isActive ? "secondary" : "ghost"}
-                className="w-full justify-start"
+                variant={isActive ? "default" : "ghost"}
+                className={isActive 
+                  ? "w-full justify-start bg-sidebar-accent hover:bg-sidebar-accent/90" 
+                  : "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                }
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <Icon className="mr-2 h-4 w-4" />
@@ -73,10 +80,10 @@ export function Sidebar({ user }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-sidebar-border">
         <Button
           variant="ghost"
-          className="w-full justify-start text-destructive hover:bg-destructive/10"
+          className="w-full justify-start text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive"
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >
