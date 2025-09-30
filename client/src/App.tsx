@@ -18,6 +18,8 @@ import Tracking from "@/pages/tracking";
 import Financial from "@/pages/financial";
 import Reports from "@/pages/reports";
 import Compliance from "@/pages/compliance";
+import Settings from "@/pages/settings";
+import Approvals from "@/pages/approvals";
 
 function ProtectedRoute({ component: Component, title }: { component: any; title: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -99,6 +101,12 @@ function Router() {
       </Route>
       <Route path="/compliance">
         {() => <ProtectedRoute component={Compliance} title="Compliance" />}
+      </Route>
+      <Route path="/settings">
+        {() => <ProtectedRoute component={Settings} title="Configurações" />}
+      </Route>
+      <Route path="/approvals">
+        {() => <ProtectedRoute component={Approvals} title="Aprovações" />}
       </Route>
       <Route component={NotFound} />
     </Switch>
