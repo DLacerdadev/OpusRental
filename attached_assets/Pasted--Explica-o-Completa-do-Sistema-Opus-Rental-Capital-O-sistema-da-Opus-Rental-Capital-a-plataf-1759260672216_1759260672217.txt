@@ -1,0 +1,153 @@
+📖 Explicação Completa do Sistema – Opus Rental Capital
+
+O sistema da Opus Rental Capital é a plataforma central que organiza, controla e dá transparência ao modelo de investimento lastreado em trailers de carga. Ele foi criado para que cada investidor tenha clareza sobre sua cota, saiba exatamente onde está seu ativo e acompanhe, em tempo real, os resultados gerados.
+
+A seguir, estão os elementos que o sistema tem e precisa ter para funcionar de maneira sólida, segura e escalável.
+
+1. Área do Investidor
+
+O sistema oferece ao investidor um acesso exclusivo por meio de aplicativo (iOS e Android) ou versão web.
+Nessa área, ele encontra:
+
+Cadastro completo (dados pessoais e financeiros).
+
+Resumo de sua carteira, mostrando quais cotas possui.
+
+Histórico de retornos mensais já pagos.
+
+Projeção dos ganhos futuros, calculados automaticamente.
+
+Garantia vinculada: cada cota é associada a um trailer específico.
+
+Esse ambiente é pensado para transmitir segurança e simplicidade, facilitando a consulta e fortalecendo a confiança do investidor.
+
+2. Gestão de Cotas
+
+O sistema trabalha com a lógica de que cada cota é um trailer inteiro (não há divisão fracionada).
+No módulo de cotas, o sistema controla:
+
+O valor de cada cota.
+
+O vínculo da cota com o investidor.
+
+O trailer correspondente àquela cota.
+
+O histórico da cota (quando foi adquirida, situação atual, rentabilidade acumulada).
+
+Esse módulo garante que o investimento seja transparente e rastreável, sem risco de confusão entre cotas ou ativos.
+
+3. Gestão de Ativos (Trailers)
+
+Cada trailer é registrado individualmente no sistema, como um ativo único, com todas as informações necessárias:
+
+Valor de compra.
+
+Data de aquisição.
+
+Status atual (em estoque, ativo com investidor, em manutenção, vencido).
+
+Depreciação acumulada (quanto o ativo já perdeu de valor).
+
+Data de vencimento prevista (fim do ciclo de vida útil).
+
+Para facilitar a gestão, o sistema usa o Farol do Ativo:
+
+Verde → trailer novo.
+
+Amarelo → ativo em meio ciclo de vida.
+
+Vermelho → próximo ao vencimento.
+
+Esse recurso dá clareza imediata sobre a saúde da frota e dos ativos vinculados a cada investidor.
+
+4. Estoque
+
+O sistema precisa ter uma área dedicada ao controle de estoque de trailers.
+Esse módulo mostra:
+
+Quantos trailers estão disponíveis para venda de novas cotas.
+
+Quais já estão vinculados a investidores.
+
+Quais estão próximos do vencimento e precisam ser substituídos.
+
+Isso permite que a empresa tenha uma visão estratégica de expansão e saiba sempre sua capacidade de oferecer novas cotas.
+
+5. Financeiro
+
+Um dos pontos centrais do sistema é o módulo financeiro, que organiza todo o fluxo de entradas e saídas.
+Ele deve contemplar:
+
+Entradas de capital com a venda de cotas.
+
+Receitas recorrentes geradas pelos trailers em atividade.
+
+Repasses mensais aos investidores (fixo de 2% ao mês).
+
+Margem da empresa, calculada automaticamente.
+
+Relatórios financeiros em dólar, com histórico consolidado.
+
+Esse módulo garante clareza tanto para a empresa quanto para os investidores sobre os resultados e a sustentabilidade do modelo.
+
+6. Monitoramento via GPS
+
+Um diferencial essencial do sistema é o painel de monitoramento, que permite acompanhar em tempo real a localização dos trailers.
+Esse módulo inclui:
+
+Mapa interativo (estilo Google Maps) mostrando todos os ativos.
+
+Identificação de cada trailer com informações como ID, status e cota vinculada.
+
+Filtros de busca por investidor, status do trailer ou região.
+
+Histórico de movimentação de cada trailer.
+
+Alertas automáticos em caso de inatividade, devolução próxima ou manutenção pendente.
+
+Esse recurso une tecnologia e transparência, dando segurança ao investidor e controle à empresa.
+
+7. Compliance e Garantias
+
+Como se trata de um sistema de investimentos, o módulo de compliance é obrigatório para garantir credibilidade e atender auditorias.
+Ele reúne:
+
+Documentos e contratos digitais vinculados a cada cota.
+
+Registro formal da associação entre trailer e investidor.
+
+Trilhas de auditoria com todas as movimentações registradas.
+
+Relatórios exportáveis para fins regulatórios.
+
+Esse módulo é o que dá segurança jurídica ao sistema e assegura que todo investimento esteja lastreado em um ativo real.
+
+8. Relatórios e Dashboards
+
+O sistema precisa oferecer relatórios claros, tanto para investidores quanto para a administração da empresa.
+Entre eles:
+
+Relatórios mensais para investidores, enviados automaticamente.
+
+Relatórios gerenciais para a diretoria, mostrando ativos, cotas e margens.
+
+Dashboards visuais com gráficos, indicadores e filtros interativos.
+
+Exportação em PDF e Excel.
+
+Esses relatórios fortalecem a confiança dos investidores e auxiliam a tomada de decisão da empresa.
+
+9. Segurança e Governança
+
+Por lidar com investimentos, o sistema deve priorizar segurança máxima.
+Isso inclui:
+
+Autenticação multifator para todos os acessos.
+
+Diferentes níveis de permissão (investidor, administrador, gestor).
+
+Criptografia de dados sensíveis.
+
+Registro de logs de auditoria para rastrear todas as ações.
+
+A camada de governança garante que a plataforma opere com transparência, solidez e confiabilidade.
