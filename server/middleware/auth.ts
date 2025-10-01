@@ -81,14 +81,16 @@ export const authorize = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.session.user) {
-        await storage.createAuditLog({
-          userId: req.session.userId || "anonymous",
-          action: "unauthorized_access",
-          entityType: "route",
-          entityId: req.path,
-          details: { method: req.method, path: req.path },
-          ipAddress: req.ip,
-        });
+        if (req.session.userId) {
+          await storage.createAuditLog({
+            userId: req.session.userId,
+            action: "unauthorized_access",
+            entityType: "route",
+            entityId: req.path,
+            details: { method: req.method, path: req.path },
+            ipAddress: req.ip,
+          });
+        }
         return res.status(401).json({ message: "Unauthorized" });
       }
 
