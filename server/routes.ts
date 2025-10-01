@@ -4,9 +4,52 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertTrailerSchema, insertShareSchema } from "@shared/schema";
 import session from "express-session";
-import { isAuthenticated, isManager, requireRole, type AuthRequest } from "./middleware/auth";
+import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Security middleware
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }));
+
+  // Rate limiting
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // 10 requests per window
+    message: "Too many login attempts, please try again later",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const adminLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // 50 requests per window for admin routes
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
   // Session middleware
   app.use(
     session({
@@ -22,8 +65,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
+  // Access logging
+  app.use(logAccess());
+
   // Auth routes
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {
       const { email, password } = req.body;
       
