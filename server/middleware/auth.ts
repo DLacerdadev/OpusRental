@@ -161,3 +161,67 @@ export const logAccess = () => {
     next();
   };
 };
+
+export const checkOwnership = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userRole = req.session.user.role;
+      
+      if (userRole === "manager" || userRole === "admin") {
+        return next();
+      }
+
+      const shareId = req.params.id || req.params.shareId;
+      const userId = req.session.user.id;
+
+      if (req.path.includes("/shares/") && shareId) {
+        const share = await storage.getShare(shareId);
+        if (!share || share.userId !== userId) {
+          await storage.createAuditLog({
+            userId,
+            action: "ownership_violation",
+            entityType: "share",
+            entityId: shareId,
+            details: { 
+              method: req.method, 
+              path: req.path,
+              attemptedAccess: shareId,
+              actualOwner: share?.userId || "not_found"
+            },
+            ipAddress: req.ip,
+          });
+          return res.status(403).json({ message: "Forbidden: You can only access your own resources" });
+        }
+      }
+
+      if (req.path.includes("/payments/") && shareId) {
+        const share = await storage.getShare(shareId);
+        if (!share || share.userId !== userId) {
+          await storage.createAuditLog({
+            userId,
+            action: "ownership_violation",
+            entityType: "payment",
+            entityId: shareId,
+            details: { 
+              method: req.method, 
+              path: req.path,
+              attemptedAccess: shareId,
+              actualOwner: share?.userId || "not_found"
+            },
+            ipAddress: req.ip,
+          });
+          return res.status(403).json({ message: "Forbidden: You can only access your own resources" });
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error("Ownership check error:", error);
+      res.status(500).json({ message: "Ownership check failed" });
+    }
+  };
+};
