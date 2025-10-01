@@ -17,6 +17,7 @@ export const Policy = {
   
   "GET /api/financial/records": ["manager", "admin"],
   "GET /api/financial/current": ["manager", "admin"],
+  "POST /api/financial/generate-month": ["manager", "admin"],
   
   "GET /api/documents": ["investor", "manager", "admin"],
   

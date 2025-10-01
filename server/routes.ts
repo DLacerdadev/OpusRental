@@ -276,6 +276,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/financial/generate-month", authorize(), async (req, res) => {
+    try {
+      const { referenceMonth } = req.body;
+      
+      if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) {
+        return res.status(400).json({ 
+          message: "Campo 'referenceMonth' é obrigatório e deve estar no formato YYYY-MM (ex: 2025-10)" 
+        });
+      }
+
+      const { generateMonth } = await import("./services/finance.service");
+      const result = await generateMonth(referenceMonth);
+      
+      res.json({
+        success: true,
+        message: `Pagamentos gerados para ${referenceMonth}`,
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Generate month error:", error);
+      res.status(500).json({ 
+        message: error.message || "Erro ao gerar pagamentos mensais" 
+      });
+    }
+  });
+
   // Compliance routes
   app.get("/api/documents", authorize(), async (req, res) => {
     try {
