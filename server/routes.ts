@@ -4,12 +4,7 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertTrailerSchema, insertShareSchema } from "@shared/schema";
 import session from "express-session";
-
-declare module 'express-session' {
-  interface SessionData {
-    userId: string;
-  }
-}
+import { isAuthenticated, isManager, requireRole, type AuthRequest } from "./middleware/auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
@@ -25,14 +20,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
     })
   );
-
-  // Auth middleware
-  const isAuthenticated = (req: any, res: any, next: any) => {
-    if (req.session.userId) {
-      return next();
-    }
-    res.status(401).json({ message: "Unauthorized" });
-  };
 
   // Auth routes
   app.post("/api/auth/login", async (req, res) => {
@@ -109,8 +96,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Trailer/Asset routes
-  app.get("/api/trailers", isAuthenticated, async (req, res) => {
+  // Trailer/Asset routes (Manager/Admin only)
+  app.get("/api/trailers", isAuthenticated, isManager, async (req, res) => {
     try {
       const trailers = await storage.getAllTrailers();
       res.json(trailers);
@@ -120,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/trailers/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/trailers/:id", isAuthenticated, isManager, async (req, res) => {
     try {
       const trailer = await storage.getTrailer(req.params.id);
       if (!trailer) {
@@ -133,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/trailers", isAuthenticated, async (req, res) => {
+  app.post("/api/trailers", isAuthenticated, isManager, async (req, res) => {
     try {
       const validated = insertTrailerSchema.parse(req.body);
       const trailer = await storage.createTrailer(validated);
@@ -154,8 +141,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tracking routes
-  app.get("/api/tracking", isAuthenticated, async (req, res) => {
+  // Tracking routes (Manager/Admin only)
+  app.get("/api/tracking", isAuthenticated, isManager, async (req, res) => {
     try {
       const tracking = await storage.getAllLatestTracking();
       res.json(tracking);
@@ -165,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tracking/:trailerId/history", isAuthenticated, async (req, res) => {
+  app.get("/api/tracking/:trailerId/history", isAuthenticated, isManager, async (req, res) => {
     try {
       const trailer = await storage.getTrailerByTrailerId(req.params.trailerId);
       if (!trailer) {
@@ -179,8 +166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Financial routes
-  app.get("/api/financial/records", isAuthenticated, async (req, res) => {
+  // Financial routes (Manager/Admin only)
+  app.get("/api/financial/records", isAuthenticated, isManager, async (req, res) => {
     try {
       const records = await storage.getAllFinancialRecords();
       res.json(records);
@@ -190,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/financial/current", isAuthenticated, async (req, res) => {
+  app.get("/api/financial/current", isAuthenticated, isManager, async (req, res) => {
     try {
       const now = new Date();
       const month = `${now.toLocaleString('en-US', { month: 'long' })}/${now.getFullYear()}`;
@@ -233,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/audit-logs", isAuthenticated, async (req, res) => {
+  app.get("/api/audit-logs", isAuthenticated, isManager, async (req, res) => {
     try {
       const logs = await storage.getRecentAuditLogs(50);
       res.json(logs);
