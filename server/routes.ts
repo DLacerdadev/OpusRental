@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get("/api/dashboard/stats", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard/stats", authorize(), async (req, res) => {
     try {
       const stats = await storage.getDashboardStats(req.session.userId!);
       res.json(stats);
@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Portfolio routes
-  app.get("/api/portfolio", isAuthenticated, async (req, res) => {
+  app.get("/api/portfolio", authorize(), async (req, res) => {
     try {
       const portfolio = await storage.getPortfolioData(req.session.userId!);
       res.json(portfolio);
@@ -164,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Trailer/Asset routes (Manager/Admin only)
-  app.get("/api/trailers", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/trailers", authorize(), async (req, res) => {
     try {
       const trailers = await storage.getAllTrailers();
       res.json(trailers);
@@ -174,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/trailers/:id", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/trailers/:id", authorize(), async (req, res) => {
     try {
       const trailer = await storage.getTrailer(req.params.id);
       if (!trailer) {
@@ -187,7 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/trailers", isAuthenticated, isManager, async (req, res) => {
+  app.post("/api/trailers", authorize(), async (req, res) => {
     try {
       const validated = insertTrailerSchema.parse(req.body);
       const trailer = await storage.createTrailer(validated);
@@ -209,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tracking routes (Manager/Admin only)
-  app.get("/api/tracking", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/tracking", authorize(), async (req, res) => {
     try {
       const tracking = await storage.getAllLatestTracking();
       res.json(tracking);
@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tracking/:trailerId/history", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/tracking/:trailerId/history", authorize(), async (req, res) => {
     try {
       const trailer = await storage.getTrailerByTrailerId(req.params.trailerId);
       if (!trailer) {
@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Financial routes (Manager/Admin only)
-  app.get("/api/financial/records", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/financial/records", authorize(), async (req, res) => {
     try {
       const records = await storage.getAllFinancialRecords();
       res.json(records);
@@ -244,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/financial/current", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/financial/current", authorize(), async (req, res) => {
     try {
       const now = new Date();
       const month = `${now.toLocaleString('en-US', { month: 'long' })}/${now.getFullYear()}`;
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Compliance routes
-  app.get("/api/documents", isAuthenticated, async (req, res) => {
+  app.get("/api/documents", authorize(), async (req, res) => {
     try {
       const documents = await storage.getDocumentsByUserId(req.session.userId!);
       res.json(documents);
@@ -287,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/audit-logs", isAuthenticated, isManager, async (req, res) => {
+  app.get("/api/audit-logs", authorize(), adminLimiter, async (req, res) => {
     try {
       const logs = await storage.getRecentAuditLogs(50);
       res.json(logs);
@@ -298,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Shares routes
-  app.get("/api/shares", isAuthenticated, async (req, res) => {
+  app.get("/api/shares", authorize(), async (req, res) => {
     try {
       const shares = await storage.getSharesByUserId(req.session.userId!);
       res.json(shares);
@@ -308,13 +308,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/shares/:id", authorize(), checkOwnership(), async (req, res) => {
+    try {
+      const share = await storage.getShare(req.params.id);
+      if (!share) {
+        return res.status(404).json({ message: "Share not found" });
+      }
+      res.json(share);
+    } catch (error) {
+      console.error("Share error:", error);
+      res.status(500).json({ message: "Failed to fetch share" });
+    }
+  });
+
   // Payments routes
-  app.get("/api/payments", isAuthenticated, async (req, res) => {
+  app.get("/api/payments", authorize(), async (req, res) => {
     try {
       const payments = await storage.getPaymentsByUserId(req.session.userId!);
       res.json(payments);
     } catch (error) {
       console.error("Payments error:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.get("/api/payments/:shareId", authorize(), checkOwnership(), async (req, res) => {
+    try {
+      const payments = await storage.getPaymentsByShareId(req.params.shareId);
+      res.json(payments);
+    } catch (error) {
+      console.error("Payments by share error:", error);
       res.status(500).json({ message: "Failed to fetch payments" });
     }
   });
