@@ -103,7 +103,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Collapse Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-6 -right-3 bg-accent hover:bg-accent/90 text-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 z-10"
+        className="absolute top-6 left-4 bg-accent hover:bg-accent/90 text-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 z-10"
         data-testid="button-toggle-sidebar"
       >
         {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
