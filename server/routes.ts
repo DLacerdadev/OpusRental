@@ -2,11 +2,13 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import { insertUserSchema, insertTrailerSchema, insertShareSchema } from "@shared/schema";
+import { insertUserSchema, insertTrailerSchema, insertShareSchema, financialRecords } from "@shared/schema";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -236,7 +238,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial routes (Manager/Admin only)
   app.get("/api/financial/records", authorize(), async (req, res) => {
     try {
-      const records = await storage.getAllFinancialRecords();
+      const records = await db.select()
+        .from(financialRecords)
+        .orderBy(sql`month desc`)
+        .limit(12);
       res.json(records);
     } catch (error) {
       console.error("Financial records error:", error);
@@ -276,22 +281,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/financial/generate-month", authorize(), async (req, res) => {
+  app.post("/api/financial/generate/:month", authorize(), async (req, res) => {
     try {
-      const { referenceMonth } = req.body;
+      const { month } = req.params;
       
-      if (!referenceMonth || !/^\d{4}-\d{2}$/.test(referenceMonth)) {
+      if (!month || !/^\d{4}-\d{2}$/.test(month)) {
         return res.status(400).json({ 
-          message: "Campo 'referenceMonth' é obrigatório e deve estar no formato YYYY-MM (ex: 2025-10)" 
+          message: "Formato de mês inválido. Use YYYY-MM (ex: 2025-10)" 
         });
       }
 
       const { generateMonth } = await import("./services/finance.service");
-      const result = await generateMonth(referenceMonth);
+      const result = await generateMonth(month);
       
       res.json({
         success: true,
-        message: `Pagamentos gerados para ${referenceMonth}`,
+        message: `Pagamentos gerados para ${month}`,
         data: result,
       });
     } catch (error: any) {
