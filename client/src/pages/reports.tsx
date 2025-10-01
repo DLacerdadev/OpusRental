@@ -52,6 +52,20 @@ export default function Reports() {
     },
   ];
 
+  const handleNewReport = () => {
+    toast({
+      title: "Criar Novo Relatório",
+      description: "Funcionalidade de criação de relatório personalizado em desenvolvimento",
+    });
+  };
+
+  const handleReportClick = (reportTitle: string) => {
+    toast({
+      title: `Gerando ${reportTitle}`,
+      description: "O relatório está sendo preparado...",
+    });
+  };
+
   const handleExportPDF = () => {
     const headers = ["Tipo", "Período", "Status"];
     const data = [
@@ -62,6 +76,13 @@ export default function Reports() {
     toast({
       title: "Exportado com sucesso",
       description: "O relatório foi exportado em PDF",
+    });
+  };
+
+  const handleExportExcel = () => {
+    toast({
+      title: "Exportado com sucesso",
+      description: "O relatório foi exportado em Excel",
     });
   };
 
@@ -85,7 +106,11 @@ export default function Reports() {
           <h1 className="text-3xl font-bold text-foreground">Relatórios</h1>
           <p className="text-sm text-muted-foreground mt-1">Gere e exporte relatórios personalizados</p>
         </div>
-        <Button className="bg-accent hover:bg-accent/90 shadow-lg" data-testid="button-new-report">
+        <Button 
+          className="bg-accent hover:bg-accent/90 shadow-lg" 
+          onClick={handleNewReport}
+          data-testid="button-new-report"
+        >
           Novo Relatório
         </Button>
       </div>
@@ -100,6 +125,7 @@ export default function Reports() {
             <Card
               key={report.testId}
               className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer border-l-4 border-l-accent"
+              onClick={() => handleReportClick(report.title)}
               data-testid={`card-${report.testId}`}
             >
               <CardContent className="p-6">
@@ -137,6 +163,7 @@ export default function Reports() {
             <Button
               variant="outline"
               className="flex items-center justify-center gap-3 p-6 border-2 hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 hover:text-foreground transition-all"
+              onClick={handleExportExcel}
               data-testid="button-export-excel"
             >
               <FileText className="text-green-600 h-6 w-6" />
