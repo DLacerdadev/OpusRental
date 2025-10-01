@@ -85,6 +85,51 @@ export default function Assets() {
     return "bg-red-500";
   };
 
+  const handleExport = () => {
+    if (!trailers || trailers.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há ativos cadastrados no sistema.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ["ID", "Status", "Valor de Compra", "Valor Atual", "Data de Aquisição", "Localização", "Latitude", "Longitude"];
+    const csvData = trailers.map((trailer: any) => [
+      trailer.trailerId,
+      trailer.status,
+      `$${parseFloat(trailer.purchaseValue).toFixed(2)}`,
+      `$${parseFloat(trailer.currentValue).toFixed(2)}`,
+      format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
+      trailer.location || "",
+      trailer.latitude || "",
+      trailer.longitude || "",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ativos_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Exportado com sucesso!",
+      description: "Arquivo CSV baixado.",
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -109,7 +154,12 @@ export default function Assets() {
             <Plus className="mr-2 h-4 w-4" />
             Novo Ativo
           </Button>
-          <Button variant="outline" className="border-2" data-testid="button-export">
+          <Button 
+            variant="outline" 
+            className="border-2" 
+            data-testid="button-export"
+            onClick={handleExport}
+          >
             <Download className="mr-2 h-4 w-4" />
             Exportar
           </Button>
