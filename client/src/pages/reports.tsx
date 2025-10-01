@@ -126,7 +126,7 @@ export default function Reports() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-secondary hover:bg-secondary/5 transition-all"
+              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-secondary hover:bg-secondary/5 hover:text-foreground transition-all"
               onClick={handleExportPDF}
               data-testid="button-export-pdf"
             >
@@ -136,7 +136,7 @@ export default function Reports() {
 
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-green-600 hover:bg-green-50 transition-all"
+              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-green-600 hover:bg-green-50 hover:text-foreground dark:hover:text-foreground transition-all"
               data-testid="button-export-excel"
             >
               <FileText className="text-green-600 h-6 w-6" />
@@ -145,7 +145,7 @@ export default function Reports() {
 
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-accent hover:bg-accent/5 transition-all"
+              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-accent hover:bg-accent/5 hover:text-foreground transition-all"
               onClick={handleExportCSV}
               data-testid="button-export-csv"
             >
