@@ -17,7 +17,7 @@ export const Policy = {
   
   "GET /api/financial/records": ["manager", "admin"],
   "GET /api/financial/current": ["manager", "admin"],
-  "POST /api/financial/generate-month": ["manager", "admin"],
+  "POST /api/financial/generate/:month": ["manager", "admin"],
   
   "GET /api/documents": ["investor", "manager", "admin"],
   
@@ -38,7 +38,11 @@ export function matchPolicy(method: string, path: string): readonly UserRole[] |
   const normalizedPath = path.replace(/\/[^/]+$/, (match) => {
     const uuidPattern = /^\/[0-9a-f-]+$/i;
     const trailerIdPattern = /^\/[A-Z0-9-]+$/;
+    const monthPattern = /^\/\d{4}-\d{2}$/;
     
+    if (path.includes('/generate/') && monthPattern.test(match)) {
+      return "/:month";
+    }
     if (path.includes('/payments/') && uuidPattern.test(match)) {
       return "/:shareId";
     }
