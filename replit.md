@@ -163,3 +163,40 @@ Preferred communication style: Simple, everyday language.
 - ✅ E2E: 403 insufficient permissions (role-based)
 - ✅ E2E: Cross-user ownership validation
 - ✅ CSRF protection on mutations
+
+## Financial Engine (October 2025)
+
+### Automated Payment Generation
+
+**Idempotent Payment Service** (`server/services/finance.service.ts`)
+- Generates 2% monthly returns for all active shares
+- Database-level idempotency using `ON CONFLICT DO NOTHING`
+- Unique constraint on `(share_id, reference_month)` prevents duplicates
+- Consolidates monthly financial records with upsert pattern
+
+**Administrative Endpoints**
+- `POST /api/financial/generate/:month` - Manual payment generation (manager/admin)
+  - Month as URL path parameter (format: YYYY-MM)
+  - Protected with authorize() middleware
+  - Returns: {success, message, data: {sharesProcessed, investorPayouts, totalRevenue}}
+- `GET /api/financial/records` - Historical financial data (manager/admin)
+  - Returns last 12 months ordered by month DESC
+  - Optimized with direct SQL: `orderBy(sql\`month desc\`).limit(12)`
+
+**Automated Scheduler** (`server/scheduler.ts`)
+- Cron job runs on 1st of each month at 06:00 UTC
+- Auto-generates payments for current month using node-cron
+- Schedule pattern: `"0 6 1 * *"` (minute 0, hour 6, day 1)
+- Initialized on server startup via `server/index.ts`
+- Logs execution results to console for monitoring
+
+**Database Optimizations**
+- Unique index: `payments (share_id, reference_month)` for idempotency
+- Performance index: `payments (user_id, reference_month)` for queries
+- Unique constraint: `financial_records (month)` for consolidation
+- Date format standardized: ISO 8601 YYYY-MM (e.g., "2025-10")
+
+**Policy Updates**
+- Pattern matching for `:month` parameter in URL paths
+- Month pattern: `/\d{4}-\d{2}/` for YYYY-MM format
+- Authorization check before payment generation
