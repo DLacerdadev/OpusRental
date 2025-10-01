@@ -1,8 +1,18 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
+    
+    if (res.status === 403) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access this resource.",
+        variant: "destructive",
+      });
+    }
+    
     throw new Error(`${res.status}: ${text}`);
   }
 }
