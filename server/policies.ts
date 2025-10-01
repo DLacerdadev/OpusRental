@@ -35,14 +35,20 @@ export type PolicyKey = keyof typeof Policy;
 
 export function matchPolicy(method: string, path: string): readonly UserRole[] | readonly ["*"] | undefined {
   const normalizedPath = path.replace(/\/[^/]+$/, (match) => {
-    if (match.match(/^\/[0-9a-f-]+$/i)) {
-      return "/:id";
+    const uuidPattern = /^\/[0-9a-f-]+$/i;
+    const trailerIdPattern = /^\/[A-Z0-9-]+$/;
+    
+    if (path.includes('/payments/') && uuidPattern.test(match)) {
+      return "/:shareId";
     }
-    if (match.match(/^\/[A-Z0-9-]+$/)) {
+    if (path.includes('/tracking/') && trailerIdPattern.test(match)) {
       return "/:trailerId";
     }
-    if (match.match(/^\/share-[0-9]+$/)) {
-      return "/:shareId";
+    if (uuidPattern.test(match)) {
+      return "/:id";
+    }
+    if (trailerIdPattern.test(match)) {
+      return "/:trailerId";
     }
     return match;
   });
@@ -59,11 +65,13 @@ export const OwnershipRoutes = new Set([
 
 export function requiresOwnershipCheck(method: string, path: string): boolean {
   const normalizedPath = path.replace(/\/[^/]+$/, (match) => {
-    if (match.match(/^\/[0-9a-f-]+$/i)) {
-      return "/:id";
-    }
-    if (match.match(/^\/share-[0-9]+$/)) {
+    const uuidPattern = /^\/[0-9a-f-]+$/i;
+    
+    if (path.includes('/payments/') && uuidPattern.test(match)) {
       return "/:shareId";
+    }
+    if (uuidPattern.test(match)) {
+      return "/:id";
     }
     return match;
   });
