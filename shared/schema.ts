@@ -9,6 +9,8 @@ import {
   date,
   boolean,
   jsonb,
+  uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -66,9 +68,12 @@ export const payments = pgTable("payments", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentDate: date("payment_date").notNull(),
   status: text("status").notNull().default("paid"), // paid, pending, failed
-  referenceMonth: text("reference_month").notNull(), // "January/2024"
+  referenceMonth: varchar("reference_month", { length: 7 }).notNull(), // "2025-10" format YYYY-MM
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => ({
+  uniqShareMonth: uniqueIndex("uniq_payments_share_month").on(t.shareId, t.referenceMonth),
+  idxUserMonth: index("idx_payments_user_month").on(t.userId, t.referenceMonth),
+}));
 
 // Tracking data table
 export const trackingData = pgTable("tracking_data", {
@@ -110,11 +115,11 @@ export const auditLogs = pgTable("audit_logs", {
 // Financial records table
 export const financialRecords = pgTable("financial_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  month: text("month").notNull(), // "January/2024"
-  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).notNull(),
-  investorPayouts: decimal("investor_payouts", { precision: 10, scale: 2 }).notNull(),
-  operationalCosts: decimal("operational_costs", { precision: 10, scale: 2 }).notNull(),
-  companyMargin: decimal("company_margin", { precision: 10, scale: 2 }).notNull(),
+  month: varchar("month", { length: 7 }).notNull().unique(), // "2025-10" format YYYY-MM
+  totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).notNull().default("0"),
+  investorPayouts: decimal("investor_payouts", { precision: 12, scale: 2 }).notNull().default("0"),
+  operationalCosts: decimal("operational_costs", { precision: 12, scale: 2 }).notNull().default("0"),
+  companyMargin: decimal("company_margin", { precision: 12, scale: 2 }).notNull().default("0"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
