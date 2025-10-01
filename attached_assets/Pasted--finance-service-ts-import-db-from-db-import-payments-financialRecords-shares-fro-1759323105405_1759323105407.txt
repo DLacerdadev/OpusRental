@@ -1,0 +1,53 @@
+// finance.service.ts
+import { db } from "@/db";
+import { payments, financialRecords, shares } from "@/db/schema";
+import { sql, eq } from "drizzle-orm";
+
+export async function generateMonth(referenceMonth: string) {
+  // referencia "YYYY-MM" para o mês atual/anterior
+  const today = new Date();
+  const paymentDate = new Date(Date.UTC(
+    Number(referenceMonth.slice(0,4)),
+    Number(referenceMonth.slice(5,7)) - 1,
+    Math.min(28, today.getUTCDate()) // seguro
+  ));
+
+  // 1) shares ativas
+  const activeShares = await db.query.shares.findMany({
+    where: (s, { eq }) => eq(s.status, "active"),
+    columns: { id: true, userId: true, purchaseValue: true, monthlyReturn: true },
+  });
+
+  // 2) insere pagamentos (idempotente)
+  let payoutSum = 0;
+  for (const s of activeShares) {
+    const rate = Number(s.monthlyReturn ?? 2) / 100; // default 2%
+    const amount = +(Number(s.purchaseValue) * rate).toFixed(2);
+
+    await db.execute(sql`
+      INSERT INTO "payments" ("id","shareId","userId","amount","paymentDate","status","referenceMonth","createdAt")
+      VALUES (gen_random_uuid(), ${s.id}, ${s.userId}, ${amount}, ${paymentDate.toISOString()}, 'paid', ${referenceMonth}, now())
+      ON CONFLICT ("shareId","referenceMonth") DO NOTHING
+    `);
+
+    payoutSum += amount;
+  }
+
+  // 3) consolida financialRecords (exemplo: revenue = payouts / 0.7, ajuste depois)
+  const investorPayouts = +payoutSum.toFixed(2);
+  const totalRevenue = investorPayouts; // no seu caso, pode ser aluguel recebido; ajuste ao seu modelo
+  const operationalCosts = 0;
+  const companyMargin = +(Number(totalRevenue) - investorPayouts - operationalCosts).toFixed(2);
+
+  await db.execute(sql`
+    INSERT INTO "financialRecords" ("id","month","totalRevenue","investorPayouts","operationalCosts","companyMargin","createdAt")
+    VALUES (gen_random_uuid(), ${referenceMonth}, ${totalRevenue}, ${investorPayouts}, ${operationalCosts}, ${companyMargin}, now())
+    ON CONFLICT ("month") DO UPDATE
+      SET "totalRevenue" = EXCLUDED."totalRevenue",
+          "investorPayouts" = EXCLUDED."investorPayouts",
+          "operationalCosts" = EXCLUDED."operationalCosts",
+          "companyMargin" = EXCLUDED."companyMargin";
+  `);
+
+  return { referenceMonth, counts: activeShares.length, investorPayouts, totalRevenue, companyMargin };
+}
