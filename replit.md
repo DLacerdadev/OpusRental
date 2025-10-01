@@ -50,7 +50,14 @@ Preferred communication style: Simple, everyday language.
 **Authentication & Security**
 - bcrypt for password hashing
 - Session-based authentication with HTTP-only cookies
+- Policy-based authorization with centralized permission map (server/policies.ts)
 - Role-based access control (investor, manager, admin)
+- Ownership validation for investor resources (shares, payments)
+- CSRF protection via secure sessions
+- Rate limiting on authentication and admin endpoints
+- Helmet middleware with CSP headers for production
+- Session regeneration on login (anti-fixation)
+- Comprehensive audit logging (401/403 attempts, ownership violations)
 - Secure session storage with configurable secrets
 
 ### Data Architecture
@@ -109,3 +116,50 @@ Preferred communication style: Simple, everyday language.
 - React Hook Form for form state management
 - Zod for runtime schema validation
 - @hookform/resolvers for integration
+
+## Security Implementation
+
+### Policy-Based Authorization (October 2025)
+
+**Centralized Permission Map** (`server/policies.ts`)
+- All routes defined in single Policy object with allowed roles
+- Dynamic route matching with pattern normalization (/:id, /:shareId, /:trailerId)
+- Context-aware pattern detection (e.g., /api/payments/{uuid} → /:shareId)
+
+**Authorization Middleware** (`server/middleware/auth.ts`)
+- `authorize()`: Validates user role against Policy map for each route
+- `checkOwnership()`: Ensures investors can only access their own resources
+- `logAccess()`: Comprehensive logging of all API access (user, role, path, method, status)
+
+**Ownership Validation**
+- Investor resources: shares, payments require ownership check
+- Manager/admin: bypass ownership checks (full access)
+- Returns 403 with audit log on ownership violation
+- Validates share.userId === req.session.user.id for investor role
+
+**Session Security**
+- Stores complete user object: {id, email, role}
+- Never trusts client-side role information
+- Session regeneration on login (prevents fixation attacks)
+- Secure cookies: httpOnly, sameSite: 'lax', secure: true in production
+
+**CSRF & Rate Limiting**
+- CSRF protection via secure session validation
+- Rate limiters: 5 req/15min on login, 100 req/15min on admin routes
+- Helmet middleware with CSP headers for production hardening
+
+**Audit Logging**
+- Logs all 401/403 attempts with IP, user, role, path, method
+- Special action types: "access_denied", "ownership_violation"
+- Anonymous user audit logs (userId: null) for failed auth attempts
+
+**Frontend Protection**
+- ProtectedRoute component with role-based guards
+- Centralized 403 handling in queryClient with toast notifications
+- Automatic redirect to login on 401 responses
+
+### Testing Coverage
+- ✅ E2E: 401 unauthorized access
+- ✅ E2E: 403 insufficient permissions (role-based)
+- ✅ E2E: Cross-user ownership validation
+- ✅ CSRF protection on mutations
