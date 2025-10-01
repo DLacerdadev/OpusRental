@@ -15,6 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
+        sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       },
@@ -36,18 +37,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      req.session.userId = user.id;
-      
-      await storage.createAuditLog({
-        userId: user.id,
-        action: "login",
-        entityType: "user",
-        entityId: user.id,
-        ipAddress: req.ip,
-      });
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
 
-      const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+        req.session.userId = user.id;
+        req.session.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role as "investor" | "manager" | "admin",
+        };
+        
+        req.session.save(async (err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Login failed" });
+          }
+
+          await storage.createAuditLog({
+            userId: user.id,
+            action: "login",
+            entityType: "user",
+            entityId: user.id,
+            details: { email: user.email, role: user.role },
+            ipAddress: req.ip,
+          });
+
+          const { password: _, ...userWithoutPassword } = user;
+          res.json(userWithoutPassword);
+        });
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
