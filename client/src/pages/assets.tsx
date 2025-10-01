@@ -95,22 +95,33 @@ export default function Assets() {
       return;
     }
 
-    const headers = ["ID", "Status", "Valor de Compra", "Valor Atual", "Data de Aquisição", "Localização", "Latitude", "Longitude"];
+    const headers = ["ID", "Status", "Valor de Compra (USD)", "Valor Atual (USD)", "Data de Aquisicao", "Localizacao", "Latitude", "Longitude"];
     const csvData = trailers.map((trailer: any) => [
       trailer.trailerId,
       trailer.status,
-      `$${parseFloat(trailer.purchaseValue).toFixed(2)}`,
-      `$${parseFloat(trailer.currentValue).toFixed(2)}`,
+      parseFloat(trailer.purchaseValue).toFixed(2),
+      parseFloat(trailer.currentValue).toFixed(2),
       format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
       trailer.location || "",
       trailer.latitude || "",
       trailer.longitude || "",
     ]);
 
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map((row: any[]) => row.map((cell: any) => `"${cell}"`).join(","))
-    ].join("\n");
+    const csvRows = [
+      headers.join(";"),
+      ...csvData.map((row: any[]) => 
+        row.map((cell: any) => {
+          const cellStr = String(cell);
+          if (cellStr.includes(";") || cellStr.includes(",") || cellStr.includes('"') || cellStr.includes("\n")) {
+            return `"${cellStr.replace(/"/g, '""')}"`;
+          }
+          return cellStr;
+        }).join(";")
+      )
+    ];
+
+    const BOM = "\uFEFF";
+    const csvContent = BOM + csvRows.join("\r\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
