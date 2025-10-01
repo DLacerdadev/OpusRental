@@ -1,21 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
+import { matchPolicy, type UserRole } from "../policies";
 
 declare module 'express-session' {
   interface SessionData {
     userId: string;
+    user?: {
+      id: string;
+      email: string;
+      role: UserRole;
+    };
   }
 }
 
-export interface AuthRequest extends Request {
-  session: {
-    userId?: string;
-    destroy: (callback: (err?: any) => void) => void;
-  };
-  user?: any;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
 }
 
-export const isAuthenticated = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.userId) {
     return next();
   }
@@ -23,7 +29,7 @@ export const isAuthenticated = (req: AuthRequest, res: Response, next: NextFunct
 };
 
 export const requireRole = (allowedRoles: string[]) => {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.session.userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -56,7 +62,7 @@ export const isManager = requireRole(["manager", "admin"]);
 
 export const isAdmin = requireRole(["admin"]);
 
-export const attachUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const attachUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.session.userId) {
       const user = await storage.getUser(req.session.userId);
@@ -69,4 +75,89 @@ export const attachUser = async (req: AuthRequest, res: Response, next: NextFunc
     console.error("Attach user error:", error);
     next();
   }
+};
+
+export const authorize = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) {
+        await storage.createAuditLog({
+          userId: req.session.userId || "anonymous",
+          action: "unauthorized_access",
+          entityType: "route",
+          entityId: req.path,
+          details: { method: req.method, path: req.path },
+          ipAddress: req.ip,
+        });
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const allowedRoles = matchPolicy(req.method, req.path);
+      
+      if (!allowedRoles) {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      if (allowedRoles[0] === "*") {
+        return next();
+      }
+
+      const roles = allowedRoles as readonly UserRole[];
+      if (!roles.includes(req.session.user.role)) {
+        await storage.createAuditLog({
+          userId: req.session.user.id,
+          action: "forbidden_access",
+          entityType: "route",
+          entityId: req.path,
+          details: { 
+            method: req.method, 
+            path: req.path,
+            required: allowedRoles,
+            current: req.session.user.role 
+          },
+          ipAddress: req.ip,
+        });
+        
+        return res.status(403).json({ 
+          message: "Forbidden: Insufficient permissions",
+          required: allowedRoles,
+          current: req.session.user.role
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error("Authorization error:", error);
+      res.status(500).json({ message: "Authorization failed" });
+    }
+  };
+};
+
+export const logAccess = () => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        userId: req.session.user?.id || req.session.userId || "anonymous",
+        email: req.session.user?.email || "unknown",
+        role: req.session.user?.role || "none",
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        duration: `${duration}ms`,
+        ip: req.ip,
+      };
+      
+      if (res.statusCode >= 400) {
+        console.error("❌ Access Error:", JSON.stringify(logEntry));
+      } else {
+        console.log("✅ Access:", JSON.stringify(logEntry));
+      }
+    });
+    
+    next();
+  };
 };
