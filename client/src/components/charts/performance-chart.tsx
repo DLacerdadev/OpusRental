@@ -7,12 +7,16 @@ interface PerformanceChartProps {
 export function PerformanceChart({ data }: PerformanceChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <LineChart data={data} margin={{ bottom: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis 
           dataKey="month" 
           stroke="#6b7280"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '11px' }}
+          interval={0}
+          angle={-15}
+          textAnchor="end"
+          height={60}
         />
         <YAxis 
           stroke="#6b7280"

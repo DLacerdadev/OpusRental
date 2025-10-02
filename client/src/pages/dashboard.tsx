@@ -60,26 +60,20 @@ export default function Dashboard() {
   }
 
   // Agregar pagamentos do mesmo mês e formatar para o gráfico
+  // Backend já retorna apenas os últimos 6 meses
   const paymentsByMonth = new Map<string, number>();
   stats?.recentPayments?.forEach((p: any) => {
     const currentValue = paymentsByMonth.get(p.referenceMonth) || 0;
     paymentsByMonth.set(p.referenceMonth, currentValue + parseFloat(p.amount));
   });
 
+  // Ordenar cronologicamente e formatar
   const performanceData = Array.from(paymentsByMonth.entries())
+    .sort((a, b) => a[0].localeCompare(b[0])) // Ordena cronologicamente (YYYY-MM)
     .map(([month, value]) => ({
-      month: formatMonth(month),
+      month: formatMonth(month), // Formata para exibição
       value: value,
-    }))
-    .sort((a, b) => {
-      const [aMonth, aYear] = a.month.split('/');
-      const [bMonth, bYear] = b.month.split('/');
-      return aYear === bYear 
-        ? (['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(aMonth) - 
-           ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(bMonth))
-        : parseInt(aYear) - parseInt(bYear);
-    })
-    .slice(-6);
+    }));
 
   return (
     <div className="p-8 space-y-8">

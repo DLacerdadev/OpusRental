@@ -309,13 +309,23 @@ export class DatabaseStorage implements IStorage {
     const totalReturns = userShares.reduce((sum, share) =>
       sum + parseFloat(share.totalReturns || "0"), 0);
 
+    // Get last 6 unique months sorted chronologically
+    const uniqueMonths = Array.from(new Set(userPayments.map(p => p.referenceMonth)))
+      .sort()
+      .slice(-6); // Get last 6 months
+    
+    // Get all payments from those 6 months
+    const last6MonthsPayments = userPayments.filter(p => 
+      uniqueMonths.includes(p.referenceMonth)
+    );
+
     return {
       totalValue,
       activeShares: userShares.filter(s => s.status === "active").length,
       monthlyReturn,
       totalReturns,
       nextPayment: monthlyReturn,
-      recentPayments: userPayments.slice(0, 5),
+      recentPayments: last6MonthsPayments,
     };
   }
 
