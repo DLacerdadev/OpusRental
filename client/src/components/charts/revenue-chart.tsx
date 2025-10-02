@@ -8,14 +8,27 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis 
+          dataKey="month" 
+          stroke="#6b7280"
+          style={{ fontSize: '12px' }}
+        />
+        <YAxis 
+          stroke="#6b7280"
+          style={{ fontSize: '12px' }}
+        />
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: '#fff',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px'
+          }}
+        />
         <Legend />
-        <Bar dataKey="revenue" fill="hsl(var(--chart-2))" name="Receita Total" />
-        <Bar dataKey="payouts" fill="hsl(var(--chart-1))" name="Repasses" />
-        <Bar dataKey="margin" fill="hsl(var(--chart-4))" name="Margem" />
+        <Bar dataKey="revenue" fill="#10b981" name="Receita Total" />
+        <Bar dataKey="payouts" fill="#3b82f6" name="Repasses" />
+        <Bar dataKey="margin" fill="#8b5cf6" name="Margem" />
       </BarChart>
     </ResponsiveContainer>
   );
