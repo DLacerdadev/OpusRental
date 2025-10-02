@@ -10,6 +10,36 @@ The platform serves multiple user roles including investors, managers, and admin
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 2025)
+
+### Role-Based Dashboard Implementation
+- **Manager Dashboard**: Displays company-wide statistics and business overview
+  - Total fleet value and trailer count (active/total)
+  - Total shares sold across all investors
+  - Company revenue and margin (last 6 months aggregated)
+  - Revenue performance chart (company-wide)
+  - Recent system activity (all payments processed)
+  - No personal portfolio or "Minha Carteira" tab (managers don't own shares)
+  
+- **Investor Dashboard**: Shows personal investment portfolio
+  - Personal wallet total value
+  - Active shares count
+  - Monthly return and next payment projection
+  - Personal performance chart (last 6 months)
+  - Recent payment activity
+  - Status of owned assets
+
+- **Backend Implementation**: 
+  - `getCompanyStats()` method in storage for manager/admin statistics
+  - `getDashboardStats(userId)` method for investor personal statistics
+  - Route logic checks user role and calls appropriate method
+  
+- **Frontend Implementation**:
+  - Conditional rendering based on `user.role` 
+  - Manager/Admin see company-wide view with business metrics
+  - Investors see personal portfolio view
+  - "Minha Carteira" tab removed from manager navigation (frontend + backend policies)
+
 ## System Architecture
 
 ### Frontend Architecture

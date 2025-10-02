@@ -146,8 +146,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard routes
   app.get("/api/dashboard/stats", authorize(), async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats(req.session.userId!);
-      res.json(stats);
+      const userRole = req.session.user?.role;
+      
+      // Managers and admins get company-wide statistics
+      if (userRole === "manager" || userRole === "admin") {
+        const stats = await storage.getCompanyStats();
+        res.json(stats);
+      } else {
+        // Investors get personal statistics
+        const stats = await storage.getDashboardStats(req.session.userId!);
+        res.json(stats);
+      }
     } catch (error) {
       console.error("Dashboard stats error:", error);
       res.status(500).json({ message: "Failed to fetch dashboard stats" });

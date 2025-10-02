@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PerformanceChart } from "@/components/charts/performance-chart";
-import { Wallet, TrendingUp, DollarSign, Calendar, Activity } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
-interface DashboardStats {
+interface InvestorStats {
   totalValue: number;
   activeShares: number;
   monthlyReturn: number;
@@ -19,13 +20,35 @@ interface DashboardStats {
   }>;
 }
 
+interface CompanyStats {
+  totalFleetValue: number;
+  totalTrailers: number;
+  activeTrailers: number;
+  totalSharesSold: number;
+  totalRevenue: number;
+  totalMargin: number;
+  revenueData: Array<{
+    month: string;
+    revenue: number;
+  }>;
+  recentActivity: Array<{
+    id: string;
+    amount: string;
+    referenceMonth: string;
+    paymentDate: string;
+    userId: string;
+  }>;
+}
+
 export default function Dashboard() {
-  const { data: stats, isLoading } = useQuery<DashboardStats>({
+  const { user } = useAuth();
+  const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
   });
 
   const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
+    enabled: user?.role === "investor",
   });
 
   const formatMonth = (month: string) => {
@@ -59,19 +82,164 @@ export default function Dashboard() {
     );
   }
 
+  const isManager = user?.role === "manager" || user?.role === "admin";
+
+  // Manager/Admin Dashboard
+  if (isManager && stats && 'totalFleetValue' in stats) {
+    const companyStats = stats as CompanyStats;
+    
+    const revenueChartData = companyStats.revenueData.map(data => ({
+      month: formatMonth(data.month),
+      value: data.revenue,
+    }));
+
+    return (
+      <div className="p-8 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Dashboard - Visão Geral</h1>
+            <p className="text-sm text-muted-foreground mt-1">Estatísticas gerais do negócio</p>
+          </div>
+          <div className="bg-accent/10 border border-accent/30 px-4 py-2 rounded-xl">
+            <p className="text-xs font-semibold text-accent">ÚLTIMO ACESSO</p>
+            <p className="text-sm font-bold text-foreground">{format(new Date(), "dd/MM/yyyy • HH:mm")}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-accent/10 p-3 rounded-2xl">
+                  <Truck className="h-7 w-7 text-accent" />
+                </div>
+                <span className="text-xs font-semibold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                  {companyStats.activeTrailers}/{companyStats.totalTrailers}
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">FROTA TOTAL</p>
+              <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
+                ${companyStats.totalFleetValue.toFixed(2)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-primary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-primary/10 p-3 rounded-2xl">
+                  <Users className="h-7 w-7 text-primary" />
+                </div>
+                <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">VENDIDAS</span>
+              </div>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">COTAS VENDIDAS</p>
+              <p className="text-3xl font-bold text-foreground" data-testid="text-shares-sold">
+                {companyStats.totalSharesSold}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-green-50 p-3 rounded-2xl">
+                  <DollarSign className="h-7 w-7 text-green-600" />
+                </div>
+                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">6 MESES</span>
+              </div>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">RECEITA TOTAL</p>
+              <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">
+                ${companyStats.totalRevenue.toFixed(2)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-purple-50 p-3 rounded-2xl">
+                  <BarChart3 className="h-7 w-7 text-purple-600" />
+                </div>
+                <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">6 MESES</span>
+              </div>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">MARGEM TOTAL</p>
+              <p className="text-3xl font-bold text-purple-600" data-testid="text-total-margin">
+                ${companyStats.totalMargin.toFixed(2)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance de Receita - Últimos 6 Meses</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {revenueChartData.length > 0 ? (
+                <PerformanceChart data={revenueChartData} />
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Nenhum dado de receita disponível
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Atividade Recente do Sistema</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companyStats.recentActivity?.slice(0, 5).map((activity: any) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center space-x-3 p-3 bg-muted/50 rounded-md"
+                    data-testid={`activity-${activity.id}`}
+                  >
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        Pagamento processado - {formatMonth(activity.referenceMonth)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(activity.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-green-600">
+                      ${parseFloat(activity.amount).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                {(!companyStats.recentActivity || companyStats.recentActivity.length === 0) && (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhuma atividade recente
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Investor Dashboard
+  const investorStats = stats as InvestorStats;
+  
   // Agregar pagamentos do mesmo mês e formatar para o gráfico
-  // Backend já retorna apenas os últimos 6 meses
   const paymentsByMonth = new Map<string, number>();
-  stats?.recentPayments?.forEach((p: any) => {
+  investorStats?.recentPayments?.forEach((p: any) => {
     const currentValue = paymentsByMonth.get(p.referenceMonth) || 0;
     paymentsByMonth.set(p.referenceMonth, currentValue + parseFloat(p.amount));
   });
 
   // Ordenar cronologicamente e formatar
   const performanceData = Array.from(paymentsByMonth.entries())
-    .sort((a, b) => a[0].localeCompare(b[0])) // Ordena cronologicamente (YYYY-MM)
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([month, value]) => ({
-      month: formatMonth(month), // Formata para exibição
+      month: formatMonth(month),
       value: value,
     }));
 
@@ -100,7 +268,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">CARTEIRA TOTAL</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
-              ${stats?.totalValue?.toFixed(2) || "0.00"}
+              ${investorStats?.totalValue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -115,7 +283,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">COTAS ATIVAS</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-active-shares">
-              {stats?.activeShares || 0}
+              {investorStats?.activeShares || 0}
             </p>
           </CardContent>
         </Card>
@@ -130,7 +298,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">RETORNO MENSAL</p>
             <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
-              ${stats?.monthlyReturn?.toFixed(2) || "0.00"}
+              ${investorStats?.monthlyReturn?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -147,7 +315,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">PRÓXIMO PAGAMENTO</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
-              ${stats?.nextPayment?.toFixed(2) || "0.00"}
+              ${investorStats?.nextPayment?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -176,7 +344,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stats?.recentPayments?.slice(0, 5).map((payment: any) => (
+              {investorStats?.recentPayments?.slice(0, 5).map((payment: any) => (
                 <div
                   key={payment.id}
                   className="flex items-center space-x-3 p-3 bg-muted/50 rounded-md"
@@ -196,7 +364,7 @@ export default function Dashboard() {
                   </span>
                 </div>
               ))}
-              {(!stats?.recentPayments || stats.recentPayments.length === 0) && (
+              {(!investorStats?.recentPayments || investorStats.recentPayments.length === 0) && (
                 <div className="text-center text-muted-foreground py-8">
                   Nenhuma atividade recente
                 </div>

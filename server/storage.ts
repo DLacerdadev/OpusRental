@@ -329,6 +329,55 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // Company-wide statistics for managers
+  async getCompanyStats(): Promise<any> {
+    const allTrailers = await this.getAllTrailers();
+    const allShares = await db.select().from(shares);
+    const allPayments = await db.select().from(payments);
+    const recentRecords = await db
+      .select()
+      .from(financialRecords)
+      .orderBy(sql`month desc`)
+      .limit(6);
+    
+    const totalFleetValue = allTrailers.reduce((sum, trailer) => 
+      sum + parseFloat(trailer.purchaseValue || "0"), 0);
+    
+    const totalSharesSold = allShares.filter(s => s.status === "active").length;
+    
+    const totalRevenue = recentRecords.reduce((sum, record) =>
+      sum + parseFloat(record.totalRevenue || "0"), 0);
+    
+    const totalMargin = recentRecords.reduce((sum, record) =>
+      sum + parseFloat(record.companyMargin || "0"), 0);
+
+    // Get last 6 unique months from financial records
+    const revenueData = recentRecords
+      .reverse()
+      .map(record => ({
+        month: record.month,
+        revenue: parseFloat(record.totalRevenue || "0"),
+      }));
+
+    // Recent system activity - last payments
+    const recentActivity = await db
+      .select()
+      .from(payments)
+      .orderBy(desc(payments.paymentDate))
+      .limit(10);
+
+    return {
+      totalFleetValue,
+      totalTrailers: allTrailers.length,
+      activeTrailers: allTrailers.filter(t => t.status === "active").length,
+      totalSharesSold,
+      totalRevenue,
+      totalMargin,
+      revenueData,
+      recentActivity,
+    };
+  }
+
   async getPortfolioData(userId: string): Promise<any> {
     const userShares = await this.getSharesByUserId(userId);
     const userPayments = await this.getPaymentsByUserId(userId);
