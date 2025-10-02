@@ -28,6 +28,12 @@ export default function Dashboard() {
     queryKey: ["/api/shares"],
   });
 
+  const formatMonth = (month: string) => {
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const [year, monthNum] = month.split('-');
+    return `${months[parseInt(monthNum) - 1]}/${year}`;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -53,10 +59,27 @@ export default function Dashboard() {
     );
   }
 
-  const performanceData = stats?.recentPayments?.slice(0, 6).reverse().map((p: any) => ({
-    month: p.referenceMonth,
-    value: parseFloat(p.amount),
-  })) || [];
+  // Agregar pagamentos do mesmo mês e formatar para o gráfico
+  const paymentsByMonth = new Map<string, number>();
+  stats?.recentPayments?.forEach((p: any) => {
+    const currentValue = paymentsByMonth.get(p.referenceMonth) || 0;
+    paymentsByMonth.set(p.referenceMonth, currentValue + parseFloat(p.amount));
+  });
+
+  const performanceData = Array.from(paymentsByMonth.entries())
+    .map(([month, value]) => ({
+      month: formatMonth(month),
+      value: value,
+    }))
+    .sort((a, b) => {
+      const [aMonth, aYear] = a.month.split('/');
+      const [bMonth, bYear] = b.month.split('/');
+      return aYear === bYear 
+        ? (['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(aMonth) - 
+           ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(bMonth))
+        : parseInt(aYear) - parseInt(bYear);
+    })
+    .slice(-6);
 
   return (
     <div className="p-8 space-y-8">
@@ -168,7 +191,7 @@ export default function Dashboard() {
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">
-                      Pagamento recebido - {payment.referenceMonth}
+                      Pagamento recebido - {formatMonth(payment.referenceMonth)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(payment.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
