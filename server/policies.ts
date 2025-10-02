@@ -6,7 +6,7 @@ export const Policy = {
   "POST /api/auth/logout": ["investor", "manager", "admin"],
   
   "GET /api/dashboard/stats": ["investor", "manager", "admin"],
-  "GET /api/portfolio": ["investor", "manager", "admin"],
+  "GET /api/portfolio": ["investor"],
   
   "GET /api/trailers": ["manager", "admin"],
   "GET /api/trailers/:id": ["manager", "admin"],
