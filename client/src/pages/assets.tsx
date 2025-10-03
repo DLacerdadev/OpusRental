@@ -400,6 +400,7 @@ export default function Assets() {
                 <tr>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">COTAS</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">FAROL</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VALOR</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">AQUISIÇÃO</th>
@@ -423,6 +424,11 @@ export default function Assets() {
                         <Badge variant={statusInfo.variant} className="rounded-full">
                           {statusInfo.label}
                         </Badge>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="font-semibold text-foreground" data-testid={`text-shares-${trailer.id}`}>
+                          {trailer.soldShares || 0}/{trailer.totalShares || 1}
+                        </span>
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
@@ -453,7 +459,7 @@ export default function Assets() {
                 })}
                 {(!trailers || trailers.length === 0) && (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={8} className="text-center py-12 text-muted-foreground">
                       Nenhum ativo cadastrado
                     </td>
                   </tr>
