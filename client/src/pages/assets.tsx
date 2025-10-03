@@ -325,20 +325,17 @@ export default function Assets() {
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Latitude</FormLabel>
+                      <FormLabel>Latitude (Opcional)</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.0000001" 
-                          min="-90"
-                          max="90"
                           placeholder="29.7604" 
                           {...field} 
                           value={field.value || ""} 
                           data-testid="input-latitude" 
                         />
                       </FormControl>
-                      <p className="text-xs text-muted-foreground mt-1">Valores entre -90 e 90. Ex: 29.7604</p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -349,20 +346,17 @@ export default function Assets() {
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Longitude</FormLabel>
+                      <FormLabel>Longitude (Opcional)</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
                           step="0.0000001" 
-                          min="-180"
-                          max="180"
                           placeholder="-95.3698" 
                           {...field} 
                           value={field.value || ""} 
                           data-testid="input-longitude" 
                         />
                       </FormControl>
-                      <p className="text-xs text-muted-foreground mt-1">Valores entre -180 e 180. Ex: -95.3698</p>
                       <FormMessage />
                     </FormItem>
                   )}
