@@ -136,8 +136,8 @@ export function Sidebar({ user }: SidebarProps) {
       </nav>
 
       {/* Settings Section */}
-      <div className="p-4 border-t border-white/10 space-y-2">
-        <div className={`${isCollapsed ? "hidden" : "block"} text-xs font-bold text-white/50 mb-3 px-2`}>
+      <div className="p-4 border-t border-white/20 space-y-2 bg-black/10">
+        <div className={`${isCollapsed ? "hidden" : "block"} text-xs font-bold text-white/90 mb-3 px-2 tracking-wider`}>
           SISTEMA
         </div>
         
