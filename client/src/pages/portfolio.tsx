@@ -1,13 +1,63 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import { ShoppingCart, Truck, MapPin, DollarSign } from "lucide-react";
+import { useState } from "react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { insertShareSchema, type Trailer } from "@shared/schema";
 
 export default function Portfolio() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+
   const { data: portfolio, isLoading } = useQuery({
     queryKey: ["/api/portfolio"],
+  });
+
+  const { data: availableTrailers, isLoading: loadingTrailers } = useQuery<Trailer[]>({
+    queryKey: ["/api/trailers/available"],
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (trailerId: string) => {
+      const trailer = availableTrailers?.find((t) => t.id === trailerId);
+      if (!trailer) throw new Error("Trailer not found");
+
+      const shareData = {
+        trailerId: trailer.id,
+        purchaseValue: trailer.purchaseValue,
+        purchaseDate: new Date().toISOString().split("T")[0],
+        status: "active" as const,
+        monthlyReturn: "2.00",
+        totalReturns: "0.00",
+      };
+
+      const validated = insertShareSchema.parse(shareData);
+      return await apiRequest("POST", "/api/shares", validated);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers/available"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shares"] });
+      setIsDialogOpen(false);
+      toast({
+        title: "Cota adquirida com sucesso!",
+        description: "Sua nova cota foi registrada e já está gerando retornos.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao comprar cota",
+        description: error.message || "Não foi possível processar sua compra. Tente novamente.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
@@ -26,10 +76,103 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Minha Carteira</h1>
-        <p className="text-sm text-muted-foreground mt-1">Acompanhe seus investimentos e retornos</p>
+    <div className="p-8 space-y-8" data-testid="page-portfolio">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground" data-testid="heading-portfolio">Minha Carteira</h1>
+          <p className="text-sm text-muted-foreground mt-1">Acompanhe seus investimentos e retornos</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2" data-testid="button-buy-share">
+              <ShoppingCart className="h-4 w-4" />
+              Comprar Nova Cota
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-buy-share">
+            <DialogHeader>
+              <DialogTitle>Trailers Disponíveis</DialogTitle>
+              <DialogDescription>
+                Selecione um trailer para adquirir sua cota. Cada cota representa a propriedade de um trailer completo.
+              </DialogDescription>
+            </DialogHeader>
+
+            {loadingTrailers ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-32 w-full" />
+                ))}
+              </div>
+            ) : availableTrailers && availableTrailers.length > 0 ? (
+              <div className="grid gap-4">
+                {availableTrailers.map((trailer) => (
+                  <Card key={trailer.id} className="overflow-hidden" data-testid={`card-trailer-${trailer.id}`}>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="bg-primary/10 p-2 rounded-lg">
+                              <Truck className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-lg" data-testid={`text-trailer-id-${trailer.id}`}>
+                                {trailer.trailerId}
+                              </h3>
+                              <Badge variant="secondary">Disponível</Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div className="flex items-center gap-2 text-sm">
+                              <DollarSign className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="text-muted-foreground">Valor da Cota</p>
+                                <p className="font-bold" data-testid={`text-value-${trailer.id}`}>
+                                  ${parseFloat(trailer.purchaseValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {trailer.location && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                  <p className="text-muted-foreground">Localização</p>
+                                  <p className="font-medium">{trailer.location}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p className="text-sm text-green-800 dark:text-green-300">
+                              <span className="font-semibold">Retorno mensal: </span>
+                              ${(parseFloat(trailer.purchaseValue) * 0.02).toLocaleString("en-US", { minimumFractionDigits: 2 })} (2%)
+                            </p>
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={() => purchaseMutation.mutate(trailer.id)}
+                          disabled={purchaseMutation.isPending}
+                          className="ml-4"
+                          data-testid={`button-purchase-${trailer.id}`}
+                        >
+                          {purchaseMutation.isPending ? "Processando..." : "Comprar"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12" data-testid="text-no-trailers">
+                <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Nenhum trailer disponível no momento</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
