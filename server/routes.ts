@@ -394,10 +394,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Trailer is not available for purchase" });
       }
       
-      // Check if trailer already has a share
+      // Check available shares for this trailer
       const existingShares = await storage.getSharesByTrailerId(validated.trailerId);
-      if (existingShares.length > 0) {
-        return res.status(400).json({ message: "This trailer already has a share assigned" });
+      const totalShares = parseInt(trailer.totalShares?.toString() || "1");
+      const availableShares = totalShares - existingShares.length;
+      
+      if (availableShares <= 0) {
+        return res.status(400).json({ message: "No shares available for this trailer" });
       }
       
       // Create the share
@@ -406,8 +409,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.session.userId!,
       });
       
-      // Update trailer status to active
-      await storage.updateTrailer(validated.trailerId, { status: "active" });
+      // Update trailer status to active if all shares are sold
+      if (existingShares.length + 1 >= totalShares) {
+        await storage.updateTrailer(validated.trailerId, { status: "active" });
+      }
       
       // Create audit log
       await storage.createAuditLog({
