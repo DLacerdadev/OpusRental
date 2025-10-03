@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 export function exportToPDF(title: string, headers: string[], data: any[][]) {
   const doc = new jsPDF();
@@ -49,21 +50,18 @@ export function exportToCSV(filename: string, headers: string[], data: any[][]) 
 }
 
 export function exportToExcel(filename: string, headers: string[], data: any[][]) {
-  // Create simple tab-delimited content that Excel opens natively
-  const rows = [headers, ...data];
-  const content = rows.map(row => row.join('\t')).join('\n');
+  // Create workbook and worksheet using SheetJS
+  const workbook = XLSX.utils.book_new();
   
-  // Use text/csv MIME type with .xls extension - Excel opens this without warnings
-  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+  // Combine headers and data
+  const worksheetData = [headers, ...data];
   
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
+  // Create worksheet from array of arrays
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
   
-  link.setAttribute("href", url);
-  link.setAttribute("download", `${filename}.xls`);
-  link.style.visibility = "hidden";
+  // Add worksheet to workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório");
   
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  // Export to XLSX file
+  XLSX.writeFile(workbook, `${filename}.xlsx`);
 }

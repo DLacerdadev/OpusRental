@@ -136,7 +136,7 @@ export default function Reports() {
       exportToExcel(fileName, headers, data);
       toast({
         title: "Excel Exportado",
-        description: `${reportTitle} exportado em Excel (.xls) com sucesso`,
+        description: `${reportTitle} exportado em Excel (.xlsx) com sucesso`,
       });
     } else if (format === "CSV") {
       exportToCSV(fileName, headers, data);
