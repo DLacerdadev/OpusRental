@@ -124,12 +124,35 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(trailers).orderBy(desc(trailers.createdAt));
   }
 
-  async getAvailableTrailers(): Promise<Trailer[]> {
-    return await db
+  async getAvailableTrailers(): Promise<any[]> {
+    // Get trailers with stock status
+    const availableTrailers = await db
       .select()
       .from(trailers)
       .where(eq(trailers.status, "stock"))
       .orderBy(desc(trailers.createdAt));
+    
+    // For each trailer, count sold shares and calculate available shares
+    const trailersWithAvailability = await Promise.all(
+      availableTrailers.map(async (trailer) => {
+        const soldShares = await db
+          .select()
+          .from(shares)
+          .where(eq(shares.trailerId, trailer.id));
+        
+        const totalShares = parseInt(trailer.totalShares?.toString() || "1");
+        const availableShares = totalShares - soldShares.length;
+        
+        return {
+          ...trailer,
+          soldShares: soldShares.length,
+          availableShares,
+        };
+      })
+    );
+    
+    // Filter to only show trailers with available shares
+    return trailersWithAvailability.filter((t) => t.availableShares > 0);
   }
 
   async createTrailer(trailer: InsertTrailer): Promise<Trailer> {

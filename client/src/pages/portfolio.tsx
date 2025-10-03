@@ -114,11 +114,18 @@ export default function Portfolio() {
                             <div className="bg-primary/10 p-2 rounded-lg">
                               <Truck className="h-6 w-6 text-primary" />
                             </div>
-                            <div>
+                            <div className="flex-1">
                               <h3 className="font-bold text-lg" data-testid={`text-trailer-id-${trailer.id}`}>
                                 {trailer.trailerId}
                               </h3>
-                              <Badge variant="secondary">Disponível</Badge>
+                              <div className="flex gap-2 items-center mt-1 flex-wrap">
+                                <Badge variant="secondary">Disponível</Badge>
+                                {trailer.availableShares !== undefined && (
+                                  <Badge variant={trailer.availableShares > 0 ? "default" : "destructive"} className="text-xs">
+                                    {trailer.availableShares} {trailer.availableShares === 1 ? "cota disponível" : "cotas disponíveis"}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
