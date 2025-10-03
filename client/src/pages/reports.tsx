@@ -91,11 +91,41 @@ export default function Reports() {
     let headers: string[] = [];
     let data: any[][] = [];
     
+    // Função auxiliar para calcular idade em meses
+    const calculateAgeMonths = (purchaseDate: string) => {
+      const today = new Date();
+      const purchase = new Date(purchaseDate);
+      return (today.getFullYear() - purchase.getFullYear()) * 12 + 
+             (today.getMonth() - purchase.getMonth());
+    };
+    
+    // Função auxiliar para calcular farol (status de idade)
+    const calculateHealthFlag = (ageMonths: number) => {
+      if (ageMonths < 12) return "Verde";
+      if (ageMonths <= 24) return "Amarelo";
+      return "Vermelho";
+    };
+    
     switch (reportTitle) {
       case "Relatório do Investidor":
-        headers = ["Mês", "Cotas Ativas", "Valor Investido", "Retorno Mensal", "Status"];
+        headers = [
+          "Mês", 
+          "Cotas Ativas", 
+          "Valor Investido", 
+          "Retorno Mensal", 
+          "Retorno Acumulado",
+          "Rentabilidade %",
+          "Status"
+        ];
         
         if (payments && Array.isArray(payments) && payments.length > 0) {
+          // Calculate totals
+          const totalInvested = Array.isArray(shares) 
+            ? shares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue), 0) 
+            : 0;
+          const totalReturns = payments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+          const rentabilidade = totalInvested > 0 ? (totalReturns / totalInvested * 100) : 0;
+          
           // Group payments by month
           const paymentsByMonth = new Map<string, any[]>();
           payments.forEach((p: any) => {
@@ -106,40 +136,90 @@ export default function Reports() {
           });
 
           // Create data rows
+          let accumulatedReturns = 0;
           data = Array.from(paymentsByMonth.entries())
             .sort((a, b) => b[0].localeCompare(a[0])) // Sort by month desc
             .slice(0, 12) // Last 12 months
+            .reverse() // Show oldest first for accumulation
             .map(([month, monthPayments]) => {
-              const totalAmount = monthPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+              const monthAmount = monthPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+              accumulatedReturns += monthAmount;
               const activeShares = Array.isArray(shares) ? shares.filter((s: any) => s.status === "active").length : 0;
-              const totalInvested = Array.isArray(shares) ? shares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue), 0) : 0;
+              const monthRentabilidade = totalInvested > 0 ? (accumulatedReturns / totalInvested * 100) : 0;
               
               return [
-                format(new Date(month + "-01"), "MMMM/yyyy"),
+                format(new Date(month + "-01"), "MMM/yyyy"),
                 activeShares.toString(),
                 formatCurrency(totalInvested),
-                formatCurrency(totalAmount),
+                formatCurrency(monthAmount),
+                formatCurrency(accumulatedReturns),
+                `${monthRentabilidade.toFixed(2)}%`,
                 "Pago"
               ];
-            });
+            })
+            .reverse(); // Return to desc order for display
         } else {
-          data = [["Sem dados disponíveis", "-", "-", "-", "-"]];
+          data = [["Sem dados disponíveis", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         
       case "Performance de Ativos":
-        headers = ["Trailer ID", "Modelo", "Status", "Valor Atual", "Data Compra"];
+        headers = [
+          "Trailer ID", 
+          "Modelo",
+          "Status",
+          "Farol",
+          "Idade (meses)",
+          "Valor Compra",
+          "Depr. Acumulada",
+          "Valor Contábil",
+          "Repasses",
+          "Yield %",
+          "Data Compra",
+          "Localização"
+        ];
         
         if (trailers && Array.isArray(trailers) && trailers.length > 0) {
-          data = trailers.map((trailer: any) => [
-            trailer.trailerId,
-            trailer.model || "N/A",
-            trailer.status === "active" ? "Ativo" : trailer.status === "stock" ? "Estoque" : "Inativo",
-            formatCurrency(parseFloat(trailer.currentValue)),
-            format(new Date(trailer.purchaseDate), "dd/MM/yyyy")
-          ]);
+          data = trailers.map((trailer: any) => {
+            const ageMonths = calculateAgeMonths(trailer.purchaseDate);
+            const healthFlag = calculateHealthFlag(ageMonths);
+            const purchaseValue = parseFloat(trailer.purchaseValue);
+            const depRate = parseFloat(trailer.depreciationRate || 0);
+            
+            // Calcular depreciação acumulada (mensal)
+            const depreciationAccumulated = Math.min(purchaseValue, purchaseValue * depRate * ageMonths);
+            const bookValue = purchaseValue - depreciationAccumulated;
+            
+            // Calcular repasses para este trailer (através das shares)
+            let totalPayouts = 0;
+            if (Array.isArray(shares) && Array.isArray(payments)) {
+              const trailerShares = shares.filter((s: any) => s.trailerId === trailer.id);
+              trailerShares.forEach((share: any) => {
+                const sharePayments = payments.filter((p: any) => p.shareId === share.id);
+                totalPayouts += sharePayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+              });
+            }
+            
+            // Calcular yield% (retorno / valor investido)
+            const yieldPercent = purchaseValue > 0 ? (totalPayouts / purchaseValue * 100) : 0;
+            
+            return [
+              trailer.trailerId,
+              trailer.model || "N/A",
+              trailer.status === "active" ? "Ativo" : trailer.status === "stock" ? "Estoque" : trailer.status === "maintenance" ? "Manutenção" : "Inativo",
+              healthFlag,
+              ageMonths.toString(),
+              formatCurrency(purchaseValue),
+              formatCurrency(depreciationAccumulated),
+              formatCurrency(bookValue),
+              formatCurrency(totalPayouts),
+              `${yieldPercent.toFixed(2)}%`,
+              format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
+              trailer.location || "Não informado"
+            ];
+          });
         } else {
-          data = [["Sem ativos cadastrados", "-", "-", "-", "-"]];
+          data = [["Sem ativos cadastrados", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         
@@ -162,36 +242,91 @@ export default function Reports() {
         break;
         
       case "Compliance":
-        headers = ["Documento", "Tipo", "Data Upload", "Compartilhado", "Status"];
+        headers = [
+          "Documento",
+          "Tipo",
+          "Cota/Ativo",
+          "Data Upload",
+          "Compartilhado",
+          "Versão",
+          "Status"
+        ];
         
         if (documents && Array.isArray(documents) && documents.length > 0) {
-          data = documents.map((doc: any) => [
-            doc.fileName,
-            doc.documentType,
-            format(new Date(doc.uploadedAt), "dd/MM/yyyy"),
-            doc.sharedWithManager ? "Sim" : "Não",
-            "Válido"
-          ]);
+          data = documents.map((doc: any) => {
+            // Identificar a cota/ativo relacionado
+            let relatedAsset = "N/A";
+            if (doc.shareId && Array.isArray(shares)) {
+              const share = shares.find((s: any) => s.id === doc.shareId);
+              if (share && Array.isArray(trailers)) {
+                const trailer = trailers.find((t: any) => t.id === share.trailerId);
+                relatedAsset = trailer ? trailer.trailerId : "N/A";
+              }
+            }
+            
+            return [
+              doc.fileName,
+              doc.documentType || "Geral",
+              relatedAsset,
+              format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm"),
+              doc.sharedWithManager ? "Sim" : "Não",
+              "1.0", // Versão padrão
+              "Válido"
+            ];
+          });
         } else {
-          data = [["Sem documentos cadastrados", "-", "-", "-", "-"]];
+          data = [["Sem documentos cadastrados", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         
       case "Operacional":
-        headers = ["Trailer ID", "Modelo", "Localização", "Coordenadas", "Depreciação"];
+        headers = [
+          "Trailer ID",
+          "Modelo",
+          "Status",
+          "Farol",
+          "Idade (meses)",
+          "Localização",
+          "Coordenadas GPS",
+          "Última Atividade",
+          "Taxa Depr. (%)",
+          "Disponibilidade"
+        ];
         
         if (trailers && Array.isArray(trailers) && trailers.length > 0) {
-          data = trailers.map((trailer: any) => [
-            trailer.trailerId,
-            trailer.model || "N/A",
-            trailer.location || "Não informado",
-            trailer.latitude && trailer.longitude 
-              ? `${parseFloat(trailer.latitude).toFixed(4)}, ${parseFloat(trailer.longitude).toFixed(4)}`
-              : "N/A",
-            `${(parseFloat(trailer.depreciationRate) * 100).toFixed(1)}%`
-          ]);
+          data = trailers.map((trailer: any) => {
+            const ageMonths = calculateAgeMonths(trailer.purchaseDate);
+            const healthFlag = calculateHealthFlag(ageMonths);
+            
+            // Status operacional detalhado
+            let operationalStatus = "Parado";
+            if (trailer.status === "active") operationalStatus = "Operacional";
+            if (trailer.status === "maintenance") operationalStatus = "Manutenção";
+            if (trailer.status === "stock") operationalStatus = "Estoque";
+            
+            // Disponibilidade (% do tempo ativo vs total)
+            const disponibilidade = trailer.status === "active" ? "100%" : 
+                                   trailer.status === "maintenance" ? "0%" : "N/A";
+            
+            return [
+              trailer.trailerId,
+              trailer.model || "N/A",
+              operationalStatus,
+              healthFlag,
+              ageMonths.toString(),
+              trailer.location || "Não informado",
+              trailer.latitude && trailer.longitude 
+                ? `${parseFloat(trailer.latitude).toFixed(4)}, ${parseFloat(trailer.longitude).toFixed(4)}`
+                : "N/A",
+              trailer.lastActivity 
+                ? format(new Date(trailer.lastActivity), "dd/MM/yyyy")
+                : "N/A",
+              `${(parseFloat(trailer.depreciationRate || 0) * 100).toFixed(2)}%`,
+              disponibilidade
+            ];
+          });
         } else {
-          data = [["Sem dados operacionais", "-", "-", "-", "-"]];
+          data = [["Sem dados operacionais", "-", "-", "-", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         

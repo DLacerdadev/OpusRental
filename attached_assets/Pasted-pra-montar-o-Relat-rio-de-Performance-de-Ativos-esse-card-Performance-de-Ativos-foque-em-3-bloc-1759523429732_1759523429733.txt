@@ -1,0 +1,333 @@
+pra montar o Relatório de Performance de Ativos (esse card “Performance de Ativos”), foque em 3 blocos: identificação, saúde operacional, desempenho econômico. Abaixo listo os campos mínimos (com fórmulas) já mapeados para o seu esquema atual (Express + Drizzle) e o que falta criar.
+
+1) Identificação do ativo (dimensão)
+
+assetId (ex.: TR002) – trailers.trailerId
+
+status (stock | active | maintenance | expired) – trailers.status
+
+farol (verde/amarelo/vermelho) – calculado por idade (regra abaixo)
+
+purchaseValueUSD – trailers.purchaseValue
+
+purchaseDate – trailers.purchaseDate
+
+expirationDate (se usar) – trailers.expirationDate
+
+location / última atividade – trailers.location, trailers.lastActivity
+
+investorName / investorId (se houver cota vinculada) – shares.userId → users
+
+Úteis para filtro: empresa/filial, centro de custo, região (se existirem no seu domínio).
+
+2) Saúde operacional (utilização e manutenção)
+
+ageMonths – meses desde purchaseDate.
+
+ageMonths = DATEDIFF(month, purchaseDate, today)
+
+farol – pela sua regra:
+
+Verde < 12, Amarelo 12–24, Vermelho > 24 (em meses).
+
+uptime% – % de tempo em operação (vs parado/manutenção).
+
+uptime% = horas_movimento / horas_totais no período
+
+Base: trackingData.status (“moving” | “stopped” | “maintenance”) ou distanceToday > 0.
+
+diasAtivo – dias distintos com movimento no período.
+
+distanciaTotal – soma de trackingData.distanceToday (ou haversine pelos pontos).
+
+mtbf / mttr (opcional) – tempo médio entre falhas / tempo médio de reparo se você registra manutenção.
+
+alertasQtd – contagem de eventos (ex.: fora de rota, sem telemetria, etc. se você tiver).
+
+Se hoje o trackingData só tem “moving/stopped/maintenance”, uptime% + diasAtivo + distância já contam uma boa história.
+
+3) Desempenho econômico (por ativo e consolidado)
+
+bookValueUSD (valor contábil atual)
+
+Se depreciationRate for mensal:
+depAcum = MIN(purchaseValue, purchaseValue * depreciationRate * ageMonths)
+bookValue = purchaseValue - depAcum
+
+Se for anual: ajuste ageYears.
+
+rentalRevenueUSD (receita de aluguel no período)
+⚠️ Seu schema atual não tem a receita por ativo. Sugestões:
+
+Criar tabela assetRevenue (assetId, month, amount), ou
+
+Campo monthlyRate em trailers (valor previsto) + tabela de exceções.
+
+investorPayoutUSD (repasse ao investidor no período)
+
+Hoje isso aparece em payments por share, não por ativo. Para atrelar:
+
+payments.shareId → shares.trailerId → ativo.
+
+yield% do ativo (repasse / valor da cota)
+
+yield% = (sum(payments.amount período) / shares.purchaseValue) * 100
+
+margemOperacionalUSD (se tiver receita real do ativo)
+
+margem = rentalRevenueUSD - investorPayoutUSD - custosOperacionais
+
+paybackEstimadoMeses (se tiver rentalRevenue estável)
+
+payback = purchaseValue / (rentalRevenueUSD - custos - repasse)
+
+4) KPIs de topo do relatório (fleet level)
+
+Qtd Ativos (ativos no período)
+
+% em operação (ativos com uptime% > 0 no período)
+
+Utilização média (média de uptime%)
+
+Receita total (opcional) / Repasse total / Margem
+
+Idade média (meses) / Distribuição de faróis
+
+Top 5 ativos por: utilização, distância, receita, yield
+
+Bottom 5 ativos pelos mesmos critérios
+
+5) Colunas recomendadas para export (CSV/Excel)
+assetId, status, farol, purchaseDate, ageMonths, purchaseValueUSD, bookValueUSD,
+uptimePct, diasAtivo, distanciaTotalKm,
+investorId, investorName,
+rentalRevenueUSD, investorPayoutUSD, yieldPct, margemOperacionalUSD,
+lastActivityAt, location
+
+6) Query de exemplo (base para o dataset do relatório)
+
+Ajuste para Drizzle; abaixo está a ideia em SQL legível. Considera um mês de referência.
+
+WITH params AS (
+  SELECT DATEFROMPARTS(@ano, @mes, 1) AS dt_ini,
+         EOMONTH(DATEFROMPARTS(@ano, @mes, 1)) AS dt_fim
+),
+base AS (
+  SELECT
+    t.id            AS trailer_pk,
+    t.trailerId     AS assetId,
+    t.status,
+    t.purchaseValue AS purchaseValueUSD,
+    t.purchaseDate,
+    t.depreciationRate,
+    t.location,
+    t.lastActivity
+  FROM trailers t
+),
+age_calc AS (
+  SELECT b.*,
+         DATEDIFF(MONTH, b.purchaseDate, GETUTCDATE()) AS ageMonths,
+         CASE
+           WHEN DATEDIFF(MONTH, b.purchaseDate, GETUTCDATE()) < 12 THEN 'verde'
+           WHEN DATEDIFF(MONTH, b.purchaseDate, GETUTCDATE()) <= 24 THEN 'amarelo'
+           ELSE 'vermelho'
+         END AS farol,
+         -- depreciação mensal (exemplo)
+         CASE
+           WHEN b.depreciationRate IS NULL THEN b.purchaseValueUSD
+           ELSE GREATEST(
+                 0,
+                 b.purchaseValueUSD - (b.purchaseValueUSD * b.depreciationRate * DATEDIFF(MONTH, b.purchaseDate, GETUTCDATE()))
+               )
+         END AS bookValueUSD
+  FROM base b
+),
+track AS (
+  SELECT
+    td.trailerId,
+    COUNT(DISTINCT CAST(td.timestamp AS DATE)) AS diasAtivo,
+    SUM(COALESCE(td.distanceToday,0))          AS distanciaTotal,
+    SUM(CASE WHEN td.status = 'moving' THEN 1 ELSE 0 END) AS ticksMov,
+    COUNT(*) AS ticksTotais
+  FROM trackingData td
+  JOIN params p ON td.timestamp >= p.dt_ini AND td.timestamp <= p.dt_fim
+  GROUP BY td.trailerId
+),
+payout AS (
+  SELECT s.trailerId,
+         SUM(p.amount) AS investorPayoutUSD
+  FROM payments p
+  JOIN shares s ON s.id = p.shareId
+  JOIN params pr ON p.referenceMonth = FORMAT(pr.dt_ini, 'yyyy-MM')
+  GROUP BY s.trailerId
+),
+revenue AS (
+  -- se você criar assetRevenue (trailerId, month, amount)
+  SELECT ar.trailerId, SUM(ar.amount) AS rentalRevenueUSD
+  FROM assetRevenue ar
+  JOIN params pr ON ar.month = FORMAT(pr.dt_ini, 'yyyy-MM')
+  GROUP BY ar.trailerId
+)
+SELECT
+  a.assetId, a.status, a.farol, a.purchaseDate, a.ageMonths,
+  a.purchaseValueUSD, a.bookValueUSD,
+  CAST(COALESCE(t.ticksMov,0) * 1.0 / NULLIF(t.ticksTotais,0) AS DECIMAL(5,2)) AS uptimePct,
+  COALESCE(t.diasAtivo,0)  AS diasAtivo,
+  COALESCE(t.distanciaTotal,0) AS distanciaTotalKm,
+  COALESCE(r.rentalRevenueUSD, 0) AS rentalRevenueUSD,
+  COALESCE(py.investorPayoutUSD, 0) AS investorPayoutUSD,
+  CASE
+    WHEN a.purchaseValueUSD > 0
+    THEN ROUND(COALESCE(py.investorPayoutUSD,0) / a.purchaseValueUSD * 100, 2)
+    ELSE 0 END AS yieldPct,
+  COALESCE(r.rentalRevenueUSD,0) - COALESCE(py.investorPayoutUSD,0) AS margemOperacionalUSD,
+  a.lastActivity, a.location
+FROM age_calc a
+LEFT JOIN track t ON t.trailerId = a.assetId
+LEFT JOIN payout py ON py.trailerId = a.assetId
+LEFT JOIN revenue r ON r.trailerId = a.assetId
+ORDER BY uptimePct DESC, margemOperacionalUSD DESC;
+
+7) Campos que faltam hoje para um relatório “premium”
+
+Receita por ativo/mês → criar assetRevenue (ou monthlyRate no trailers + ajustes).
+
+Custos por ativo/mês (manutenção, pneus, seguros) → opcional, mas eleva a qualidade do KPI de margem.
+
+Eventos de manutenção (datas/status) → para MTBF/MTTR.
+
+Recap (o essencial)
+
+Identificação (assetId, status, farol, idade, valor de compra/contábil)
+
+Operação (uptime%, dias ativos, km)
+
+Econômico (repasse, receita se houver, yield, margem)
+
+Fleet KPIs (somatórios e rankings)
+
+Se quiser, eu te entrego o SELECT/Drizzle builder já adaptado ao seu banco (com o período como parâmetro) e o layout do PDF com esses campos em cards + tabela.
+
+Você disse:
+tendo todos esses relatórios o que cada um deve ter como essêncial? 
+O ChatGPT disse:
+
+ótima pergunta 👌 — olhando esse menu de relatórios, dá pra definir um núcleo essencial de campos/métricas para cada tipo, de forma que o MVP entregue valor real e ainda seja viável.
+
+📊 1) Relatório do Investidor
+
+Objetivo: extrato mensal por investidor, claro e auditável.
+Essenciais:
+
+Identificação: Nome do investidor, CPF/ID, mês de referência.
+
+Carteira: lista de cotas (ativo, valor investido, data, status).
+
+Pagamentos do mês: valor repassado por cota + total.
+
+Histórico acumulado: total de aportes, total recebido até agora.
+
+Projeções: estimativa 3 / 6 / 12 meses (com base nos 2% a.m.).
+
+Situação de pagamentos: Pago / Pendente / Falho.
+
+Resumo: Total investido | Retorno acumulado | Rentabilidade %.
+
+📈 2) Performance de Ativos
+
+Objetivo: saúde e resultado dos trailers (gestão patrimonial).
+Essenciais:
+
+Identificação do ativo: código (TR001), status, localização atual.
+
+Data de aquisição / Valor de compra.
+
+Idade em meses + farol (verde/ amarelo / vermelho).
+
+Depreciação acumulada / Valor contábil atual.
+
+Utilização: uptime %, dias ativos no mês, km rodados.
+
+Pagamentos atrelados: repasses ao investidor associados a esse ativo.
+
+Receita (se houver por ativo).
+
+Alertas: eventos de manutenção, vencimento, inatividade.
+
+💰 3) Relatório Financeiro
+
+Objetivo: consolidar receitas, repasses e margem da empresa.
+Essenciais:
+
+Mês de referência.
+
+Receita bruta total (aluguéis).
+
+Repasses aos investidores (somatório dos pagamentos).
+
+Custos operacionais (se já existir estrutura).
+
+Margem da empresa (receita - repasses - custos).
+
+Gráfico de evolução (12 meses).
+
+Distribuição por ativo (se receita estiver vinculada).
+
+🛡️ 4) Compliance
+
+Objetivo: rastreabilidade e auditoria.
+Essenciais:
+
+Documentos por investidor/cota: contrato, KYC, compliance.
+
+Status de cada documento: Verificado / Pendente / Rejeitado.
+
+Datas de upload / aprovação.
+
+Trilha de auditoria: ações de usuário (login, criação de cota, aprovação, exportação).
+
+Pendências: documentos faltantes, investidores bloqueados.
+
+⚙️ 5) Operacional
+
+Objetivo: uso e manutenção da frota.
+Essenciais:
+
+Disponibilidade por ativo (% tempo ativo vs manutenção).
+
+Histórico de manutenções: datas, tipos, duração.
+
+Tempo médio entre falhas (MTBF).
+
+Tempo médio de reparo (MTTR).
+
+Status atual dos ativos: Ativo / Manutenção / Vencido / Estoque.
+
+Alertas: ativos parados há mais de X dias, manutenção atrasada.
+
+📝 6) Personalizado
+
+Objetivo: permitir flexibilidade ao gestor.
+Essenciais:
+
+Construtor simples: escolher período, ativos, métricas (financeiro, operacional, compliance).
+
+Filtros básicos: por investidor, ativo, status, centro de custo, região.
+
+Exportações em PDF, Excel, CSV.
+
+Salvar templates de relatórios para reuso.
+
+✅ Resumindo:
+
+Investidor → foca no que ele recebeu e vai receber.
+
+Ativos → foca na saúde e retorno de cada trailer.
+
+Financeiro → visão consolidada da operação e margem.
+
+Compliance → garantia regulatória e trilha de auditoria.
+
+Operacional → disponibilidade, manutenção, performance técnica.
+
+Personalizado → liberdade de cruzar os dados dos outros relatórios.
