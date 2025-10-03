@@ -54,7 +54,7 @@ export function Sidebar({ user }: SidebarProps) {
     { path: "/assets", icon: Truck, label: "Gestão de Ativos", roles: ["manager", "admin"] },
     { path: "/tracking", icon: MapPin, label: "Rastreamento", roles: ["manager", "admin"] },
     { path: "/financial", icon: DollarSign, label: "Financeiro", roles: ["manager", "admin"] },
-    { path: "/reports", icon: FileText, label: "Relatórios", roles: ["investor", "manager", "admin"] },
+    { path: "/reports", icon: FileText, label: "Relatórios", roles: ["manager", "admin"] },
     { path: "/compliance", icon: Shield, label: "Compliance", roles: ["manager", "admin"] },
   ];
 
