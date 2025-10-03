@@ -60,14 +60,71 @@ export default function Reports() {
   };
 
   const handleExport = (reportTitle: string, format: "PDF" | "Excel" | "CSV") => {
-    const headers = ["Tipo", "Período", "Status", "Detalhes"];
-    const data = [
-      [reportTitle, "Outubro/2025", "Completo", "Dados atualizados"],
-      [reportTitle, "Setembro/2025", "Completo", "Dados históricos"],
-      [reportTitle, "Agosto/2025", "Completo", "Dados históricos"],
-    ];
-
     const fileName = reportTitle.toLowerCase().replace(/\s+/g, "-");
+    
+    // Define dados específicos para cada tipo de relatório
+    let headers: string[] = [];
+    let data: any[][] = [];
+    
+    switch (reportTitle) {
+      case "Relatório do Investidor":
+        headers = ["Mês", "Cotas Ativas", "Valor Investido", "Retorno Mensal", "Status"];
+        data = [
+          ["Outubro/2025", "3", "R$ 150.000,00", "R$ 3.000,00", "Pago"],
+          ["Setembro/2025", "3", "R$ 150.000,00", "R$ 3.000,00", "Pago"],
+          ["Agosto/2025", "2", "R$ 100.000,00", "R$ 2.000,00", "Pago"],
+        ];
+        break;
+        
+      case "Performance de Ativos":
+        headers = ["Trailer ID", "Modelo", "Utilização", "Receita Mensal", "ROI"];
+        data = [
+          ["TRL-001", "Dry Van 53ft", "95%", "R$ 8.500,00", "12.5%"],
+          ["TRL-002", "Refrigerado 48ft", "88%", "R$ 9.200,00", "14.2%"],
+          ["TRL-003", "Flatbed 53ft", "92%", "R$ 7.800,00", "11.8%"],
+        ];
+        break;
+        
+      case "Relatório Financeiro":
+        headers = ["Mês", "Receita Total", "Custos", "Margem", "Pagamentos"];
+        data = [
+          ["Outubro/2025", "R$ 125.000,00", "R$ 45.000,00", "64%", "R$ 15.000,00"],
+          ["Setembro/2025", "R$ 118.000,00", "R$ 42.000,00", "64.4%", "R$ 14.500,00"],
+          ["Agosto/2025", "R$ 112.000,00", "R$ 40.000,00", "64.3%", "R$ 13.800,00"],
+        ];
+        break;
+        
+      case "Compliance":
+        headers = ["Documento", "Tipo", "Data Emissão", "Validade", "Status"];
+        data = [
+          ["DOT Inspection", "Inspeção", "15/10/2025", "15/10/2026", "Válido"],
+          ["Insurance Policy", "Seguro", "01/10/2025", "01/10/2026", "Válido"],
+          ["Registration", "Registro", "10/09/2025", "10/09/2026", "Válido"],
+        ];
+        break;
+        
+      case "Operacional":
+        headers = ["Trailer", "Manutenções", "Km Rodados", "Última Revisão", "Próxima"];
+        data = [
+          ["TRL-001", "2", "45.000 km", "15/10/2025", "15/01/2026"],
+          ["TRL-002", "1", "38.000 km", "20/10/2025", "20/01/2026"],
+          ["TRL-003", "3", "52.000 km", "10/10/2025", "10/01/2026"],
+        ];
+        break;
+        
+      case "Personalizado":
+        headers = ["Campo 1", "Campo 2", "Campo 3", "Campo 4"];
+        data = [
+          ["Configurar", "campos", "personalizados", "aqui"],
+        ];
+        break;
+        
+      default:
+        headers = ["Tipo", "Período", "Status", "Detalhes"];
+        data = [
+          [reportTitle, "Outubro/2025", "Completo", "Dados atualizados"],
+        ];
+    }
 
     if (format === "PDF") {
       exportToPDF(`${reportTitle} - Opus Rental Capital`, headers, data);
