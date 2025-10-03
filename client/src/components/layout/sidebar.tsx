@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import logoPath from "@assets/image_1759264185138.png";
 import { useState } from "react";
 import {
@@ -29,6 +30,7 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const logoutMutation = useMutation({
@@ -48,19 +50,19 @@ export function Sidebar({ user }: SidebarProps) {
   const isManager = user?.role === "manager" || user?.role === "admin";
 
   const navItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard", roles: ["investor", "manager", "admin"] },
-    { path: "/portfolio", icon: Briefcase, label: "Minha Carteira", roles: ["investor"] },
-    { path: "/investor-shares", icon: Users, label: "Investidores", roles: ["manager", "admin"] },
-    { path: "/assets", icon: Truck, label: "Gestão de Ativos", roles: ["manager", "admin"] },
-    { path: "/tracking", icon: MapPin, label: "Rastreamento", roles: ["manager", "admin"] },
-    { path: "/financial", icon: DollarSign, label: "Financeiro", roles: ["manager", "admin"] },
-    { path: "/reports", icon: FileText, label: "Relatórios", roles: ["manager", "admin"] },
-    { path: "/compliance", icon: Shield, label: "Compliance", roles: ["manager", "admin"] },
+    { path: "/", icon: LayoutDashboard, label: t('nav.dashboard'), roles: ["investor", "manager", "admin"] },
+    { path: "/portfolio", icon: Briefcase, label: t('nav.portfolio'), roles: ["investor"] },
+    { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
+    { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
+    { path: "/tracking", icon: MapPin, label: t('nav.tracking'), roles: ["manager", "admin"] },
+    { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
+    { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
+    { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },
   ];
 
   const settingsItems = [
-    { path: "/approvals", icon: CheckCircle, label: "Aprovações", roles: ["manager", "admin"] },
-    { path: "/settings", icon: Settings, label: "Configurações", roles: ["investor", "manager", "admin"] },
+    { path: "/approvals", icon: CheckCircle, label: t('nav.approvals'), roles: ["manager", "admin"] },
+    { path: "/settings", icon: Settings, label: t('nav.settings'), roles: ["investor", "manager", "admin"] },
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || "investor"));
@@ -98,9 +100,11 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/40 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-1">
               <UserCog className="h-4 w-4 text-accent" />
-              <p className="text-xs text-accent font-bold">PERFIL</p>
+              <p className="text-xs text-accent font-bold">{t('header.profile')}</p>
             </div>
-            <p className="text-sm text-white font-semibold capitalize">{user?.role || "Investidor"}</p>
+            <p className="text-sm text-white font-semibold capitalize">
+              {t(`roles.${user?.role || 'investor'}`)}
+            </p>
             {user?.email && <p className="text-xs text-white/70 mt-1 truncate">{user.email}</p>}
           </div>
         )}
@@ -138,7 +142,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Settings Section */}
       <div className="p-4 border-t border-white/20 space-y-2 bg-black/10">
         <div className={`${isCollapsed ? "hidden" : "block"} text-xs font-bold text-white/90 mb-3 px-2 tracking-wider`}>
-          SISTEMA
+          {t('nav.logout').toUpperCase().includes('SAIR') ? 'SISTEMA' : 'SYSTEM'}
         </div>
         
         {filteredSettingsItems.map((item) => {
@@ -168,7 +172,7 @@ export function Sidebar({ user }: SidebarProps) {
           data-testid="button-logout"
         >
           <LogOut className={`h-5 w-5 ${isCollapsed ? "" : "mr-3"}`} />
-          {!isCollapsed && <span>Sair</span>}
+          {!isCollapsed && <span>{t('nav.logout')}</span>}
         </button>
       </div>
     </div>
