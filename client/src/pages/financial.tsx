@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { ArrowUp, DollarSign, TrendingUp, PieChart } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Financial() {
+  const { i18n } = useTranslation();
   const { data: current, isLoading } = useQuery({
     queryKey: ["/api/financial/current"],
   });
@@ -45,7 +48,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">RECEITA MENSAL</p>
             <p className="text-2xl font-bold text-green-600" data-testid="text-total-revenue">
-              ${current?.totalRevenue?.toFixed(2) || "0.00"}
+              {formatCurrency(current?.totalRevenue || 0, i18n.language)}
             </p>
           </CardContent>
         </Card>
@@ -59,7 +62,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">REPASSES</p>
             <p className="text-2xl font-bold text-accent" data-testid="text-investor-payouts">
-              ${current?.investorPayouts?.toFixed(2) || "0.00"}
+              {formatCurrency(current?.investorPayouts || 0, i18n.language)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">2% a.m. por cota</p>
           </CardContent>
@@ -74,7 +77,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">MARGEM EMPRESA</p>
             <p className="text-2xl font-bold text-primary" data-testid="text-company-margin">
-              ${current?.companyMargin?.toFixed(2) || "0.00"}
+              {formatCurrency(current?.companyMargin || 0, i18n.language)}
             </p>
           </CardContent>
         </Card>
@@ -88,7 +91,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">CAPITAL GERIDO</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-total-capital">
-              ${current?.totalCapital?.toFixed(2) || "0.00"}
+              {formatCurrency(current?.totalCapital || 0, i18n.language)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               {current?.activeShares || 0} cotas ativas
@@ -125,7 +128,7 @@ export default function Financial() {
                   <span className="font-semibold text-green-900">Receita dos Trailers</span>
                 </div>
                 <span className="font-bold text-green-600 text-lg">
-                  +${current?.totalRevenue?.toFixed(2) || "0.00"}
+                  +{formatCurrency(current?.totalRevenue || 0, i18n.language)}
                 </span>
               </div>
 
@@ -135,7 +138,7 @@ export default function Financial() {
                   <span className="font-semibold text-accent">Repasse Investidores</span>
                 </div>
                 <span className="font-bold text-accent text-lg">
-                  -${current?.investorPayouts?.toFixed(2) || "0.00"}
+                  -{formatCurrency(current?.investorPayouts || 0, i18n.language)}
                 </span>
               </div>
 
@@ -143,7 +146,7 @@ export default function Financial() {
                 <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl border-2 border-primary/30">
                   <span className="font-bold text-primary">Lucro Líquido</span>
                   <span className="font-bold text-primary text-2xl">
-                    ${current?.companyMargin?.toFixed(2) || "0.00"}
+                    {formatCurrency(current?.companyMargin || 0, i18n.language)}
                   </span>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarCh
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "@/lib/utils";
 
 interface InvestorStats {
   totalValue: number;
@@ -43,7 +44,7 @@ interface CompanyStats {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -121,7 +122,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalFleetValue')}</p>
               <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
-                ${companyStats.totalFleetValue.toFixed(2)}
+                {formatCurrency(companyStats.totalFleetValue, i18n.language)}
               </p>
             </CardContent>
           </Card>
@@ -151,7 +152,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyRevenue')}</p>
               <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">
-                ${companyStats.totalRevenue.toFixed(2)}
+                {formatCurrency(companyStats.totalRevenue, i18n.language)}
               </p>
             </CardContent>
           </Card>
@@ -166,7 +167,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyMargin')}</p>
               <p className="text-3xl font-bold text-purple-600" data-testid="text-total-margin">
-                ${companyStats.totalMargin.toFixed(2)}
+                {formatCurrency(companyStats.totalMargin, i18n.language)}
               </p>
             </CardContent>
           </Card>
@@ -210,7 +211,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-green-600">
-                      ${parseFloat(activity.amount).toFixed(2)}
+                      {formatCurrency(parseFloat(activity.amount), i18n.language)}
                     </span>
                   </div>
                 ))}
@@ -270,7 +271,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
-              ${investorStats?.totalValue?.toFixed(2) || "0.00"}
+              {formatCurrency(investorStats?.totalValue || 0, i18n.language)}
             </p>
           </CardContent>
         </Card>
@@ -300,7 +301,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
             <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
-              ${investorStats?.monthlyReturn?.toFixed(2) || "0.00"}
+              {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language)}
             </p>
           </CardContent>
         </Card>
@@ -317,7 +318,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
-              ${investorStats?.nextPayment?.toFixed(2) || "0.00"}
+              {formatCurrency(investorStats?.nextPayment || 0, i18n.language)}
             </p>
           </CardContent>
         </Card>
@@ -362,13 +363,13 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-green-600">
-                    +${parseFloat(payment.amount).toFixed(2)}
+                    +{formatCurrency(parseFloat(payment.amount), i18n.language)}
                   </span>
                 </div>
               ))}
               {(!investorStats?.recentPayments || investorStats.recentPayments.length === 0) && (
                 <div className="text-center text-muted-foreground py-8">
-                  Nenhuma atividade recente
+                  {t('dashboard.noRecentActivity')}
                 </div>
               )}
             </div>
@@ -398,7 +399,7 @@ export default function Dashboard() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Valor:</span>
-                    <span className="font-medium text-right break-all">${parseFloat(share.purchaseValue).toFixed(2)}</span>
+                    <span className="font-medium text-right break-all">{formatCurrency(parseFloat(share.purchaseValue), i18n.language)}</span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Adquirida:</span>
@@ -407,7 +408,7 @@ export default function Dashboard() {
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Retorno mensal:</span>
                     <span className="font-medium text-green-600 text-right break-all">
-                      ${(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100).toFixed(2)}
+                      {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, i18n.language)}
                     </span>
                   </div>
                 </div>
