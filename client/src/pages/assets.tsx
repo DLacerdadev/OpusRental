@@ -102,13 +102,39 @@ export default function Assets() {
       return;
     }
 
-    const headers = ["ID", "Status", "Valor de Compra (USD)", "Valor Atual (USD)", "Data de Aquisicao", "Localizacao", "Latitude", "Longitude"];
+    // Traduções de status para português
+    const statusTranslations: Record<string, string> = {
+      stock: "Estoque",
+      active: "Ativo",
+      maintenance: "Manutenção",
+      expired: "Vencido",
+    };
+
+    const headers = [
+      "ID do Trailer",
+      "Status",
+      "Cotas Vendidas",
+      "Total de Cotas",
+      "Cotas Disponíveis",
+      "Valor de Compra (USD)",
+      "Valor Atual (USD)",
+      "Data de Aquisição",
+      "Taxa de Depreciação",
+      "Localização",
+      "Latitude",
+      "Longitude"
+    ];
+
     const csvData = trailers.map((trailer: any) => [
       trailer.trailerId,
-      trailer.status,
+      statusTranslations[trailer.status] || trailer.status,
+      trailer.soldShares || 0,
+      trailer.totalShares || 1,
+      (trailer.totalShares || 1) - (trailer.soldShares || 0),
       parseFloat(trailer.purchaseValue).toFixed(2),
       parseFloat(trailer.currentValue).toFixed(2),
       format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
+      trailer.depreciationRate || "0",
       trailer.location || "",
       trailer.latitude || "",
       trailer.longitude || "",
@@ -135,7 +161,7 @@ export default function Assets() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `ativos_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.setAttribute("download", `ativos_opus_rental_${format(new Date(), "yyyy-MM-dd")}.csv`);
     link.style.visibility = "hidden";
     
     document.body.appendChild(link);
@@ -144,7 +170,7 @@ export default function Assets() {
 
     toast({
       title: "Exportado com sucesso!",
-      description: "Arquivo CSV baixado.",
+      description: "Planilha de ativos baixada com todos os detalhes.",
     });
   };
 
