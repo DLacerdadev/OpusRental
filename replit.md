@@ -12,6 +12,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 2025)
 
+### Trailer Model Field (October 2025)
+- **Model Field Added**: Each trailer now has a required model field
+  - Added `model` text field to trailers table with default "Dry Van 53ft"
+  - Field appears in trailer creation form after ID field
+  - Existing trailers populated with default model value
+  - Model examples: "Dry Van 53ft", "Refrigerado 48ft", "Flatbed 53ft"
+
 ### Multi-Share System Implementation
 - **Trailer Multi-Share Support**: Each trailer can now have multiple shares (cotas)
   - Added `totalShares` field to trailers table (integer, default: 1)

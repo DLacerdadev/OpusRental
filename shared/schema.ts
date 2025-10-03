@@ -32,6 +32,7 @@ export const users = pgTable("users", {
 export const trailers = pgTable("trailers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   trailerId: text("trailer_id").notNull().unique(), // TR001, TR002, etc.
+  model: text("model").notNull().default("Dry Van 53ft"), // Dry Van 53ft, Refrigerado 48ft, etc.
   purchaseValue: decimal("purchase_value", { precision: 10, scale: 2 }).notNull(),
   purchaseDate: date("purchase_date").notNull(),
   status: text("status").notNull().default("stock"), // stock, active, maintenance, expired

@@ -28,6 +28,7 @@ export default function Assets() {
     resolver: zodResolver(insertTrailerSchema),
     defaultValues: {
       trailerId: "",
+      model: "",
       purchaseValue: "",
       purchaseDate: new Date().toISOString().split('T')[0],
       currentValue: "",
@@ -240,6 +241,20 @@ export default function Assets() {
                       <FormLabel>ID do Trailer</FormLabel>
                       <FormControl>
                         <Input placeholder="TR001" {...field} data-testid="input-trailer-id" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="model"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Modelo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Dry Van 53ft" {...field} data-testid="input-model" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
