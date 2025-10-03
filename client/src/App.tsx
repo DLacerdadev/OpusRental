@@ -20,6 +20,7 @@ import Reports from "@/pages/reports";
 import Compliance from "@/pages/compliance";
 import Settings from "@/pages/settings";
 import Approvals from "@/pages/approvals";
+import InvestorShares from "@/pages/investor-shares";
 
 function ProtectedRoute({ component: Component, title }: { component: any; title: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -107,6 +108,9 @@ function Router() {
       </Route>
       <Route path="/approvals">
         {() => <ProtectedRoute component={Approvals} title="Aprovações" />}
+      </Route>
+      <Route path="/investor-shares">
+        {() => <ProtectedRoute component={InvestorShares} title="Cotas dos Investidores" />}
       </Route>
       <Route component={NotFound} />
     </Switch>

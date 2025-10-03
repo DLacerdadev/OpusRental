@@ -19,6 +19,7 @@ import {
   Settings,
   CheckCircle,
   UserCog,
+  Users,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -49,6 +50,7 @@ export function Sidebar({ user }: SidebarProps) {
   const navItems = [
     { path: "/", icon: LayoutDashboard, label: "Dashboard", roles: ["investor", "manager", "admin"] },
     { path: "/portfolio", icon: Briefcase, label: "Minha Carteira", roles: ["investor"] },
+    { path: "/investor-shares", icon: Users, label: "Cotas dos Investidores", roles: ["manager", "admin"] },
     { path: "/assets", icon: Truck, label: "Gestão de Ativos", roles: ["manager", "admin"] },
     { path: "/tracking", icon: MapPin, label: "Rastreamento", roles: ["manager", "admin"] },
     { path: "/financial", icon: DollarSign, label: "Financeiro", roles: ["manager", "admin"] },
