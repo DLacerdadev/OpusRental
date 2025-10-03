@@ -100,14 +100,14 @@ export default function Reports() {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Relatórios</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Relatórios</h1>
           <p className="text-sm text-muted-foreground mt-1">Gere e exporte relatórios personalizados</p>
         </div>
         <Button 
-          className="bg-accent hover:bg-accent/90 shadow-lg" 
+          className="bg-accent hover:bg-accent/90 shadow-lg w-full sm:w-auto" 
           onClick={handleNewReport}
           data-testid="button-new-report"
         >
@@ -115,7 +115,7 @@ export default function Reports() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {reportTypes.map((report) => {
           const Icon = report.icon;
           const bgColor = `bg-${report.color}-100`;
@@ -128,14 +128,14 @@ export default function Reports() {
               onClick={() => handleReportClick(report.title)}
               data-testid={`card-${report.testId}`}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className={`${bgColor} p-4 rounded-2xl`}>
-                    <Icon className={`${textColor} h-7 w-7`} />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className={`${bgColor} p-3 sm:p-4 rounded-2xl flex-shrink-0`}>
+                    <Icon className={`${textColor} h-6 w-6 sm:h-7 sm:w-7`} />
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">{report.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{report.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-foreground text-sm sm:text-base break-words">{report.title}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">{report.description}</p>
                   </div>
                 </div>
               </CardContent>
@@ -146,38 +146,38 @@ export default function Reports() {
 
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">Opções de Exportação</CardTitle>
+          <CardTitle className="text-base sm:text-lg font-bold">Opções de Exportação</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-secondary hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-foreground transition-all"
+              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-secondary hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-foreground transition-all"
               onClick={handleExportPDF}
               data-testid="button-export-pdf"
             >
-              <FileText className="text-secondary h-6 w-6" />
-              <span className="font-semibold">Exportar PDF</span>
+              <FileText className="text-secondary h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+              <span className="font-semibold text-sm sm:text-base">Exportar PDF</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 hover:text-foreground transition-all"
+              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 hover:text-foreground transition-all"
               onClick={handleExportExcel}
               data-testid="button-export-excel"
             >
-              <FileText className="text-green-600 h-6 w-6" />
-              <span className="font-semibold">Exportar Excel</span>
+              <FileText className="text-green-600 h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+              <span className="font-semibold text-sm sm:text-base">Exportar Excel</span>
             </Button>
 
             <Button
               variant="outline"
-              className="flex items-center justify-center gap-3 p-6 border-2 hover:border-accent hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-foreground transition-all"
+              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-accent hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-foreground transition-all sm:col-span-2 lg:col-span-1"
               onClick={handleExportCSV}
               data-testid="button-export-csv"
             >
-              <FileText className="text-accent h-6 w-6" />
-              <span className="font-semibold">Exportar CSV</span>
+              <FileText className="text-accent h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+              <span className="font-semibold text-sm sm:text-base">Exportar CSV</span>
             </Button>
           </div>
         </CardContent>
