@@ -30,7 +30,7 @@ export default function Financial() {
   })) || [];
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Financeiro</h1>
         <p className="text-sm text-muted-foreground mt-1">Gestão completa de receitas e pagamentos</p>

@@ -54,7 +54,7 @@ export default function InvestorShares() {
   };
 
   return (
-    <div className="space-y-6" data-testid="page-investor-shares">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8" data-testid="page-investor-shares">
       <div>
         <h1 className="text-3xl font-bold" data-testid="heading-investor-shares">Cotas dos Investidores</h1>
         <p className="text-muted-foreground" data-testid="text-description">

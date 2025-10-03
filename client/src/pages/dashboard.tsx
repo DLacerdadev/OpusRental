@@ -97,7 +97,7 @@ export default function Dashboard() {
     }));
 
     return (
-      <div className="p-8 space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t('dashboard.companyTitle')}</h1>
@@ -247,7 +247,7 @@ export default function Dashboard() {
     }));
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t('dashboard.title')}</h1>
