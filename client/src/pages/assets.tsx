@@ -63,7 +63,13 @@ export default function Assets() {
   });
 
   const onSubmit = (data: InsertTrailer) => {
-    createTrailerMutation.mutate(data);
+    // Remove latitude/longitude if they're empty strings
+    const cleanedData = {
+      ...data,
+      latitude: data.latitude === "" ? undefined : data.latitude,
+      longitude: data.longitude === "" ? undefined : data.longitude,
+    };
+    createTrailerMutation.mutate(cleanedData as InsertTrailer);
   };
 
   const getStatusBadge = (status: string) => {

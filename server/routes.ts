@@ -210,7 +210,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/trailers", authorize(), async (req, res) => {
     try {
-      const validated = insertTrailerSchema.parse(req.body);
+      // Clean up latitude/longitude - convert empty strings or invalid values to null
+      const cleanedData = {
+        ...req.body,
+        latitude: req.body.latitude === "" || req.body.latitude === null ? null : req.body.latitude,
+        longitude: req.body.longitude === "" || req.body.longitude === null ? null : req.body.longitude,
+      };
+      
+      const validated = insertTrailerSchema.parse(cleanedData);
       const trailer = await storage.createTrailer(validated);
       
       await storage.createAuditLog({
