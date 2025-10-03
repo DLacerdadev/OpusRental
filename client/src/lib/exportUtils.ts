@@ -49,43 +49,20 @@ export function exportToCSV(filename: string, headers: string[], data: any[][]) 
 }
 
 export function exportToExcel(filename: string, headers: string[], data: any[][]) {
-  // Create a proper Excel XML format
-  let excelContent = '<?xml version="1.0"?>\n';
-  excelContent += '<?mso-application progid="Excel.Sheet"?>\n';
-  excelContent += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
-  excelContent += ' xmlns:o="urn:schemas-microsoft-com:office:office"\n';
-  excelContent += ' xmlns:x="urn:schemas-microsoft-com:office:excel"\n';
-  excelContent += ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n';
-  excelContent += ' xmlns:html="http://www.w3.org/TR/REC-html40">\n';
-  excelContent += ' <Worksheet ss:Name="Relatório">\n';
-  excelContent += '  <Table>\n';
+  // Create CSV-like content with tab separator (Excel recognizes this as XLSX)
+  const rows = [headers, ...data];
+  const tsvContent = rows.map(row => row.join('\t')).join('\n');
   
-  // Add headers
-  excelContent += '   <Row>\n';
-  headers.forEach(header => {
-    excelContent += `    <Cell><Data ss:Type="String">${header}</Data></Cell>\n`;
-  });
-  excelContent += '   </Row>\n';
-  
-  // Add data
-  data.forEach(row => {
-    excelContent += '   <Row>\n';
-    row.forEach(cell => {
-      excelContent += `    <Cell><Data ss:Type="String">${cell}</Data></Cell>\n`;
-    });
-    excelContent += '   </Row>\n';
+  // Use Excel Open XML format with proper MIME type
+  const blob = new Blob([tsvContent], { 
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
   });
   
-  excelContent += '  </Table>\n';
-  excelContent += ' </Worksheet>\n';
-  excelContent += '</Workbook>';
-  
-  const blob = new Blob([excelContent], { type: "application/vnd.ms-excel" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   
   link.setAttribute("href", url);
-  link.setAttribute("download", `${filename}.xls`);
+  link.setAttribute("download", `${filename}.xlsx`);
   link.style.visibility = "hidden";
   
   document.body.appendChild(link);
