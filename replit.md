@@ -12,6 +12,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 2025)
 
+### Multi-Share System Implementation
+- **Trailer Multi-Share Support**: Each trailer can now have multiple shares (cotas)
+  - Added `totalShares` field to trailers table (integer, default: 1)
+  - Existing trailers without specification default to 1 share
+  - Trailer status changes to "active" only when ALL shares are sold
+  - Share availability calculated as: totalShares - soldShares
+  
+- **Purchase Validation**:
+  - Removed restriction of "one share per trailer"
+  - Validates available shares count before purchase (availableShares > 0)
+  - Returns error if no shares are available for a trailer
+  - Multiple investors can purchase shares of the same trailer
+  
+- **Backend Implementation**:
+  - `getAvailableTrailers()` enhanced to return share availability data
+  - Calculates soldShares and availableShares for each trailer
+  - Filters to show only trailers with available shares > 0
+  - Purchase route checks totalShares vs sold count
+  
+- **Frontend Display**:
+  - Shows "X cotas disponíveis" badge on available trailers
+  - Displays total shares info when > 1
+  - Responsive design with proper text wrapping and overflow handling
+
 ### Role-Based Dashboard Implementation
 - **Manager Dashboard**: Displays company-wide statistics and business overview
   - Total fleet value and trailer count (active/total)
@@ -103,8 +127,9 @@ Preferred communication style: Simple, everyday language.
 - **Financial Records**: Aggregated monthly financial performance data
 
 **Key Relationships**
-- One-to-one mapping between shares and trailers (each share = one trailer)
+- Many-to-one mapping between shares and trailers (multiple shares can reference one trailer)
 - Many-to-one relationship between shares and users (investor portfolios)
+- Each trailer can have N shares (defined by totalShares field, default: 1)
 - Historical tracking of payments, locations, and audit events
 
 ### API Structure
