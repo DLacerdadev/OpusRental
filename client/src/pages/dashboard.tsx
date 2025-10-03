@@ -5,6 +5,7 @@ import { PerformanceChart } from "@/components/charts/performance-chart";
 import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 interface InvestorStats {
   totalValue: number;
@@ -42,6 +43,7 @@ interface CompanyStats {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -97,11 +99,11 @@ export default function Dashboard() {
       <div className="p-8 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard - Visão Geral</h1>
-            <p className="text-sm text-muted-foreground mt-1">Estatísticas gerais do negócio</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('dashboard.companyTitle')}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{t('dashboard.companySubtitle')}</p>
           </div>
           <div className="bg-accent/10 border border-accent/30 px-4 py-2 rounded-xl">
-            <p className="text-xs font-semibold text-accent">ÚLTIMO ACESSO</p>
+            <p className="text-xs font-semibold text-accent">{t('dashboard.lastAccess')}</p>
             <p className="text-sm font-bold text-foreground">{format(new Date(), "dd/MM/yyyy • HH:mm")}</p>
           </div>
         </div>
@@ -117,7 +119,7 @@ export default function Dashboard() {
                   {companyStats.activeTrailers}/{companyStats.totalTrailers}
                 </span>
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-2">FROTA TOTAL</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalFleetValue')}</p>
               <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
                 ${companyStats.totalFleetValue.toFixed(2)}
               </p>
@@ -130,9 +132,9 @@ export default function Dashboard() {
                 <div className="bg-primary/10 p-3 rounded-2xl">
                   <Users className="h-7 w-7 text-primary" />
                 </div>
-                <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">VENDIDAS</span>
+                <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{t('dashboard.sold')}</span>
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-2">COTAS VENDIDAS</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalSharesSold')}</p>
               <p className="text-3xl font-bold text-foreground" data-testid="text-shares-sold">
                 {companyStats.totalSharesSold}
               </p>
@@ -145,9 +147,9 @@ export default function Dashboard() {
                 <div className="bg-green-50 p-3 rounded-2xl">
                   <DollarSign className="h-7 w-7 text-green-600" />
                 </div>
-                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">6 MESES</span>
+                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-2">RECEITA TOTAL</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyRevenue')}</p>
               <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">
                 ${companyStats.totalRevenue.toFixed(2)}
               </p>
@@ -160,9 +162,9 @@ export default function Dashboard() {
                 <div className="bg-purple-50 p-3 rounded-2xl">
                   <BarChart3 className="h-7 w-7 text-purple-600" />
                 </div>
-                <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">6 MESES</span>
+                <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
-              <p className="text-sm font-semibold text-muted-foreground mb-2">MARGEM TOTAL</p>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyMargin')}</p>
               <p className="text-3xl font-bold text-purple-600" data-testid="text-total-margin">
                 ${companyStats.totalMargin.toFixed(2)}
               </p>
@@ -173,14 +175,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Performance de Receita - Últimos 6 Meses</CardTitle>
+              <CardTitle>{t('dashboard.revenuePerformance')}</CardTitle>
             </CardHeader>
             <CardContent>
               {revenueChartData.length > 0 ? (
                 <PerformanceChart data={revenueChartData} />
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  Nenhum dado de receita disponível
+                  {t('dashboard.noRevenueData')}
                 </div>
               )}
             </CardContent>
@@ -188,7 +190,7 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Atividade Recente do Sistema</CardTitle>
+              <CardTitle>{t('dashboard.recentSystemActivity')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -201,7 +203,7 @@ export default function Dashboard() {
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">
-                        Pagamento processado - {formatMonth(activity.referenceMonth)}
+                        {t('dashboard.paymentProcessed')} - {formatMonth(activity.referenceMonth)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(activity.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
@@ -214,7 +216,7 @@ export default function Dashboard() {
                 ))}
                 {(!companyStats.recentActivity || companyStats.recentActivity.length === 0) && (
                   <div className="text-center text-muted-foreground py-8">
-                    Nenhuma atividade recente
+                    {t('dashboard.noRecentActivity')}
                   </div>
                 )}
               </div>
@@ -247,11 +249,11 @@ export default function Dashboard() {
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Visão geral da sua carteira de investimentos</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('dashboard.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('dashboard.subtitle')}</p>
         </div>
         <div className="bg-accent/10 border border-accent/30 px-4 py-2 rounded-xl">
-          <p className="text-xs font-semibold text-accent">ÚLTIMO ACESSO</p>
+          <p className="text-xs font-semibold text-accent">{t('dashboard.lastAccess')}</p>
           <p className="text-sm font-bold text-foreground">{format(new Date(), "dd/MM/yyyy • HH:mm")}</p>
         </div>
       </div>
@@ -266,7 +268,7 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+0%</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">CARTEIRA TOTAL</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
               ${investorStats?.totalValue?.toFixed(2) || "0.00"}
             </p>
@@ -279,9 +281,9 @@ export default function Dashboard() {
               <div className="bg-primary/10 p-3 rounded-2xl">
                 <TrendingUp className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">ATIVO</span>
+              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{t('dashboard.active')}</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">COTAS ATIVAS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.activeShares')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-active-shares">
               {investorStats?.activeShares || 0}
             </p>
@@ -296,7 +298,7 @@ export default function Dashboard() {
               </div>
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">2% a.m.</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">RETORNO MENSAL</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
             <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
               ${investorStats?.monthlyReturn?.toFixed(2) || "0.00"}
             </p>
@@ -313,7 +315,7 @@ export default function Dashboard() {
                 {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM")}
               </span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">PRÓXIMO PAGAMENTO</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
               ${investorStats?.nextPayment?.toFixed(2) || "0.00"}
             </p>
@@ -325,14 +327,14 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Performance dos Últimos Meses</CardTitle>
+            <CardTitle>{t('dashboard.performanceLastMonths')}</CardTitle>
           </CardHeader>
           <CardContent>
             {performanceData.length > 0 ? (
               <PerformanceChart data={performanceData} />
             ) : (
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Nenhum dado de performance disponível
+                {t('dashboard.noPerformanceData')}
               </div>
             )}
           </CardContent>
@@ -340,7 +342,7 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Atividade Recente</CardTitle>
+            <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -353,7 +355,7 @@ export default function Dashboard() {
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">
-                      Pagamento recebido - {formatMonth(payment.referenceMonth)}
+                      {t('dashboard.paymentReceived')} - {formatMonth(payment.referenceMonth)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(payment.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
