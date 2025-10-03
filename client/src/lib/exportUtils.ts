@@ -6,7 +6,10 @@ export function exportToPDF(title: string, headers: string[], data: any[][]) {
   const doc = new jsPDF();
   
   doc.setFontSize(18);
-  doc.text(title, 14, 22);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const textWidth = doc.getTextWidth(title);
+  const textX = (pageWidth - textWidth) / 2;
+  doc.text(title, textX, 22);
   
   doc.setFontSize(11);
   doc.setTextColor(100);
@@ -19,11 +22,14 @@ export function exportToPDF(title: string, headers: string[], data: any[][]) {
     styles: {
       fontSize: 9,
       cellPadding: 3,
+      halign: 'center',
+      valign: 'middle',
     },
     headStyles: {
       fillColor: [33, 150, 243],
       textColor: 255,
       fontStyle: "bold",
+      halign: 'center',
     },
   });
   
