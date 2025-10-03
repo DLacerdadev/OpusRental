@@ -15,7 +15,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTrailerSchema, type InsertTrailer } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Assets() {
@@ -23,7 +22,6 @@ export default function Assets() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const { toast } = useToast();
-  const { i18n } = useTranslation();
   
   const { data: trailers, isLoading } = useQuery({
     queryKey: ["/api/trailers"],
@@ -624,7 +622,7 @@ export default function Assets() {
                       </td>
                       <td className="py-4 px-6">
                         <span className="font-bold text-foreground">
-                          {formatCurrency(parseFloat(trailer.currentValue), i18n.language)}
+                          {formatCurrency(parseFloat(trailer.currentValue))}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-muted-foreground">

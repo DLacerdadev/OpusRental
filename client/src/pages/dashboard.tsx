@@ -122,7 +122,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalFleetValue')}</p>
               <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
-                {formatCurrency(companyStats.totalFleetValue, i18n.language)}
+                {formatCurrency(companyStats.totalFleetValue)}
               </p>
             </CardContent>
           </Card>
@@ -152,7 +152,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyRevenue')}</p>
               <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">
-                {formatCurrency(companyStats.totalRevenue, i18n.language)}
+                {formatCurrency(companyStats.totalRevenue)}
               </p>
             </CardContent>
           </Card>
@@ -167,7 +167,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyMargin')}</p>
               <p className="text-3xl font-bold text-purple-600" data-testid="text-total-margin">
-                {formatCurrency(companyStats.totalMargin, i18n.language)}
+                {formatCurrency(companyStats.totalMargin)}
               </p>
             </CardContent>
           </Card>
@@ -211,7 +211,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-green-600">
-                      {formatCurrency(parseFloat(activity.amount), i18n.language)}
+                      {formatCurrency(parseFloat(activity.amount))}
                     </span>
                   </div>
                 ))}
@@ -271,7 +271,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
-              {formatCurrency(investorStats?.totalValue || 0, i18n.language)}
+              {formatCurrency(investorStats?.totalValue || 0)}
             </p>
           </CardContent>
         </Card>
@@ -301,7 +301,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
             <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
-              {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language)}
+              {formatCurrency(investorStats?.monthlyReturn || 0)}
             </p>
           </CardContent>
         </Card>
@@ -318,7 +318,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
             <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
-              {formatCurrency(investorStats?.nextPayment || 0, i18n.language)}
+              {formatCurrency(investorStats?.nextPayment || 0)}
             </p>
           </CardContent>
         </Card>
@@ -363,7 +363,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-green-600">
-                    +{formatCurrency(parseFloat(payment.amount), i18n.language)}
+                    +{formatCurrency(parseFloat(payment.amount))}
                   </span>
                 </div>
               ))}
@@ -399,7 +399,7 @@ export default function Dashboard() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Valor:</span>
-                    <span className="font-medium text-right break-all">{formatCurrency(parseFloat(share.purchaseValue), i18n.language)}</span>
+                    <span className="font-medium text-right break-all">{formatCurrency(parseFloat(share.purchaseValue))}</span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Adquirida:</span>
@@ -408,7 +408,7 @@ export default function Dashboard() {
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Retorno mensal:</span>
                     <span className="font-medium text-green-600 text-right break-all">
-                      {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, i18n.language)}
+                      {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100)}
                     </span>
                   </div>
                 </div>
