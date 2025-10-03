@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Eye, Users, TrendingUp, DollarSign, Shield, Settings, FileDown } from "lucide-react";
-import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
+import { exportToPDF, exportToCSV, exportToExcel } from "@/lib/exportUtils";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Reports() {
@@ -64,7 +64,10 @@ export default function Reports() {
     const data = [
       [reportTitle, "Outubro/2025", "Completo", "Dados atualizados"],
       [reportTitle, "Setembro/2025", "Completo", "Dados históricos"],
+      [reportTitle, "Agosto/2025", "Completo", "Dados históricos"],
     ];
+
+    const fileName = reportTitle.toLowerCase().replace(/\s+/g, "-");
 
     if (format === "PDF") {
       exportToPDF(`${reportTitle} - Opus Rental Capital`, headers, data);
@@ -72,17 +75,17 @@ export default function Reports() {
         title: "PDF Exportado",
         description: `${reportTitle} exportado em PDF com sucesso`,
       });
+    } else if (format === "Excel") {
+      exportToExcel(fileName, headers, data);
+      toast({
+        title: "Excel Exportado",
+        description: `${reportTitle} exportado em Excel (.xls) com sucesso`,
+      });
     } else if (format === "CSV") {
-      const fileName = reportTitle.toLowerCase().replace(/\s+/g, "-");
       exportToCSV(fileName, headers, data);
       toast({
         title: "CSV Exportado",
         description: `${reportTitle} exportado em CSV com sucesso`,
-      });
-    } else {
-      toast({
-        title: "Excel Exportado",
-        description: `${reportTitle} exportado em Excel com sucesso`,
       });
     }
   };
