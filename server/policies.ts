@@ -23,6 +23,7 @@ export const Policy = {
   
   "GET /api/audit-logs": ["manager", "admin"],
   
+  "GET /api/shares/all": ["manager", "admin"],
   "GET /api/shares": ["investor", "manager", "admin"],
   "GET /api/shares/:id": ["investor", "manager", "admin"],
   "POST /api/shares": ["manager", "admin"],

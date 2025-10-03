@@ -47,6 +47,7 @@ export interface IStorage {
   getSharesByUserId(userId: string): Promise<Share[]>;
   getSharesByTrailerId(trailerId: string): Promise<Share[]>;
   getAllShares(): Promise<Share[]>;
+  getAllSharesWithDetails(): Promise<any[]>;
   createShare(share: InsertShare): Promise<Share>;
   updateShare(id: string, share: Partial<Share>): Promise<Share>;
   
@@ -152,6 +153,36 @@ export class DatabaseStorage implements IStorage {
 
   async getAllShares(): Promise<Share[]> {
     return await db.select().from(shares).orderBy(desc(shares.createdAt));
+  }
+
+  async getAllSharesWithDetails(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: shares.id,
+        userId: shares.userId,
+        trailerId: shares.trailerId,
+        status: shares.status,
+        purchaseDate: shares.purchaseDate,
+        purchaseValue: shares.purchaseValue,
+        monthlyReturn: shares.monthlyReturn,
+        totalReturns: shares.totalReturns,
+        createdAt: shares.createdAt,
+        updatedAt: shares.updatedAt,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+        trailerTrailerId: trailers.trailerId,
+        trailerPurchaseValue: trailers.purchaseValue,
+        trailerCurrentValue: trailers.currentValue,
+        trailerStatus: trailers.status,
+        trailerLocation: trailers.location,
+      })
+      .from(shares)
+      .leftJoin(users, eq(shares.userId, users.id))
+      .leftJoin(trailers, eq(shares.trailerId, trailers.id))
+      .orderBy(desc(shares.createdAt));
+    
+    return result;
   }
 
   async createShare(share: InsertShare): Promise<Share> {

@@ -338,6 +338,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Shares routes
+  app.get("/api/shares/all", authorize(), async (req, res) => {
+    try {
+      const sharesWithDetails = await storage.getAllSharesWithDetails();
+      res.json(sharesWithDetails);
+    } catch (error) {
+      console.error("All shares error:", error);
+      res.status(500).json({ message: "Failed to fetch all shares" });
+    }
+  });
+
   app.get("/api/shares", authorize(), async (req, res) => {
     try {
       const shares = await storage.getSharesByUserId(req.session.userId!);
