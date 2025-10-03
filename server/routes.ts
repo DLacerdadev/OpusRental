@@ -198,6 +198,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/trailers/available", authorize(), async (req, res) => {
+    try {
+      const trailers = await storage.getAvailableTrailers();
+      res.json(trailers);
+    } catch (error) {
+      console.error("Available trailers error:", error);
+      res.status(500).json({ message: "Failed to fetch available trailers" });
+    }
+  });
+
   app.post("/api/trailers", authorize(), async (req, res) => {
     try {
       const validated = insertTrailerSchema.parse(req.body);
@@ -368,6 +378,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Share error:", error);
       res.status(500).json({ message: "Failed to fetch share" });
+    }
+  });
+
+  app.post("/api/shares", authorize(), async (req, res) => {
+    try {
+      const validated = insertShareSchema.parse(req.body);
+      
+      // Check if trailer is available
+      const trailer = await storage.getTrailer(validated.trailerId);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+      if (trailer.status !== "stock") {
+        return res.status(400).json({ message: "Trailer is not available for purchase" });
+      }
+      
+      // Check if trailer already has a share
+      const existingShares = await storage.getSharesByTrailerId(validated.trailerId);
+      if (existingShares.length > 0) {
+        return res.status(400).json({ message: "This trailer already has a share assigned" });
+      }
+      
+      // Create the share
+      const share = await storage.createShare({
+        ...validated,
+        userId: req.session.userId!,
+      });
+      
+      // Update trailer status to active
+      await storage.updateTrailer(validated.trailerId, { status: "active" });
+      
+      // Create audit log
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "purchase_share",
+        entityType: "share",
+        entityId: share.id,
+        details: { trailerId: validated.trailerId, purchaseValue: validated.purchaseValue },
+        ipAddress: req.ip,
+      });
+      
+      res.json(share);
+    } catch (error) {
+      console.error("Create share error:", error);
+      res.status(500).json({ message: "Failed to create share" });
     }
   });
 

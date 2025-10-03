@@ -9,6 +9,7 @@ export const Policy = {
   "GET /api/portfolio": ["investor"],
   
   "GET /api/trailers": ["manager", "admin"],
+  "GET /api/trailers/available": ["investor", "manager", "admin"],
   "GET /api/trailers/:id": ["manager", "admin"],
   "POST /api/trailers": ["manager", "admin"],
   
@@ -26,7 +27,7 @@ export const Policy = {
   "GET /api/shares/all": ["manager", "admin"],
   "GET /api/shares": ["investor", "manager", "admin"],
   "GET /api/shares/:id": ["investor", "manager", "admin"],
-  "POST /api/shares": ["manager", "admin"],
+  "POST /api/shares": ["investor", "manager", "admin"],
   
   "GET /api/payments": ["investor", "manager", "admin"],
   "GET /api/payments/:shareId": ["investor", "manager", "admin"],

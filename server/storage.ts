@@ -39,6 +39,7 @@ export interface IStorage {
   getTrailer(id: string): Promise<Trailer | undefined>;
   getTrailerByTrailerId(trailerId: string): Promise<Trailer | undefined>;
   getAllTrailers(): Promise<Trailer[]>;
+  getAvailableTrailers(): Promise<Trailer[]>;
   createTrailer(trailer: InsertTrailer): Promise<Trailer>;
   updateTrailer(id: string, trailer: Partial<Trailer>): Promise<Trailer>;
   
@@ -121,6 +122,14 @@ export class DatabaseStorage implements IStorage {
 
   async getAllTrailers(): Promise<Trailer[]> {
     return await db.select().from(trailers).orderBy(desc(trailers.createdAt));
+  }
+
+  async getAvailableTrailers(): Promise<Trailer[]> {
+    return await db
+      .select()
+      .from(trailers)
+      .where(eq(trailers.status, "stock"))
+      .orderBy(desc(trailers.createdAt));
   }
 
   async createTrailer(trailer: InsertTrailer): Promise<Trailer> {
