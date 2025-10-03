@@ -67,7 +67,16 @@ export function Sidebar({ user }: SidebarProps) {
   const filteredSettingsItems = settingsItems.filter(item => item.roles.includes(user?.role || "investor"));
 
   return (
-    <div className={`bg-gradient-to-b from-primary via-primary to-primary/95 text-white border-r border-white/10 min-h-screen flex flex-col shadow-2xl transition-all duration-300 ${isCollapsed ? "w-20" : "w-72"}`}>
+    <div className={`relative bg-gradient-to-b from-primary via-primary to-primary/95 text-white border-r border-white/10 min-h-screen flex flex-col shadow-2xl transition-all duration-300 ${isCollapsed ? "w-20" : "w-72"}`}>
+      {/* Collapse Toggle Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute top-6 right-4 bg-accent hover:bg-accent/90 text-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 z-20"
+        data-testid="button-toggle-sidebar"
+      >
+        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </button>
+
       {/* Header with Logo */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
@@ -101,15 +110,6 @@ export function Sidebar({ user }: SidebarProps) {
           </div>
         )}
       </div>
-
-      {/* Collapse Toggle Button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-6 left-4 bg-accent hover:bg-accent/90 text-white rounded-full p-1.5 shadow-lg transition-all hover:scale-110 z-10"
-        data-testid="button-toggle-sidebar"
-      >
-        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-      </button>
 
       {/* Navigation */}
       <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
