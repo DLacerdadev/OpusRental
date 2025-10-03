@@ -3,13 +3,14 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
 export function exportToPDF(title: string, headers: string[], data: any[][]) {
-  const doc = new jsPDF();
+  const orientation = headers.length > 8 ? 'landscape' : 'portrait';
+  const doc = new jsPDF({ orientation });
   
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   const pageWidth = doc.internal.pageSize.getWidth();
   const textWidth = doc.getTextWidth(title);
   const textX = (pageWidth - textWidth) / 2;
-  doc.text(title, textX, 22);
+  doc.text(title, textX, 20);
   
   doc.setFontSize(11);
   doc.setTextColor(100);
@@ -17,20 +18,30 @@ export function exportToPDF(title: string, headers: string[], data: any[][]) {
   autoTable(doc, {
     head: [headers],
     body: data,
-    startY: 30,
+    startY: 28,
     theme: "grid",
     styles: {
-      fontSize: 9,
-      cellPadding: 3,
+      fontSize: 8,
+      cellPadding: 2,
       halign: 'center',
       valign: 'middle',
+      overflow: 'linebreak',
+      cellWidth: 'auto',
     },
     headStyles: {
       fillColor: [33, 150, 243],
       textColor: 255,
       fontStyle: "bold",
       halign: 'center',
+      fontSize: 8,
+      cellPadding: 2,
+      minCellHeight: 10,
     },
+    columnStyles: headers.reduce((acc, _, index) => {
+      acc[index] = { cellWidth: 'auto' };
+      return acc;
+    }, {} as any),
+    margin: { top: 28, left: 5, right: 5 },
   });
   
   doc.save(`${title.toLowerCase().replace(/\s+/g, "-")}.pdf`);
