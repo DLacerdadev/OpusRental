@@ -49,20 +49,18 @@ export function exportToCSV(filename: string, headers: string[], data: any[][]) 
 }
 
 export function exportToExcel(filename: string, headers: string[], data: any[][]) {
-  // Create CSV-like content with tab separator (Excel recognizes this as XLSX)
+  // Create simple tab-delimited content that Excel opens natively
   const rows = [headers, ...data];
-  const tsvContent = rows.map(row => row.join('\t')).join('\n');
+  const content = rows.map(row => row.join('\t')).join('\n');
   
-  // Use Excel Open XML format with proper MIME type
-  const blob = new Blob([tsvContent], { 
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
-  });
+  // Use text/csv MIME type with .xls extension - Excel opens this without warnings
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
   
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   
   link.setAttribute("href", url);
-  link.setAttribute("download", `${filename}.xlsx`);
+  link.setAttribute("download", `${filename}.xls`);
   link.style.visibility = "hidden";
   
   document.body.appendChild(link);
