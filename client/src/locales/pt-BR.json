@@ -201,5 +201,21 @@
     "investor": "Investidor",
     "manager": "Gerente",
     "admin": "Administrador"
+  },
+  "login": {
+    "title": "Opus Rental Capital",
+    "subtitle": "Plataforma de Investimentos",
+    "email": "E-mail",
+    "password": "Senha",
+    "emailPlaceholder": "seu@email.com",
+    "passwordPlaceholder": "••••••••",
+    "loginButton": "Acessar Plataforma",
+    "loggingIn": "Entrando...",
+    "forgotPassword": "Esqueci minha senha",
+    "footer": "Investimentos em trailers de carga • Mercado norte-americano",
+    "successTitle": "Login realizado",
+    "successDescription": "Bem-vindo à Opus Rental Capital",
+    "errorTitle": "Falha no login",
+    "errorDescription": "Credenciais inválidas"
   }
 }
