@@ -450,6 +450,7 @@ export default function Assets() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">MODELO</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">COTAS</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">FAROL</th>
@@ -470,6 +471,9 @@ export default function Assets() {
                     >
                       <td className="py-4 px-6">
                         <span className="font-bold text-primary">{trailer.trailerId}</span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-foreground">{trailer.model || "—"}</span>
                       </td>
                       <td className="py-4 px-6">
                         <Badge variant={statusInfo.variant} className="rounded-full">
@@ -510,7 +514,7 @@ export default function Assets() {
                 })}
                 {(!trailers || trailers.length === 0) && (
                   <tr>
-                    <td colSpan={8} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={9} className="text-center py-12 text-muted-foreground">
                       Nenhum ativo cadastrado
                     </td>
                   </tr>
