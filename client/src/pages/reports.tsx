@@ -3,9 +3,35 @@ import { Button } from "@/components/ui/button";
 import { FileText, Download, Eye, Users, TrendingUp, DollarSign, Shield, Settings, FileDown } from "lucide-react";
 import { exportToPDF, exportToCSV, exportToExcel } from "@/lib/exportUtils";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Reports() {
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Fetch real data from APIs
+  const { data: shares } = useQuery({
+    queryKey: ["/api/shares"],
+  });
+
+  const { data: payments } = useQuery({
+    queryKey: ["/api/payments"],
+  });
+
+  const { data: trailers } = useQuery({
+    queryKey: ["/api/trailers"],
+  });
+
+  const { data: financialRecords } = useQuery({
+    queryKey: ["/api/financial/records"],
+  });
+
+  const { data: documents } = useQuery({
+    queryKey: ["/api/documents"],
+  });
 
   const reportTypes = [
     {
@@ -59,86 +85,143 @@ export default function Reports() {
     });
   };
 
-  const handleExport = (reportTitle: string, format: "PDF" | "Excel" | "CSV") => {
+  const handleExport = (reportTitle: string, exportFormat: "PDF" | "Excel" | "CSV") => {
     const fileName = reportTitle.toLowerCase().replace(/\s+/g, "-");
     
-    // Define dados específicos para cada tipo de relatório
     let headers: string[] = [];
     let data: any[][] = [];
     
     switch (reportTitle) {
       case "Relatório do Investidor":
         headers = ["Mês", "Cotas Ativas", "Valor Investido", "Retorno Mensal", "Status"];
-        data = [
-          ["Outubro/2025", "3", "R$ 150.000,00", "R$ 3.000,00", "Pago"],
-          ["Setembro/2025", "3", "R$ 150.000,00", "R$ 3.000,00", "Pago"],
-          ["Agosto/2025", "2", "R$ 100.000,00", "R$ 2.000,00", "Pago"],
-        ];
+        
+        if (payments && Array.isArray(payments) && payments.length > 0) {
+          // Group payments by month
+          const paymentsByMonth = new Map<string, any[]>();
+          payments.forEach((p: any) => {
+            if (!paymentsByMonth.has(p.referenceMonth)) {
+              paymentsByMonth.set(p.referenceMonth, []);
+            }
+            paymentsByMonth.get(p.referenceMonth)!.push(p);
+          });
+
+          // Create data rows
+          data = Array.from(paymentsByMonth.entries())
+            .sort((a, b) => b[0].localeCompare(a[0])) // Sort by month desc
+            .slice(0, 12) // Last 12 months
+            .map(([month, monthPayments]) => {
+              const totalAmount = monthPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
+              const activeShares = Array.isArray(shares) ? shares.filter((s: any) => s.status === "active").length : 0;
+              const totalInvested = Array.isArray(shares) ? shares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue), 0) : 0;
+              
+              return [
+                format(new Date(month + "-01"), "MMMM/yyyy"),
+                activeShares.toString(),
+                formatCurrency(totalInvested),
+                formatCurrency(totalAmount),
+                "Pago"
+              ];
+            });
+        } else {
+          data = [["Sem dados disponíveis", "-", "-", "-", "-"]];
+        }
         break;
         
       case "Performance de Ativos":
-        headers = ["Trailer ID", "Modelo", "Utilização", "Receita Mensal", "ROI"];
-        data = [
-          ["TRL-001", "Dry Van 53ft", "95%", "R$ 8.500,00", "12.5%"],
-          ["TRL-002", "Refrigerado 48ft", "88%", "R$ 9.200,00", "14.2%"],
-          ["TRL-003", "Flatbed 53ft", "92%", "R$ 7.800,00", "11.8%"],
-        ];
+        headers = ["Trailer ID", "Modelo", "Status", "Valor Atual", "Data Compra"];
+        
+        if (trailers && Array.isArray(trailers) && trailers.length > 0) {
+          data = trailers.map((trailer: any) => [
+            trailer.trailerId,
+            trailer.model || "N/A",
+            trailer.status === "active" ? "Ativo" : trailer.status === "stock" ? "Estoque" : "Inativo",
+            formatCurrency(parseFloat(trailer.currentValue)),
+            format(new Date(trailer.purchaseDate), "dd/MM/yyyy")
+          ]);
+        } else {
+          data = [["Sem ativos cadastrados", "-", "-", "-", "-"]];
+        }
         break;
         
       case "Relatório Financeiro":
-        headers = ["Mês", "Receita Total", "Custos", "Margem", "Pagamentos"];
-        data = [
-          ["Outubro/2025", "R$ 125.000,00", "R$ 45.000,00", "64%", "R$ 15.000,00"],
-          ["Setembro/2025", "R$ 118.000,00", "R$ 42.000,00", "64.4%", "R$ 14.500,00"],
-          ["Agosto/2025", "R$ 112.000,00", "R$ 40.000,00", "64.3%", "R$ 13.800,00"],
-        ];
+        headers = ["Mês", "Receita Total", "Repasses", "Margem", "Capital Gerido"];
+        
+        if (financialRecords && Array.isArray(financialRecords) && financialRecords.length > 0) {
+          data = financialRecords
+            .slice(0, 12)
+            .map((record: any) => [
+              format(new Date(record.month + "-01"), "MMMM/yyyy"),
+              formatCurrency(parseFloat(record.totalRevenue)),
+              formatCurrency(parseFloat(record.investorPayouts)),
+              formatCurrency(parseFloat(record.companyMargin)),
+              formatCurrency(parseFloat(record.totalCapital))
+            ]);
+        } else {
+          data = [["Sem dados financeiros", "-", "-", "-", "-"]];
+        }
         break;
         
       case "Compliance":
-        headers = ["Documento", "Tipo", "Data Emissão", "Validade", "Status"];
-        data = [
-          ["DOT Inspection", "Inspeção", "15/10/2025", "15/10/2026", "Válido"],
-          ["Insurance Policy", "Seguro", "01/10/2025", "01/10/2026", "Válido"],
-          ["Registration", "Registro", "10/09/2025", "10/09/2026", "Válido"],
-        ];
+        headers = ["Documento", "Tipo", "Data Upload", "Compartilhado", "Status"];
+        
+        if (documents && Array.isArray(documents) && documents.length > 0) {
+          data = documents.map((doc: any) => [
+            doc.fileName,
+            doc.documentType,
+            format(new Date(doc.uploadedAt), "dd/MM/yyyy"),
+            doc.sharedWithManager ? "Sim" : "Não",
+            "Válido"
+          ]);
+        } else {
+          data = [["Sem documentos cadastrados", "-", "-", "-", "-"]];
+        }
         break;
         
       case "Operacional":
-        headers = ["Trailer", "Manutenções", "Km Rodados", "Última Revisão", "Próxima"];
-        data = [
-          ["TRL-001", "2", "45.000 km", "15/10/2025", "15/01/2026"],
-          ["TRL-002", "1", "38.000 km", "20/10/2025", "20/01/2026"],
-          ["TRL-003", "3", "52.000 km", "10/10/2025", "10/01/2026"],
-        ];
+        headers = ["Trailer ID", "Modelo", "Localização", "Coordenadas", "Depreciação"];
+        
+        if (trailers && Array.isArray(trailers) && trailers.length > 0) {
+          data = trailers.map((trailer: any) => [
+            trailer.trailerId,
+            trailer.model || "N/A",
+            trailer.location || "Não informado",
+            trailer.latitude && trailer.longitude 
+              ? `${parseFloat(trailer.latitude).toFixed(4)}, ${parseFloat(trailer.longitude).toFixed(4)}`
+              : "N/A",
+            `${(parseFloat(trailer.depreciationRate) * 100).toFixed(1)}%`
+          ]);
+        } else {
+          data = [["Sem dados operacionais", "-", "-", "-", "-"]];
+        }
         break;
         
       case "Personalizado":
-        headers = ["Campo 1", "Campo 2", "Campo 3", "Campo 4"];
+        headers = ["Tipo", "Descrição", "Valor", "Data"];
         data = [
-          ["Configurar", "campos", "personalizados", "aqui"],
+          ["Relatório Personalizado", "Configure os campos desejados", "N/A", format(new Date(), "dd/MM/yyyy")],
         ];
         break;
         
       default:
         headers = ["Tipo", "Período", "Status", "Detalhes"];
         data = [
-          [reportTitle, "Outubro/2025", "Completo", "Dados atualizados"],
+          [reportTitle, format(new Date(), "MMMM/yyyy"), "Completo", "Dados atualizados"],
         ];
     }
 
-    if (format === "PDF") {
+    if (exportFormat === "PDF") {
       exportToPDF(`${reportTitle} - Opus Rental Capital`, headers, data);
       toast({
         title: "PDF Exportado",
         description: `${reportTitle} exportado em PDF com sucesso`,
       });
-    } else if (format === "Excel") {
+    } else if (exportFormat === "Excel") {
       exportToExcel(fileName, headers, data);
       toast({
         title: "Excel Exportado",
         description: `${reportTitle} exportado em Excel (.xlsx) com sucesso`,
       });
-    } else if (format === "CSV") {
+    } else if (exportFormat === "CSV") {
       exportToCSV(fileName, headers, data);
       toast({
         title: "CSV Exportado",
