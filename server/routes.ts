@@ -383,6 +383,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/shares", authorize(), async (req, res) => {
     try {
+      console.log("Session data:", { userId: req.session.userId, user: req.session.user });
+      
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       // Check if trailer is available
       const trailer = await storage.getTrailer(req.body.trailerId);
       if (!trailer) {
