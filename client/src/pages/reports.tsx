@@ -181,8 +181,8 @@ export default function Reports() {
                     <Icon className={`${textColor} h-6 w-6 sm:h-7 sm:w-7`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-foreground text-sm sm:text-base break-words">{report.title}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">{report.description}</p>
+                    <h4 className="font-bold text-foreground text-sm sm:text-base">{report.title}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">{report.description}</p>
                   </div>
                 </div>
                 
