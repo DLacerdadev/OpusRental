@@ -401,13 +401,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No shares available for this trailer" });
       }
       
-      // Validate the request body first (without userId)
-      const validated = insertShareSchema.parse(req.body);
-      
-      // Add userId from session after validation
-      const shareData = {
-        ...validated,
+      // Create share data directly from request and session
+      const shareData: any = {
         userId: req.session.userId!,
+        trailerId: req.body.trailerId,
+        purchaseValue: req.body.purchaseValue,
+        purchaseDate: req.body.purchaseDate,
+        status: req.body.status || "active",
+        monthlyReturn: req.body.monthlyReturn || "2.00",
+        totalReturns: "0.00",
       };
       
       const share = await storage.createShare(shareData);
