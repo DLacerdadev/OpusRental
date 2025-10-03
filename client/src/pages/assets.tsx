@@ -36,6 +36,7 @@ export default function Assets() {
       location: "",
       latitude: "",
       longitude: "",
+      totalShares: 1,
     },
   });
 
@@ -285,6 +286,28 @@ export default function Assets() {
 
                 <FormField
                   control={form.control}
+                  name="totalShares"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total de Cotas</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="1" 
+                          placeholder="1" 
+                          {...field} 
+                          value={field.value || 1}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                          data-testid="input-total-shares" 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
@@ -306,6 +329,7 @@ export default function Assets() {
                       <FormControl>
                         <Input type="number" step="0.0000001" placeholder="29.7604" {...field} value={field.value || ""} data-testid="input-latitude" />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">Valores entre -90 e 90. Ex: 29.7604</p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -320,6 +344,7 @@ export default function Assets() {
                       <FormControl>
                         <Input type="number" step="0.0000001" placeholder="-95.3698" {...field} value={field.value || ""} data-testid="input-longitude" />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">Valores entre -180 e 180. Ex: -95.3698</p>
                       <FormMessage />
                     </FormItem>
                   )}
