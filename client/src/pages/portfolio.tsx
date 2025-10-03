@@ -38,8 +38,7 @@ export default function Portfolio() {
         totalReturns: "0.00",
       };
 
-      const validated = insertShareSchema.parse(shareData);
-      return await apiRequest("POST", "/api/shares", validated);
+      return await apiRequest("POST", "/api/shares", shareData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });

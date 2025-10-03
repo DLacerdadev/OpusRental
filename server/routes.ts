@@ -383,10 +383,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/shares", authorize(), async (req, res) => {
     try {
-      const validated = insertShareSchema.parse(req.body);
-      
       // Check if trailer is available
-      const trailer = await storage.getTrailer(validated.trailerId);
+      const trailer = await storage.getTrailer(req.body.trailerId);
       if (!trailer) {
         return res.status(404).json({ message: "Trailer not found" });
       }
@@ -395,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check available shares for this trailer
-      const existingShares = await storage.getSharesByTrailerId(validated.trailerId);
+      const existingShares = await storage.getSharesByTrailerId(req.body.trailerId);
       const totalShares = parseInt(trailer.totalShares?.toString() || "1");
       const availableShares = totalShares - existingShares.length;
       
@@ -403,15 +401,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No shares available for this trailer" });
       }
       
-      // Create the share
-      const share = await storage.createShare({
-        ...validated,
+      // Create the share with userId from session
+      const shareData = {
+        ...req.body,
         userId: req.session.userId!,
-      });
+      };
+      
+      const validated = insertShareSchema.parse(shareData);
+      const share = await storage.createShare(validated);
       
       // Update trailer status to active if all shares are sold
       if (existingShares.length + 1 >= totalShares) {
-        await storage.updateTrailer(validated.trailerId, { status: "active" });
+        await storage.updateTrailer(req.body.trailerId, { status: "active" });
       }
       
       // Create audit log
@@ -420,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: "purchase_share",
         entityType: "share",
         entityId: share.id,
-        details: { trailerId: validated.trailerId, purchaseValue: validated.purchaseValue },
+        details: { trailerId: req.body.trailerId, purchaseValue: req.body.purchaseValue },
         ipAddress: req.ip,
       });
       
