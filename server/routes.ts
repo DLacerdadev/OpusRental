@@ -383,12 +383,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/shares", authorize(), async (req, res) => {
     try {
-      console.log("Session data:", { userId: req.session.userId, user: req.session.user });
-      
-      if (!req.session.userId) {
-        return res.status(401).json({ message: "User session not found" });
-      }
-      
       // Check if trailer is available
       const trailer = await storage.getTrailer(req.body.trailerId);
       if (!trailer) {
@@ -407,14 +401,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No shares available for this trailer" });
       }
       
-      // Create the share with userId from session
+      // Validate the request body first (without userId)
+      const validated = insertShareSchema.parse(req.body);
+      
+      // Add userId from session after validation
       const shareData = {
-        ...req.body,
+        ...validated,
         userId: req.session.userId!,
       };
       
-      const validated = insertShareSchema.parse(shareData);
-      const share = await storage.createShare(validated);
+      const share = await storage.createShare(shareData);
       
       // Update trailer status to active if all shares are sold
       if (existingShares.length + 1 >= totalShares) {
