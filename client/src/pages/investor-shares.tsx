@@ -63,7 +63,7 @@ export default function InvestorShares() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="card-total-shares">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Cotas</CardTitle>
@@ -141,49 +141,51 @@ export default function InvestorShares() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium">Investidor</th>
-                    <th className="text-left py-3 px-4 font-medium">Email</th>
-                    <th className="text-left py-3 px-4 font-medium">Trailer</th>
-                    <th className="text-left py-3 px-4 font-medium">Valor da Cota</th>
-                    <th className="text-left py-3 px-4 font-medium">Retorno Mensal</th>
-                    <th className="text-left py-3 px-4 font-medium">Total Recebido</th>
-                    <th className="text-left py-3 px-4 font-medium">Data de Compra</th>
-                    <th className="text-left py-3 px-4 font-medium">Status</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Investidor</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Email</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Trailer</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Valor da Cota</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Retorno Mensal</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Total Recebido</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Data de Compra</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredShares.map((share) => (
                     <tr key={share.id} className="border-b hover:bg-muted/50" data-testid={`row-share-${share.id}`}>
-                      <td className="py-3 px-4" data-testid={`text-investor-${share.id}`}>
-                        <div className="font-medium">
+                      <td className="py-3 px-2 sm:px-4" data-testid={`text-investor-${share.id}`}>
+                        <div className="font-medium whitespace-nowrap">
                           {share.userFirstName || share.userLastName
                             ? `${share.userFirstName || ""} ${share.userLastName || ""}`.trim()
                             : "N/A"}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground" data-testid={`text-email-${share.id}`}>
-                        {share.userEmail}
+                      <td className="py-3 px-2 sm:px-4 text-sm text-muted-foreground" data-testid={`text-email-${share.id}`}>
+                        <div className="max-w-[150px] truncate" title={share.userEmail}>{share.userEmail}</div>
                       </td>
-                      <td className="py-3 px-4" data-testid={`text-trailer-${share.id}`}>
-                        <div className="font-medium">{share.trailerTrailerId}</div>
+                      <td className="py-3 px-2 sm:px-4" data-testid={`text-trailer-${share.id}`}>
+                        <div className="font-medium whitespace-nowrap">{share.trailerTrailerId}</div>
                         {share.trailerLocation && (
-                          <div className="text-xs text-muted-foreground">{share.trailerLocation}</div>
+                          <div className="text-xs text-muted-foreground max-w-[120px] truncate" title={share.trailerLocation}>
+                            {share.trailerLocation}
+                          </div>
                         )}
                       </td>
-                      <td className="py-3 px-4" data-testid={`text-value-${share.id}`}>
+                      <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-value-${share.id}`}>
                         ${parseFloat(share.purchaseValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 px-4 text-green-600" data-testid={`text-return-${share.id}`}>
+                      <td className="py-3 px-2 sm:px-4 text-green-600 whitespace-nowrap" data-testid={`text-return-${share.id}`}>
                         {parseFloat(share.monthlyReturn).toFixed(2)}%
                       </td>
-                      <td className="py-3 px-4" data-testid={`text-total-returns-${share.id}`}>
+                      <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-total-returns-${share.id}`}>
                         ${parseFloat(share.totalReturns).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 px-4 text-sm" data-testid={`text-date-${share.id}`}>
+                      <td className="py-3 px-2 sm:px-4 text-sm whitespace-nowrap" data-testid={`text-date-${share.id}`}>
                         {format(new Date(share.purchaseDate), "dd/MM/yyyy")}
                       </td>
-                      <td className="py-3 px-4" data-testid={`badge-status-${share.id}`}>
-                        <Badge variant={share.status === "active" ? "default" : "secondary"}>
+                      <td className="py-3 px-2 sm:px-4" data-testid={`badge-status-${share.id}`}>
+                        <Badge variant={share.status === "active" ? "default" : "secondary"} className="whitespace-nowrap">
                           {share.status === "active" ? "Ativa" : "Inativa"}
                         </Badge>
                       </td>

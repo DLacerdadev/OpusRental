@@ -380,31 +380,31 @@ export default function Dashboard() {
           <CardTitle>Status dos Meus Ativos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {shares?.map((share: any) => (
               <div
                 key={share.id}
                 className="border border-border rounded-lg p-4"
                 data-testid={`share-${share.id}`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium">Cota #{share.id.slice(0, 8)}</h4>
-                  <span className={`${getStatusColor(share.status)} px-2 py-1 rounded-full text-xs font-medium text-white`}>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h4 className="font-medium truncate" title={`Cota #${share.id}`}>Cota #{share.id.slice(0, 8)}</h4>
+                  <span className={`${getStatusColor(share.status)} px-2 py-1 rounded-full text-xs font-medium text-white whitespace-nowrap flex-shrink-0`}>
                     {share.status}
                   </span>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Valor:</span>
-                    <span className="font-medium">${parseFloat(share.purchaseValue).toFixed(2)}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground flex-shrink-0">Valor:</span>
+                    <span className="font-medium text-right break-all">${parseFloat(share.purchaseValue).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Adquirida:</span>
-                    <span>{format(new Date(share.purchaseDate), "dd/MM/yyyy")}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground flex-shrink-0">Adquirida:</span>
+                    <span className="text-right whitespace-nowrap">{format(new Date(share.purchaseDate), "dd/MM/yyyy")}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Retorno mensal:</span>
-                    <span className="font-medium text-green-600">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground flex-shrink-0">Retorno mensal:</span>
+                    <span className="font-medium text-green-600 text-right break-all">
                       ${(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100).toFixed(2)}
                     </span>
                   </div>
@@ -412,7 +412,7 @@ export default function Dashboard() {
               </div>
             ))}
             {(!shares || shares.length === 0) && (
-              <div className="col-span-3 text-center text-muted-foreground py-8">
+              <div className="col-span-full text-center text-muted-foreground py-8">
                 Você ainda não possui cotas ativas
               </div>
             )}

@@ -185,6 +185,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/trailers/available", authorize(), async (req, res) => {
+    try {
+      const trailers = await storage.getAvailableTrailers();
+      res.json(trailers);
+    } catch (error) {
+      console.error("Available trailers error:", error);
+      res.status(500).json({ message: "Failed to fetch available trailers" });
+    }
+  });
+
   app.get("/api/trailers/:id", authorize(), async (req, res) => {
     try {
       const trailer = await storage.getTrailer(req.params.id);
@@ -195,16 +205,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Trailer error:", error);
       res.status(500).json({ message: "Failed to fetch trailer" });
-    }
-  });
-
-  app.get("/api/trailers/available", authorize(), async (req, res) => {
-    try {
-      const trailers = await storage.getAvailableTrailers();
-      res.json(trailers);
-    } catch (error) {
-      console.error("Available trailers error:", error);
-      res.status(500).json({ message: "Failed to fetch available trailers" });
     }
   });
 

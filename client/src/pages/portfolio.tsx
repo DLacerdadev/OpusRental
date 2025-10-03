@@ -175,8 +175,8 @@ export default function Portfolio() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
           <Card className="shadow-lg">
             <CardHeader className="border-b bg-muted/30">
               <CardTitle className="text-lg font-bold">Histórico de Retornos</CardTitle>
@@ -186,22 +186,22 @@ export default function Portfolio() {
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">MÊS/ANO</th>
-                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VALOR PAGO</th>
-                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">DATA</th>
-                      <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">MÊS/ANO</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">VALOR PAGO</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">DATA</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">STATUS</th>
                     </tr>
                   </thead>
                   <tbody>
                     {portfolio?.payments?.map((payment: any) => (
                       <tr key={payment.id} className="border-b border-border hover:bg-muted/20 transition-colors" data-testid={`payment-${payment.id}`}>
-                        <td className="py-4 px-6 font-medium">{payment.referenceMonth}</td>
-                        <td className="py-4 px-6 font-bold text-green-600">
+                        <td className="py-4 px-4 sm:px-6 font-medium whitespace-nowrap">{payment.referenceMonth}</td>
+                        <td className="py-4 px-4 sm:px-6 font-bold text-green-600 whitespace-nowrap">
                           ${parseFloat(payment.amount).toFixed(2)}
                         </td>
-                        <td className="py-4 px-6">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
-                        <td className="py-4 px-6">
-                          <Badge variant={payment.status === "paid" ? "default" : "secondary"} className="rounded-full">
+                        <td className="py-4 px-4 sm:px-6 whitespace-nowrap">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
+                        <td className="py-4 px-4 sm:px-6">
+                          <Badge variant={payment.status === "paid" ? "default" : "secondary"} className="rounded-full whitespace-nowrap">
                             {payment.status === "paid" ? "Pago" : "Pendente"}
                           </Badge>
                         </td>
@@ -267,16 +267,16 @@ export default function Portfolio() {
               <div className="space-y-3">
                 {portfolio?.shares?.map((share: any) => (
                   <div key={share.id} className="p-3 bg-muted/50 rounded-md" data-testid={`share-card-${share.id}`}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">Cota #{share.id.slice(0, 8)}</span>
-                      <Badge variant={share.status === "active" ? "default" : "secondary"}>
+                    <div className="flex justify-between items-center gap-2 mb-2">
+                      <span className="font-medium truncate" title={`Cota #${share.id}`}>Cota #{share.id.slice(0, 8)}</span>
+                      <Badge variant={share.status === "active" ? "default" : "secondary"} className="flex-shrink-0">
                         {share.status === "active" ? "Ativa" : "Inativa"}
                       </Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      <p>Valor: ${parseFloat(share.purchaseValue).toFixed(2)}</p>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p className="break-all">Valor: ${parseFloat(share.purchaseValue).toFixed(2)}</p>
                       <p>Adquirida: {format(new Date(share.purchaseDate), "dd/MM/yyyy")}</p>
-                      <p className="text-green-600 font-medium">
+                      <p className="text-green-600 font-medium break-all">
                         Retorno mensal: ${(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100).toFixed(2)}
                       </p>
                     </div>
