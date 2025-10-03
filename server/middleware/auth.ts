@@ -143,9 +143,9 @@ export const logAccess = () => {
       const duration = Date.now() - start;
       const logEntry = {
         timestamp: new Date().toISOString(),
-        userId: req.session.user?.id || req.session.userId || "anonymous",
-        email: req.session.user?.email || "unknown",
-        role: req.session.user?.role || "none",
+        userId: req.session?.user?.id || req.session?.userId || "anonymous",
+        email: req.session?.user?.email || "unknown",
+        role: req.session?.user?.role || "none",
         method: req.method,
         path: req.path,
         status: res.statusCode,
