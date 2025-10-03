@@ -125,14 +125,24 @@ export default function Assets() {
       "Longitude"
     ];
 
+    // Função para formatar valores monetários no padrão brasileiro
+    const formatCurrency = (value: string | number) => {
+      const num = parseFloat(String(value));
+      const formatted = num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      return `$ ${formatted}`;
+    };
+
     const csvData = trailers.map((trailer: any) => [
       trailer.trailerId,
       statusTranslations[trailer.status] || trailer.status,
       trailer.soldShares || 0,
       trailer.totalShares || 1,
       (trailer.totalShares || 1) - (trailer.soldShares || 0),
-      parseFloat(trailer.purchaseValue).toFixed(2),
-      parseFloat(trailer.currentValue).toFixed(2),
+      formatCurrency(trailer.purchaseValue),
+      formatCurrency(trailer.currentValue),
       format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
       trailer.depreciationRate || "0",
       trailer.location || "",
