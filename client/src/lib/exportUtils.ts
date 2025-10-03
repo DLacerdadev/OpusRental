@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 export function exportToPDF(title: string, headers: string[], data: any[][]) {
   const doc = new jsPDF();
@@ -10,7 +10,7 @@ export function exportToPDF(title: string, headers: string[], data: any[][]) {
   doc.setFontSize(11);
   doc.setTextColor(100);
   
-  (doc as any).autoTable({
+  autoTable(doc, {
     head: [headers],
     body: data,
     startY: 30,
