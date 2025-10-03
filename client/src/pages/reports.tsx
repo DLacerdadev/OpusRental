@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye, Users, TrendingUp, DollarSign, Shield, Settings } from "lucide-react";
+import { FileText, Download, Eye, Users, TrendingUp, DollarSign, Shield, Settings, FileDown } from "lucide-react";
 import { exportToPDF, exportToCSV } from "@/lib/exportUtils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -59,44 +59,32 @@ export default function Reports() {
     });
   };
 
-  const handleReportClick = (reportTitle: string) => {
-    toast({
-      title: `Gerando ${reportTitle}`,
-      description: "O relatório está sendo preparado...",
-    });
-  };
-
-  const handleExportPDF = () => {
-    const headers = ["Tipo", "Período", "Status"];
+  const handleExport = (reportTitle: string, format: "PDF" | "Excel" | "CSV") => {
+    const headers = ["Tipo", "Período", "Status", "Detalhes"];
     const data = [
-      ["Relatório do Investidor", "Janeiro/2024", "Completo"],
-      ["Relatório Financeiro", "Dezembro/2023", "Completo"],
+      [reportTitle, "Outubro/2025", "Completo", "Dados atualizados"],
+      [reportTitle, "Setembro/2025", "Completo", "Dados históricos"],
     ];
-    exportToPDF("Relatórios Opus Rental Capital", headers, data);
-    toast({
-      title: "Exportado com sucesso",
-      description: "O relatório foi exportado em PDF",
-    });
-  };
 
-  const handleExportExcel = () => {
-    toast({
-      title: "Exportado com sucesso",
-      description: "O relatório foi exportado em Excel",
-    });
-  };
-
-  const handleExportCSV = () => {
-    const headers = ["Tipo", "Período", "Status"];
-    const data = [
-      ["Relatório do Investidor", "Janeiro/2024", "Completo"],
-      ["Relatório Financeiro", "Dezembro/2023", "Completo"],
-    ];
-    exportToCSV("relatorios-opus", headers, data);
-    toast({
-      title: "Exportado com sucesso",
-      description: "O relatório foi exportado em CSV",
-    });
+    if (format === "PDF") {
+      exportToPDF(`${reportTitle} - Opus Rental Capital`, headers, data);
+      toast({
+        title: "PDF Exportado",
+        description: `${reportTitle} exportado em PDF com sucesso`,
+      });
+    } else if (format === "CSV") {
+      const fileName = reportTitle.toLowerCase().replace(/\s+/g, "-");
+      exportToCSV(fileName, headers, data);
+      toast({
+        title: "CSV Exportado",
+        description: `${reportTitle} exportado em CSV com sucesso`,
+      });
+    } else {
+      toast({
+        title: "Excel Exportado",
+        description: `${reportTitle} exportado em Excel com sucesso`,
+      });
+    }
   };
 
   return (
@@ -124,12 +112,11 @@ export default function Reports() {
           return (
             <Card
               key={report.testId}
-              className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer border-l-4 border-l-accent"
-              onClick={() => handleReportClick(report.title)}
+              className="shadow-lg hover:shadow-xl transition-all border-l-4 border-l-accent"
               data-testid={`card-${report.testId}`}
             >
               <CardContent className="p-4 sm:p-6">
-                <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4">
                   <div className={`${bgColor} p-3 sm:p-4 rounded-2xl flex-shrink-0`}>
                     <Icon className={`${textColor} h-6 w-6 sm:h-7 sm:w-7`} />
                   </div>
@@ -138,50 +125,56 @@ export default function Reports() {
                     <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">{report.description}</p>
                   </div>
                 </div>
+                
+                {/* Export Icons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExport(report.title, "PDF");
+                    }}
+                    data-testid={`button-export-pdf-${report.testId}`}
+                    title="Exportar PDF"
+                  >
+                    <FileText className="h-4 w-4 text-secondary" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExport(report.title, "Excel");
+                    }}
+                    data-testid={`button-export-excel-${report.testId}`}
+                    title="Exportar Excel"
+                  >
+                    <FileDown className="h-4 w-4 text-green-600" />
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExport(report.title, "CSV");
+                    }}
+                    data-testid={`button-export-csv-${report.testId}`}
+                    title="Exportar CSV"
+                  >
+                    <Download className="h-4 w-4 text-accent" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           );
         })}
       </div>
-
-      <Card className="shadow-lg">
-        <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-base sm:text-lg font-bold">Opções de Exportação</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-4 sm:pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <Button
-              variant="outline"
-              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-secondary hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-foreground transition-all"
-              onClick={handleExportPDF}
-              data-testid="button-export-pdf"
-            >
-              <FileText className="text-secondary h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
-              <span className="font-semibold text-sm sm:text-base">Exportar PDF</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 hover:text-foreground transition-all"
-              onClick={handleExportExcel}
-              data-testid="button-export-excel"
-            >
-              <FileText className="text-green-600 h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
-              <span className="font-semibold text-sm sm:text-base">Exportar Excel</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex items-center justify-center gap-2 sm:gap-3 p-4 sm:p-6 border-2 hover:border-accent hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-foreground transition-all sm:col-span-2 lg:col-span-1"
-              onClick={handleExportCSV}
-              data-testid="button-export-csv"
-            >
-              <FileText className="text-accent h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
-              <span className="font-semibold text-sm sm:text-base">Exportar CSV</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
