@@ -49,34 +49,38 @@ export function exportToCSV(filename: string, headers: string[], data: any[][]) 
 }
 
 export function exportToExcel(filename: string, headers: string[], data: any[][]) {
-  // Create HTML table that Excel can open
-  let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-  html += '<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
-  html += '<x:Name>Relatório</x:Name>';
-  html += '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>';
-  html += '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
-  html += '<meta charset="UTF-8"></head><body>';
-  html += '<table border="1">';
+  // Create a proper Excel XML format
+  let excelContent = '<?xml version="1.0"?>\n';
+  excelContent += '<?mso-application progid="Excel.Sheet"?>\n';
+  excelContent += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
+  excelContent += ' xmlns:o="urn:schemas-microsoft-com:office:office"\n';
+  excelContent += ' xmlns:x="urn:schemas-microsoft-com:office:excel"\n';
+  excelContent += ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n';
+  excelContent += ' xmlns:html="http://www.w3.org/TR/REC-html40">\n';
+  excelContent += ' <Worksheet ss:Name="Relatório">\n';
+  excelContent += '  <Table>\n';
   
   // Add headers
-  html += '<thead><tr style="background-color: #2196F3; color: white; font-weight: bold;">';
+  excelContent += '   <Row>\n';
   headers.forEach(header => {
-    html += `<th style="padding: 8px;">${header}</th>`;
+    excelContent += `    <Cell><Data ss:Type="String">${header}</Data></Cell>\n`;
   });
-  html += '</tr></thead>';
+  excelContent += '   </Row>\n';
   
   // Add data
-  html += '<tbody>';
   data.forEach(row => {
-    html += '<tr>';
+    excelContent += '   <Row>\n';
     row.forEach(cell => {
-      html += `<td style="padding: 8px;">${cell}</td>`;
+      excelContent += `    <Cell><Data ss:Type="String">${cell}</Data></Cell>\n`;
     });
-    html += '</tr>';
+    excelContent += '   </Row>\n';
   });
-  html += '</tbody></table></body></html>';
   
-  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+  excelContent += '  </Table>\n';
+  excelContent += ' </Worksheet>\n';
+  excelContent += '</Workbook>';
+  
+  const blob = new Blob([excelContent], { type: "application/vnd.ms-excel" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   
