@@ -42,6 +42,7 @@ export const trailers = pgTable("trailers", {
   latitude: decimal("latitude", { precision: 10, scale: 7 }),
   longitude: decimal("longitude", { precision: 10, scale: 7 }),
   lastActivity: timestamp("last_activity"),
+  totalShares: integer("total_shares").notNull().default(1), // Total number of shares available for this trailer
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
