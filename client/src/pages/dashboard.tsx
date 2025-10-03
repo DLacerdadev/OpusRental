@@ -121,7 +121,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalFleetValue')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
+              <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-fleet-value">
                 {formatCurrency(companyStats.totalFleetValue)}
               </p>
             </CardContent>
@@ -136,7 +136,7 @@ export default function Dashboard() {
                 <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{t('dashboard.sold')}</span>
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalSharesSold')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-shares-sold">
+              <p className="text-2xl font-bold text-foreground break-words" data-testid="text-shares-sold">
                 {companyStats.totalSharesSold}
               </p>
             </CardContent>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyRevenue')}</p>
-              <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">
+              <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
                 {formatCurrency(companyStats.totalRevenue)}
               </p>
             </CardContent>
@@ -166,7 +166,7 @@ export default function Dashboard() {
                 <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyMargin')}</p>
-              <p className="text-3xl font-bold text-purple-600" data-testid="text-total-margin">
+              <p className="text-2xl font-bold text-purple-600 break-words" data-testid="text-total-margin">
                 {formatCurrency(companyStats.totalMargin)}
               </p>
             </CardContent>
@@ -270,7 +270,7 @@ export default function Dashboard() {
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+0%</span>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
-            <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
+            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-value">
               {formatCurrency(investorStats?.totalValue || 0)}
             </p>
           </CardContent>
@@ -285,7 +285,7 @@ export default function Dashboard() {
               <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{t('dashboard.active')}</span>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.activeShares')}</p>
-            <p className="text-3xl font-bold text-foreground" data-testid="text-active-shares">
+            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-active-shares">
               {investorStats?.activeShares || 0}
             </p>
           </CardContent>
@@ -300,7 +300,7 @@ export default function Dashboard() {
               <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">2% a.m.</span>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
-            <p className="text-3xl font-bold text-green-600" data-testid="text-monthly-return">
+            <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-monthly-return">
               {formatCurrency(investorStats?.monthlyReturn || 0)}
             </p>
           </CardContent>
@@ -317,7 +317,7 @@ export default function Dashboard() {
               </span>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
-            <p className="text-3xl font-bold text-foreground" data-testid="text-next-payment">
+            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-next-payment">
               {formatCurrency(investorStats?.nextPayment || 0)}
             </p>
           </CardContent>

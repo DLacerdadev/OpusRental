@@ -45,7 +45,7 @@ export default function Financial() {
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">RECEITA MENSAL</p>
-            <p className="text-2xl font-bold text-green-600" data-testid="text-total-revenue">
+            <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
               {formatCurrency(current?.totalRevenue || 0)}
             </p>
           </CardContent>
@@ -59,7 +59,7 @@ export default function Financial() {
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">REPASSES</p>
-            <p className="text-2xl font-bold text-accent" data-testid="text-investor-payouts">
+            <p className="text-2xl font-bold text-accent break-words" data-testid="text-investor-payouts">
               {formatCurrency(current?.investorPayouts || 0)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">2% a.m. por cota</p>
@@ -74,7 +74,7 @@ export default function Financial() {
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">MARGEM EMPRESA</p>
-            <p className="text-2xl font-bold text-primary" data-testid="text-company-margin">
+            <p className="text-2xl font-bold text-primary break-words" data-testid="text-company-margin">
               {formatCurrency(current?.companyMargin || 0)}
             </p>
           </CardContent>
@@ -88,7 +88,7 @@ export default function Financial() {
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">CAPITAL GERIDO</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-total-capital">
+            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-capital">
               {formatCurrency(current?.totalCapital || 0)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
@@ -125,7 +125,7 @@ export default function Financial() {
                   <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
                   <span className="font-semibold text-green-900">Receita dos Trailers</span>
                 </div>
-                <span className="font-bold text-green-600 text-lg">
+                <span className="font-bold text-green-600 text-lg break-words">
                   +{formatCurrency(current?.totalRevenue || 0)}
                 </span>
               </div>
@@ -135,7 +135,7 @@ export default function Financial() {
                   <div className="w-3 h-3 bg-accent rounded-full shadow-lg"></div>
                   <span className="font-semibold text-accent">Repasse Investidores</span>
                 </div>
-                <span className="font-bold text-accent text-lg">
+                <span className="font-bold text-accent text-lg break-words">
                   -{formatCurrency(current?.investorPayouts || 0)}
                 </span>
               </div>
@@ -143,7 +143,7 @@ export default function Financial() {
               <div className="border-t-2 pt-4">
                 <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl border-2 border-primary/30">
                   <span className="font-bold text-primary">Lucro Líquido</span>
-                  <span className="font-bold text-primary text-2xl">
+                  <span className="font-bold text-primary text-2xl break-words">
                     {formatCurrency(current?.companyMargin || 0)}
                   </span>
                 </div>
