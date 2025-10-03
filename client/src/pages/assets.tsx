@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Assets() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const { toast } = useToast();
   
   const { data: trailers, isLoading } = useQuery({
@@ -443,6 +445,133 @@ export default function Assets() {
         </DialogContent>
       </Dialog>
 
+      {/* Modal de Detalhes do Ativo */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-primary">
+              Detalhes do Ativo
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas do ativo selecionado
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedTrailer && (
+            <div className="space-y-6 mt-4">
+              {/* Informações Básicas */}
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <h3 className="font-semibold text-lg mb-3">Informações Básicas</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground">ID do Trailer</label>
+                    <p className="font-bold text-primary text-lg">{selectedTrailer.trailerId}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Modelo</label>
+                    <p className="font-semibold">{selectedTrailer.model || "—"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Status</label>
+                    <div className="mt-1">
+                      <Badge variant={getStatusBadge(selectedTrailer.status).variant} className="rounded-full">
+                        {getStatusBadge(selectedTrailer.status).label}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Data de Aquisição</label>
+                    <p className="font-semibold">
+                      {format(new Date(selectedTrailer.purchaseDate), "dd/MM/yyyy")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Informações Financeiras */}
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <h3 className="font-semibold text-lg mb-3">Informações Financeiras</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground">Valor de Compra</label>
+                    <p className="font-bold text-lg">${parseFloat(selectedTrailer.purchaseValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Valor Atual</label>
+                    <p className="font-bold text-lg">${parseFloat(selectedTrailer.currentValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Taxa de Depreciação</label>
+                    <p className="font-semibold">{(parseFloat(selectedTrailer.depreciationRate) * 100).toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Indicador de Idade</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className={`w-5 h-5 ${getTrafficLight(selectedTrailer.purchaseDate)} rounded-full shadow-lg`}></div>
+                      <span className="text-sm text-muted-foreground">
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-green-500" && "< 1 ano"}
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-yellow-500" && "1-2 anos"}
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-red-500" && "> 2 anos"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Informações de Cotas */}
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <h3 className="font-semibold text-lg mb-3">Informações de Cotas</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground">Total de Cotas</label>
+                    <p className="font-bold text-lg">{selectedTrailer.totalShares || 1}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Cotas Vendidas</label>
+                    <p className="font-bold text-lg">{selectedTrailer.soldShares || 0}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Cotas Disponíveis</label>
+                    <p className="font-bold text-lg text-accent">
+                      {(selectedTrailer.totalShares || 1) - (selectedTrailer.soldShares || 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Localização */}
+              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                <h3 className="font-semibold text-lg mb-3">Localização</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground">Cidade/Estado</label>
+                    <p className="font-semibold">{selectedTrailer.location || "—"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Latitude</label>
+                    <p className="font-mono text-sm">{selectedTrailer.latitude || "—"}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Longitude</label>
+                    <p className="font-mono text-sm">{selectedTrailer.longitude || "—"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button 
+                  onClick={() => setDetailsDialogOpen(false)}
+                  className="bg-accent hover:bg-accent/90"
+                  data-testid="button-close-details"
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Card className="shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -504,6 +633,10 @@ export default function Assets() {
                           variant="ghost" 
                           size="icon" 
                           className="hover:bg-accent/20 hover:text-accent" 
+                          onClick={() => {
+                            setSelectedTrailer(trailer);
+                            setDetailsDialogOpen(true);
+                          }}
                           data-testid={`button-view-${trailer.id}`}
                         >
                           <Eye className="h-4 w-4" />
