@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Truck, Search, TrendingUp, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface ShareWithDetails {
   id: string;
@@ -30,6 +31,7 @@ interface ShareWithDetails {
 
 export default function InvestorShares() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useTranslation();
 
   const { data: shares, isLoading } = useQuery<ShareWithDetails[]>({
     queryKey: ["/api/shares/all"],
@@ -56,9 +58,9 @@ export default function InvestorShares() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8" data-testid="page-investor-shares">
       <div>
-        <h1 className="text-3xl font-bold" data-testid="heading-investor-shares">Cotas dos Investidores</h1>
+        <h1 className="text-3xl font-bold" data-testid="heading-investor-shares">{t('investorShares.title')}</h1>
         <p className="text-muted-foreground" data-testid="text-description">
-          Visualize todas as cotas adquiridas pelos investidores
+          {t('investorShares.subtitle')}
         </p>
       </div>
 
@@ -66,7 +68,7 @@ export default function InvestorShares() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="card-total-shares">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Cotas</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('investorShares.totalShares')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -76,7 +78,7 @@ export default function InvestorShares() {
 
         <Card data-testid="card-active-shares">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cotas Ativas</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('investorShares.activeShares')}</CardTitle>
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -86,7 +88,7 @@ export default function InvestorShares() {
 
         <Card data-testid="card-total-investors">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Investidores</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('investorShares.investors')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -96,7 +98,7 @@ export default function InvestorShares() {
 
         <Card data-testid="card-total-value">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total Investido</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('investorShares.totalInvested')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -113,7 +115,7 @@ export default function InvestorShares() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             data-testid="input-search"
-            placeholder="Buscar por investidor, email, trailer ou status..."
+            placeholder={t('investorShares.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -124,9 +126,9 @@ export default function InvestorShares() {
       {/* Shares Table */}
       <Card data-testid="card-shares-table">
         <CardHeader>
-          <CardTitle>Lista de Cotas</CardTitle>
+          <CardTitle>{t('investorShares.sharesList')}</CardTitle>
           <CardDescription>
-            {filteredShares?.length || 0} cotas encontradas
+            {filteredShares?.length || 0} {t('investorShares.sharesFound')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -141,14 +143,14 @@ export default function InvestorShares() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Investidor</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Email</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Trailer</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Valor da Cota</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Retorno Mensal</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Total Recebido</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Data de Compra</th>
-                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">Status</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.investor')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.email')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.trailer')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.shareValue')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.monthlyReturn')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.totalReceived')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.purchaseDate')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -186,7 +188,7 @@ export default function InvestorShares() {
                       </td>
                       <td className="py-3 px-2 sm:px-4" data-testid={`badge-status-${share.id}`}>
                         <Badge variant={share.status === "active" ? "default" : "secondary"} className="whitespace-nowrap">
-                          {share.status === "active" ? "Ativa" : "Inativa"}
+                          {share.status === "active" ? t('investorShares.active') : t('investorShares.inactive')}
                         </Badge>
                       </td>
                     </tr>
@@ -198,7 +200,7 @@ export default function InvestorShares() {
             <div className="text-center py-12" data-testid="text-no-shares">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
-                {searchTerm ? "Nenhuma cota encontrada com os filtros aplicados" : "Nenhuma cota cadastrada"}
+                {searchTerm ? t('investorShares.noSharesFiltered') : t('investorShares.noShares')}
               </p>
             </div>
           )}
