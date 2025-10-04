@@ -7,10 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function Reports() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Fetch real data from APIs
   const { data: shares } = useQuery({
@@ -40,43 +42,43 @@ export default function Reports() {
   const reportTypes = [
     {
       icon: Users,
-      title: "Relatório de Investidores",
-      description: "Extrato mensal por investidor",
+      title: t('reports.investorsReport'),
+      description: t('reports.investorsDescription'),
       color: "blue",
       testId: "investor-report",
     },
     {
       icon: TrendingUp,
-      title: "Performance de Ativos",
-      description: "Análise detalhada da frota",
+      title: t('reports.performanceReport'),
+      description: t('reports.performanceDescription'),
       color: "green",
       testId: "performance-report",
     },
     {
       icon: DollarSign,
-      title: "Relatório Financeiro",
-      description: "Consolidado de receitas e pagamentos",
+      title: t('reports.financialReport'),
+      description: t('reports.financialDescription'),
       color: "yellow",
       testId: "financial-report",
     },
     {
       icon: Shield,
-      title: "Compliance",
-      description: "Documentação e auditoria",
+      title: t('reports.complianceReport'),
+      description: t('reports.complianceDescription'),
       color: "purple",
       testId: "compliance-report",
     },
     {
       icon: Settings,
-      title: "Operacional",
-      description: "Utilização e manutenção",
+      title: t('reports.operationalReport'),
+      description: t('reports.operationalDescription'),
       color: "red",
       testId: "operational-report",
     },
     {
       icon: FileText,
-      title: "Personalizado",
-      description: "Configure seus próprios relatórios",
+      title: t('reports.customReport'),
+      description: t('reports.customDescription'),
       color: "gray",
       testId: "custom-report",
     },
@@ -84,8 +86,8 @@ export default function Reports() {
 
   const handleNewReport = () => {
     toast({
-      title: "Criar Novo Relatório",
-      description: "Funcionalidade de criação de relatório personalizado em desenvolvimento",
+      title: t('reports.newReportTitle'),
+      description: t('reports.newReportDescription'),
     });
   };
 
@@ -378,20 +380,20 @@ export default function Reports() {
     if (exportFormat === "PDF") {
       exportToPDF(`${reportTitle} - Opus Rental Capital`, headers, data);
       toast({
-        title: "PDF Exportado",
-        description: `${reportTitle} exportado em PDF com sucesso`,
+        title: t('reports.pdfExported'),
+        description: `${reportTitle} ${t('reports.exportSuccess')}`,
       });
     } else if (exportFormat === "Excel") {
       exportToExcel(fileName, headers, data);
       toast({
-        title: "Excel Exportado",
-        description: `${reportTitle} exportado em Excel (.xlsx) com sucesso`,
+        title: t('reports.excelExported'),
+        description: `${reportTitle} ${t('reports.exportSuccess')}`,
       });
     } else if (exportFormat === "CSV") {
       exportToCSV(fileName, headers, data);
       toast({
-        title: "CSV Exportado",
-        description: `${reportTitle} exportado em CSV com sucesso`,
+        title: t('reports.csvExported'),
+        description: `${reportTitle} ${t('reports.exportSuccess')}`,
       });
     }
   };
@@ -400,15 +402,15 @@ export default function Reports() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Relatórios</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gere e exporte relatórios personalizados</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('reports.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('reports.subtitle')}</p>
         </div>
         <Button 
           className="bg-accent hover:bg-accent/90 shadow-lg w-full sm:w-auto" 
           onClick={handleNewReport}
           data-testid="button-new-report"
         >
-          Novo Relatório
+          {t('reports.newReport')}
         </Button>
       </div>
 
@@ -446,7 +448,7 @@ export default function Reports() {
                       handleExport(report.title, "PDF");
                     }}
                     data-testid={`button-export-pdf-${report.testId}`}
-                    title="Exportar PDF"
+                    title={t('reports.exportPDF')}
                   >
                     <FileText className="h-4 w-4 text-secondary" />
                   </Button>
@@ -460,7 +462,7 @@ export default function Reports() {
                       handleExport(report.title, "Excel");
                     }}
                     data-testid={`button-export-excel-${report.testId}`}
-                    title="Exportar Excel"
+                    title={t('reports.exportExcel')}
                   >
                     <FileDown className="h-4 w-4 text-green-600" />
                   </Button>
@@ -474,7 +476,7 @@ export default function Reports() {
                       handleExport(report.title, "CSV");
                     }}
                     data-testid={`button-export-csv-${report.testId}`}
-                    title="Exportar CSV"
+                    title={t('reports.exportCSV')}
                   >
                     <Download className="h-4 w-4 text-accent" />
                   </Button>
