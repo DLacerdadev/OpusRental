@@ -2,8 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, User, DollarSign, FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Approvals() {
+  const { t } = useTranslation();
   const pendingApprovals = [
     {
       id: 1,
@@ -64,15 +66,15 @@ export default function Approvals() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Aprovações</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gerencie solicitações pendentes</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('approvals.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('approvals.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Card className="border-2 border-accent/30">
             <CardContent className="p-4 flex items-center gap-3">
               <Clock className="h-8 w-8 text-accent" />
               <div>
-                <p className="text-xs text-muted-foreground">Pendentes</p>
+                <p className="text-xs text-muted-foreground">{t('approvals.pending')}</p>
                 <p className="text-2xl font-bold text-foreground">{pendingApprovals.length}</p>
               </div>
             </CardContent>
@@ -82,7 +84,7 @@ export default function Approvals() {
 
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">Solicitações Pendentes</CardTitle>
+          <CardTitle className="text-lg font-bold">{t('approvals.pendingRequests')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-border">
@@ -101,15 +103,15 @@ export default function Approvals() {
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-bold text-foreground">{approval.user}</h3>
                         <Badge variant="secondary" className="rounded-full">
-                          {approval.type === "investment" && "Investimento"}
-                          {approval.type === "document" && "Documento"}
-                          {approval.type === "withdrawal" && "Resgate"}
+                          {approval.type === "investment" && t('approvals.investment')}
+                          {approval.type === "document" && t('approvals.document')}
+                          {approval.type === "withdrawal" && t('approvals.withdrawal')}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">{approval.description}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>Data: {approval.date}</span>
-                        {approval.amount !== "-" && <span>Valor: {approval.amount}</span>}
+                        <span>{t('approvals.date')}: {approval.date}</span>
+                        {approval.amount !== "-" && <span>{t('approvals.amount')}: {approval.amount}</span>}
                       </div>
                     </div>
                   </div>
@@ -120,7 +122,7 @@ export default function Approvals() {
                       data-testid={`button-approve-${approval.id}`}
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
-                      Aprovar
+                      {t('approvals.approve')}
                     </Button>
                     <Button
                       size="sm"
@@ -129,7 +131,7 @@ export default function Approvals() {
                       data-testid={`button-reject-${approval.id}`}
                     >
                       <XCircle className="h-4 w-4 mr-1" />
-                      Rejeitar
+                      {t('approvals.reject')}
                     </Button>
                   </div>
                 </div>
@@ -147,7 +149,7 @@ export default function Approvals() {
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">APROVADAS (30 DIAS)</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('approvals.approved30Days')}</p>
             <p className="text-3xl font-bold text-foreground">15</p>
           </CardContent>
         </Card>
@@ -159,7 +161,7 @@ export default function Approvals() {
                 <XCircle className="h-6 w-6 text-secondary" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">REJEITADAS (30 DIAS)</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('approvals.rejected30Days')}</p>
             <p className="text-3xl font-bold text-foreground">3</p>
           </CardContent>
         </Card>
@@ -171,7 +173,7 @@ export default function Approvals() {
                 <Clock className="h-6 w-6 text-accent" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">TEMPO MÉDIO</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('approvals.averageTime')}</p>
             <p className="text-3xl font-bold text-foreground">2h</p>
           </CardContent>
         </Card>
