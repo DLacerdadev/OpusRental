@@ -151,17 +151,28 @@
     "title": "Reports",
     "subtitle": "Generate and export system reports",
     "availableReports": "Available Reports",
-    "assetsReport": "Assets Report",
-    "assetsDescription": "Complete list of all trailers",
-    "paymentsReport": "Payments Report",
-    "paymentsDescription": "Investor payment history",
+    "newReport": "New Report",
     "investorsReport": "Investors Report",
-    "investorsDescription": "List of all investors and their shares",
+    "investorsDescription": "Monthly statement per investor",
+    "performanceReport": "Asset Performance",
+    "performanceDescription": "Detailed fleet analysis",
     "financialReport": "Financial Report",
-    "financialDescription": "Consolidated financial summary",
+    "financialDescription": "Revenue and payment consolidated",
+    "complianceReport": "Compliance",
+    "complianceDescription": "Documentation and audit",
+    "operationalReport": "Operational",
+    "operationalDescription": "Utilization and maintenance",
+    "customReport": "Custom",
+    "customDescription": "Configure your own reports",
     "exportPDF": "Export PDF",
     "exportExcel": "Export Excel",
-    "exportCSV": "Export CSV"
+    "exportCSV": "Export CSV",
+    "pdfExported": "PDF Exported",
+    "excelExported": "Excel Exported",
+    "csvExported": "CSV Exported",
+    "exportSuccess": "successfully exported",
+    "newReportTitle": "Create New Report",
+    "newReportDescription": "Custom report creation feature under development"
   },
   "compliance": {
     "title": "Compliance",
@@ -180,8 +191,15 @@
     "security": "Security"
   },
   "investors": {
-    "title": "Investors",
-    "subtitle": "View all investor shares",
+    "title": "Investor Shares",
+    "subtitle": "View all shares acquired by investors",
+    "totalShares": "Total Shares",
+    "totalInvestors": "Investors",
+    "totalValue": "Total Value",
+    "activeShares": "Active Shares",
+    "searchPlaceholder": "Search by investor, email, trailer or status...",
+    "sharesList": "Shares List",
+    "sharesFound": "shares found",
     "table": {
       "investor": "INVESTOR",
       "email": "EMAIL",
@@ -189,9 +207,17 @@
       "model": "MODEL",
       "purchaseDate": "PURCHASE DATE",
       "purchaseValue": "SHARE VALUE",
+      "monthlyReturn": "MONTHLY RETURN",
+      "totalReturns": "TOTAL RETURNS",
       "status": "STATUS",
       "noShares": "No shares found"
     }
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Manage pending requests",
+    "pendingApprovals": "Pending Approvals",
+    "noPendingApprovals": "No pending approvals at the moment"
   },
   "common": {
     "loading": "Loading...",

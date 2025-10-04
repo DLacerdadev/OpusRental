@@ -151,17 +151,28 @@
     "title": "Relatórios",
     "subtitle": "Gere e exporte relatórios do sistema",
     "availableReports": "Relatórios Disponíveis",
-    "assetsReport": "Relatório de Ativos",
-    "assetsDescription": "Lista completa de todos os trailers",
-    "paymentsReport": "Relatório de Pagamentos",
-    "paymentsDescription": "Histórico de pagamentos aos investidores",
+    "newReport": "Novo Relatório",
     "investorsReport": "Relatório de Investidores",
-    "investorsDescription": "Lista de todos os investidores e suas cotas",
+    "investorsDescription": "Extrato mensal por investidor",
+    "performanceReport": "Performance de Ativos",
+    "performanceDescription": "Análise detalhada da frota",
     "financialReport": "Relatório Financeiro",
-    "financialDescription": "Resumo financeiro consolidado",
+    "financialDescription": "Consolidado de receitas e pagamentos",
+    "complianceReport": "Compliance",
+    "complianceDescription": "Documentação e auditoria",
+    "operationalReport": "Operacional",
+    "operationalDescription": "Utilização e manutenção",
+    "customReport": "Personalizado",
+    "customDescription": "Configure seus próprios relatórios",
     "exportPDF": "Exportar PDF",
     "exportExcel": "Exportar Excel",
-    "exportCSV": "Exportar CSV"
+    "exportCSV": "Exportar CSV",
+    "pdfExported": "PDF Exportado",
+    "excelExported": "Excel Exportado",
+    "csvExported": "CSV Exportado",
+    "exportSuccess": "exportado com sucesso",
+    "newReportTitle": "Criar Novo Relatório",
+    "newReportDescription": "Funcionalidade de criação de relatório personalizado em desenvolvimento"
   },
   "compliance": {
     "title": "Compliance",
@@ -180,8 +191,15 @@
     "security": "Segurança"
   },
   "investors": {
-    "title": "Investidores",
-    "subtitle": "Visualize as cotas de todos os investidores",
+    "title": "Cotas dos Investidores",
+    "subtitle": "Visualize todas as cotas adquiridas pelos investidores",
+    "totalShares": "Total de Cotas",
+    "totalInvestors": "Investidores",
+    "totalValue": "Valor Total",
+    "activeShares": "Cotas Ativas",
+    "searchPlaceholder": "Buscar por investidor, email, trailer ou status...",
+    "sharesList": "Lista de Cotas",
+    "sharesFound": "cotas encontradas",
     "table": {
       "investor": "INVESTIDOR",
       "email": "E-MAIL",
@@ -189,9 +207,17 @@
       "model": "MODELO",
       "purchaseDate": "DATA DE COMPRA",
       "purchaseValue": "VALOR DA COTA",
+      "monthlyReturn": "RETORNO MENSAL",
+      "totalReturns": "RETORNOS TOTAIS",
       "status": "STATUS",
       "noShares": "Nenhuma cota encontrada"
     }
+  },
+  "approvals": {
+    "title": "Aprovações",
+    "subtitle": "Gerencie solicitações pendentes",
+    "pendingApprovals": "Aprovações Pendentes",
+    "noPendingApprovals": "Nenhuma aprovação pendente no momento"
   },
   "common": {
     "loading": "Carregando...",
