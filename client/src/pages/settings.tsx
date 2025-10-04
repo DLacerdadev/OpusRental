@@ -4,13 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { User, Bell, Shield, Palette, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Settings() {
+  const { t } = useTranslation();
+  
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Configurações</h1>
-        <p className="text-sm text-muted-foreground mt-1">Gerencie suas preferências e configurações</p>
+        <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t('settings.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -20,20 +23,20 @@ export default function Settings() {
               <div className="bg-accent/10 p-3 rounded-2xl">
                 <User className="h-6 w-6 text-accent" />
               </div>
-              <CardTitle className="text-lg font-bold">Perfil do Usuário</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('settings.userProfile')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome Completo</Label>
-              <Input id="name" placeholder="Seu nome" data-testid="input-name" />
+              <Label htmlFor="name">{t('settings.fullName')}</Label>
+              <Input id="name" placeholder={t('settings.namePlaceholder')} data-testid="input-name" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" data-testid="input-email" />
+              <Label htmlFor="email">{t('settings.email')}</Label>
+              <Input id="email" type="email" placeholder={t('settings.emailPlaceholder')} data-testid="input-email" />
             </div>
             <Button className="bg-accent hover:bg-accent/90 w-full" data-testid="button-save-profile">
-              Salvar Alterações
+              {t('settings.saveChanges')}
             </Button>
           </CardContent>
         </Card>
@@ -44,28 +47,28 @@ export default function Settings() {
               <div className="bg-primary/10 p-3 rounded-2xl">
                 <Bell className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle className="text-lg font-bold">Notificações</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('settings.notifications')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
               <div>
-                <p className="font-semibold text-foreground">Email de Pagamentos</p>
-                <p className="text-sm text-muted-foreground">Receber notificações de pagamentos</p>
+                <p className="font-semibold text-foreground">{t('settings.paymentEmails')}</p>
+                <p className="text-sm text-muted-foreground">{t('settings.paymentEmailsDesc')}</p>
               </div>
               <Switch data-testid="switch-email-payments" />
             </div>
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
               <div>
-                <p className="font-semibold text-foreground">Relatórios Mensais</p>
-                <p className="text-sm text-muted-foreground">Resumo mensal por email</p>
+                <p className="font-semibold text-foreground">{t('settings.monthlyReports')}</p>
+                <p className="text-sm text-muted-foreground">{t('settings.monthlyReportsDesc')}</p>
               </div>
               <Switch data-testid="switch-monthly-reports" />
             </div>
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
               <div>
-                <p className="font-semibold text-foreground">Alertas de GPS</p>
-                <p className="text-sm text-muted-foreground">Notificações de rastreamento</p>
+                <p className="font-semibold text-foreground">{t('settings.gpsAlerts')}</p>
+                <p className="text-sm text-muted-foreground">{t('settings.gpsAlertsDesc')}</p>
               </div>
               <Switch data-testid="switch-gps-alerts" />
             </div>
@@ -78,20 +81,20 @@ export default function Settings() {
               <div className="bg-secondary/10 p-3 rounded-2xl">
                 <Shield className="h-6 w-6 text-secondary" />
               </div>
-              <CardTitle className="text-lg font-bold">Segurança</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('settings.security')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="current-password">Senha Atual</Label>
+              <Label htmlFor="current-password">{t('settings.currentPassword')}</Label>
               <Input id="current-password" type="password" data-testid="input-current-password" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new-password">Nova Senha</Label>
+              <Label htmlFor="new-password">{t('settings.newPassword')}</Label>
               <Input id="new-password" type="password" data-testid="input-new-password" />
             </div>
             <Button className="bg-secondary hover:bg-secondary/90 w-full" data-testid="button-change-password">
-              Alterar Senha
+              {t('settings.changePassword')}
             </Button>
           </CardContent>
         </Card>
@@ -102,19 +105,19 @@ export default function Settings() {
               <div className="bg-green-50 p-3 rounded-2xl">
                 <Palette className="h-6 w-6 text-green-600" />
               </div>
-              <CardTitle className="text-lg font-bold">Preferências</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('settings.preferences')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
               <div>
-                <p className="font-semibold text-foreground">Tema Escuro</p>
-                <p className="text-sm text-muted-foreground">Alternar modo escuro</p>
+                <p className="font-semibold text-foreground">{t('settings.darkMode')}</p>
+                <p className="text-sm text-muted-foreground">{t('settings.darkModeDesc')}</p>
               </div>
               <Switch data-testid="switch-dark-mode" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="language">Idioma</Label>
+              <Label htmlFor="language">{t('settings.language')}</Label>
               <select 
                 id="language" 
                 className="w-full px-3 py-2 border border-border rounded-xl bg-background"
