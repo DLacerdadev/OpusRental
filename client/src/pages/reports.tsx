@@ -17,6 +17,10 @@ export default function Reports() {
     queryKey: ["/api/shares"],
   });
 
+  const { data: allShares } = useQuery({
+    queryKey: ["/api/shares/all"],
+  });
+
   const { data: payments } = useQuery({
     queryKey: ["/api/payments"],
   });
@@ -36,8 +40,8 @@ export default function Reports() {
   const reportTypes = [
     {
       icon: Users,
-      title: "Relatório do Investidor",
-      description: "Extrato mensal completo",
+      title: "Relatório de Investidores",
+      description: "Extrato mensal por investidor",
       color: "blue",
       testId: "investor-report",
     },
@@ -107,59 +111,86 @@ export default function Reports() {
     };
     
     switch (reportTitle) {
-      case "Relatório do Investidor":
+      case "Relatório de Investidores":
         headers = [
-          "Mês", 
-          "Cotas Ativas", 
-          "Valor Investido", 
-          "Retorno Mensal", 
+          "Investidor",
+          "Email",
+          "Cotas Ativas",
+          "Total Investido",
           "Retorno Acumulado",
           "Rentabilidade %",
-          "Status"
+          "Próx. Pagamento (3m)",
+          "Próx. Pagamento (6m)",
+          "Próx. Pagamento (12m)",
+          "Status Pagamentos"
         ];
         
-        if (payments && Array.isArray(payments) && payments.length > 0) {
-          // Calculate totals
-          const totalInvested = Array.isArray(shares) 
-            ? shares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue), 0) 
-            : 0;
-          const totalReturns = payments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
-          const rentabilidade = totalInvested > 0 ? (totalReturns / totalInvested * 100) : 0;
-          
-          // Group payments by month
-          const paymentsByMonth = new Map<string, any[]>();
-          payments.forEach((p: any) => {
-            if (!paymentsByMonth.has(p.referenceMonth)) {
-              paymentsByMonth.set(p.referenceMonth, []);
+        if (allShares && Array.isArray(allShares) && allShares.length > 0) {
+          // Group shares by investor
+          const investorMap = new Map<string, any[]>();
+          allShares.forEach((share: any) => {
+            if (!investorMap.has(share.userId)) {
+              investorMap.set(share.userId, []);
             }
-            paymentsByMonth.get(p.referenceMonth)!.push(p);
+            investorMap.get(share.userId)!.push(share);
           });
 
-          // Create data rows
-          let accumulatedReturns = 0;
-          data = Array.from(paymentsByMonth.entries())
-            .sort((a, b) => b[0].localeCompare(a[0])) // Sort by month desc
-            .slice(0, 12) // Last 12 months
-            .reverse() // Show oldest first for accumulation
-            .map(([month, monthPayments]) => {
-              const monthAmount = monthPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
-              accumulatedReturns += monthAmount;
-              const activeShares = Array.isArray(shares) ? shares.filter((s: any) => s.status === "active").length : 0;
-              const monthRentabilidade = totalInvested > 0 ? (accumulatedReturns / totalInvested * 100) : 0;
-              
-              return [
-                format(new Date(month + "-01"), "MMM/yyyy"),
-                activeShares.toString(),
-                formatCurrency(totalInvested),
-                formatCurrency(monthAmount),
-                formatCurrency(accumulatedReturns),
-                `${monthRentabilidade.toFixed(2)}%`,
-                "Pago"
-              ];
-            })
-            .reverse(); // Return to desc order for display
+          // Create data rows for each investor
+          data = Array.from(investorMap.entries()).map(([userId, investorShares]) => {
+            const firstShare = investorShares[0];
+            const investorName = `${firstShare.userFirstName || ""} ${firstShare.userLastName || ""}`.trim() || "N/A";
+            const investorEmail = firstShare.userEmail || "N/A";
+            
+            // Calculate totals for this investor
+            const activeShares = investorShares.filter((s: any) => s.status === "active");
+            const totalInvested = investorShares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue || 0), 0);
+            
+            // Calculate accumulated returns for this investor
+            let totalReturns = 0;
+            if (Array.isArray(payments)) {
+              const shareIds = investorShares.map((s: any) => s.id);
+              const investorPayments = payments.filter((p: any) => shareIds.includes(p.shareId));
+              totalReturns = investorPayments.reduce((sum: number, p: any) => sum + parseFloat(p.amount || 0), 0);
+            }
+            
+            // Calculate rentability
+            const rentabilidade = totalInvested > 0 ? (totalReturns / totalInvested * 100) : 0;
+            
+            // Calculate projections (2% per month per active share)
+            const monthlyReturn = activeShares.length * totalInvested * 0.02 / (investorShares.length || 1);
+            const projection3m = monthlyReturn * 3;
+            const projection6m = monthlyReturn * 6;
+            const projection12m = monthlyReturn * 12;
+            
+            // Payment status
+            const currentMonth = format(new Date(), "yyyy-MM");
+            let paymentStatus = "Pendente";
+            if (Array.isArray(payments)) {
+              const shareIds = investorShares.map((s: any) => s.id);
+              const currentMonthPayments = payments.filter((p: any) => 
+                shareIds.includes(p.shareId) && p.referenceMonth === currentMonth
+              );
+              if (currentMonthPayments.length > 0) {
+                const allPaid = currentMonthPayments.every((p: any) => p.status === "paid");
+                paymentStatus = allPaid ? "Pago" : "Processando";
+              }
+            }
+            
+            return [
+              investorName,
+              investorEmail,
+              activeShares.length.toString(),
+              formatCurrency(totalInvested),
+              formatCurrency(totalReturns),
+              `${rentabilidade.toFixed(2)}%`,
+              formatCurrency(projection3m),
+              formatCurrency(projection6m),
+              formatCurrency(projection12m),
+              paymentStatus
+            ];
+          });
         } else {
-          data = [["Sem dados disponíveis", "-", "-", "-", "-", "-", "-"]];
+          data = [["Sem investidores cadastrados", "-", "-", "-", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         
