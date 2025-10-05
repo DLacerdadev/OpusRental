@@ -16,8 +16,10 @@ import { insertTrailerSchema, type InsertTrailer } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function Assets() {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
@@ -51,16 +53,16 @@ export default function Assets() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trailers"] });
       toast({
-        title: "Sucesso!",
-        description: "Ativo criado com sucesso.",
+        title: t('assets.successTitle'),
+        description: t('assets.successDescription'),
       });
       setDialogOpen(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao criar ativo.",
+        title: t('assets.errorTitle'),
+        description: t('assets.errorDescription'),
         variant: "destructive",
       });
     },
@@ -78,10 +80,10 @@ export default function Assets() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; label: string }> = {
-      active: { variant: "default", label: "Ativo" },
-      stock: { variant: "secondary", label: "Estoque" },
-      maintenance: { variant: "outline", label: "Manutenção" },
-      expired: { variant: "destructive", label: "Vencido" },
+      active: { variant: "default", label: t('assets.statusActive') },
+      stock: { variant: "secondary", label: t('assets.statusStock') },
+      maintenance: { variant: "outline", label: t('assets.statusMaintenance') },
+      expired: { variant: "destructive", label: t('assets.statusExpired') },
     };
     return variants[status] || variants.stock;
   };
@@ -99,34 +101,33 @@ export default function Assets() {
   const handleExport = () => {
     if (!trailers || trailers.length === 0) {
       toast({
-        title: "Nenhum dado para exportar",
-        description: "Não há ativos cadastrados no sistema.",
+        title: t('assets.noDataToExport'),
+        description: t('assets.noAssetsRegistered'),
         variant: "destructive",
       });
       return;
     }
 
-    // Traduções de status para português
     const statusTranslations: Record<string, string> = {
-      stock: "Estoque",
-      active: "Ativo",
-      maintenance: "Manutenção",
-      expired: "Vencido",
+      stock: t('assets.statusStock'),
+      active: t('assets.statusActive'),
+      maintenance: t('assets.statusMaintenance'),
+      expired: t('assets.statusExpired'),
     };
 
     const headers = [
-      "ID do Trailer",
-      "Status",
-      "Cotas Vendidas",
-      "Total de Cotas",
-      "Cotas Disponíveis",
-      "Valor de Compra (USD)",
-      "Valor Atual (USD)",
-      "Data de Aquisição",
-      "Taxa de Depreciação",
-      "Localização",
-      "Latitude",
-      "Longitude"
+      t('assets.trailerId'),
+      t('assets.status'),
+      t('assets.sharesSold'),
+      t('assets.totalShares'),
+      t('assets.sharesAvailable'),
+      t('assets.purchaseValue'),
+      t('assets.currentValue'),
+      t('assets.purchaseDate'),
+      t('assets.depreciationRate'),
+      t('assets.location'),
+      t('assets.latitude'),
+      t('assets.longitude')
     ];
 
     // Função para formatar valores monetários no padrão brasileiro
@@ -183,8 +184,8 @@ export default function Assets() {
     document.body.removeChild(link);
 
     toast({
-      title: "Exportado com sucesso!",
-      description: "Planilha de ativos baixada com todos os detalhes.",
+      title: t('assets.exportSuccess'),
+      description: t('assets.exportDescription'),
     });
   };
 
@@ -200,8 +201,8 @@ export default function Assets() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestão de Ativos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Controle e monitore seus trailers</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('assets.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('assets.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Button 
@@ -210,7 +211,7 @@ export default function Assets() {
             onClick={() => setDialogOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Novo Ativo
+            {t('assets.newAsset')}
           </Button>
           <Button 
             variant="outline" 
@@ -219,7 +220,7 @@ export default function Assets() {
             onClick={handleExport}
           >
             <Download className="mr-2 h-4 w-4" />
-            Exportar
+            {t('assets.export')}
           </Button>
         </div>
       </div>
@@ -227,9 +228,9 @@ export default function Assets() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Novo Ativo</DialogTitle>
+            <DialogTitle>{t('assets.newAssetDialog')}</DialogTitle>
             <DialogDescription>
-              Adicione um novo trailer ao sistema
+              {t('assets.newAssetDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -241,7 +242,7 @@ export default function Assets() {
                   name="trailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ID do Trailer</FormLabel>
+                      <FormLabel>{t('assets.trailerId')}</FormLabel>
                       <FormControl>
                         <Input placeholder="TR001" {...field} data-testid="input-trailer-id" />
                       </FormControl>
@@ -255,7 +256,7 @@ export default function Assets() {
                   name="model"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Modelo</FormLabel>
+                      <FormLabel>{t('assets.model')}</FormLabel>
                       <FormControl>
                         <Input placeholder="Dry Van 53ft" {...field} data-testid="input-model" />
                       </FormControl>
@@ -269,18 +270,18 @@ export default function Assets() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel>{t('assets.status')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-status">
-                            <SelectValue placeholder="Selecione o status" />
+                            <SelectValue placeholder={t('assets.selectStatus')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="stock">Estoque</SelectItem>
-                          <SelectItem value="active">Ativo</SelectItem>
-                          <SelectItem value="maintenance">Manutenção</SelectItem>
-                          <SelectItem value="expired">Vencido</SelectItem>
+                          <SelectItem value="stock">{t('assets.statusStock')}</SelectItem>
+                          <SelectItem value="active">{t('assets.statusActive')}</SelectItem>
+                          <SelectItem value="maintenance">{t('assets.statusMaintenance')}</SelectItem>
+                          <SelectItem value="expired">{t('assets.statusExpired')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -293,7 +294,7 @@ export default function Assets() {
                   name="purchaseValue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valor de Compra (USD)</FormLabel>
+                      <FormLabel>{t('assets.purchaseValue')}</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="50000.00" {...field} data-testid="input-purchase-value" />
                       </FormControl>
@@ -307,7 +308,7 @@ export default function Assets() {
                   name="currentValue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valor Atual (USD)</FormLabel>
+                      <FormLabel>{t('assets.currentValue')}</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="50000.00" {...field} data-testid="input-current-value" />
                       </FormControl>
@@ -321,7 +322,7 @@ export default function Assets() {
                   name="purchaseDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Aquisição</FormLabel>
+                      <FormLabel>{t('assets.purchaseDate')}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} data-testid="input-purchase-date" />
                       </FormControl>
@@ -335,7 +336,7 @@ export default function Assets() {
                   name="depreciationRate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Taxa de Depreciação</FormLabel>
+                      <FormLabel>{t('assets.depreciationRate')}</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="0.05" {...field} data-testid="input-depreciation-rate" />
                       </FormControl>
@@ -349,7 +350,7 @@ export default function Assets() {
                   name="totalShares"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total de Cotas</FormLabel>
+                      <FormLabel>{t('assets.totalShares')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -371,7 +372,7 @@ export default function Assets() {
                   name="location"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
-                      <FormLabel>Localização</FormLabel>
+                      <FormLabel>{t('assets.location')}</FormLabel>
                       <FormControl>
                         <Input placeholder="Houston, TX" {...field} value={field.value || ""} data-testid="input-location" />
                       </FormControl>
@@ -385,7 +386,7 @@ export default function Assets() {
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Latitude (Opcional)</FormLabel>
+                      <FormLabel>{t('assets.latitude')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -406,7 +407,7 @@ export default function Assets() {
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Longitude (Opcional)</FormLabel>
+                      <FormLabel>{t('assets.longitude')}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -430,7 +431,7 @@ export default function Assets() {
                   onClick={() => setDialogOpen(false)}
                   data-testid="button-cancel"
                 >
-                  Cancelar
+                  {t('assets.cancel')}
                 </Button>
                 <Button 
                   type="submit" 
@@ -438,7 +439,7 @@ export default function Assets() {
                   disabled={createTrailerMutation.isPending}
                   data-testid="button-submit-asset"
                 >
-                  {createTrailerMutation.isPending ? "Criando..." : "Criar Ativo"}
+                  {createTrailerMutation.isPending ? t('assets.creating') : t('assets.createAsset')}
                 </Button>
               </div>
             </form>
@@ -451,10 +452,10 @@ export default function Assets() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-primary">
-              Detalhes do Ativo
+              {t('assets.detailsDialog')}
             </DialogTitle>
             <DialogDescription>
-              Informações completas do ativo selecionado
+              {t('assets.detailsDescription')}
             </DialogDescription>
           </DialogHeader>
           
@@ -462,18 +463,18 @@ export default function Assets() {
             <div className="space-y-6 mt-4">
               {/* Informações Básicas */}
               <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">Informações Básicas</h3>
+                <h3 className="font-semibold text-lg mb-3">{t('assets.basicInfo')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">ID do Trailer</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.trailerId')}</label>
                     <p className="font-bold text-primary text-lg">{selectedTrailer.trailerId}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Modelo</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.model')}</label>
                     <p className="font-semibold">{selectedTrailer.model || "—"}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Status</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.status')}</label>
                     <div className="mt-1">
                       <Badge variant={getStatusBadge(selectedTrailer.status).variant} className="rounded-full">
                         {getStatusBadge(selectedTrailer.status).label}
@@ -481,7 +482,7 @@ export default function Assets() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Data de Aquisição</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.purchaseDate')}</label>
                     <p className="font-semibold">
                       {format(new Date(selectedTrailer.purchaseDate), "dd/MM/yyyy")}
                     </p>
@@ -491,28 +492,28 @@ export default function Assets() {
 
               {/* Informações Financeiras */}
               <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">Informações Financeiras</h3>
+                <h3 className="font-semibold text-lg mb-3">{t('assets.financialInfo')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">Valor de Compra</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.purchaseValueLabel')}</label>
                     <p className="font-bold text-lg">${parseFloat(selectedTrailer.purchaseValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Valor Atual</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.currentValueLabel')}</label>
                     <p className="font-bold text-lg">${parseFloat(selectedTrailer.currentValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Taxa de Depreciação</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.depreciationRate')}</label>
                     <p className="font-semibold">{(parseFloat(selectedTrailer.depreciationRate) * 100).toFixed(1)}%</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Indicador de Idade</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.ageIndicator')}</label>
                     <div className="flex items-center gap-2 mt-1">
                       <div className={`w-5 h-5 ${getTrafficLight(selectedTrailer.purchaseDate)} rounded-full shadow-lg`}></div>
                       <span className="text-sm text-muted-foreground">
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-green-500" && "< 1 ano"}
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-yellow-500" && "1-2 anos"}
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-red-500" && "> 2 anos"}
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-green-500" && t('assets.lessThan1Year')}
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-yellow-500" && t('assets.between1And2Years')}
+                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-red-500" && t('assets.moreThan2Years')}
                       </span>
                     </div>
                   </div>
@@ -521,18 +522,18 @@ export default function Assets() {
 
               {/* Informações de Cotas */}
               <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">Informações de Cotas</h3>
+                <h3 className="font-semibold text-lg mb-3">{t('assets.sharesInfo')}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">Total de Cotas</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.totalShares')}</label>
                     <p className="font-bold text-lg">{selectedTrailer.totalShares || 1}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Cotas Vendidas</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.sharesSold')}</label>
                     <p className="font-bold text-lg">{selectedTrailer.soldShares || 0}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Cotas Disponíveis</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.sharesAvailable')}</label>
                     <p className="font-bold text-lg text-accent">
                       {(selectedTrailer.totalShares || 1) - (selectedTrailer.soldShares || 0)}
                     </p>
@@ -542,18 +543,18 @@ export default function Assets() {
 
               {/* Localização */}
               <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">Localização</h3>
+                <h3 className="font-semibold text-lg mb-3">{t('assets.location')}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">Cidade/Estado</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.cityState')}</label>
                     <p className="font-semibold">{selectedTrailer.location || "—"}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Latitude</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.latitude')}</label>
                     <p className="font-mono text-sm">{selectedTrailer.latitude || "—"}</p>
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Longitude</label>
+                    <label className="text-sm text-muted-foreground">{t('assets.longitude')}</label>
                     <p className="font-mono text-sm">{selectedTrailer.longitude || "—"}</p>
                   </div>
                 </div>
@@ -565,7 +566,7 @@ export default function Assets() {
                   className="bg-accent hover:bg-accent/90"
                   data-testid="button-close-details"
                 >
-                  Fechar
+                  {t('assets.close')}
                 </Button>
               </div>
             </div>
@@ -580,14 +581,14 @@ export default function Assets() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">MODELO</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">COTAS</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">FAROL</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VALOR</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">AQUISIÇÃO</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">LOCALIZAÇÃO</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">AÇÕES</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableModel')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.status')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableShares')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableTrafficLight')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableValue')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableAcquisition')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableLocation')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -649,7 +650,7 @@ export default function Assets() {
                 {(!trailers || trailers.length === 0) && (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-muted-foreground">
-                      Nenhum ativo cadastrado
+                      {t('assets.noAssets')}
                     </td>
                   </tr>
                 )}

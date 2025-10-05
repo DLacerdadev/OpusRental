@@ -18,9 +18,10 @@ Preferred communication style: Simple, everyday language.
   - Investor Shares page: Complete translation support for table headers, status badges, and messages
   - Approvals page: Translated pending requests, buttons, and statistics
   - Settings page: Full i18n for user profile, notifications, security, and preferences sections
+  - Assets page: Complete translation including dialogs, forms, table headers, status badges, and export functionality
   
 - **Translation Files Updated**:
-  - `pt-BR.json`: Added comprehensive translations for reports, investorShares, approvals, and settings sections
+  - `pt-BR.json`: Added comprehensive translations for reports, investorShares, approvals, settings, and assets sections
   - `en-US.json`: Parallel English translations for all new sections
   - Translation structure follows pattern: `t('section.key')` for organized namespace
   
@@ -29,6 +30,7 @@ Preferred communication style: Simple, everyday language.
   - InvestorShares: 17 new keys (stats, table headers, status labels, search)
   - Approvals: 11 new keys (workflow stages, actions, statistics)
   - Settings: 21 new keys (profile, notifications, security, preferences, dark mode)
+  - Assets: 57 new keys (page title, forms, dialogs, table headers, status translations, export, toast messages)
 
 ### Trailer Model Field (October 2025)
 - **Model Field Added**: Each trailer now has a required model field
