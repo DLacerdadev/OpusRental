@@ -333,7 +333,10 @@
     "cashFlowThisMonth": "Fluxo Financeiro Este Mês",
     "trailerRevenue": "Receita dos Trailers",
     "investorPayouts": "Repasse Investidores",
-    "netProfit": "Lucro Líquido"
+    "netProfit": "Lucro Líquido",
+    "chartRevenue": "Receita Total",
+    "chartPayouts": "Repasses",
+    "chartMargin": "Margem"
   },
   "pageTitles": {
     "dashboard": "Dashboard",

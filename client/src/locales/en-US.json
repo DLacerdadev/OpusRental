@@ -333,7 +333,10 @@
     "cashFlowThisMonth": "Cash Flow This Month",
     "trailerRevenue": "Trailer Revenue",
     "investorPayouts": "Investor Payouts",
-    "netProfit": "Net Profit"
+    "netProfit": "Net Profit",
+    "chartRevenue": "Total Revenue",
+    "chartPayouts": "Payouts",
+    "chartMargin": "Margin"
   },
   "pageTitles": {
     "dashboard": "Dashboard",
