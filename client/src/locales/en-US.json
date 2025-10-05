@@ -304,6 +304,37 @@
     "exportDescription": "Asset spreadsheet downloaded with all details.",
     "noAssets": "No assets registered"
   },
+  "tracking": {
+    "title": "GPS Tracking",
+    "subtitle": "Monitor your assets in real time",
+    "refresh": "Refresh",
+    "export": "Export",
+    "recentActivity": "Recent Activity",
+    "moving": "Moving",
+    "stopped": "Stopped",
+    "noTrackingData": "No tracking data",
+    "locationDetails": "Location Details",
+    "tableStatus": "STATUS",
+    "tableLocation": "LOCATION",
+    "tableUpdate": "UPDATE",
+    "tableSpeed": "SPEED"
+  },
+  "financial": {
+    "title": "Financial",
+    "subtitle": "Complete revenue and payment management",
+    "monthlyRevenue": "MONTHLY REVENUE",
+    "payouts": "PAYOUTS",
+    "companyMargin": "COMPANY MARGIN",
+    "managedCapital": "MANAGED CAPITAL",
+    "monthlyRate": "2% p.m. per share",
+    "activeShares": "active shares",
+    "revenueEvolution": "Revenue Evolution (12 months)",
+    "noFinancialData": "No financial data available",
+    "cashFlowThisMonth": "Cash Flow This Month",
+    "trailerRevenue": "Trailer Revenue",
+    "investorPayouts": "Investor Payouts",
+    "netProfit": "Net Profit"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

@@ -5,8 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrackingMap } from "@/components/maps/tracking-map";
 import { RefreshCw, Download } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function Tracking() {
+  const { t } = useTranslation();
   const { data: trackingData, isLoading } = useQuery({
     queryKey: ["/api/tracking"],
   });
@@ -32,17 +34,17 @@ export default function Tracking() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Rastreamento GPS</h1>
-          <p className="text-sm text-muted-foreground mt-1">Monitore seus ativos em tempo real</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('tracking.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('tracking.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="border-2" data-testid="button-refresh">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Atualizar
+            {t('tracking.refresh')}
           </Button>
           <Button variant="outline" className="border-2" data-testid="button-export-tracking">
             <Download className="mr-2 h-4 w-4" />
-            Exportar
+            {t('tracking.export')}
           </Button>
         </div>
       </div>
@@ -59,7 +61,7 @@ export default function Tracking() {
         <div className="space-y-4">
           <Card className="shadow-lg border-l-4 border-l-accent">
             <CardHeader>
-              <CardTitle className="text-lg font-bold">Atividade Recente</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('tracking.recentActivity')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
@@ -70,13 +72,13 @@ export default function Tracking() {
                       <p className="font-bold text-foreground">{track.trailerId}</p>
                     </div>
                     <p className="text-xs text-muted-foreground ml-5">
-                      {track.status === "moving" ? "Em movimento" : "Parado"} • {track.location}
+                      {track.status === "moving" ? t('tracking.moving') : t('tracking.stopped')} • {track.location}
                     </p>
                   </div>
                 ))}
                 {(!trackingData || trackingData.length === 0) && (
                   <div className="text-center text-muted-foreground py-8">
-                    Nenhum dado de rastreamento
+                    {t('tracking.noTrackingData')}
                   </div>
                 )}
               </div>
@@ -87,7 +89,7 @@ export default function Tracking() {
 
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">Detalhes de Localização</CardTitle>
+          <CardTitle className="text-lg font-bold">{t('tracking.locationDetails')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -95,10 +97,10 @@ export default function Tracking() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">STATUS</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">LOCALIZAÇÃO</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ATUALIZAÇÃO</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">VELOCIDADE</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('tracking.tableStatus')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('tracking.tableLocation')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('tracking.tableUpdate')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('tracking.tableSpeed')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,7 +113,7 @@ export default function Tracking() {
                       <span className="flex items-center gap-2">
                         <div className={`w-3 h-3 ${track.status === "moving" ? "bg-green-500 animate-pulse" : "bg-yellow-500"} rounded-full shadow-lg`}></div>
                         <span className={`font-semibold ${track.status === "moving" ? "text-green-600" : "text-yellow-600"}`}>
-                          {track.status === "moving" ? "Em movimento" : "Parado"}
+                          {track.status === "moving" ? t('tracking.moving') : t('tracking.stopped')}
                         </span>
                       </span>
                     </td>

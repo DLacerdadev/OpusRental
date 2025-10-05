@@ -304,6 +304,37 @@
     "exportDescription": "Planilha de ativos baixada com todos os detalhes.",
     "noAssets": "Nenhum ativo cadastrado"
   },
+  "tracking": {
+    "title": "Rastreamento GPS",
+    "subtitle": "Monitore seus ativos em tempo real",
+    "refresh": "Atualizar",
+    "export": "Exportar",
+    "recentActivity": "Atividade Recente",
+    "moving": "Em movimento",
+    "stopped": "Parado",
+    "noTrackingData": "Nenhum dado de rastreamento",
+    "locationDetails": "Detalhes de Localização",
+    "tableStatus": "STATUS",
+    "tableLocation": "LOCALIZAÇÃO",
+    "tableUpdate": "ATUALIZAÇÃO",
+    "tableSpeed": "VELOCIDADE"
+  },
+  "financial": {
+    "title": "Financeiro",
+    "subtitle": "Gestão completa de receitas e pagamentos",
+    "monthlyRevenue": "RECEITA MENSAL",
+    "payouts": "REPASSES",
+    "companyMargin": "MARGEM EMPRESA",
+    "managedCapital": "CAPITAL GERIDO",
+    "monthlyRate": "2% a.m. por cota",
+    "activeShares": "cotas ativas",
+    "revenueEvolution": "Evolução da Receita (12 meses)",
+    "noFinancialData": "Nenhum dado financeiro disponível",
+    "cashFlowThisMonth": "Fluxo Financeiro Este Mês",
+    "trailerRevenue": "Receita dos Trailers",
+    "investorPayouts": "Repasse Investidores",
+    "netProfit": "Lucro Líquido"
+  },
   "common": {
     "loading": "Carregando...",
     "error": "Erro",
