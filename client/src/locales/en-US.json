@@ -335,6 +335,18 @@
     "investorPayouts": "Investor Payouts",
     "netProfit": "Net Profit"
   },
+  "pageTitles": {
+    "dashboard": "Dashboard",
+    "portfolio": "My Portfolio",
+    "assets": "Asset Management",
+    "tracking": "GPS Tracking",
+    "financial": "Financial",
+    "reports": "Reports",
+    "compliance": "Compliance",
+    "settings": "Settings",
+    "approvals": "Approvals",
+    "investorShares": "Investor Shares"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

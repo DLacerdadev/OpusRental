@@ -335,6 +335,18 @@
     "investorPayouts": "Repasse Investidores",
     "netProfit": "Lucro Líquido"
   },
+  "pageTitles": {
+    "dashboard": "Dashboard",
+    "portfolio": "Minha Carteira",
+    "assets": "Gestão de Ativos",
+    "tracking": "Monitoramento GPS",
+    "financial": "Financeiro",
+    "reports": "Relatórios",
+    "compliance": "Compliance",
+    "settings": "Configurações",
+    "approvals": "Aprovações",
+    "investorShares": "Cotas dos Investidores"
+  },
   "common": {
     "loading": "Carregando...",
     "error": "Erro",

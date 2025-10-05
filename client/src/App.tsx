@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import NotFound from "@/pages/not-found";
@@ -22,10 +23,11 @@ import Settings from "@/pages/settings";
 import Approvals from "@/pages/approvals";
 import InvestorShares from "@/pages/investor-shares";
 
-function ProtectedRoute({ component: Component, title }: { component: any; title: string }) {
+function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -54,7 +56,7 @@ function ProtectedRoute({ component: Component, title }: { component: any; title
     <div className="min-h-screen flex bg-background">
       <Sidebar user={user} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header title={title} user={user} />
+        <Header title={t(titleKey)} user={user} />
         <main className="flex-1 overflow-auto bg-background">
           <Component />
         </main>
@@ -83,34 +85,34 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/">
-        {() => <ProtectedRoute component={Dashboard} title="Dashboard" />}
+        {() => <ProtectedRoute component={Dashboard} titleKey="pageTitles.dashboard" />}
       </Route>
       <Route path="/portfolio">
-        {() => <ProtectedRoute component={Portfolio} title="Minha Carteira" />}
+        {() => <ProtectedRoute component={Portfolio} titleKey="pageTitles.portfolio" />}
       </Route>
       <Route path="/assets">
-        {() => <ProtectedRoute component={Assets} title="Gestão de Ativos" />}
+        {() => <ProtectedRoute component={Assets} titleKey="pageTitles.assets" />}
       </Route>
       <Route path="/tracking">
-        {() => <ProtectedRoute component={Tracking} title="Monitoramento GPS" />}
+        {() => <ProtectedRoute component={Tracking} titleKey="pageTitles.tracking" />}
       </Route>
       <Route path="/financial">
-        {() => <ProtectedRoute component={Financial} title="Financeiro" />}
+        {() => <ProtectedRoute component={Financial} titleKey="pageTitles.financial" />}
       </Route>
       <Route path="/reports">
-        {() => <ProtectedRoute component={Reports} title="Relatórios" />}
+        {() => <ProtectedRoute component={Reports} titleKey="pageTitles.reports" />}
       </Route>
       <Route path="/compliance">
-        {() => <ProtectedRoute component={Compliance} title="Compliance" />}
+        {() => <ProtectedRoute component={Compliance} titleKey="pageTitles.compliance" />}
       </Route>
       <Route path="/settings">
-        {() => <ProtectedRoute component={Settings} title="Configurações" />}
+        {() => <ProtectedRoute component={Settings} titleKey="pageTitles.settings" />}
       </Route>
       <Route path="/approvals">
-        {() => <ProtectedRoute component={Approvals} title="Aprovações" />}
+        {() => <ProtectedRoute component={Approvals} titleKey="pageTitles.approvals" />}
       </Route>
       <Route path="/investor-shares">
-        {() => <ProtectedRoute component={InvestorShares} title="Cotas dos Investidores" />}
+        {() => <ProtectedRoute component={InvestorShares} titleKey="pageTitles.investorShares" />}
       </Route>
       <Route component={NotFound} />
     </Switch>
