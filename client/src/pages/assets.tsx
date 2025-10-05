@@ -585,6 +585,7 @@ export default function Assets() {
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.status')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableShares')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableTrafficLight')}</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tablePurchaseValue')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableValue')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableAcquisition')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableLocation')}</th>
@@ -622,6 +623,11 @@ export default function Assets() {
                         </div>
                       </td>
                       <td className="py-4 px-6">
+                        <span className="font-semibold text-muted-foreground">
+                          {formatCurrency(parseFloat(trailer.purchaseValue))}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
                         <span className="font-bold text-foreground">
                           {formatCurrency(parseFloat(trailer.currentValue))}
                         </span>
@@ -649,7 +655,7 @@ export default function Assets() {
                 })}
                 {(!trailers || trailers.length === 0) && (
                   <tr>
-                    <td colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={10} className="text-center py-12 text-muted-foreground">
                       {t('assets.noAssets')}
                     </td>
                   </tr>
