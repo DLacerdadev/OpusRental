@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   role: text("role").notNull().default("investor"), // investor, manager, admin
+  country: text("country").default("US"), // US, BR, etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
