@@ -110,7 +110,7 @@ export default function InvestorShares() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="card-total-shares">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('investorShares.totalShares')}</CardTitle>
@@ -149,18 +149,6 @@ export default function InvestorShares() {
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-total-invested">
               ${stats.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-total-portfolio">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('investorShares.totalPortfolioValue')}</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600" data-testid="text-total-portfolio">
-              ${stats.totalPortfolioValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
