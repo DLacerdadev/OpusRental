@@ -119,6 +119,7 @@ export default function Reports() {
           "Email",
           "Cotas Ativas",
           "Total Investido",
+          "Valor da Carteira",
           "Retorno Acumulado",
           "Rentabilidade %",
           "Próx. Pagamento (3m)",
@@ -146,6 +147,7 @@ export default function Reports() {
             // Calculate totals for this investor
             const activeShares = investorShares.filter((s: any) => s.status === "active");
             const totalInvested = investorShares.reduce((sum: number, s: any) => sum + parseFloat(s.purchaseValue || 0), 0);
+            const portfolioValue = investorShares.reduce((sum: number, s: any) => sum + parseFloat(s.trailerCurrentValue || 0), 0);
             
             // Calculate accumulated returns for this investor
             let totalReturns = 0;
@@ -183,6 +185,7 @@ export default function Reports() {
               investorEmail,
               activeShares.length.toString(),
               formatCurrency(totalInvested, user?.country),
+              formatCurrency(portfolioValue, user?.country),
               formatCurrency(totalReturns, user?.country),
               `${rentabilidade.toFixed(2)}%`,
               formatCurrency(projection3m, user?.country),
@@ -192,7 +195,7 @@ export default function Reports() {
             ];
           });
         } else {
-          data = [["Sem investidores cadastrados", "-", "-", "-", "-", "-", "-", "-", "-", "-"]];
+          data = [["Sem investidores cadastrados", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]];
         }
         break;
         
