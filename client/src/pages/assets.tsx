@@ -15,11 +15,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTrailerSchema, type InsertTrailer } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Assets() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
@@ -624,12 +626,12 @@ export default function Assets() {
                       </td>
                       <td className="py-4 px-6">
                         <span className="font-semibold text-muted-foreground">
-                          {formatCurrency(parseFloat(trailer.purchaseValue))}
+                          {formatCurrency(parseFloat(trailer.purchaseValue), user?.country)}
                         </span>
                       </td>
                       <td className="py-4 px-6">
                         <span className="font-bold text-foreground">
-                          {formatCurrency(parseFloat(trailer.currentValue))}
+                          {formatCurrency(parseFloat(trailer.currentValue), user?.country)}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-muted-foreground">

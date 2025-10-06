@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { ArrowUp, DollarSign, TrendingUp, PieChart } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Financial() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: current, isLoading } = useQuery({
     queryKey: ["/api/financial/current"],
   });
@@ -48,7 +50,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.monthlyRevenue')}</p>
             <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
-              {formatCurrency(current?.totalRevenue || 0)}
+              {formatCurrency(current?.totalRevenue || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
@@ -62,7 +64,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.payouts')}</p>
             <p className="text-2xl font-bold text-accent break-words" data-testid="text-investor-payouts">
-              {formatCurrency(current?.investorPayouts || 0)}
+              {formatCurrency(current?.investorPayouts || 0, user?.country)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">{t('financial.monthlyRate')}</p>
           </CardContent>
@@ -77,7 +79,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.companyMargin')}</p>
             <p className="text-2xl font-bold text-primary break-words" data-testid="text-company-margin">
-              {formatCurrency(current?.companyMargin || 0)}
+              {formatCurrency(current?.companyMargin || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
@@ -91,7 +93,7 @@ export default function Financial() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.managedCapital')}</p>
             <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-capital">
-              {formatCurrency(current?.totalCapital || 0)}
+              {formatCurrency(current?.totalCapital || 0, user?.country)}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               {current?.activeShares || 0} {t('financial.activeShares')}
@@ -128,7 +130,7 @@ export default function Financial() {
                   <span className="font-semibold text-green-900">{t('financial.trailerRevenue')}</span>
                 </div>
                 <span className="font-bold text-green-600 text-lg break-words">
-                  +{formatCurrency(current?.totalRevenue || 0)}
+                  +{formatCurrency(current?.totalRevenue || 0, user?.country)}
                 </span>
               </div>
 
@@ -138,7 +140,7 @@ export default function Financial() {
                   <span className="font-semibold text-accent">{t('financial.investorPayouts')}</span>
                 </div>
                 <span className="font-bold text-accent text-lg break-words">
-                  -{formatCurrency(current?.investorPayouts || 0)}
+                  -{formatCurrency(current?.investorPayouts || 0, user?.country)}
                 </span>
               </div>
 
@@ -146,7 +148,7 @@ export default function Financial() {
                 <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl border-2 border-primary/30">
                   <span className="font-bold text-primary">{t('financial.netProfit')}</span>
                   <span className="font-bold text-primary text-2xl break-words">
-                    {formatCurrency(current?.companyMargin || 0)}
+                    {formatCurrency(current?.companyMargin || 0, user?.country)}
                   </span>
                 </div>
               </div>

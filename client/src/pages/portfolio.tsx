@@ -11,11 +11,13 @@ import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertShareSchema, type Trailer } from "@shared/schema";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Portfolio() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: portfolio, isLoading } = useQuery({
     queryKey: ["/api/portfolio"],
@@ -204,7 +206,7 @@ export default function Portfolio() {
                       <tr key={payment.id} className="border-b border-border hover:bg-muted/20 transition-colors" data-testid={`payment-${payment.id}`}>
                         <td className="py-4 px-4 sm:px-6 font-medium whitespace-nowrap">{payment.referenceMonth}</td>
                         <td className="py-4 px-4 sm:px-6 font-bold text-green-600 whitespace-nowrap">
-                          {formatCurrency(parseFloat(payment.amount))}
+                          {formatCurrency(parseFloat(payment.amount), user?.country)}
                         </td>
                         <td className="py-4 px-4 sm:px-6 whitespace-nowrap">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
                         <td className="py-4 px-4 sm:px-6">
@@ -239,7 +241,7 @@ export default function Portfolio() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-semibold text-muted-foreground">Próximos 3 meses</span>
                     <span className="font-bold text-accent">
-                      {formatCurrency(calculateProjection(portfolio?.shares || [], 3))}
+                      {formatCurrency(calculateProjection(portfolio?.shares || [], 3), user?.country)}
                     </span>
                   </div>
                   <Progress value={25} className="h-2 bg-accent/20" />
@@ -248,7 +250,7 @@ export default function Portfolio() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-semibold text-muted-foreground">Próximos 6 meses</span>
                     <span className="font-bold text-accent">
-                      {formatCurrency(calculateProjection(portfolio?.shares || [], 6))}
+                      {formatCurrency(calculateProjection(portfolio?.shares || [], 6), user?.country)}
                     </span>
                   </div>
                   <Progress value={50} className="h-2 bg-accent/20" />
@@ -257,7 +259,7 @@ export default function Portfolio() {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-semibold text-muted-foreground">Próximos 12 meses</span>
                     <span className="font-bold text-accent">
-                      {formatCurrency(calculateProjection(portfolio?.shares || [], 12))}
+                      {formatCurrency(calculateProjection(portfolio?.shares || [], 12), user?.country)}
                     </span>
                   </div>
                   <Progress value={100} className="h-2" />
@@ -281,10 +283,10 @@ export default function Portfolio() {
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="break-all">Valor: {formatCurrency(parseFloat(share.purchaseValue))}</p>
+                      <p className="break-all">Valor: {formatCurrency(parseFloat(share.purchaseValue), user?.country)}</p>
                       <p>Adquirida: {format(new Date(share.purchaseDate), "dd/MM/yyyy")}</p>
                       <p className="text-green-600 font-medium break-all">
-                        Retorno mensal: {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100)}
+                        Retorno mensal: {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, user?.country)}
                       </p>
                     </div>
                   </div>

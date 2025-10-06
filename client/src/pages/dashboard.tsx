@@ -6,7 +6,7 @@ import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarCh
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 interface InvestorStats {
   totalValue: number;
@@ -122,7 +122,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalFleetValue')}</p>
               <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-fleet-value">
-                {formatCurrency(companyStats.totalFleetValue)}
+                {formatCurrency(companyStats.totalFleetValue, user?.country)}
               </p>
             </CardContent>
           </Card>
@@ -152,7 +152,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyRevenue')}</p>
               <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
-                {formatCurrency(companyStats.totalRevenue)}
+                {formatCurrency(companyStats.totalRevenue, user?.country)}
               </p>
             </CardContent>
           </Card>
@@ -167,7 +167,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.companyMargin')}</p>
               <p className="text-2xl font-bold text-purple-600 break-words" data-testid="text-total-margin">
-                {formatCurrency(companyStats.totalMargin)}
+                {formatCurrency(companyStats.totalMargin, user?.country)}
               </p>
             </CardContent>
           </Card>
@@ -211,7 +211,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-green-600">
-                      {formatCurrency(parseFloat(activity.amount))}
+                      {formatCurrency(parseFloat(activity.amount), user?.country)}
                     </span>
                   </div>
                 ))}
@@ -271,7 +271,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
             <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-value">
-              {formatCurrency(investorStats?.totalValue || 0)}
+              {formatCurrency(investorStats?.totalValue || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
@@ -301,7 +301,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
             <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-monthly-return">
-              {formatCurrency(investorStats?.monthlyReturn || 0)}
+              {formatCurrency(investorStats?.monthlyReturn || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
@@ -318,7 +318,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
             <p className="text-2xl font-bold text-foreground break-words" data-testid="text-next-payment">
-              {formatCurrency(investorStats?.nextPayment || 0)}
+              {formatCurrency(investorStats?.nextPayment || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
@@ -363,7 +363,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-green-600">
-                    +{formatCurrency(parseFloat(payment.amount))}
+                    +{formatCurrency(parseFloat(payment.amount), user?.country)}
                   </span>
                 </div>
               ))}
@@ -399,7 +399,7 @@ export default function Dashboard() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Valor:</span>
-                    <span className="font-medium text-right break-all">{formatCurrency(parseFloat(share.purchaseValue))}</span>
+                    <span className="font-medium text-right break-all">{formatCurrency(parseFloat(share.purchaseValue), user?.country)}</span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Adquirida:</span>
@@ -408,7 +408,7 @@ export default function Dashboard() {
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Retorno mensal:</span>
                     <span className="font-medium text-green-600 text-right break-all">
-                      {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100)}
+                      {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, user?.country)}
                     </span>
                   </div>
                 </div>

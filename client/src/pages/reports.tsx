@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
 
 export default function Reports() {
@@ -182,12 +182,12 @@ export default function Reports() {
               investorName,
               investorEmail,
               activeShares.length.toString(),
-              formatCurrency(totalInvested),
-              formatCurrency(totalReturns),
+              formatCurrency(totalInvested, user?.country),
+              formatCurrency(totalReturns, user?.country),
               `${rentabilidade.toFixed(2)}%`,
-              formatCurrency(projection3m),
-              formatCurrency(projection6m),
-              formatCurrency(projection12m),
+              formatCurrency(projection3m, user?.country),
+              formatCurrency(projection6m, user?.country),
+              formatCurrency(projection12m, user?.country),
               paymentStatus
             ];
           });
@@ -242,10 +242,10 @@ export default function Reports() {
               trailer.status === "active" ? "Ativo" : trailer.status === "stock" ? "Estoque" : trailer.status === "maintenance" ? "Manutenção" : "Inativo",
               healthFlag,
               ageMonths.toString(),
-              formatCurrency(purchaseValue),
-              formatCurrency(depreciationAccumulated),
-              formatCurrency(bookValue),
-              formatCurrency(totalPayouts),
+              formatCurrency(purchaseValue, user?.country),
+              formatCurrency(depreciationAccumulated, user?.country),
+              formatCurrency(bookValue, user?.country),
+              formatCurrency(totalPayouts, user?.country),
               `${yieldPercent.toFixed(2)}%`,
               format(new Date(trailer.purchaseDate), "dd/MM/yyyy"),
               trailer.location || "Não informado"
@@ -264,10 +264,10 @@ export default function Reports() {
             .slice(0, 12)
             .map((record: any) => [
               format(new Date(record.month + "-01"), "MMMM/yyyy"),
-              formatCurrency(parseFloat(record.totalRevenue)),
-              formatCurrency(parseFloat(record.investorPayouts)),
-              formatCurrency(parseFloat(record.companyMargin)),
-              formatCurrency(parseFloat(record.totalCapital))
+              formatCurrency(parseFloat(record.totalRevenue), user?.country),
+              formatCurrency(parseFloat(record.investorPayouts), user?.country),
+              formatCurrency(parseFloat(record.companyMargin), user?.country),
+              formatCurrency(parseFloat(record.totalCapital), user?.country)
             ]);
         } else {
           data = [["Sem dados financeiros", "-", "-", "-", "-"]];
