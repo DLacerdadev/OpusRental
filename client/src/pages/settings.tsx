@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Bell, Shield, Palette, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Settings() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
@@ -34,6 +37,18 @@ export default function Settings() {
             <div className="space-y-2">
               <Label htmlFor="email">{t('settings.email')}</Label>
               <Input id="email" type="email" placeholder={t('settings.emailPlaceholder')} data-testid="input-email" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="country">{t('settings.country')}</Label>
+              <Select defaultValue={user?.country || "US"}>
+                <SelectTrigger data-testid="select-country">
+                  <SelectValue placeholder={t('settings.selectCountry')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="US">🇺🇸 United States (USD)</SelectItem>
+                  <SelectItem value="BR">🇧🇷 Brasil (BRL)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button className="bg-accent hover:bg-accent/90 w-full" data-testid="button-save-profile">
               {t('settings.saveChanges')}
