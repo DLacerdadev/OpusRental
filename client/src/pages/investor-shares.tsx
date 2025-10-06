@@ -147,6 +147,7 @@ export default function InvestorShares() {
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.email')}</th>
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.trailer')}</th>
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.shareValue')}</th>
+                    <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.currentValue')}</th>
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.monthlyReturn')}</th>
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.totalReceived')}</th>
                     <th className="text-left py-3 px-2 sm:px-4 font-medium whitespace-nowrap">{t('investorShares.purchaseDate')}</th>
@@ -174,8 +175,11 @@ export default function InvestorShares() {
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-value-${share.id}`}>
+                      <td className="py-3 px-2 sm:px-4 text-muted-foreground whitespace-nowrap" data-testid={`text-value-${share.id}`}>
                         ${parseFloat(share.purchaseValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-3 px-2 sm:px-4 font-semibold whitespace-nowrap" data-testid={`text-current-value-${share.id}`}>
+                        ${parseFloat(share.trailerCurrentValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
                       <td className="py-3 px-2 sm:px-4 text-green-600 whitespace-nowrap" data-testid={`text-return-${share.id}`}>
                         {parseFloat(share.monthlyReturn).toFixed(2)}%
