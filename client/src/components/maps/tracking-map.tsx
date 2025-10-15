@@ -26,6 +26,13 @@ function MapUpdater({ markers }: { markers: any[] }) {
   const map = useMap();
   
   useEffect(() => {
+    // Fix for Leaflet size calculation
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  }, [map]);
+  
+  useEffect(() => {
     if (markers.length > 0) {
       const bounds = L.latLngBounds(
         markers.map(m => [parseFloat(m.latitude as any), parseFloat(m.longitude as any)])
