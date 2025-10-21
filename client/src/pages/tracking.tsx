@@ -131,6 +131,13 @@ export default function Tracking() {
                     </td>
                   </tr>
                 ))}
+                {(!trackingData || trackingData.length === 0) && (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12 text-muted-foreground">
+                      {t('tracking.noTrackingData')}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
