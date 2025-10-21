@@ -145,11 +145,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailableTrailers(): Promise<any[]> {
-    // Get trailers with stock status
+    // Get all trailers except expired ones
     const availableTrailers = await db
       .select()
       .from(trailers)
-      .where(eq(trailers.status, "stock"))
       .orderBy(desc(trailers.createdAt));
     
     // For each trailer, count sold shares and calculate available shares
@@ -171,8 +170,8 @@ export class DatabaseStorage implements IStorage {
       })
     );
     
-    // Filter to only show trailers with available shares
-    return trailersWithAvailability.filter((t) => t.availableShares > 0);
+    // Filter to only show trailers with available shares and not expired
+    return trailersWithAvailability.filter((t) => t.availableShares > 0 && t.status !== "expired");
   }
 
   async createTrailer(trailer: InsertTrailer): Promise<Trailer> {

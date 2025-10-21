@@ -390,13 +390,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/shares", authorize(), async (req, res) => {
     try {
-      // Check if trailer is available
+      // Check if trailer exists
       const trailer = await storage.getTrailer(req.body.trailerId);
       if (!trailer) {
         return res.status(404).json({ message: "Trailer not found" });
       }
-      if (trailer.status !== "stock") {
-        return res.status(400).json({ message: "Trailer is not available for purchase" });
+      
+      // Check if trailer is expired (not available for purchase)
+      if (trailer.status === "expired") {
+        return res.status(400).json({ message: "Trailer is expired and not available for purchase" });
       }
       
       // Check available shares for this trailer
