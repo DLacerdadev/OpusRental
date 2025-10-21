@@ -230,8 +230,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(trailer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create trailer error:", error);
+      
+      // Handle Zod validation errors
+      if (error.name === 'ZodError') {
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err: any) => {
+          const field = err.path[0];
+          fieldErrors[field] = err.message;
+        });
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: fieldErrors 
+        });
+      }
+      
+      // Handle database unique constraint violation (duplicate trailer ID)
+      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('unique constraint')) {
+        return res.status(400).json({ 
+          message: "Trailer ID already exists", 
+          errors: { trailerId: "This Trailer ID is already in use. Please use a different ID." } 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to create trailer" });
     }
   });

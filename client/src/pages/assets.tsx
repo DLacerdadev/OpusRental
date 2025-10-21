@@ -61,12 +61,31 @@ export default function Assets() {
       setDialogOpen(false);
       form.reset();
     },
-    onError: () => {
-      toast({
-        title: t('assets.errorTitle'),
-        description: t('assets.errorDescription'),
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if we have field-specific errors from the backend
+      if (error.errors && typeof error.errors === 'object') {
+        // Set errors on specific fields
+        Object.entries(error.errors).forEach(([field, message]) => {
+          form.setError(field as any, {
+            type: 'manual',
+            message: message as string,
+          });
+        });
+        
+        // Show toast with the main error message
+        toast({
+          title: t('assets.errorTitle'),
+          description: error.message || t('assets.errorDescription'),
+          variant: "destructive",
+        });
+      } else {
+        // Generic error handling
+        toast({
+          title: t('assets.errorTitle'),
+          description: error.message || t('assets.errorDescription'),
+          variant: "destructive",
+        });
+      }
     },
   });
 
