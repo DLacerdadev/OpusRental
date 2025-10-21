@@ -64,25 +64,29 @@ export default function Assets() {
     onError: (error: any) => {
       // Check if we have field-specific errors from the backend
       if (error.errors && typeof error.errors === 'object') {
-        // Set errors on specific fields
+        // Set errors on specific fields with translated messages
         Object.entries(error.errors).forEach(([field, message]) => {
+          // Check if the message is a translation key
+          const translatedMessage = t(`assets.${message}`, { defaultValue: message as string });
           form.setError(field as any, {
             type: 'manual',
-            message: message as string,
+            message: translatedMessage,
           });
         });
         
-        // Show toast with the main error message
+        // Show toast with translated main error message
+        const translatedError = t(`assets.${error.message}`, { defaultValue: t('assets.errorDescription') });
         toast({
           title: t('assets.errorTitle'),
-          description: error.message || t('assets.errorDescription'),
+          description: translatedError,
           variant: "destructive",
         });
       } else {
         // Generic error handling
+        const translatedError = error.message ? t(`assets.${error.message}`, { defaultValue: error.message }) : t('assets.errorDescription');
         toast({
           title: t('assets.errorTitle'),
-          description: error.message || t('assets.errorDescription'),
+          description: translatedError,
           variant: "destructive",
         });
       }

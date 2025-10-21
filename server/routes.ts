@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fieldErrors[field] = err.message;
         });
         return res.status(400).json({ 
-          message: "Validation error", 
+          message: "validationError", 
           errors: fieldErrors 
         });
       }
@@ -249,12 +249,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle database unique constraint violation (duplicate trailer ID)
       if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('unique constraint')) {
         return res.status(400).json({ 
-          message: "Trailer ID already exists", 
-          errors: { trailerId: "This Trailer ID is already in use. Please use a different ID." } 
+          message: "duplicateTrailerId", 
+          errors: { trailerId: "duplicateTrailerId" } 
         });
       }
       
-      res.status(500).json({ message: "Failed to create trailer" });
+      res.status(500).json({ message: "errorDescription" });
     }
   });
 
