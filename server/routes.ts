@@ -123,6 +123,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/register", authLimiter, async (req, res) => {
+    try {
+      const { firstName, lastName, email, username, password } = req.body;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "emailExists" });
+      }
+
+      // Check if username already exists
+      const existingUsername = await storage.getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "usernameExists" });
+      }
+
+      // Create new investor user (password will be hashed in createUser)
+      const newUser = await storage.createUser({
+        firstName,
+        lastName,
+        email,
+        username,
+        password,
+        role: "investor",
+        country: "BR",
+      });
+
+      // Log the registration
+      await storage.createAuditLog({
+        userId: newUser.id,
+        action: "register",
+        entityType: "user",
+        entityId: newUser.id,
+        details: { email: newUser.email, role: newUser.role },
+        ipAddress: req.ip,
+      });
+
+      // Auto-login after registration
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.status(500).json({ message: "Registration succeeded but login failed" });
+        }
+
+        req.session.userId = newUser.id;
+        req.session.user = {
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role as "investor" | "manager" | "admin",
+        };
+
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Registration succeeded but login failed" });
+          }
+
+          const { password: _, ...userWithoutPassword } = newUser;
+          res.json(userWithoutPassword);
+        });
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy(() => {
       res.json({ message: "Logged out successfully" });

@@ -12,6 +12,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
+import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import Portfolio from "@/pages/portfolio";
 import Assets from "@/pages/assets";
@@ -77,13 +78,14 @@ function Router() {
     );
   }
 
-  if (!isAuthenticated && location !== "/login") {
+  if (!isAuthenticated && location !== "/login" && location !== "/register") {
     return <Login />;
   }
 
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/">
         {() => <ProtectedRoute component={Dashboard} titleKey="pageTitles.dashboard" />}
       </Route>

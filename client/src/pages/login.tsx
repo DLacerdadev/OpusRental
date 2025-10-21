@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
 import logoPath from "@assets/image_1759264185138.png";
+import { Link } from "wouter";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -145,10 +146,13 @@ export default function Login() {
               {loginMutation.isPending ? t('login.loggingIn') : t('login.loginButton')}
             </Button>
 
-            <div className="text-center">
-              <a href="#" className="text-sm text-accent hover:underline font-medium">
+            <div className="flex justify-between items-center text-sm">
+              <a href="#" className="text-accent hover:underline font-medium">
                 {t('login.forgotPassword')}
               </a>
+              <Link href="/register" className="text-accent hover:underline font-medium" data-testid="link-register">
+                {t('login.createAccount')}
+              </Link>
             </div>
           </form>
 
