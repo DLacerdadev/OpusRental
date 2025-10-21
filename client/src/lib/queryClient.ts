@@ -13,7 +13,25 @@ async function throwIfResNotOk(res: Response) {
       });
     }
     
-    throw new Error(`${res.status}: ${text}`);
+    // Try to parse JSON error response
+    let errorData;
+    try {
+      errorData = JSON.parse(text);
+    } catch {
+      // If not JSON, use the text as is
+      throw new Error(text || res.statusText);
+    }
+    
+    // Create a custom error with message and errors properties
+    const error = new Error(errorData.message || text) as Error & {
+      message: string;
+      errors?: Record<string, string>;
+      status: number;
+    };
+    error.errors = errorData.errors;
+    error.status = res.status;
+    
+    throw error;
   }
 }
 
