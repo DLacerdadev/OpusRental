@@ -23,8 +23,10 @@ export default function Portfolio() {
     queryKey: ["/api/portfolio"],
   });
 
-  const { data: availableTrailers, isLoading: loadingTrailers } = useQuery<Trailer[]>({
+  const { data: availableTrailers, isLoading: loadingTrailers, refetch: refetchAvailableTrailers } = useQuery<Trailer[]>({
     queryKey: ["/api/trailers/available"],
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const purchaseMutation = useMutation({
@@ -84,7 +86,12 @@ export default function Portfolio() {
           <h1 className="text-3xl font-bold text-foreground" data-testid="heading-portfolio">Minha Carteira</h1>
           <p className="text-sm text-muted-foreground mt-1">Acompanhe seus investimentos e retornos</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (open) {
+            refetchAvailableTrailers();
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="gap-2" data-testid="button-buy-share">
               <ShoppingCart className="h-4 w-4" />
