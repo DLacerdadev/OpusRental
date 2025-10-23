@@ -138,7 +138,7 @@ export default function Register() {
             <p className="text-muted-foreground">{t('register.subtitle')}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName" className="text-sm font-semibold text-foreground">{t('register.firstName')}</Label>

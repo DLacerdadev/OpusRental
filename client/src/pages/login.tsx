@@ -108,7 +108,7 @@ export default function Login() {
             <p className="text-muted-foreground">{t('login.subtitle')}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-semibold text-foreground">{t('login.email')}</Label>
               <Input
