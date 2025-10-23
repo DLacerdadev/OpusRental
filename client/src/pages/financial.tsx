@@ -34,15 +34,15 @@ export default function Financial() {
   })) || [];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">{t('financial.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('financial.title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('financial.subtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-green-50 p-3 rounded-2xl">
                 <ArrowUp className="h-6 w-6 text-green-600" />
@@ -102,7 +102,7 @@ export default function Financial() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="shadow-lg">
           <CardHeader className="border-b bg-muted/30">
             <CardTitle className="text-lg font-bold">{t('financial.revenueEvolution')}</CardTitle>

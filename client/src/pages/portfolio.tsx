@@ -80,7 +80,7 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8" data-testid="page-portfolio">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-portfolio">
       <div className="flex justify-end items-center">
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
@@ -89,12 +89,13 @@ export default function Portfolio() {
           }
         }}>
           <DialogTrigger asChild>
-            <Button className="gap-2" data-testid="button-buy-share">
+            <Button className="gap-2 h-11 px-4" data-testid="button-buy-share">
               <ShoppingCart className="h-4 w-4" />
-              Comprar Nova Cota
+              <span className="hidden sm:inline">Comprar Nova Cota</span>
+              <span className="sm:hidden">Comprar</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="dialog-buy-share">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto" data-testid="dialog-buy-share">
             <DialogHeader>
               <DialogTitle>Trailers Disponíveis</DialogTitle>
               <DialogDescription>

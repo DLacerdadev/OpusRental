@@ -7,19 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Bell, Shield, Palette, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Settings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('settings.subtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="shadow-lg border-l-4 border-l-accent">
           <CardHeader className="border-b bg-muted/30">
             <div className="flex items-center gap-3">
@@ -129,19 +135,26 @@ export default function Settings() {
                 <p className="font-semibold text-foreground">{t('settings.darkMode')}</p>
                 <p className="text-sm text-muted-foreground">{t('settings.darkModeDesc')}</p>
               </div>
-              <Switch data-testid="switch-dark-mode" />
+              <Switch 
+                checked={theme === "dark"}
+                onCheckedChange={toggleTheme}
+                data-testid="switch-dark-mode" 
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="language">{t('settings.language')}</Label>
-              <select 
-                id="language" 
-                className="w-full px-3 py-2 border border-border rounded-xl bg-background"
-                data-testid="select-language"
+              <Select 
+                value={i18n.language} 
+                onValueChange={changeLanguage}
               >
-                <option value="pt-BR">Português (Brasil)</option>
-                <option value="en-US">English (US)</option>
-                <option value="es-ES">Español</option>
-              </select>
+                <SelectTrigger data-testid="select-language">
+                  <SelectValue placeholder={t('settings.selectLanguage')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                  <SelectItem value="en-US">English (US)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

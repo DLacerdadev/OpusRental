@@ -31,28 +31,28 @@ export default function Tracking() {
   })) || [];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('tracking.title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('tracking.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('tracking.subtitle')}</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="border-2" data-testid="button-refresh">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {t('tracking.refresh')}
+        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button variant="outline" className="border-2 h-11 flex-1 sm:flex-none" data-testid="button-refresh">
+            <RefreshCw className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('tracking.refresh')}</span>
           </Button>
-          <Button variant="outline" className="border-2" data-testid="button-export-tracking">
-            <Download className="mr-2 h-4 w-4" />
-            {t('tracking.export')}
+          <Button variant="outline" className="border-2 h-11 flex-1 sm:flex-none" data-testid="button-export-tracking">
+            <Download className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t('tracking.export')}</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="lg:col-span-3">
-          <Card className="shadow-lg overflow-hidden">
-            <CardContent className="p-0 h-[500px]">
+          <Card className="shadow-md sm:shadow-lg overflow-hidden">
+            <CardContent className="p-0 h-[400px] sm:h-[500px]">
               <TrackingMap markers={markers} />
             </CardContent>
           </Card>
