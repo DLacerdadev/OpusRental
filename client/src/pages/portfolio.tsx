@@ -81,11 +81,7 @@ export default function Portfolio() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8" data-testid="page-portfolio">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground" data-testid="heading-portfolio">Minha Carteira</h1>
-          <p className="text-sm text-muted-foreground mt-1">Acompanhe seus investimentos e retornos</p>
-        </div>
+      <div className="flex justify-end items-center">
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (open) {
