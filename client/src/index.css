@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix Leaflet z-index to prevent overlapping Sheet/Dialog */
+.leaflet-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-shadow-pane,
+.leaflet-marker-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-control-container {
+  z-index: 10 !important;
+}
+
 :root {
   --background: hsl(210, 20%, 98%);
   --foreground: hsl(210, 70%, 15%);

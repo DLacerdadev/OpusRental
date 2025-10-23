@@ -41,3 +41,30 @@ An idempotent payment service (`server/services/finance.service.ts`) automatical
 - **Form & Validation**: React Hook Form, Zod, @hookform/resolvers
 - **Backend Libraries**: Express.js, Drizzle ORM, bcrypt, express-session, node-cron
 - **Development Tools**: TypeScript, Vite, ESBuild
+
+## Recent Changes
+
+### Mobile Responsiveness + Dark Mode Fix (October 2025)
+
+Completed comprehensive mobile-first responsive redesign across all 9 platform pages with full dark mode support:
+
+**Responsive Design:**
+- Mobile (1-col) → Tablet (2-col) → Desktop (3-4 col) adaptive grids
+- Responsive padding pattern: p-3 → sm:p-4 → md:p-6 → lg:p-8
+- Touch-optimized with 44px minimum targets on all interactive elements
+- Dialogs/modals scale from 95vw (mobile) to max-w-4xl (desktop)
+
+**Navigation:**
+- Hamburger menu with Sheet drawer on mobile (< 1024px breakpoint)
+- Drawer auto-closes on page navigation
+- Sidebar always expanded within drawer for better UX
+
+**Dark Mode:**
+- Implemented `useTheme` hook with localStorage persistence
+- Added dark variants to all hard-coded colors (green-600 → dark:green-400)
+- Proper contrast ratios for accessibility
+- Automatic system theme detection
+
+**Bug Fixes:**
+- Fixed z-index issue where Leaflet map overlapped Sheet drawer on mobile tracking page
+- Added CSS rules to prevent map controls from interfering with modals (z-index: 1 for panes, 10 for controls)

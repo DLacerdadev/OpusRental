@@ -51,7 +51,7 @@ export default function Tracking() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="lg:col-span-3">
-          <Card className="shadow-md sm:shadow-lg overflow-hidden">
+          <Card className="shadow-md sm:shadow-lg overflow-hidden relative z-0">
             <CardContent className="p-0 h-[400px] sm:h-[500px]">
               <TrackingMap markers={markers} />
             </CardContent>

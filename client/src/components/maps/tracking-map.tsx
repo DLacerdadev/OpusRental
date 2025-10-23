@@ -52,7 +52,8 @@ export function TrackingMap({ markers }: TrackingMapProps) {
       center={defaultCenter}
       zoom={5}
       style={{ height: "100%", width: "100%", minHeight: "400px" }}
-      className="rounded-lg"
+      className="rounded-lg relative z-0"
+      zoomControl={true}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
