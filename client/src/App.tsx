@@ -4,12 +4,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
@@ -29,6 +30,7 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -55,9 +57,24 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar user={user} />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar user={user} />
+      </div>
+
+      {/* Mobile Drawer */}
+      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+        <SheetContent side="left" className="p-0 w-72">
+          <Sidebar user={user} onNavigate={() => setIsMobileMenuOpen(false)} isMobile={true} />
+        </SheetContent>
+      </Sheet>
+
       <div className="flex-1 flex flex-col min-w-0">
-        <Header title={t(titleKey)} user={user} />
+        <Header 
+          title={t(titleKey)} 
+          user={user} 
+          onMenuClick={() => setIsMobileMenuOpen(true)}
+        />
         <main className="flex-1 overflow-auto bg-background">
           <Component />
         </main>

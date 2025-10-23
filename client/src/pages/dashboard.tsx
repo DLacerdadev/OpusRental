@@ -97,8 +97,8 @@ export default function Dashboard() {
     }));
 
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -236,66 +236,66 @@ export default function Dashboard() {
     }));
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Performance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-accent/10 p-3 rounded-2xl">
-                <Wallet className="h-7 w-7 text-accent" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-accent/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
+                <Wallet className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-accent" />
               </div>
-              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">+0%</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">+0%</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.totalValue')}</p>
-            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-total-value">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.totalValue')}</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words" data-testid="text-total-value">
               {formatCurrency(investorStats?.totalValue || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-primary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-primary/10 p-3 rounded-2xl">
-                <TrendingUp className="h-7 w-7 text-primary" />
+        <Card className="border-l-4 border-l-primary shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-primary/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-primary" />
               </div>
-              <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{t('dashboard.active')}</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 sm:py-1 rounded-full">{t('dashboard.active')}</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.activeShares')}</p>
-            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-active-shares">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.activeShares')}</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words" data-testid="text-active-shares">
               {investorStats?.activeShares || 0}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-green-50 p-3 rounded-2xl">
-                <DollarSign className="h-7 w-7 text-green-600" />
+        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-green-50 dark:bg-green-950/30 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
               </div>
-              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">2% a.m.</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">2% a.m.</span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.monthlyReturn')}</p>
-            <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-monthly-return">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.monthlyReturn')}</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 break-words" data-testid="text-monthly-return">
               {formatCurrency(investorStats?.monthlyReturn || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-secondary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-secondary/10 p-3 rounded-2xl">
-                <Calendar className="h-7 w-7 text-secondary" />
+        <Card className="border-l-4 border-l-secondary shadow-md hover:shadow-lg transition-all active:scale-98">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-secondary/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-secondary" />
               </div>
-              <span className="text-xs font-semibold text-secondary bg-secondary/10 px-2 py-1 rounded-full">
+              <span className="text-[10px] sm:text-xs font-semibold text-secondary bg-secondary/10 px-2 py-0.5 sm:py-1 rounded-full">
                 {format(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5), "dd/MM")}
               </span>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('dashboard.nextPayment')}</p>
-            <p className="text-2xl font-bold text-foreground break-words" data-testid="text-next-payment">
+            <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.nextPayment')}</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words" data-testid="text-next-payment">
               {formatCurrency(investorStats?.nextPayment || 0, user?.country)}
             </p>
           </CardContent>
@@ -303,7 +303,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>{t('dashboard.performanceLastMonths')}</CardTitle>
