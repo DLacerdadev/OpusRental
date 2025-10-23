@@ -135,12 +135,12 @@ export default function Dashboard() {
             <CardContent className="p-4 sm:p-5 lg:p-6">
               <div className="flex items-center justify-between mb-3">
                 <div className="bg-green-50 dark:bg-green-950/30 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
+                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600 dark:text-green-400" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">6 {t('dashboard.months')}</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
               <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.companyRevenue')}</p>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400 break-words" data-testid="text-total-revenue">
                 {formatCurrency(companyStats.totalRevenue, user?.country)}
               </p>
             </CardContent>
@@ -150,12 +150,12 @@ export default function Dashboard() {
             <CardContent className="p-4 sm:p-5 lg:p-6">
               <div className="flex items-center justify-between mb-3">
                 <div className="bg-purple-50 dark:bg-purple-950/30 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-purple-600" />
+                  <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-purple-600 dark:text-purple-400" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-semibold text-purple-600 bg-purple-50 dark:bg-purple-950/30 px-2 py-0.5 sm:py-1 rounded-full">6 {t('dashboard.months')}</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 px-2 py-0.5 sm:py-1 rounded-full">6 {t('dashboard.months')}</span>
               </div>
               <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.companyMargin')}</p>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600 break-words" data-testid="text-total-margin">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600 dark:text-purple-400 break-words" data-testid="text-total-margin">
                 {formatCurrency(companyStats.totalMargin, user?.country)}
               </p>
             </CardContent>
@@ -199,7 +199,7 @@ export default function Dashboard() {
                         {format(new Date(activity.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
                       </p>
                     </div>
-                    <span className="text-sm font-semibold text-green-600">
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">
                       {formatCurrency(parseFloat(activity.amount), user?.country)}
                     </span>
                   </div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
               <div className="bg-accent/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
                 <Wallet className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-accent" />
               </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">+0%</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">+0%</span>
             </div>
             <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.totalValue')}</p>
             <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground break-words" data-testid="text-total-value">
@@ -273,12 +273,12 @@ export default function Dashboard() {
           <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-green-50 dark:bg-green-950/30 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600" />
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600 dark:text-green-400" />
               </div>
-              <span className="text-[10px] sm:text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">2% a.m.</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 sm:py-1 rounded-full">2% a.m.</span>
             </div>
             <p className="text-xs sm:text-sm font-semibold text-muted-foreground mb-1 sm:mb-2">{t('dashboard.monthlyReturn')}</p>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 break-words" data-testid="text-monthly-return">
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400 break-words" data-testid="text-monthly-return">
               {formatCurrency(investorStats?.monthlyReturn || 0, user?.country)}
             </p>
           </CardContent>
@@ -340,7 +340,7 @@ export default function Dashboard() {
                       {format(new Date(payment.paymentDate), "dd/MM/yyyy 'às' HH:mm")}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-green-600">
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
                     +{formatCurrency(parseFloat(payment.amount), user?.country)}
                   </span>
                 </div>

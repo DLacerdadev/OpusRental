@@ -123,8 +123,8 @@ export default function Settings() {
         <Card className="shadow-lg border-l-4 border-l-green-500">
           <CardHeader className="border-b bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="bg-green-50 p-3 rounded-2xl">
-                <Palette className="h-6 w-6 text-green-600" />
+              <div className="bg-green-50 dark:bg-green-950 p-3 rounded-2xl">
+                <Palette className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <CardTitle className="text-lg font-bold">{t('settings.preferences')}</CardTitle>
             </div>

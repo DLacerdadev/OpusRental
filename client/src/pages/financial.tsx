@@ -44,19 +44,19 @@ export default function Financial() {
         <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
           <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="bg-green-50 p-3 rounded-2xl">
-                <ArrowUp className="h-6 w-6 text-green-600" />
+              <div className="bg-green-50 dark:bg-green-950 p-3 rounded-2xl">
+                <ArrowUp className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.monthlyRevenue')}</p>
-            <p className="text-2xl font-bold text-green-600 break-words" data-testid="text-total-revenue">
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400 break-words" data-testid="text-total-revenue">
               {formatCurrency(current?.totalRevenue || 0, user?.country)}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-accent/10 p-3 rounded-2xl">
                 <DollarSign className="h-6 w-6 text-accent" />
@@ -70,8 +70,8 @@ export default function Financial() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-primary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-primary shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-primary/10 p-3 rounded-2xl">
                 <PieChart className="h-6 w-6 text-primary" />
@@ -84,8 +84,8 @@ export default function Financial() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-secondary shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-secondary shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-secondary/10 p-3 rounded-2xl">
                 <TrendingUp className="h-6 w-6 text-secondary" />
@@ -129,7 +129,7 @@ export default function Financial() {
                   <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
                   <span className="font-semibold text-green-900">{t('financial.trailerRevenue')}</span>
                 </div>
-                <span className="font-bold text-green-600 text-lg break-words">
+                <span className="font-bold text-green-600 dark:text-green-400 text-lg break-words">
                   +{formatCurrency(current?.totalRevenue || 0, user?.country)}
                 </span>
               </div>

@@ -41,8 +41,8 @@ export default function Compliance() {
         <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
           <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="bg-green-50 p-3 rounded-2xl">
-                <FileText className="h-6 w-6 text-green-600" />
+              <div className="bg-green-50 dark:bg-green-950 p-3 rounded-2xl">
+                <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">CONTRATOS ATIVOS</p>
@@ -52,8 +52,8 @@ export default function Compliance() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-accent shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-accent/10 p-3 rounded-2xl">
                 <Shield className="h-6 w-6 text-accent" />
@@ -66,11 +66,11 @@ export default function Compliance() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-yellow-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="bg-yellow-50 p-3 rounded-2xl">
-                <Clock className="h-6 w-6 text-yellow-600" />
+              <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-2xl">
+                <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">PENDÊNCIAS</p>
@@ -80,11 +80,11 @@ export default function Compliance() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-          <CardContent className="p-6">
+        <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="bg-purple-50 p-3 rounded-2xl">
-                <History className="h-6 w-6 text-purple-600" />
+              <div className="bg-purple-50 dark:bg-purple-950 p-3 rounded-2xl">
+                <History className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">LOGS AUDITORIA</p>
@@ -109,8 +109,8 @@ export default function Compliance() {
                   data-testid={`document-${doc.id}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="bg-green-50 p-2 rounded-xl">
-                      <FileText className="h-5 w-5 text-green-600" />
+                    <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded-xl">
+                      <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
                       <p className="font-bold text-foreground">{doc.fileName}</p>
