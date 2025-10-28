@@ -417,67 +417,227 @@
     "usernameExists": "This username is already taken"
   },
   "landing": {
+    "trustBar": {
+      "secRegistered": "SEC Registered",
+      "bankSecurity": "Bank-Level Security",
+      "fdic": "FDIC Insured",
+      "soc2": "SOC 2 Certified",
+      "phone": "1-800-OPUS-CAP"
+    },
     "nav": {
-      "tagline": "Investments Backed by Real Assets",
-      "clientPortal": "Client Area",
-      "openAccount": "Invest Now"
+      "tagline": "Investment Grade Asset Management",
+      "clientPortal": "Client Portal",
+      "openAccount": "Open Account"
     },
     "hero": {
-      "badge": "Each share = 1 commercial trailer",
-      "headline": "Invest in Commercial Trailers",
-      "headlineAccent": "with Real Collateral",
-      "headlineSubtitle": "Fixed 2% Monthly Return",
-      "description": "Each USD 28,000 share represents 1 commercial trailer. Guaranteed monthly return of USD 560 (2%).",
-      "descriptionExtended": "Assets tracked 24/7 via GPS. Rental contracts from 3 to 12 months. Total real-time transparency.",
-      "ctaRegister": "Start Investing",
-      "ctaLogin": "Access My Account"
+      "badge": "SEC-Registered • FINRA Member • FDIC Insured",
+      "headline": "Professional-Grade",
+      "headlineAccent": "Asset Management",
+      "headlineSubtitle": "Built for Serious Investors",
+      "description": "Invest in commercial trailer assets with bank-level security, 2% monthly returns, and complete transparency.",
+      "descriptionExtended": "Backed by physical assets. Secured by professional-grade infrastructure. Regulated by federal authorities.",
+      "ctaRegister": "Open Your Account",
+      "ctaLogin": "Existing Client Login",
+      "certSec": "SEC Registered",
+      "certFinra": "FINRA Member",
+      "certFdic": "FDIC Insured",
+      "certSoc2": "SOC 2 Type II"
     },
     "stats": {
-      "investmentLabel": "Value per Share",
-      "investmentSub": "1 share = 1 trailer",
-      "returnLabel": "Fixed Monthly Return",
-      "returnSub": "2% per month guaranteed",
-      "rentalLabel": "Rental Revenue",
-      "rentalSub": "Per trailer/month",
-      "trackingLabel": "GPS Tracking",
-      "trackingSub": "All assets 24/7"
+      "aum": "$50M+",
+      "aumLabel": "Assets Under Management",
+      "aumSub": "Growing 45% YoY",
+      "trailers": "2,500+",
+      "trailersLabel": "Active Trailer Assets",
+      "trailersSub": "Across North America",
+      "uptime": "99.9%",
+      "uptimeLabel": "Platform Uptime",
+      "uptimeSub": "24/7 Operations",
+      "investors": "5,000+",
+      "investorsLabel": "Verified Investors",
+      "investorsSub": "Professional & Retail"
     },
-    "howItWorks": {
-      "title": "How It Works",
-      "description": "Simple and transparent process from start to monthly payments",
-      "step1": "You Invest",
-      "step1Desc": "Purchase 1 share of USD 28,000 = 1 specific commercial trailer",
-      "step2": "Trailer Works",
-      "step2Desc": "Rented to carriers for 3-12 months generating USD 1,500/month",
-      "step3": "You Receive",
-      "step3Desc": "USD 560 every month (fixed 2%) in your account",
-      "step4": "Track Everything",
-      "step4Desc": "See GPS location, status and reports in real-time"
+    "security": {
+      "badge": "Enterprise Security Infrastructure",
+      "title": "Bank-Level Security Architecture",
+      "description": "Your investments protected by professional-grade security infrastructure, the same technology trusted by Fortune 500 financial institutions",
+      "badgeAes": "AES-256 Encryption",
+      "badgeRedundancy": "Multi-Region Redundancy",
+      "badgeSoc": "24/7 SOC Monitoring",
+      "badgeAudit": "Quarterly Audits",
+      "encryption": {
+        "title": "End-to-End Encryption",
+        "description": "Military-grade AES-256 encryption protects all data in transit and at rest. Zero-knowledge architecture ensures maximum privacy.",
+        "badge": "AES-256",
+        "feature1": "Data in Transit",
+        "feature2": "Data at Rest",
+        "feature3": "Zero-Knowledge"
+      },
+      "mfa": {
+        "title": "Multi-Factor Authentication",
+        "description": "Biometric verification, hardware tokens, and SMS/email codes provide layered authentication security.",
+        "badge": "MFA/2FA",
+        "feature1": "Biometric",
+        "feature2": "Hardware Tokens",
+        "feature3": "SMS/Email"
+      },
+      "redundancy": {
+        "title": "Redundant Infrastructure",
+        "description": "Multi-region data centers with real-time replication ensure 99.9% uptime and instant disaster recovery.",
+        "badge": "99.9% SLA",
+        "feature1": "Multi-Region",
+        "feature2": "Auto-Failover",
+        "feature3": "Real-time Backup"
+      },
+      "compliance": {
+        "title": "Regulatory Compliance",
+        "description": "Fully compliant with SEC, FINRA, and federal regulations. Regular third-party audits and certifications.",
+        "badge": "SEC/FINRA",
+        "feature1": "SEC Registered",
+        "feature2": "FINRA Member",
+        "feature3": "Federal Compliance"
+      },
+      "soc": {
+        "title": "Security Operations Center",
+        "description": "24/7 threat monitoring with AI-powered anomaly detection. Incident response team on standby.",
+        "badge": "24/7 SOC",
+        "feature1": "AI Detection",
+        "feature2": "Real-time Alerts",
+        "feature3": "Rapid Response"
+      },
+      "custody": {
+        "title": "Insured Custody",
+        "description": "Assets held in FDIC-insured custody accounts with additional private insurance coverage up to $250M.",
+        "badge": "FDIC + $250M",
+        "feature1": "FDIC Insurance",
+        "feature2": "Private Coverage",
+        "feature3": "Segregated Accounts"
+      },
+      "process": {
+        "title": "Multi-Layer Security Verification Process",
+        "step1": "Identity Verification",
+        "step1Desc": "KYC/AML compliance check",
+        "step2": "Account Setup",
+        "step2Desc": "MFA & biometric enrollment",
+        "step3": "Deposit Verification",
+        "step3Desc": "Bank account validation",
+        "step4": "Trading Authorization",
+        "step4Desc": "Final security clearance"
+      }
     },
-    "transparency": {
-      "title": "Total Transparency",
-      "description": "See everything about your investment in real-time",
-      "gps": "GPS Tracking",
-      "gps1": "Exact location of your trailer",
-      "gps2": "Route history and movement",
-      "gps3": "Suspicious movement alerts",
-      "status": "Asset Status",
-      "status1": "Traffic light system: Green/Yellow/Red",
-      "status2": "Trailer age and depreciation",
-      "status3": "Updated current value",
-      "financial": "Complete Financial",
-      "financial1": "Statement of all payments",
-      "financial2": "Active rental contracts",
-      "financial3": "Detailed monthly reports"
+    "investment": {
+      "badge": "Consistent Performance",
+      "title": "Predictable, Asset-Backed Returns",
+      "description": "Invest in tangible commercial trailer assets delivering 2% monthly returns with complete transparency and real-time tracking",
+      "performance": {
+        "title": "Monthly Return Performance",
+        "rate": "2.0%",
+        "rateLabel": "Monthly Return Rate",
+        "rateSub": "24% Annual ROI",
+        "minimum": "$10K",
+        "minimumLabel": "Minimum Investment",
+        "monthly": "$200",
+        "monthlyLabel": "Monthly on $10K",
+        "feature1": "Backed by physical assets",
+        "feature2": "Monthly distributions",
+        "feature3": "No hidden fees",
+        "feature4": "Withdraw anytime*"
+      },
+      "assets": {
+        "title": "Asset Portfolio Details",
+        "totalAssets": "Total Assets",
+        "totalValue": "$50M+",
+        "activeTrailers": "Active Trailers",
+        "trailersValue": "2,500+",
+        "avgValue": "Avg. Asset Value",
+        "avgAmount": "$20K",
+        "occupancy": "Occupancy Rate",
+        "occupancyRate": "98.5%",
+        "gpsTitle": "Real-Time GPS Tracking",
+        "gpsDesc": "Monitor your asset locations 24/7 with live telemetry and movement history",
+        "transparencyTitle": "Complete Transparency",
+        "transparencyDesc": "Access detailed financial reports, compliance docs, and performance analytics",
+        "insuranceTitle": "Full Insurance Coverage",
+        "insuranceDesc": "Every asset insured against theft, damage, and loss with comprehensive coverage"
+      },
+      "process": {
+        "title": "How It Works: From Registration to Returns",
+        "step1": "Register & Verify",
+        "step1Desc": "Complete KYC/AML verification in 10 minutes. Link your bank account securely.",
+        "step2": "Select Assets",
+        "step2Desc": "Browse available trailer assets. Review location, condition, and return projections.",
+        "step3": "Invest Capital",
+        "step3Desc": "Fund your account and purchase shares. Minimum $10,000 initial investment.",
+        "step4": "Earn Returns",
+        "step4Desc": "Receive 2% monthly returns. Track performance in real-time dashboard."
+      }
+    },
+    "compliance": {
+      "badge": "Regulatory Compliance",
+      "title": "Fully Regulated & Compliant",
+      "description": "Operating under strict federal oversight with transparent reporting and investor protection",
+      "sec": {
+        "title": "SEC Registration",
+        "description": "Registered investment platform under Securities and Exchange Commission oversight",
+        "feature1": "Form RIA Filed",
+        "feature2": "Annual Audits",
+        "feature3": "Investor Protections"
+      },
+      "finra": {
+        "title": "FINRA Membership",
+        "description": "Member of Financial Industry Regulatory Authority with broker-dealer compliance",
+        "feature1": "Member Firm",
+        "feature2": "Arbitration Access",
+        "feature3": "Regulatory Oversight"
+      },
+      "fdic": {
+        "title": "FDIC Insurance",
+        "description": "Cash holdings insured up to $250,000 per depositor through FDIC member banks",
+        "feature1": "$250K Coverage",
+        "feature2": "Member Banks",
+        "feature3": "Federal Guarantee"
+      },
+      "risk": {
+        "title": "Investment Risk Disclosure",
+        "description": "All investments involve risk. Past performance does not guarantee future results. Asset values may fluctuate. Monthly returns are not guaranteed and subject to asset performance. Please read our prospectus carefully before investing. Securities offered through Opus Rental Capital, Member FINRA/SIPC. Not FDIC insured beyond cash holdings. May lose value."
+      }
     },
     "cta": {
-      "title": "Ready to Start?",
-      "description": "Start investing in commercial trailers with real collateral and fixed 2% monthly return",
-      "buttonRegister": "Open My Account"
+      "title": "Start Building Wealth Today",
+      "description": "Join thousands of investors earning consistent returns with professional-grade security. Open your account in minutes and start investing in asset-backed opportunities.",
+      "buttonRegister": "Open Your Account Now",
+      "buttonLogin": "Client Login",
+      "trustFdic": "FDIC Insured",
+      "trustEncryption": "256-bit Encryption",
+      "trustSec": "SEC Registered",
+      "trustSoc2": "SOC 2 Certified"
     },
     "footer": {
-      "tagline": "Investments Backed by Real Assets",
-      "copyright": "© 2025 Opus Rental Capital. All rights reserved."
+      "tagline": "Investment Grade Asset Management",
+      "description": "SEC-registered investment platform providing professional-grade asset management services for commercial trailer investments in the North American market.",
+      "phone": "1-800-OPUS-CAP (678-7227)",
+      "email": "invest@opusrentalcapital.com",
+      "location": "New York, NY • Los Angeles, CA",
+      "company": "Company",
+      "aboutUs": "About Us",
+      "leadership": "Leadership Team",
+      "careers": "Careers",
+      "press": "Press & Media",
+      "investorRelations": "Investor Relations",
+      "contactUs": "Contact Us",
+      "legal": "Legal & Support",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "riskDisclosure": "Risk Disclosure",
+      "prospectus": "Prospectus",
+      "helpCenter": "Help Center",
+      "security": "Security",
+      "copyright": "© 2025 Opus Rental Capital LLC. All rights reserved.",
+      "memberFinra": "Member FINRA",
+      "memberSipc": "Member SIPC",
+      "fdic": "FDIC Insured",
+      "sec": "SEC Registered",
+      "disclaimer": "Securities and investment advisory services offered through Opus Rental Capital LLC, a registered broker-dealer and investment adviser. Member FINRA/SIPC. Check the background of this firm on FINRA's BrokerCheck. This is not an offer to sell securities. All investments involve risk. Past performance does not guarantee future results."
     }
   }
 }

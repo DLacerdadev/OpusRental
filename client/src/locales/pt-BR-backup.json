@@ -417,67 +417,227 @@
     "usernameExists": "Este nome de usuário já está em uso"
   },
   "landing": {
+    "trustBar": {
+      "secRegistered": "Registrada SEC",
+      "bankSecurity": "Segurança Bancária",
+      "fdic": "Seguro FDIC",
+      "soc2": "Certificado SOC 2",
+      "phone": "1-800-OPUS-CAP"
+    },
     "nav": {
-      "tagline": "Investimentos Garantidos por Ativos Reais",
-      "clientPortal": "Área do Cliente",
-      "openAccount": "Investir Agora"
+      "tagline": "Gestão Profissional de Ativos",
+      "clientPortal": "Portal do Cliente",
+      "openAccount": "Abrir Conta"
     },
     "hero": {
-      "badge": "Cada cota = 1 trailer comercial",
-      "headline": "Invista em Trailers Comerciais",
-      "headlineAccent": "com Garantia Real",
-      "headlineSubtitle": "Retorno Fixo de 2% ao Mês",
-      "description": "Cada cota de USD 28.000 representa 1 trailer comercial. Retorno mensal garantido de USD 560 (2%).",
-      "descriptionExtended": "Ativos rastreados 24/7 por GPS. Contratos de aluguel de 3 a 12 meses. Transparência total em tempo real.",
-      "ctaRegister": "Começar a Investir",
-      "ctaLogin": "Acessar Minha Conta"
+      "badge": "Registrada SEC • Membro FINRA • Seguro FDIC",
+      "headline": "Gestão de Ativos",
+      "headlineAccent": "Nível Profissional",
+      "headlineSubtitle": "Feito para Investidores Sérios",
+      "description": "Invista em ativos de trailers comerciais com segurança bancária, retornos mensais de 2% e transparência completa.",
+      "descriptionExtended": "Garantido por ativos físicos. Protegido por infraestrutura de nível profissional. Regulado por autoridades federais.",
+      "ctaRegister": "Abra Sua Conta",
+      "ctaLogin": "Login do Cliente",
+      "certSec": "Registrada SEC",
+      "certFinra": "Membro FINRA",
+      "certFdic": "Seguro FDIC",
+      "certSoc2": "SOC 2 Tipo II"
     },
     "stats": {
-      "investmentLabel": "Valor por Cota",
-      "investmentSub": "1 cota = 1 trailer",
-      "returnLabel": "Retorno Mensal Fixo",
-      "returnSub": "2% ao mês garantido",
-      "rentalLabel": "Receita de Aluguel",
-      "rentalSub": "Por trailer/mês",
-      "trackingLabel": "Rastreamento GPS",
-      "trackingSub": "Todos os ativos 24/7"
+      "aum": "$50M+",
+      "aumLabel": "Ativos Sob Gestão",
+      "aumSub": "Crescendo 45% ao ano",
+      "trailers": "2.500+",
+      "trailersLabel": "Trailers Ativos",
+      "trailersSub": "Na América do Norte",
+      "uptime": "99,9%",
+      "uptimeLabel": "Disponibilidade da Plataforma",
+      "uptimeSub": "Operações 24/7",
+      "investors": "5.000+",
+      "investorsLabel": "Investidores Verificados",
+      "investorsSub": "Institucionais e Varejo"
     },
-    "howItWorks": {
-      "title": "Como Funciona",
-      "description": "Processo simples e transparente do início ao recebimento mensal",
-      "step1": "Você Investe",
-      "step1Desc": "Adquire 1 cota de USD 28.000 = 1 trailer comercial específico",
-      "step2": "Trailer Trabalha",
-      "step2Desc": "Alugado para transportadoras por 3-12 meses gerando USD 1.500/mês",
-      "step3": "Você Recebe",
-      "step3Desc": "USD 560 todo mês (2% fixo) na sua conta",
-      "step4": "Acompanhe Tudo",
-      "step4Desc": "Veja localização GPS, status e relatórios em tempo real"
+    "security": {
+      "badge": "Infraestrutura de Segurança Empresarial",
+      "title": "Arquitetura de Segurança Bancária",
+      "description": "Seus investimentos protegidos por infraestrutura de segurança de nível profissional, a mesma tecnologia confiada por instituições financeiras Fortune 500",
+      "badgeAes": "Criptografia AES-256",
+      "badgeRedundancy": "Redundância Multi-Regional",
+      "badgeSoc": "Monitoramento SOC 24/7",
+      "badgeAudit": "Auditorias Trimestrais",
+      "encryption": {
+        "title": "Criptografia Ponta a Ponta",
+        "description": "Criptografia AES-256 de nível militar protege todos os dados em trânsito e em repouso. Arquitetura de conhecimento zero garante máxima privacidade.",
+        "badge": "AES-256",
+        "feature1": "Dados em Trânsito",
+        "feature2": "Dados em Repouso",
+        "feature3": "Conhecimento Zero"
+      },
+      "mfa": {
+        "title": "Autenticação Multi-Fator",
+        "description": "Verificação biométrica, tokens de hardware e códigos SMS/e-mail fornecem segurança de autenticação em camadas.",
+        "badge": "MFA/2FA",
+        "feature1": "Biometria",
+        "feature2": "Tokens de Hardware",
+        "feature3": "SMS/E-mail"
+      },
+      "redundancy": {
+        "title": "Infraestrutura Redundante",
+        "description": "Data centers multi-regionais com replicação em tempo real garantem 99,9% de disponibilidade e recuperação instantânea de desastres.",
+        "badge": "99,9% SLA",
+        "feature1": "Multi-Regional",
+        "feature2": "Failover Automático",
+        "feature3": "Backup em Tempo Real"
+      },
+      "compliance": {
+        "title": "Conformidade Regulatória",
+        "description": "Totalmente conforme com SEC, FINRA e regulamentações federais. Auditorias e certificações regulares por terceiros.",
+        "badge": "SEC/FINRA",
+        "feature1": "Registrada SEC",
+        "feature2": "Membro FINRA",
+        "feature3": "Conformidade Federal"
+      },
+      "soc": {
+        "title": "Centro de Operações de Segurança",
+        "description": "Monitoramento de ameaças 24/7 com detecção de anomalias alimentada por IA. Equipe de resposta a incidentes em espera.",
+        "badge": "SOC 24/7",
+        "feature1": "Detecção por IA",
+        "feature2": "Alertas em Tempo Real",
+        "feature3": "Resposta Rápida"
+      },
+      "custody": {
+        "title": "Custódia Segurada",
+        "description": "Ativos mantidos em contas de custódia seguradas pelo FDIC com cobertura de seguro privado adicional de até $250M.",
+        "badge": "FDIC + $250M",
+        "feature1": "Seguro FDIC",
+        "feature2": "Cobertura Privada",
+        "feature3": "Contas Segregadas"
+      },
+      "process": {
+        "title": "Processo de Verificação de Segurança Multicamadas",
+        "step1": "Verificação de Identidade",
+        "step1Desc": "Verificação de conformidade KYC/AML",
+        "step2": "Configuração de Conta",
+        "step2Desc": "Cadastro de MFA e biometria",
+        "step3": "Verificação de Depósito",
+        "step3Desc": "Validação de conta bancária",
+        "step4": "Autorização de Negociação",
+        "step4Desc": "Liberação de segurança final"
+      }
     },
-    "transparency": {
-      "title": "Transparência Total",
-      "description": "Veja tudo sobre seu investimento em tempo real",
-      "gps": "Rastreamento GPS",
-      "gps1": "Localização exata do seu trailer",
-      "gps2": "Histórico de rotas e movimentação",
-      "gps3": "Alertas de movimento suspeito",
-      "status": "Status do Ativo",
-      "status1": "Sistema de farol: Verde/Amarelo/Vermelho",
-      "status2": "Idade do trailer e depreciação",
-      "status3": "Valor atual atualizado",
-      "financial": "Financeiro Completo",
-      "financial1": "Extrato de todos os pagamentos",
-      "financial2": "Contratos de aluguel vigentes",
-      "financial3": "Relatórios mensais detalhados"
+    "investment": {
+      "badge": "Desempenho Consistente",
+      "title": "Retornos Previsíveis Garantidos por Ativos",
+      "description": "Invista em ativos tangíveis de trailers comerciais entregando retornos mensais de 2% com transparência completa e rastreamento em tempo real",
+      "performance": {
+        "title": "Desempenho de Retorno Mensal",
+        "rate": "2,0%",
+        "rateLabel": "Taxa de Retorno Mensal",
+        "rateSub": "24% ROI Anual",
+        "minimum": "$10 mil",
+        "minimumLabel": "Investimento Mínimo",
+        "monthly": "$200",
+        "monthlyLabel": "Mensal em $10 mil",
+        "feature1": "Garantido por ativos físicos",
+        "feature2": "Distribuições mensais",
+        "feature3": "Sem taxas ocultas",
+        "feature4": "Resgate a qualquer momento*"
+      },
+      "assets": {
+        "title": "Detalhes do Portfólio de Ativos",
+        "totalAssets": "Total de Ativos",
+        "totalValue": "$50M+",
+        "activeTrailers": "Trailers Ativos",
+        "trailersValue": "2.500+",
+        "avgValue": "Valor Médio do Ativo",
+        "avgAmount": "$20 mil",
+        "occupancy": "Taxa de Ocupação",
+        "occupancyRate": "98,5%",
+        "gpsTitle": "Rastreamento GPS em Tempo Real",
+        "gpsDesc": "Monitore a localização de seus ativos 24/7 com telemetria ao vivo e histórico de movimento",
+        "transparencyTitle": "Transparência Completa",
+        "transparencyDesc": "Acesse relatórios financeiros detalhados, documentos de conformidade e análises de desempenho",
+        "insuranceTitle": "Cobertura de Seguro Completa",
+        "insuranceDesc": "Cada ativo segurado contra roubo, dano e perda com cobertura abrangente"
+      },
+      "process": {
+        "title": "Como Funciona: Do Registro aos Retornos",
+        "step1": "Registre e Verifique",
+        "step1Desc": "Complete a verificação KYC/AML em 10 minutos. Vincule sua conta bancária com segurança.",
+        "step2": "Selecione Ativos",
+        "step2Desc": "Navegue pelos ativos de trailers disponíveis. Revise localização, condição e projeções de retorno.",
+        "step3": "Invista Capital",
+        "step3Desc": "Financie sua conta e compre cotas. Investimento inicial mínimo de $10.000.",
+        "step4": "Ganhe Retornos",
+        "step4Desc": "Receba retornos mensais de 2%. Acompanhe o desempenho no painel em tempo real."
+      }
+    },
+    "compliance": {
+      "badge": "Conformidade Regulatória",
+      "title": "Totalmente Regulado e Conforme",
+      "description": "Operando sob rigorosa supervisão federal com relatórios transparentes e proteção ao investidor",
+      "sec": {
+        "title": "Registro SEC",
+        "description": "Plataforma de investimento registrada sob supervisão da Securities and Exchange Commission",
+        "feature1": "Formulário RIA Arquivado",
+        "feature2": "Auditorias Anuais",
+        "feature3": "Proteções ao Investidor"
+      },
+      "finra": {
+        "title": "Filiação FINRA",
+        "description": "Membro da Financial Industry Regulatory Authority com conformidade de corretora",
+        "feature1": "Firma Membro",
+        "feature2": "Acesso à Arbitragem",
+        "feature3": "Supervisão Regulatória"
+      },
+      "fdic": {
+        "title": "Seguro FDIC",
+        "description": "Holdings em dinheiro segurados até $250.000 por depositante através de bancos membros do FDIC",
+        "feature1": "Cobertura de $250 mil",
+        "feature2": "Bancos Membros",
+        "feature3": "Garantia Federal"
+      },
+      "risk": {
+        "title": "Divulgação de Risco de Investimento",
+        "description": "Todos os investimentos envolvem risco. O desempenho passado não garante resultados futuros. Os valores dos ativos podem flutuar. Os retornos mensais não são garantidos e estão sujeitos ao desempenho dos ativos. Por favor, leia nosso prospecto cuidadosamente antes de investir. Valores mobiliários oferecidos através da Opus Rental Capital, Membro FINRA/SIPC. Não segurado pelo FDIC além de holdings em dinheiro. Pode perder valor."
+      }
     },
     "cta": {
-      "title": "Pronto para Começar?",
-      "description": "Comece a investir em trailers comerciais com garantia real e retorno fixo de 2% ao mês",
-      "buttonRegister": "Abrir Minha Conta"
+      "title": "Comece a Construir Riqueza Hoje",
+      "description": "Junte-se a milhares de investidores ganhando retornos consistentes com segurança de nível profissional. Abra sua conta em minutos e comece a investir em oportunidades garantidas por ativos.",
+      "buttonRegister": "Abra Sua Conta Agora",
+      "buttonLogin": "Login do Cliente",
+      "trustFdic": "Seguro FDIC",
+      "trustEncryption": "Criptografia 256-bit",
+      "trustSec": "Registrada SEC",
+      "trustSoc2": "Certificado SOC 2"
     },
     "footer": {
-      "tagline": "Investimentos Garantidos por Ativos Reais",
-      "copyright": "© 2025 Opus Rental Capital. Todos os direitos reservados."
+      "tagline": "Gestão Profissional de Ativos",
+      "description": "Plataforma de investimento registrada na SEC fornecendo serviços de gestão de ativos de nível profissional para investimentos em trailers comerciais no mercado norte-americano.",
+      "phone": "1-800-OPUS-CAP (678-7227)",
+      "email": "invest@opusrentalcapital.com",
+      "location": "Nova York, NY • Los Angeles, CA",
+      "company": "Empresa",
+      "aboutUs": "Sobre Nós",
+      "leadership": "Equipe de Liderança",
+      "careers": "Carreiras",
+      "press": "Imprensa e Mídia",
+      "investorRelations": "Relações com Investidores",
+      "contactUs": "Fale Conosco",
+      "legal": "Legal e Suporte",
+      "terms": "Termos de Serviço",
+      "privacy": "Política de Privacidade",
+      "riskDisclosure": "Divulgação de Risco",
+      "prospectus": "Prospecto",
+      "helpCenter": "Central de Ajuda",
+      "security": "Segurança",
+      "copyright": "© 2025 Opus Rental Capital LLC. Todos os direitos reservados.",
+      "memberFinra": "Membro FINRA",
+      "memberSipc": "Membro SIPC",
+      "fdic": "Seguro FDIC",
+      "sec": "Registrada SEC",
+      "disclaimer": "Valores mobiliários e serviços de consultoria de investimento oferecidos através da Opus Rental Capital LLC, uma corretora registrada e consultora de investimentos. Membro FINRA/SIPC. Verifique os antecedentes desta empresa no BrokerCheck da FINRA. Esta não é uma oferta de venda de valores mobiliários. Todos os investimentos envolvem risco. O desempenho passado não garante resultados futuros."
     }
   }
 }
