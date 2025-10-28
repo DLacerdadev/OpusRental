@@ -173,40 +173,102 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentActivity')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 sm:space-y-4">
-              {companyStats.recentActivity.slice(0, 5).map((activity) => (
-                <div key={activity.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`activity-${activity.id}`}>
-                  <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                    <div className="bg-accent/10 p-2 rounded-lg flex-shrink-0">
-                      <Activity className="h-4 w-4 text-accent" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentActivity')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 sm:space-y-4">
+                {companyStats.recentActivity && companyStats.recentActivity.length > 0 ? (
+                  companyStats.recentActivity.slice(0, 5).map((activity) => (
+                    <div key={activity.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`activity-${activity.id}`}>
+                      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                        <div className="bg-accent/10 p-2 rounded-lg flex-shrink-0">
+                          <Activity className="h-4 w-4 text-accent" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground">
+                            {t('dashboard.paymentProcessed')}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {t('dashboard.user')}: {activity.userId.slice(0, 8)}...
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-shrink-0">
+                        <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400">
+                          {formatCurrency(parseFloat(activity.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {format(new Date(activity.paymentDate), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground">
-                        {t('dashboard.paymentProcessed')}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {t('dashboard.user')}: {activity.userId}
-                      </p>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">{t('dashboard.noActivityYet')}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">{t('dashboard.quickStats')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Truck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('dashboard.activeTrailers')}</p>
+                      <p className="text-xl font-bold text-foreground">{companyStats.activeTrailers}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400">
-                      {formatCurrency(parseFloat(activity.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                    </span>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {format(new Date(activity.paymentDate), 'dd/MM/yyyy')}
-                    </span>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{t('dashboard.total')}</p>
+                    <p className="text-lg font-semibold text-foreground">{companyStats.totalTrailers}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('dashboard.totalRevenue')}</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {formatCurrency(companyStats.totalRevenue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('dashboard.profitMargin')}</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {((companyStats.totalMargin / companyStats.totalRevenue) * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -301,35 +363,87 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentPayments')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 sm:space-y-4">
-            {investorStats?.recentPayments?.slice(0, 5).map((payment) => (
-              <div key={payment.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`payment-${payment.id}`}>
-                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                  <div className="bg-green-500/10 p-2 rounded-lg flex-shrink-0">
-                    <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentPayments')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 sm:space-y-4">
+              {investorStats?.recentPayments && investorStats.recentPayments.length > 0 ? (
+                investorStats.recentPayments.slice(0, 5).map((payment) => (
+                  <div key={payment.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`payment-${payment.id}`}>
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                      <div className="bg-green-500/10 p-2 rounded-lg flex-shrink-0">
+                        <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground">
+                          {t('dashboard.payment')} - {formatMonth(payment.referenceMonth)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400 flex-shrink-0">
+                      {formatCurrency(parseFloat(payment.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
-                      {t('dashboard.payment')} - {formatMonth(payment.referenceMonth)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
-                    </p>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">{t('dashboard.noPaymentsYet')}</p>
                 </div>
-                <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400 flex-shrink-0">
-                  {formatCurrency(parseFloat(payment.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">{t('dashboard.myShares')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {shares && shares.length > 0 ? (
+                shares.slice(0, 5).map((share: any) => (
+                  <div key={share.id} className="p-3 bg-muted/30 dark:bg-muted/10 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-accent" />
+                        <p className="text-sm font-semibold text-foreground">
+                          {share.trailerModel || 'Trailer'} #{share.trailerId?.slice(0, 8)}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        share.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                        share.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                        'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400'
+                      }`}>
+                        {share.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{t('dashboard.purchased')}: {format(new Date(share.purchaseDate), 'dd/MM/yyyy')}</span>
+                      <span className="font-semibold text-foreground">
+                        {formatCurrency(parseFloat(share.purchasePrice), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Truck className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">{t('dashboard.noSharesYet')}</p>
+                  <p className="text-xs mt-1">{t('dashboard.startInvesting')}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

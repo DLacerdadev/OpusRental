@@ -206,7 +206,7 @@ export default function Landing() {
             {/* Conteúdo */}
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
               <div className="flex-1 text-center sm:text-left">
-                <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl">
+                <p className="text-base sm:text-lg md:text-xl text-white font-medium max-w-3xl">
                   {t('landing.hero.description', 'Cada cota de USD 28.000 representa 1 trailer comercial. Retorno mensal garantido de USD 560 (2%).')}
                 </p>
               </div>
@@ -214,7 +214,7 @@ export default function Landing() {
               <div className="flex-shrink-0">
                 <Link href="/register">
                   <Button 
-                    className="bg-accent hover:bg-accent/90 text-white font-semibold gap-2 h-11 px-6 shadow-lg hover:shadow-xl transition-all"
+                    className="bg-accent hover:bg-accent/90 text-white font-bold gap-2 h-11 px-6 shadow-lg hover:shadow-xl transition-all"
                   >
                     {t('landing.cta.buttonRegister', 'Abrir Minha Conta')}
                     <ArrowRight className="h-4 w-4" />
