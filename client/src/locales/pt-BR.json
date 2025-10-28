@@ -475,6 +475,38 @@
       "description": "Comece a investir em trailers comerciais com garantia real e retorno fixo de 2% ao mês",
       "buttonRegister": "Abrir Minha Conta"
     },
+    "ctaBanners": {
+      "portfolio": {
+        "title": "Diversifique Seu Portfólio",
+        "description": "Adquira novas cotas e aumente seus retornos mensais. Cada trailer gera USD 560/mês (2% fixo)",
+        "button": "Comprar Nova Cota"
+      },
+      "assets": {
+        "title": "Rastreamento GPS em Tempo Real",
+        "description": "Todos os trailers têm localização GPS 24/7. Veja exatamente onde seu investimento está trabalhando",
+        "button": "Ver Rastreamento"
+      },
+      "tracking": {
+        "title": "Seu Patrimônio Protegido",
+        "description": "Monitoramento contínuo com alertas automáticos. Sistema de farol Verde/Amarelo/Vermelho",
+        "button": "Ver Meus Ativos"
+      },
+      "financial": {
+        "title": "Retorno Fixo de 2% ao Mês",
+        "description": "USD 560 mensais por cota. Pagamentos pontuais com total transparência e contratos reais",
+        "button": "Ver Histórico"
+      },
+      "reports": {
+        "title": "Transparência Total",
+        "description": "Relatórios detalhados com todos os dados financeiros, contratos e performance dos ativos",
+        "button": "Gerar Relatório"
+      },
+      "default": {
+        "title": "Comece a Investir Hoje",
+        "description": "Adquira sua primeira cota de USD 28.000 e receba USD 560 mensais com garantia real",
+        "button": "Comprar Primeira Cota"
+      }
+    },
     "footer": {
       "tagline": "Investimentos Garantidos por Ativos Reais",
       "copyright": "© 2025 Opus Rental Capital. Todos os direitos reservados."

@@ -13,11 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { insertShareSchema, type Trailer } from "@shared/schema";
 import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 export default function Portfolio() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data: portfolio, isLoading } = useQuery({
     queryKey: ["/api/portfolio"],

@@ -475,6 +475,38 @@
       "description": "Start investing in commercial trailers with real collateral and fixed 2% monthly return",
       "buttonRegister": "Open My Account"
     },
+    "ctaBanners": {
+      "portfolio": {
+        "title": "Diversify Your Portfolio",
+        "description": "Purchase new shares and increase your monthly returns. Each trailer generates USD 560/month (fixed 2%)",
+        "button": "Buy New Share"
+      },
+      "assets": {
+        "title": "Real-Time GPS Tracking",
+        "description": "All trailers have 24/7 GPS location. See exactly where your investment is working",
+        "button": "View Tracking"
+      },
+      "tracking": {
+        "title": "Your Assets Protected",
+        "description": "Continuous monitoring with automatic alerts. Green/Yellow/Red traffic light system",
+        "button": "View My Assets"
+      },
+      "financial": {
+        "title": "Fixed 2% Monthly Return",
+        "description": "USD 560 monthly per share. Punctual payments with total transparency and real contracts",
+        "button": "View History"
+      },
+      "reports": {
+        "title": "Total Transparency",
+        "description": "Detailed reports with all financial data, contracts and asset performance",
+        "button": "Generate Report"
+      },
+      "default": {
+        "title": "Start Investing Today",
+        "description": "Purchase your first USD 28,000 share and receive USD 560 monthly with real collateral",
+        "button": "Buy First Share"
+      }
+    },
     "footer": {
       "tagline": "Investments Backed by Real Assets",
       "copyright": "© 2025 Opus Rental Capital. All rights reserved."
