@@ -95,37 +95,6 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-b from-muted/30 via-background to-background"></div>
         
         <div className="max-w-7xl mx-auto relative">
-          {/* Banner CTA Estilo Azul Escuro */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[hsl(210,70%,15%)] via-[hsl(210,60%,20%)] to-[hsl(210,50%,25%)] p-6 sm:p-8 lg:p-10 mb-12 shadow-2xl"
-          >
-            {/* Efeito de brilho/overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
-            
-            {/* Conteúdo */}
-            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-              <div className="flex-1 text-center sm:text-left">
-                <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl">
-                  {t('landing.hero.description', 'Comece a investir em trailers comerciais com garantia real e retorno fixo de 2% ao mês')}
-                </p>
-              </div>
-              
-              <div className="flex-shrink-0">
-                <Link href="/register">
-                  <Button 
-                    className="bg-accent hover:bg-accent/90 text-white font-semibold gap-2 h-11 px-6 shadow-lg hover:shadow-xl transition-all"
-                  >
-                    {t('landing.cta.buttonRegister', 'Abrir Minha Conta')}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -216,6 +185,42 @@ export default function Landing() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Banner CTA Estilo Azul Escuro */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[hsl(210,70%,15%)] via-[hsl(210,60%,20%)] to-[hsl(210,50%,25%)] p-6 sm:p-8 lg:p-10 shadow-2xl"
+          >
+            {/* Efeito de brilho/overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+            
+            {/* Conteúdo */}
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl">
+                  {t('landing.hero.description', 'Cada cota de USD 28.000 representa 1 trailer comercial. Retorno mensal garantido de USD 560 (2%).')}
+                </p>
+              </div>
+              
+              <div className="flex-shrink-0">
+                <Link href="/register">
+                  <Button 
+                    className="bg-accent hover:bg-accent/90 text-white font-semibold gap-2 h-11 px-6 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {t('landing.cta.buttonRegister', 'Abrir Minha Conta')}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </motion.div>
         </div>
