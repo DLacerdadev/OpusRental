@@ -17,12 +17,10 @@ import {
   Calendar
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/hooks/useTheme";
 import logoPath from "@assets/image_1759264185138.png";
 
 export default function Landing() {
   const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,15 +45,6 @@ export default function Landing() {
             </div>
             
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-lg"
-                data-testid="button-toggle-theme"
-              >
-                {theme === "dark" ? "☀️" : "🌙"}
-              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -105,13 +94,6 @@ export default function Landing() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-6 sm:mb-8">
-              <Truck className="h-4 w-4 text-accent" />
-              <span className="text-xs sm:text-sm font-bold text-accent">
-                {t('landing.hero.badge', 'Cada cota = 1 trailer comercial')}
-              </span>
-            </div>
-
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-foreground mb-4 sm:mb-6 leading-[1.1] tracking-tight">
               {t('landing.hero.headline', 'Invista em Trailers Comerciais')}
               <br />
