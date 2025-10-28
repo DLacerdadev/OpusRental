@@ -74,54 +74,54 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
   const filteredSettingsItems = settingsItems.filter(item => item.roles.includes(user?.role || "investor"));
 
   return (
-    <div className={`relative bg-card border-r border-border min-h-screen flex flex-col shadow-lg transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
+    <div className={`relative bg-gradient-to-b from-[hsl(210,70%,15%)] via-[hsl(210,65%,17%)] to-[hsl(210,70%,15%)] text-white border-r border-white/10 min-h-screen flex flex-col shadow-2xl transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
       {/* Collapse Toggle Button - Hidden on mobile */}
       {!isMobile && (
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-8 bg-background border border-border rounded-full p-1 shadow-md hover:shadow-lg transition-all hover:scale-110 z-20 items-center justify-center"
+          className="hidden lg:flex absolute -right-4 top-8 bg-accent hover:bg-accent/90 text-white rounded-full p-2 shadow-lg hover:shadow-xl transition-all hover:scale-110 z-20 items-center justify-center"
           data-testid="button-toggle-sidebar"
         >
-          {isCollapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />}
+          {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </button>
       )}
 
       {/* Header with Logo */}
-      <div className="p-5 border-b border-border">
+      <div className="p-5 border-b border-white/10">
         {!effectiveCollapsed && (
           <div className="flex items-center gap-3 mb-4">
-            <img src={logoPath} alt="Opus" className="h-11 w-11 rounded-lg shadow-sm" />
+            <img src={logoPath} alt="Opus" className="h-11 w-11 rounded-xl shadow-lg" />
             <div>
-              <h1 className="text-base font-bold text-foreground">Opus Rental Capital</h1>
-              <p className="text-xs text-muted-foreground">Investment Platform</p>
+              <h1 className="text-base font-bold text-white">Opus Rental Capital</h1>
+              <p className="text-xs text-accent font-medium">Investment Platform</p>
             </div>
           </div>
         )}
         {effectiveCollapsed && (
-          <img src={logoPath} alt="Opus" className="h-10 w-10 rounded-lg shadow-sm mx-auto mb-3" />
+          <img src={logoPath} alt="Opus" className="h-10 w-10 rounded-xl shadow-lg mx-auto mb-3" />
         )}
         
         {!effectiveCollapsed && (
-          <div className="bg-accent/5 border border-accent/20 rounded-lg p-3">
+          <div className="bg-white/5 border border-accent/30 rounded-lg p-3 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t('header.profile')}</p>
+              <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
+              <p className="text-xs text-accent font-semibold uppercase tracking-wide">{t('header.profile')}</p>
             </div>
-            <p className="text-sm text-foreground font-semibold capitalize">
+            <p className="text-sm text-white font-bold capitalize">
               {t(`roles.${user?.role || 'investor'}`)}
             </p>
-            {user?.email && <p className="text-xs text-muted-foreground mt-1 truncate">{user.email}</p>}
+            {user?.email && <p className="text-xs text-white/70 mt-1 truncate">{user.email}</p>}
           </div>
         )}
         {effectiveCollapsed && (
-          <div className="bg-accent/10 rounded-lg p-2">
+          <div className="bg-accent/20 border border-accent/30 rounded-lg p-2">
             <UserCog className="h-5 w-5 text-accent mx-auto" />
           </div>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
+      <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto">
         {filteredNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.path;
@@ -130,14 +130,14 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
             <Link key={item.path} href={item.path}>
               <button
                 onClick={onNavigate}
-                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-3"} py-2.5 rounded-lg text-sm font-medium transition-all group ${
+                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-4"} py-3 rounded-lg text-sm font-semibold transition-all group ${
                   isActive 
-                    ? "bg-accent text-accent-foreground shadow-sm" 
-                    : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
+                    ? "bg-accent text-white shadow-lg" 
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <Icon className={`h-4.5 w-4.5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
+                <Icon className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
                 {!effectiveCollapsed && <span className="truncate">{item.label}</span>}
               </button>
             </Link>
@@ -146,9 +146,9 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
       </nav>
 
       {/* Settings Section */}
-      <div className="p-3 border-t border-border space-y-1 bg-muted/30">
+      <div className="p-4 border-t border-white/10 space-y-1.5 bg-black/20">
         {!effectiveCollapsed && (
-          <div className="text-xs font-semibold text-muted-foreground mb-2 px-3 uppercase tracking-wide">
+          <div className="text-xs font-bold text-white/60 mb-2 px-4 uppercase tracking-wider">
             {t('nav.logout').toUpperCase().includes('SAIR') ? 'Sistema' : 'System'}
           </div>
         )}
@@ -161,14 +161,14 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
             <Link key={item.path} href={item.path}>
               <button
                 onClick={onNavigate}
-                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-3"} py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-4"} py-3 rounded-lg text-sm font-semibold transition-all ${
                   isActive 
-                    ? "bg-accent text-accent-foreground shadow-sm" 
-                    : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
+                    ? "bg-accent text-white shadow-lg" 
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <Icon className={`h-4.5 w-4.5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
+                <Icon className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
                 {!effectiveCollapsed && <span className="truncate">{item.label}</span>}
               </button>
             </Link>
@@ -176,11 +176,11 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
         })}
 
         <button
-          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-3"} py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all`}
+          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-2" : "px-4"} py-3 rounded-lg text-sm font-semibold text-white/80 hover:bg-destructive/20 hover:text-white transition-all`}
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >
-          <LogOut className={`h-4.5 w-4.5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
+          <LogOut className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
           {!effectiveCollapsed && <span>{t('nav.logout')}</span>}
         </button>
       </div>
