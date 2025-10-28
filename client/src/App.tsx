@@ -12,6 +12,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import NotFound from "@/pages/not-found";
+import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
@@ -87,7 +88,7 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
-  if (isLoading) {
+  if (isLoading && location !== "/" && location !== "/login" && location !== "/register") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -95,15 +96,12 @@ function Router() {
     );
   }
 
-  if (!isAuthenticated && location !== "/login" && location !== "/register") {
-    return <Login />;
-  }
-
   return (
     <Switch>
+      <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      <Route path="/">
+      <Route path="/dashboard">
         {() => <ProtectedRoute component={Dashboard} titleKey="pageTitles.dashboard" />}
       </Route>
       <Route path="/portfolio">

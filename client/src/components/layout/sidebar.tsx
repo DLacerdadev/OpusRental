@@ -55,7 +55,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
   const isManager = user?.role === "manager" || user?.role === "admin";
 
   const navItems = [
-    { path: "/", icon: LayoutDashboard, label: t('nav.dashboard'), roles: ["investor", "manager", "admin"] },
+    { path: "/dashboard", icon: LayoutDashboard, label: t('nav.dashboard'), roles: ["investor", "manager", "admin"] },
     { path: "/portfolio", icon: Briefcase, label: t('nav.portfolio'), roles: ["investor"] },
     { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
     { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
