@@ -51,7 +51,7 @@ export default function Landing() {
                 variant="ghost"
                 size="sm"
                 onClick={toggleTheme}
-                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-lg"
                 data-testid="button-toggle-theme"
               >
                 {theme === "dark" ? "☀️" : "🌙"}
@@ -59,11 +59,15 @@ export default function Landing() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => i18n.changeLanguage(i18n.language === "en" ? "pt" : "en")}
-                className="h-7 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  const newLang = i18n.language.startsWith("en") ? "pt-BR" : "en-US";
+                  i18n.changeLanguage(newLang);
+                  localStorage.setItem('language', newLang);
+                }}
+                className="h-8 px-3 text-xs font-bold text-muted-foreground hover:text-foreground border border-border rounded-lg"
                 data-testid="button-toggle-language"
               >
-                {i18n.language === "en" ? "PT" : "EN"}
+                {i18n.language.startsWith("en") ? "🇧🇷 PT" : "🇺🇸 EN"}
               </Button>
               <Link href="/login">
                 <Button 
