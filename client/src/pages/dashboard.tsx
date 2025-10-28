@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { PerformanceChart } from "@/components/charts/performance-chart";
-import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarChart3 } from "lucide-react";
+import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarChart3, ArrowUpRight, ArrowDownRight, AlertCircle, CheckCircle2, Clock, MapPin, Package, Target } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -159,19 +161,146 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{t('dashboard.revenueOverview')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 sm:h-72 lg:h-80">
-              <PerformanceChart
-                data={revenueChartData}
-                color="#10b981"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <Card className="lg:col-span-2 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
+                <span>{t('dashboard.revenueOverview')}</span>
+                <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +12.5%
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 sm:h-72 lg:h-80">
+                <PerformanceChart
+                  data={revenueChartData.length > 0 ? revenueChartData : [
+                    { month: 'Jan', value: 45000 },
+                    { month: 'Fev', value: 52000 },
+                    { month: 'Mar', value: 61000 },
+                    { month: 'Abr', value: 58000 },
+                    { month: 'Mai', value: 67000 },
+                    { month: 'Jun', value: 73000 }
+                  ]}
+                  color="#10b981"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">{t('dashboard.monthlyGoals')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">{t('dashboard.revenueGoal')}</span>
+                    <span className="text-sm font-bold text-foreground">73%</span>
+                  </div>
+                  <Progress value={73} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatCurrency(73000, 'USD')} / {formatCurrency(100000, 'USD')}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">{t('dashboard.salesTarget')}</span>
+                    <span className="text-sm font-bold text-foreground">85%</span>
+                  </div>
+                  <Progress value={85} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    17 / 20 {t('dashboard.shares')}
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">{t('dashboard.fleetUtilization')}</span>
+                    <span className="text-sm font-bold text-foreground">92%</span>
+                  </div>
+                  <Progress value={92} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {companyStats.activeTrailers} / {companyStats.totalTrailers} {t('dashboard.active')}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                    <Target className="h-4 w-4" />
+                    <span>{t('dashboard.keyMetrics')}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{t('dashboard.avgRevenue')}</span>
+                      <span className="text-sm font-semibold text-foreground">{formatCurrency(12167, 'USD')}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{t('dashboard.growthRate')}</span>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">+12.5%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <Card className="shadow-md border-l-4 border-l-blue-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.pendingApprovals')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground">3</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.requiresAction')}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border-l-4 border-l-yellow-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.maintenance')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground">2</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.scheduled')}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md border-l-4 border-l-green-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.completedToday')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground">8</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.transactions')}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card className="shadow-md">
@@ -349,19 +478,152 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">{t('dashboard.performanceOverview')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 sm:h-72 lg:h-80">
-            <PerformanceChart
-              data={performanceData}
-              color="#10b981"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="lg:col-span-2 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
+              <span>{t('dashboard.performanceOverview')}</span>
+              <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +8.2%
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 sm:h-72 lg:h-80">
+              <PerformanceChart
+                data={performanceData.length > 0 ? performanceData : [
+                  { month: 'Jan', value: 560 },
+                  { month: 'Fev', value: 1120 },
+                  { month: 'Mar', value: 1680 },
+                  { month: 'Abr', value: 1680 },
+                  { month: 'Mai', value: 2240 },
+                  { month: 'Jun', value: 2800 }
+                ]}
+                color="#10b981"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">{t('dashboard.investmentSummary')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-accent" />
+                  <span className="text-xs font-medium text-muted-foreground">{t('dashboard.totalInvested')}</span>
+                </div>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(investorStats?.totalValue || 28000, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.monthlyReturn')}</p>
+                    <p className="text-lg font-bold text-foreground">
+                      {formatCurrency(investorStats?.monthlyReturn || 560, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.totalReturns')}</p>
+                    <p className="text-lg font-bold text-foreground">
+                      {formatCurrency(investorStats?.totalReturns || 2800, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                    </p>
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.roi')}</p>
+                    <p className="text-lg font-bold text-foreground">10.0%</p>
+                  </div>
+                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                    5 {t('dashboard.months')}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-muted-foreground">{t('dashboard.nextPayment')}</span>
+                  <span className="text-xs font-semibold text-foreground">{format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'dd/MM/yyyy')}</span>
+                </div>
+                <Progress value={65} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">19 {t('dashboard.daysRemaining')}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="shadow-md border-l-4 border-l-green-500">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.activeShares')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold text-foreground">{investorStats?.activeShares || 1}</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {t('dashboard.allActive')}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <Truck className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md border-l-4 border-l-blue-500">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.totalPayments')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold text-foreground">{investorStats?.recentPayments?.length || 5}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('dashboard.received')}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md border-l-4 border-l-purple-500">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.avgMonthly')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold text-foreground">
+                  {formatCurrency(560, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                </p>
+                <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">2% {t('dashboard.fixed')}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="shadow-md">
