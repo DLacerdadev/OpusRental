@@ -44,6 +44,9 @@ export default function Login() {
       // Save token to memory - Axios will automatically use it for ALL requests
       if (data.token) {
         setAuthToken(data.token);
+        
+        // Give the interceptor time to be ready before navigating
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
       // Invalidate all queries to force refetch with new token

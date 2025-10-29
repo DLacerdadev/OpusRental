@@ -67,9 +67,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+      // Unauthorized - clear token but DON'T redirect if on dashboard
       globalAuthToken = null;
-      if (!window.location.pathname.includes('/login')) {
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/dashboard')) {
         toast({
           title: getErrorMessage('unauthorized'),
           variant: 'destructive',
