@@ -39,10 +39,21 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response.json();
     },
-    onSuccess: async (data: any) => {
-      // Save token to localStorage FIRST
+    onSuccess: (data: any) => {
+      // Save token to localStorage and verify it was saved
       if (data.token) {
         localStorage.setItem('auth_token', data.token);
+        const savedToken = localStorage.getItem('auth_token');
+        console.log('[Login] Token saved:', savedToken ? 'Success' : 'Failed');
+        
+        if (!savedToken) {
+          toast({
+            title: "Error",
+            description: "Failed to save authentication token. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
       
       toast({
@@ -50,8 +61,10 @@ export default function Login() {
         description: t('login.successDescription'),
       });
       
-      // Force page reload to ensure clean state
-      window.location.href = "/dashboard";
+      // Small delay to ensure toast is shown, then reload
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 100);
     },
     onError: (error: Error) => {
       toast({

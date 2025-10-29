@@ -3,6 +3,7 @@ import { toast } from "@/hooks/use-toast";
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('auth_token');
+  console.log('[Auth] Getting token:', token ? 'Token exists' : 'No token found');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
