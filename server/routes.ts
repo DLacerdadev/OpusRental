@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { insertUserSchema, insertTrailerSchema, insertShareSchema, financialRecords } from "@shared/schema";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import cors from "cors";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -12,6 +13,15 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Trust proxy for Replit environment
+  app.set('trust proxy', 1);
+
+  // CORS middleware - MUST be before session and helmet
+  app.use(cors({
+    origin: true, // Allow all origins in development
+    credentials: true, // Allow cookies
+  }));
+
   // Security middleware
   app.use(helmet({
     contentSecurityPolicy: {
@@ -52,9 +62,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     standardHeaders: true,
     legacyHeaders: false,
   });
-
-  // Trust proxy for Replit environment
-  app.set('trust proxy', 1);
 
   // PostgreSQL session store
   const PgSession = connectPgSimple(session);
