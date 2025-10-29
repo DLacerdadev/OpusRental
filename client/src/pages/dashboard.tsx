@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/lib/currency";
-import { getGlobalAuthToken } from "@/lib/queryClient";
+import { getAuthToken } from "@/lib/api";
 
 interface InvestorStats {
   totalValue: number;
@@ -48,7 +48,7 @@ interface CompanyStats {
 export default function Dashboard() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { t, i18n } = useTranslation();
-  const hasToken = !!getGlobalAuthToken();
+  const hasToken = !!getAuthToken();
   
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],

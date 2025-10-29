@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient, setGlobalAuthToken } from "@/lib/queryClient";
+import api, { setAuthToken } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -36,18 +37,14 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/auth/login", credentials);
-      return response.json();
+      const response = await api.post("/api/auth/login", credentials);
+      return response.data;
     },
     onSuccess: async (data: any) => {
-      // Save token to global memory (NOT storage)
+      // Save token to memory - Axios will automatically use it for ALL requests
       if (data.token) {
-        setGlobalAuthToken(data.token);
-        console.log('[Login] Token saved to memory');
+        setAuthToken(data.token);
       }
-      
-      // Wait a bit to ensure token is set
-      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Invalidate all queries to force refetch with new token
       queryClient.invalidateQueries();
