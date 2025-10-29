@@ -13,8 +13,7 @@ import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTrailerSchema, type InsertTrailer } from "@shared/schema";
-import api from "@/lib/api";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
@@ -51,7 +50,7 @@ export default function Assets() {
 
   const createTrailerMutation = useMutation({
     mutationFn: async (data: InsertTrailer) => {
-      return await api.post("/api/trailers", data);
+      return await apiRequest("POST", "/api/trailers", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trailers"] });

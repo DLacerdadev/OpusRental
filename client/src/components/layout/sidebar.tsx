@@ -1,8 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import api, { setAuthToken } from "@/lib/api";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import logoPath from "@assets/image_1759264185138.png";
@@ -41,10 +40,9 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await api.post("/api/auth/logout", {});
+      await apiRequest("POST", "/api/auth/logout", {});
     },
     onSuccess: () => {
-      setAuthToken(null); // Clear token on logout
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Logout realizado",

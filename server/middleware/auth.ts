@@ -1,202 +1,229 @@
-import { type Request, type Response, type NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { storage } from "../storage";
-import jwt from "jsonwebtoken";
+import { matchPolicy, type UserRole } from "../policies";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+    user?: {
+      id: string;
+      email: string;
+      role: UserRole;
+    };
+  }
+}
 
 declare global {
   namespace Express {
     interface Request {
-      userId?: string;
-      userRole?: string;
+      user?: any;
     }
   }
 }
 
-const JWT_SECRET = process.env.SESSION_SECRET || "opus-rental-capital-secret-key";
-
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (req.session.userId) {
+    return next();
   }
-
-  try {
-    const payload = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
-    req.userId = payload.userId;
-    req.userRole = payload.role;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+  res.status(401).json({ message: "Unauthorized" });
 };
 
 export const requireRole = (allowedRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.userRole) {
+      if (!req.session.userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      if (!allowedRoles.includes(req.userRole)) {
-        return res.status(403).json({ message: "Forbidden" });
+      const user = await storage.getUser(req.session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
       }
 
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ 
+          message: "Forbidden: Insufficient permissions",
+          required: allowedRoles,
+          current: user.role
+        });
+      }
+
+      req.user = user;
       next();
     } catch (error) {
-      res.status(500).json({ message: "Authorization error" });
+      console.error("Role authorization error:", error);
+      res.status(500).json({ message: "Authorization failed" });
     }
   };
 };
 
 export const isManager = requireRole(["manager", "admin"]);
+
 export const isAdmin = requireRole(["admin"]);
 
-export const authorize = (permissions: string[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.userId || !req.userRole) {
-        return res.status(401).json({ message: "Unauthorized" });
+export const attachUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (req.session.userId) {
+      const user = await storage.getUser(req.session.userId);
+      if (user) {
+        req.user = user;
       }
-
-      const user = await storage.getUser(req.userId);
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const allowedRoles = permissionsMap[req.method as keyof typeof permissionsMap]?.[req.path];
-      if (!allowedRoles) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-
-      if (!allowedRoles.includes(user.role)) {
-        await storage.createAuditLog({
-          userId: user.id,
-          action: "access_denied",
-          entityType: "permission",
-          entityId: req.path,
-          details: { role: user.role, requiredRoles: allowedRoles },
-          ipAddress: req.ip,
-        });
-        return res.status(403).json({ message: "Forbidden" });
-      }
-
-      next();
-    } catch (error) {
-      res.status(500).json({ message: "Authorization error" });
     }
-  };
+    next();
+  } catch (error) {
+    console.error("Attach user error:", error);
+    next();
+  }
 };
 
-export const checkOwnership = () => {
+export const authorize = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.userId) {
+      if (!req.session.user) {
+        if (req.session.userId) {
+          await storage.createAuditLog({
+            userId: req.session.userId,
+            action: "unauthorized_access",
+            entityType: "route",
+            entityId: req.path,
+            details: { method: req.method, path: req.path },
+            ipAddress: req.ip,
+          });
+        }
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const user = await storage.getUser(req.userId);
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
+      const allowedRoles = matchPolicy(req.method, req.path);
+      
+      if (!allowedRoles) {
+        return res.status(404).json({ message: "Not found" });
       }
 
-      if (user.role === "admin" || user.role === "manager") {
+      if (allowedRoles[0] === "*") {
         return next();
       }
 
-      const resourceId = req.params.id;
-      if (!resourceId) {
-        return res.status(400).json({ message: "Resource ID required" });
-      }
-
-      let isOwner = false;
-      if (req.path.includes("/shares")) {
-        const share = await storage.getShareById(resourceId);
-        isOwner = share?.userId === user.id;
-      } else if (req.path.includes("/payments")) {
-        const payment = await storage.getPaymentById(resourceId);
-        const share = payment?.shareId ? await storage.getShareById(payment.shareId) : null;
-        isOwner = share?.userId === user.id;
-      }
-
-      if (!isOwner) {
+      const roles = allowedRoles as readonly UserRole[];
+      if (!roles.includes(req.session.user.role)) {
         await storage.createAuditLog({
-          userId: user.id,
-          action: "unauthorized_access",
-          entityType: "resource",
-          entityId: resourceId,
-          details: { path: req.path, method: req.method },
+          userId: req.session.user.id,
+          action: "forbidden_access",
+          entityType: "route",
+          entityId: req.path,
+          details: { 
+            method: req.method, 
+            path: req.path,
+            required: allowedRoles,
+            current: req.session.user.role 
+          },
           ipAddress: req.ip,
         });
-        return res.status(403).json({ message: "Forbidden" });
+        
+        return res.status(403).json({ 
+          message: "Forbidden: Insufficient permissions",
+          required: allowedRoles,
+          current: req.session.user.role
+        });
       }
 
       next();
     } catch (error) {
-      res.status(500).json({ message: "Authorization error" });
+      console.error("Authorization error:", error);
+      res.status(500).json({ message: "Authorization failed" });
     }
   };
 };
 
 export const logAccess = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const originalJson = res.json.bind(res);
-
-    res.json = function (body: any) {
-      const userId = req.userId || "anonymous";
-      const userRole = req.userRole || "none";
-
-      if (req.path.startsWith("/api/")) {
-        const logEntry: any = {
-          timestamp: new Date().toISOString(),
-          userId,
-          email: "unknown",
-          role: userRole,
-          method: req.method,
-          path: req.path,
-          status: res.statusCode,
-          duration: `${Date.now() - (req as any).startTime}ms`,
-          ip: req.ip,
-        };
-
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log("✅ Access:", JSON.stringify(logEntry));
-        } else if (res.statusCode >= 400) {
-          console.log("❌ Access Error:", JSON.stringify(logEntry));
-        }
+    const start = Date.now();
+    
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        userId: req.session?.user?.id || req.session?.userId || "anonymous",
+        email: req.session?.user?.email || "unknown",
+        role: req.session?.user?.role || "none",
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        duration: `${duration}ms`,
+        ip: req.ip,
+      };
+      
+      if (res.statusCode >= 400) {
+        console.error("❌ Access Error:", JSON.stringify(logEntry));
+      } else {
+        console.log("✅ Access:", JSON.stringify(logEntry));
       }
-
-      return originalJson(body);
-    };
-
-    (req as any).startTime = Date.now();
+    });
+    
     next();
   };
 };
 
-const permissionsMap = {
-  GET: {
-    "/api/users": ["admin", "manager"],
-    "/api/trailers": ["admin", "manager", "investor"],
-    "/api/shares": ["admin", "manager", "investor"],
-    "/api/payments": ["admin", "manager", "investor"],
-  },
-  POST: {
-    "/api/users": ["admin"],
-    "/api/trailers": ["admin", "manager"],
-    "/api/shares": ["admin", "manager"],
-    "/api/payments": ["admin", "manager"],
-  },
-  PUT: {
-    "/api/users/:id": ["admin"],
-    "/api/trailers/:id": ["admin", "manager"],
-    "/api/shares/:id": ["admin", "manager"],
-    "/api/payments/:id": ["admin", "manager"],
-  },
-  DELETE: {
-    "/api/users/:id": ["admin"],
-    "/api/trailers/:id": ["admin"],
-    "/api/shares/:id": ["admin", "manager"],
-    "/api/payments/:id": ["admin", "manager"],
-  },
+export const checkOwnership = () => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userRole = req.session.user.role;
+      
+      if (userRole === "manager" || userRole === "admin") {
+        return next();
+      }
+
+      const shareId = req.params.id || req.params.shareId;
+      const userId = req.session.user.id;
+
+      if (req.path.includes("/shares/") && shareId) {
+        const share = await storage.getShare(shareId);
+        if (!share || share.userId !== userId) {
+          await storage.createAuditLog({
+            userId,
+            action: "ownership_violation",
+            entityType: "share",
+            entityId: shareId,
+            details: { 
+              method: req.method, 
+              path: req.path,
+              attemptedAccess: shareId,
+              actualOwner: share?.userId || "not_found"
+            },
+            ipAddress: req.ip,
+          });
+          return res.status(403).json({ message: "Forbidden: You can only access your own resources" });
+        }
+      }
+
+      if (req.path.includes("/payments/") && shareId) {
+        const share = await storage.getShare(shareId);
+        if (!share || share.userId !== userId) {
+          await storage.createAuditLog({
+            userId,
+            action: "ownership_violation",
+            entityType: "payment",
+            entityId: shareId,
+            details: { 
+              method: req.method, 
+              path: req.path,
+              attemptedAccess: shareId,
+              actualOwner: share?.userId || "not_found"
+            },
+            ipAddress: req.ip,
+          });
+          return res.status(403).json({ message: "Forbidden: You can only access your own resources" });
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error("Ownership check error:", error);
+      res.status(500).json({ message: "Ownership check failed" });
+    }
+  };
 };

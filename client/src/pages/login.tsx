@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import api, { setAuthToken } from "@/lib/api";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -37,27 +36,15 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
-      const response = await api.post("/api/auth/login", credentials);
-      return response.data;
+      const response = await apiRequest("POST", "/api/auth/login", credentials);
+      return response.json();
     },
-    onSuccess: async (data: any) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: t('login.successTitle'),
         description: t('login.successDescription'),
       });
-      
-      // Save token to memory - Axios will automatically use it for ALL requests
-      if (data.token) {
-        setAuthToken(data.token);
-        
-        // Clear all queries before navigating
-        queryClient.clear();
-        
-        // Give time for token to be properly set in interceptor
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
-      
-      // Navigate without page reload (SPA navigation)
       setLocation("/dashboard");
     },
     onError: (error: Error) => {

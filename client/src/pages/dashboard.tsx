@@ -3,14 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { PerformanceChart } from "@/components/charts/performance-chart";
 import { Wallet, TrendingUp, DollarSign, Calendar, Activity, Truck, Users, BarChart3, ArrowUpRight, ArrowDownRight, AlertCircle, CheckCircle2, Clock, MapPin, Package, Target } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/lib/currency";
-import { getAuthToken } from "@/lib/api";
 
 interface InvestorStats {
   totalValue: number;
@@ -47,19 +45,15 @@ interface CompanyStats {
 }
 
 export default function Dashboard() {
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user } = useAuth();
   const { t, i18n } = useTranslation();
-  
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
-    enabled: !!user,
-    retry: false,
   });
 
   const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
-    enabled: !!user && user.role === "investor",
-    retry: false,
+    enabled: user?.role === "investor",
   });
 
   const formatMonth = (month: string) => {

@@ -3,8 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertTrailerSchema, insertShareSchema, financialRecords } from "@shared/schema";
-import jwt from "jsonwebtoken";
-import cors from "cors";
+import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -12,32 +11,22 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Trust proxy for Replit environment
-  app.set('trust proxy', 1);
-
-  // CORS middleware - MUST be before session and helmet
-  app.use(cors({
-    origin: true, // Allow all origins in development
-    credentials: true, // Allow cookies
-  }));
-
-  // Security middleware - Configured for Replit iframe environment
+  // Security middleware
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
         connectSrc: ["'self'"],
-        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+        fontSrc: ["'self'", "data:"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["'none'"],
       },
     },
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: false, // Allow resources in iframe
   }));
 
   // Rate limiting
@@ -63,8 +52,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     legacyHeaders: false,
   });
 
-  // JWT Secret
-  const JWT_SECRET = process.env.SESSION_SECRET || "opus-rental-capital-secret-key";
+  // Session middleware
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "opus-rental-capital-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      },
+    })
+  );
 
   // Access logging
   app.use(logAccess());
@@ -84,28 +85,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
-        {
-          userId: user.id,
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+
+        req.session.userId = user.id;
+        req.session.user = {
+          id: user.id,
           email: user.email,
-          role: user.role,
-        },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+          role: user.role as "investor" | "manager" | "admin",
+        };
+        
+        req.session.save(async (err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Login failed" });
+          }
 
-      await storage.createAuditLog({
-        userId: user.id,
-        action: "login",
-        entityType: "user",
-        entityId: user.id,
-        details: { email: user.email, role: user.role },
-        ipAddress: req.ip,
+          await storage.createAuditLog({
+            userId: user.id,
+            action: "login",
+            entityType: "user",
+            entityId: user.id,
+            details: { email: user.email, role: user.role },
+            ipAddress: req.ip,
+          });
+
+          const { password: _, ...userWithoutPassword } = user;
+          res.json(userWithoutPassword);
+        });
       });
-
-      const { password: _, ...userWithoutPassword } = user;
-      res.json({ ...userWithoutPassword, token });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -187,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/user", isAuthenticated, async (req, res) => {
     try {
-      const user = await storage.getUser(req.userId!);
+      const user = await storage.getUser(req.session.userId!);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -202,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard routes
   app.get("/api/dashboard/stats", authorize(), async (req, res) => {
     try {
-      const userRole = req.userRole;
+      const userRole = req.session.user?.role;
       
       // Managers and admins get company-wide statistics
       if (userRole === "manager" || userRole === "admin") {
@@ -210,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(stats);
       } else {
         // Investors get personal statistics
-        const stats = await storage.getDashboardStats(req.userId!);
+        const stats = await storage.getDashboardStats(req.session.userId!);
         res.json(stats);
       }
     } catch (error) {
@@ -222,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Portfolio routes
   app.get("/api/portfolio", authorize(), async (req, res) => {
     try {
-      const portfolio = await storage.getPortfolioData(req.userId!);
+      const portfolio = await storage.getPortfolioData(req.session.userId!);
       res.json(portfolio);
     } catch (error) {
       console.error("Portfolio error:", error);
@@ -277,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trailer = await storage.createTrailer(validated);
       
       await storage.createAuditLog({
-        userId: req.userId!,
+        userId: req.session.userId!,
         action: "create_trailer",
         entityType: "trailer",
         entityId: trailer.id,
@@ -414,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Compliance routes
   app.get("/api/documents", authorize(), async (req, res) => {
     try {
-      const documents = await storage.getDocumentsByUserId(req.userId!);
+      const documents = await storage.getDocumentsByUserId(req.session.userId!);
       res.json(documents);
     } catch (error) {
       console.error("Documents error:", error);
@@ -445,7 +456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/shares", authorize(), async (req, res) => {
     try {
-      const shares = await storage.getSharesByUserId(req.userId!);
+      const shares = await storage.getSharesByUserId(req.session.userId!);
       res.json(shares);
     } catch (error) {
       console.error("Shares error:", error);
@@ -490,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create share data directly from request and session
       const shareData: any = {
-        userId: req.userId!,
+        userId: req.session.userId!,
         trailerId: req.body.trailerId,
         purchaseValue: req.body.purchaseValue,
         purchaseDate: req.body.purchaseDate,
@@ -508,7 +519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create audit log
       await storage.createAuditLog({
-        userId: req.userId!,
+        userId: req.session.userId!,
         action: "purchase_share",
         entityType: "share",
         entityId: share.id,
@@ -526,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payments routes
   app.get("/api/payments", authorize(), async (req, res) => {
     try {
-      const payments = await storage.getPaymentsByUserId(req.userId!);
+      const payments = await storage.getPaymentsByUserId(req.session.userId!);
       res.json(payments);
     } catch (error) {
       console.error("Payments error:", error);
