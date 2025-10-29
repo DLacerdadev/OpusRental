@@ -40,20 +40,18 @@ export default function Login() {
       return response.json();
     },
     onSuccess: async (data: any) => {
-      // Save token to localStorage
+      // Save token to localStorage FIRST
       if (data.token) {
         localStorage.setItem('auth_token', data.token);
       }
-      
-      // Clear all queries and refetch user
-      queryClient.clear();
-      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       
       toast({
         title: t('login.successTitle'),
         description: t('login.successDescription'),
       });
-      setLocation("/dashboard");
+      
+      // Force page reload to ensure clean state
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({
