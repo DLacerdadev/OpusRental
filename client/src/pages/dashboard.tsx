@@ -45,10 +45,11 @@ interface CompanyStats {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { t, i18n } = useTranslation();
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
+    enabled: !!user,
   });
 
   const { data: shares = [] } = useQuery<any[]>({
@@ -75,7 +76,7 @@ export default function Dashboard() {
     }
   };
 
-  if (isLoading) {
+  if (isAuthLoading || isLoading) {
     return (
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
