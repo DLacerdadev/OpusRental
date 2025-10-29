@@ -52,12 +52,13 @@ export default function Dashboard() {
   
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
+    enabled: !!user,
     retry: false,
   });
 
   const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
-    enabled: user?.role === "investor",
+    enabled: !!user && user.role === "investor",
     retry: false,
   });
 

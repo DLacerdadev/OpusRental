@@ -41,21 +41,21 @@ export default function Login() {
       return response.data;
     },
     onSuccess: async (data: any) => {
-      // Save token to memory - Axios will automatically use it for ALL requests
-      if (data.token) {
-        setAuthToken(data.token);
-        
-        // Give the interceptor time to be ready before navigating
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      // Invalidate all queries to force refetch with new token
-      queryClient.invalidateQueries();
-      
       toast({
         title: t('login.successTitle'),
         description: t('login.successDescription'),
       });
+      
+      // Save token to memory - Axios will automatically use it for ALL requests
+      if (data.token) {
+        setAuthToken(data.token);
+        
+        // Clear all queries before navigating
+        queryClient.clear();
+        
+        // Give time for token to be properly set in interceptor
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
       
       // Navigate without page reload (SPA navigation)
       setLocation("/dashboard");
