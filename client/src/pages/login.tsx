@@ -40,11 +40,11 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data: any) => {
-      // Save token to localStorage and verify it was saved
+      // Save token to sessionStorage and verify it was saved
       if (data.token) {
-        localStorage.setItem('auth_token', data.token);
-        const savedToken = localStorage.getItem('auth_token');
-        console.log('[Login] Token saved:', savedToken ? 'Success' : 'Failed');
+        sessionStorage.setItem('auth_token', data.token);
+        const savedToken = sessionStorage.getItem('auth_token');
+        console.log('[Login] Token saved to sessionStorage:', savedToken ? 'Success' : 'Failed');
         
         if (!savedToken) {
           toast({

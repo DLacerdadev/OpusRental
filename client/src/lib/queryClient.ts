@@ -2,7 +2,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('auth_token');
+  const token = sessionStorage.getItem('auth_token');
   console.log('[Auth] Getting token:', token ? 'Token exists' : 'No token found');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
@@ -10,7 +10,7 @@ function getAuthHeaders(): HeadersInit {
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem('auth_token');
+      sessionStorage.removeItem('auth_token');
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
