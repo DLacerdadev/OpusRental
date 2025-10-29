@@ -59,7 +59,7 @@ export const authorize = (permissions: string[]) => {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const user = await storage.getUserById(req.userId);
+      const user = await storage.getUser(req.userId);
       if (!user) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -95,7 +95,7 @@ export const checkOwnership = () => {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const user = await storage.getUserById(req.userId);
+      const user = await storage.getUser(req.userId);
       if (!user) {
         return res.status(401).json({ message: "Unauthorized" });
       }
