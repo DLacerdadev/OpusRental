@@ -22,6 +22,14 @@ declare global {
 }
 
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  console.log("🔍 Auth check:", {
+    path: req.path,
+    sessionID: req.sessionID,
+    userId: req.session?.userId,
+    cookieHeader: req.headers.cookie,
+    hasSession: !!req.session,
+  });
+  
   if (req.session?.userId) {
     return next();
   }

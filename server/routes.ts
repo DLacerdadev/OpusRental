@@ -116,6 +116,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role as "investor" | "manager" | "admin",
       };
 
+      console.log("✅ Login successful:", {
+        sessionID: req.sessionID,
+        userId: req.session.userId,
+        setCookieHeader: res.getHeader('set-cookie'),
+      });
+
       await storage.createAuditLog({
         userId: user.id,
         action: "login",
