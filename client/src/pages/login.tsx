@@ -39,7 +39,11 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      // Save token to localStorage
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: t('login.successTitle'),

@@ -16,7 +16,7 @@ The frontend is built with React and TypeScript, using Vite for development and 
 
 ### Backend Architecture
 
-The backend is developed with Express.js and TypeScript on Node.js, following a RESTful API design. It uses PostgreSQL (NeonDB serverless) as the database with Drizzle ORM for type-safe operations. Authentication is session-based with `express-session` and `bcrypt` for password hashing. Authorization is policy-based with a centralized permission map and role-based access control (investor, manager, admin). Ownership validation ensures investors only access their resources. The system includes comprehensive audit logging, CSRF protection, rate limiting, and Helmet middleware for security.
+The backend is developed with Express.js and TypeScript on Node.js, following a RESTful API design. It uses PostgreSQL (NeonDB serverless) as the database with Drizzle ORM for type-safe operations. Authentication is JWT token-based (stored in localStorage, sent via Authorization header) with `jsonwebtoken` and `bcrypt` for password hashing. This architecture works reliably in iframe environments where cookies are blocked. Authorization is policy-based with a centralized permission map and role-based access control (investor, manager, admin). Ownership validation ensures investors only access their resources. The system includes comprehensive audit logging, rate limiting, and Helmet middleware for security.
 
 ### Data Architecture
 
