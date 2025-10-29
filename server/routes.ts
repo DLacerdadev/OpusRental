@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       req.session.regenerate((err) => {
         if (err) {
-          console.error("Session regeneration error:", err);
+          console.error("❌ Session regeneration error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
 
@@ -101,11 +101,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: user.role as "investor" | "manager" | "admin",
         };
         
+        console.log("✅ Session data set:", {
+          userId: req.session.userId,
+          user: req.session.user,
+          sessionID: req.sessionID,
+        });
+        
         req.session.save(async (err) => {
           if (err) {
-            console.error("Session save error:", err);
+            console.error("❌ Session save error:", err);
             return res.status(500).json({ message: "Login failed" });
           }
+
+          console.log("✅ Session saved successfully, sessionID:", req.sessionID);
 
           await storage.createAuditLog({
             userId: user.id,
