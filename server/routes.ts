@@ -21,22 +21,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     credentials: true, // Allow cookies
   }));
 
-  // Security middleware
+  // Security middleware - Configured for Replit iframe environment
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
         connectSrc: ["'self'"],
-        fontSrc: ["'self'", "data:"],
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["'none'"],
       },
     },
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false, // Allow resources in iframe
   }));
 
   // Rate limiting
