@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/lib/currency";
+import { getGlobalAuthToken } from "@/lib/queryClient";
 
 interface InvestorStats {
   totalValue: number;
@@ -47,14 +48,16 @@ interface CompanyStats {
 export default function Dashboard() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { t, i18n } = useTranslation();
+  const hasToken = !!getGlobalAuthToken();
+  
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
-    enabled: !!user,
+    enabled: !!user && hasToken,
   });
 
   const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
-    enabled: user?.role === "investor",
+    enabled: user?.role === "investor" && hasToken,
   });
 
   const formatMonth = (month: string) => {

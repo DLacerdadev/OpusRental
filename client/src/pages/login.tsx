@@ -39,12 +39,15 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       // Save token to global memory (NOT storage)
       if (data.token) {
         setGlobalAuthToken(data.token);
         console.log('[Login] Token saved to memory');
       }
+      
+      // Wait a bit to ensure token is set
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Invalidate all queries to force refetch with new token
       queryClient.invalidateQueries();
