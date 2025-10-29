@@ -69,10 +69,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       secret: process.env.SESSION_SECRET || "opus-rental-capital-secret-key",
       resave: false,
       saveUninitialized: false,
+      name: 'opus.sid',
       cookie: {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
+        httpOnly: false, // Allow JavaScript access for debugging
+        sameSite: "none",
+        secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       },
     })
