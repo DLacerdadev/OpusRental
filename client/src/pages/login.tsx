@@ -40,31 +40,21 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data: any) => {
-      // Save token to sessionStorage and verify it was saved
+      // Save token to sessionStorage
       if (data.token) {
         sessionStorage.setItem('auth_token', data.token);
-        const savedToken = sessionStorage.getItem('auth_token');
-        console.log('[Login] Token saved to sessionStorage:', savedToken ? 'Success' : 'Failed');
-        
-        if (!savedToken) {
-          toast({
-            title: "Error",
-            description: "Failed to save authentication token. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
       }
+      
+      // Invalidate all queries to force refetch with new token
+      queryClient.invalidateQueries();
       
       toast({
         title: t('login.successTitle'),
         description: t('login.successDescription'),
       });
       
-      // Small delay to ensure toast is shown, then reload
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 100);
+      // Navigate without page reload (SPA navigation)
+      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
