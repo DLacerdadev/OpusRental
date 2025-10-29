@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import { insertUserSchema, insertTrailerSchema, insertShareSchema, financialRecords } from "@shared/schema";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -55,16 +56,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Trust proxy for Replit environment
   app.set('trust proxy', 1);
 
-  // Session middleware
+  // PostgreSQL session store
+  const PgSession = connectPgSimple(session);
+  
+  // Session middleware with PostgreSQL store
   app.use(
     session({
+      store: new PgSession({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: true,
+      }),
       secret: process.env.SESSION_SECRET || "opus-rental-capital-secret-key",
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
         sameSite: "lax",
-        secure: false, // Set to false for development
+        secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       },
     })
@@ -90,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       req.session.regenerate((err) => {
         if (err) {
-          console.error("❌ Session regeneration error:", err);
+          console.error("Session regeneration error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
 
@@ -101,19 +109,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: user.role as "investor" | "manager" | "admin",
         };
         
-        console.log("✅ Session data set:", {
-          userId: req.session.userId,
-          user: req.session.user,
-          sessionID: req.sessionID,
-        });
-        
         req.session.save(async (err) => {
           if (err) {
-            console.error("❌ Session save error:", err);
+            console.error("Session save error:", err);
             return res.status(500).json({ message: "Login failed" });
           }
-
-          console.log("✅ Session saved successfully, sessionID:", req.sessionID);
 
           await storage.createAuditLog({
             userId: user.id,
