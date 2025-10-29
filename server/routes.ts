@@ -63,12 +63,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     legacyHeaders: false,
   });
 
+  // Trust proxy - Required for Replit environment
+  app.set('trust proxy', 1);
+  
   // PostgreSQL session store
   const PgSession = connectPgSimple(session);
   
   // Session middleware with PostgreSQL store
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
-  
+  // sameSite: 'none' + secure: true required for cookies to work in Replit iframe
   app.use(
     session({
       store: new PgSession({
@@ -81,8 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       name: 'opus.sid',
       cookie: {
         httpOnly: true,
-        sameSite: "lax",
-        secure: isProduction,
+        sameSite: "none",  // Required for iframe (Replit environment)
+        secure: true,      // Required with sameSite: 'none'
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       },
     })
