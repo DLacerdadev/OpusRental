@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, setGlobalAuthToken } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -40,9 +40,10 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data: any) => {
-      // Save token to sessionStorage
+      // Save token to global memory (NOT storage)
       if (data.token) {
-        sessionStorage.setItem('auth_token', data.token);
+        setGlobalAuthToken(data.token);
+        console.log('[Login] Token saved to memory');
       }
       
       // Invalidate all queries to force refetch with new token

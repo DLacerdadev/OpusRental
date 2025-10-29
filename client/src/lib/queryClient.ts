@@ -1,16 +1,26 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 
+// Global token storage (in memory, not in storage)
+let globalAuthToken: string | null = null;
+
+export function setGlobalAuthToken(token: string | null) {
+  globalAuthToken = token;
+}
+
+export function getGlobalAuthToken(): string | null {
+  return globalAuthToken;
+}
+
 function getAuthHeaders(): HeadersInit {
-  const token = sessionStorage.getItem('auth_token');
-  console.log('[Auth] Getting token:', token ? 'Token exists' : 'No token found');
+  const token = globalAuthToken;
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     if (res.status === 401) {
-      sessionStorage.removeItem('auth_token');
+      globalAuthToken = null;
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
