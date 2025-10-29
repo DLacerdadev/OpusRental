@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import api, { setAuthToken } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -46,14 +47,14 @@ export default function Register() {
         throw new Error(t('register.passwordMismatch'));
       }
 
-      const response = await apiRequest("POST", "/api/auth/register", {
+      const response = await api.post("/api/auth/register", {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         username: data.username,
         password: data.password,
       });
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });

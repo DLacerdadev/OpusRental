@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { format } from "date-fns";
 import { ShoppingCart, Truck, MapPin, DollarSign } from "lucide-react";
 import { useState } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import api from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertShareSchema, type Trailer } from "@shared/schema";
 import { formatCurrency } from "@/lib/currency";
@@ -45,7 +46,7 @@ export default function Portfolio() {
         totalReturns: "0.00",
       };
 
-      return await apiRequest("POST", "/api/shares", shareData);
+      return await api.post("/api/shares", shareData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
