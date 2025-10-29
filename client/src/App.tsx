@@ -101,9 +101,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      <Route path="/dashboard">
-        {() => <ProtectedRoute component={Dashboard} titleKey="pageTitles.dashboard" />}
-      </Route>
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/portfolio">
         {() => <ProtectedRoute component={Portfolio} titleKey="pageTitles.portfolio" />}
       </Route>

@@ -48,16 +48,15 @@ interface CompanyStats {
 export default function Dashboard() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { t, i18n } = useTranslation();
-  const hasToken = !!getAuthToken();
   
   const { data: stats, isLoading } = useQuery<InvestorStats | CompanyStats>({
     queryKey: ["/api/dashboard/stats"],
-    enabled: !!user && hasToken,
+    enabled: !!user,
   });
 
   const { data: shares = [] } = useQuery<any[]>({
     queryKey: ["/api/shares"],
-    enabled: user?.role === "investor" && hasToken,
+    enabled: user?.role === "investor",
   });
 
   const formatMonth = (month: string) => {
@@ -78,6 +77,30 @@ export default function Dashboard() {
         return "bg-gray-500";
     }
   };
+
+  // Show login prompt if no user
+  if (!isAuthLoading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Bem-vindo</CardTitle>
+            <p className="text-center text-muted-foreground mt-2">
+              Faça login para acessar seu dashboard
+            </p>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button 
+              onClick={() => window.location.href = '/login'}
+              size="lg"
+            >
+              Fazer Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isAuthLoading || isLoading) {
     return (
