@@ -60,6 +60,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const PgSession = connectPgSimple(session);
   
   // Session middleware with PostgreSQL store
+  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  
   app.use(
     session({
       store: new PgSession({
@@ -71,9 +73,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       saveUninitialized: false,
       name: 'opus.sid',
       cookie: {
-        httpOnly: false, // Allow JavaScript access for debugging
-        sameSite: "none",
-        secure: true,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: isProduction,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       },
     })
