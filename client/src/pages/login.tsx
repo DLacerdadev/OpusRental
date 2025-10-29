@@ -39,12 +39,16 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       // Save token to localStorage
       if (data.token) {
         localStorage.setItem('auth_token', data.token);
       }
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Clear all queries and refetch user
+      queryClient.clear();
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      
       toast({
         title: t('login.successTitle'),
         description: t('login.successDescription'),
