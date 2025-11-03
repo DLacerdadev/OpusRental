@@ -277,9 +277,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/trailers", authorize(), async (req, res) => {
     try {
+      // Generate automatic trailer ID based on type
+      const trailerType = req.body.trailerType || "Seco";
+      const typeCode = trailerType === "Seco" ? "S" : trailerType === "Climatizado" ? "C" : "L";
+      
+      // Get all existing trailers to determine next sequential number
+      const allTrailers = await storage.getAllTrailers();
+      const existingIds = allTrailers.map((t: any) => t.trailerId);
+      
+      // Find the highest number for this type
+      const typePrefix = `TR${typeCode}`;
+      const sameTypeIds = existingIds.filter((id: string) => id.startsWith(typePrefix));
+      
+      let nextNumber = 1;
+      if (sameTypeIds.length > 0) {
+        const numbers = sameTypeIds.map((id: string) => {
+          const numPart = id.replace(typePrefix, '');
+          return parseInt(numPart) || 0;
+        });
+        nextNumber = Math.max(...numbers) + 1;
+      }
+      
+      const generatedId = `${typePrefix}${String(nextNumber).padStart(3, '0')}`;
+      
       // Clean up latitude/longitude - convert empty strings or invalid values to null
       const cleanedData = {
         ...req.body,
+        trailerId: generatedId,
         latitude: req.body.latitude === "" || req.body.latitude === null ? null : req.body.latitude,
         longitude: req.body.longitude === "" || req.body.longitude === null ? null : req.body.longitude,
       };

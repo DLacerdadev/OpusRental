@@ -300,6 +300,7 @@
     "trailerTypeSeco": "Seco",
     "trailerTypeClimatizado": "Climatizado",
     "trailerTypeLonado": "Lonado",
+    "autoIdHint": "ID será gerado automaticamente (ex: TRS001, TRC002, TRL003)",
     "model": "Modelo",
     "status": "Status",
     "selectStatus": "Selecione o status",

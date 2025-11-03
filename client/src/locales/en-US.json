@@ -300,6 +300,7 @@
     "trailerTypeSeco": "Dry Van",
     "trailerTypeClimatizado": "Refrigerated",
     "trailerTypeLonado": "Flatbed",
+    "autoIdHint": "ID will be auto-generated (e.g.: TRS001, TRC002, TRL003)",
     "model": "Model",
     "status": "Status",
     "selectStatus": "Select status",
