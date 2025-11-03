@@ -366,23 +366,26 @@ export default function Assets() {
                               <CommandList>
                                 <CommandEmpty>{t('assets.noInvestorsFound')}</CommandEmpty>
                                 <CommandGroup>
-                                  {investors?.map((investor: any) => (
-                                    <CommandItem
-                                      key={investor.id}
-                                      value={`${investor.firstName} ${investor.lastName} ${investor.email}`}
-                                      onSelect={() => {
-                                        form.setValue("investorId", investor.id);
-                                        setInvestorComboOpen(false);
-                                      }}
-                                    >
-                                      <Check
-                                        className={`mr-2 h-4 w-4 ${
-                                          field.value === investor.id ? "opacity-100" : "opacity-0"
-                                        }`}
-                                      />
-                                      {investor.firstName} {investor.lastName} ({investor.email})
-                                    </CommandItem>
-                                  ))}
+                                  {investors?.map((investor: any) => {
+                                    const searchValue = `${investor.firstName} ${investor.lastName} ${investor.email}`.toLowerCase();
+                                    return (
+                                      <CommandItem
+                                        key={investor.id}
+                                        value={searchValue}
+                                        onSelect={() => {
+                                          form.setValue("investorId", investor.id);
+                                          setInvestorComboOpen(false);
+                                        }}
+                                      >
+                                        <Check
+                                          className={`mr-2 h-4 w-4 ${
+                                            field.value === investor.id ? "opacity-100" : "opacity-0"
+                                          }`}
+                                        />
+                                        {investor.firstName} {investor.lastName} ({investor.email})
+                                      </CommandItem>
+                                    );
+                                  })}
                                 </CommandGroup>
                               </CommandList>
                             </Command>
