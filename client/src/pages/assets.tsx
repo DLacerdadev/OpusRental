@@ -35,6 +35,7 @@ export default function Assets() {
     resolver: zodResolver(insertTrailerSchema),
     defaultValues: {
       trailerId: "",
+      trailerType: "Seco",
       model: "",
       purchaseValue: "",
       purchaseDate: new Date().toISOString().split('T')[0],
@@ -271,6 +272,29 @@ export default function Assets() {
                       <FormControl>
                         <Input placeholder="TR001" {...field} data-testid="input-trailer-id" />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="trailerType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('assets.trailerType')}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-trailer-type">
+                            <SelectValue placeholder={t('assets.selectTrailerType')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Seco">{t('assets.trailerTypeSeco')}</SelectItem>
+                          <SelectItem value="Climatizado">{t('assets.trailerTypeClimatizado')}</SelectItem>
+                          <SelectItem value="Lonado">{t('assets.trailerTypeLonado')}</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
