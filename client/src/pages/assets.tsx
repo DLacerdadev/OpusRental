@@ -26,6 +26,7 @@ export default function Assets() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const [allocationType, setAllocationType] = useState<"open" | "specific">("open");
+  const [investorSearchQuery, setInvestorSearchQuery] = useState("");
   const { toast } = useToast();
   
   const { data: trailers, isLoading } = useQuery({
@@ -332,12 +333,21 @@ export default function Assets() {
 
               {allocationType === "specific" && (
                 <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <FormLabel>{t('assets.selectInvestor')}</FormLabel>
+                    <Input
+                      placeholder={t('assets.searchInvestor')}
+                      value={investorSearchQuery}
+                      onChange={(e) => setInvestorSearchQuery(e.target.value)}
+                      className="mb-2"
+                      data-testid="input-search-investor"
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="investorId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('assets.selectInvestor')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-investor">
@@ -345,11 +355,28 @@ export default function Assets() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {investors?.map((investor: any) => (
-                              <SelectItem key={investor.id} value={investor.id}>
-                                {investor.firstName} {investor.lastName} ({investor.email})
-                              </SelectItem>
-                            ))}
+                            {investors
+                              ?.filter((investor: any) => {
+                                const searchLower = investorSearchQuery.toLowerCase();
+                                const fullName = `${investor.firstName} ${investor.lastName}`.toLowerCase();
+                                const email = investor.email.toLowerCase();
+                                return fullName.includes(searchLower) || email.includes(searchLower);
+                              })
+                              .map((investor: any) => (
+                                <SelectItem key={investor.id} value={investor.id}>
+                                  {investor.firstName} {investor.lastName} ({investor.email})
+                                </SelectItem>
+                              ))}
+                            {investors?.filter((investor: any) => {
+                              const searchLower = investorSearchQuery.toLowerCase();
+                              const fullName = `${investor.firstName} ${investor.lastName}`.toLowerCase();
+                              const email = investor.email.toLowerCase();
+                              return fullName.includes(searchLower) || email.includes(searchLower);
+                            }).length === 0 && (
+                              <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                                {t('assets.noInvestorsFound')}
+                              </div>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

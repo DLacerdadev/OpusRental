@@ -309,6 +309,8 @@
     "allocationSpecificHint": "Asset will be allocated to a specific investor",
     "selectInvestor": "Investor",
     "selectInvestorPlaceholder": "Select an investor",
+    "searchInvestor": "Search investor...",
+    "noInvestorsFound": "No investors found",
     "model": "Model",
     "status": "Status",
     "selectStatus": "Select status",

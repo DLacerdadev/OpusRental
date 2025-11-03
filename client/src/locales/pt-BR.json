@@ -309,6 +309,8 @@
     "allocationSpecificHint": "Ativo será alocado para um investidor específico",
     "selectInvestor": "Investidor",
     "selectInvestorPlaceholder": "Selecione um investidor",
+    "searchInvestor": "Pesquisar investidor...",
+    "noInvestorsFound": "Nenhum investidor encontrado",
     "model": "Modelo",
     "status": "Status",
     "selectStatus": "Selecione o status",
