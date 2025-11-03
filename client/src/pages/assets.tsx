@@ -619,6 +619,7 @@ export default function Assets() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableType')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableModel')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.status')}</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableShares')}</th>
@@ -641,6 +642,14 @@ export default function Assets() {
                     >
                       <td className="py-4 px-6">
                         <span className="font-bold text-primary">{trailer.trailerId}</span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <Badge variant="outline" className="font-medium">
+                          {trailer.trailerType === "Seco" ? t('assets.trailerTypeSeco') : 
+                           trailer.trailerType === "Climatizado" ? t('assets.trailerTypeClimatizado') : 
+                           trailer.trailerType === "Lonado" ? t('assets.trailerTypeLonado') : 
+                           trailer.trailerType || "—"}
+                        </Badge>
                       </td>
                       <td className="py-4 px-6">
                         <span className="text-foreground">{trailer.model || "—"}</span>
@@ -693,7 +702,7 @@ export default function Assets() {
                 })}
                 {(!trailers || trailers.length === 0) && (
                   <tr>
-                    <td colSpan={10} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={11} className="text-center py-12 text-muted-foreground">
                       {t('assets.noAssets')}
                     </td>
                   </tr>

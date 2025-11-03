@@ -319,6 +319,7 @@
     "statusStock": "Estoque",
     "statusMaintenance": "Manutenção",
     "statusExpired": "Vencido",
+    "tableType": "TIPO",
     "tableModel": "MODELO",
     "tableShares": "COTAS",
     "tableTrafficLight": "FAROL",
