@@ -8,7 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Eye, Plus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Download, Eye, Plus, Check, ChevronsUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +28,7 @@ export default function Assets() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const [allocationType, setAllocationType] = useState<"open" | "specific">("open");
-  const [investorSearchQuery, setInvestorSearchQuery] = useState("");
+  const [investorComboOpen, setInvestorComboOpen] = useState(false);
   const { toast } = useToast();
   
   const { data: trailers, isLoading } = useQuery({
@@ -333,52 +335,59 @@ export default function Assets() {
 
               {allocationType === "specific" && (
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <FormLabel>{t('assets.selectInvestor')}</FormLabel>
-                    <Input
-                      placeholder={t('assets.searchInvestor')}
-                      value={investorSearchQuery}
-                      onChange={(e) => setInvestorSearchQuery(e.target.value)}
-                      className="mb-2"
-                      data-testid="input-search-investor"
-                    />
-                  </div>
                   <FormField
                     control={form.control}
                     name="investorId"
                     render={({ field }) => (
-                      <FormItem>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-investor">
-                              <SelectValue placeholder={t('assets.selectInvestorPlaceholder')} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {investors
-                              ?.filter((investor: any) => {
-                                const searchLower = investorSearchQuery.toLowerCase();
-                                const fullName = `${investor.firstName} ${investor.lastName}`.toLowerCase();
-                                const email = investor.email.toLowerCase();
-                                return fullName.includes(searchLower) || email.includes(searchLower);
-                              })
-                              .map((investor: any) => (
-                                <SelectItem key={investor.id} value={investor.id}>
-                                  {investor.firstName} {investor.lastName} ({investor.email})
-                                </SelectItem>
-                              ))}
-                            {investors?.filter((investor: any) => {
-                              const searchLower = investorSearchQuery.toLowerCase();
-                              const fullName = `${investor.firstName} ${investor.lastName}`.toLowerCase();
-                              const email = investor.email.toLowerCase();
-                              return fullName.includes(searchLower) || email.includes(searchLower);
-                            }).length === 0 && (
-                              <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                                {t('assets.noInvestorsFound')}
-                              </div>
-                            )}
-                          </SelectContent>
-                        </Select>
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t('assets.selectInvestor')}</FormLabel>
+                        <Popover open={investorComboOpen} onOpenChange={setInvestorComboOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={investorComboOpen}
+                                className="w-full justify-between"
+                                data-testid="button-select-investor"
+                              >
+                                {field.value
+                                  ? investors?.find((investor: any) => investor.id === field.value)
+                                    ? `${investors.find((inv: any) => inv.id === field.value).firstName} ${investors.find((inv: any) => inv.id === field.value).lastName} (${investors.find((inv: any) => inv.id === field.value).email})`
+                                    : t('assets.selectInvestorPlaceholder')
+                                  : t('assets.selectInvestorPlaceholder')}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px] p-0">
+                            <Command>
+                              <CommandInput placeholder={t('assets.searchInvestor')} />
+                              <CommandList>
+                                <CommandEmpty>{t('assets.noInvestorsFound')}</CommandEmpty>
+                                <CommandGroup>
+                                  {investors?.map((investor: any) => (
+                                    <CommandItem
+                                      key={investor.id}
+                                      value={`${investor.firstName} ${investor.lastName} ${investor.email}`}
+                                      onSelect={() => {
+                                        form.setValue("investorId", investor.id);
+                                        setInvestorComboOpen(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={`mr-2 h-4 w-4 ${
+                                          field.value === investor.id ? "opacity-100" : "opacity-0"
+                                        }`}
+                                      />
+                                      {investor.firstName} {investor.lastName} ({investor.email})
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
