@@ -44,6 +44,50 @@ An idempotent payment service (`server/services/finance.service.ts`) automatical
 
 ## Recent Changes
 
+### Asset Allocation System (November 2025)
+
+Implemented comprehensive asset allocation functionality allowing managers to assign trailers to specific investors or open quotation for all:
+
+**Backend Features:**
+- New endpoint `/api/investors` to list all investors (manager/admin only)
+- Modified trailer creation to support allocation types:
+  - **Open Quotation**: Asset available for all investors to purchase
+  - **Specific Investor**: Asset automatically assigned to selected investor
+- Automatic share creation when asset is allocated to specific investor
+- Trailer status automatically changes to "active" when share is created
+- Audit logging includes allocation details
+
+**Frontend Features:**
+- Dynamic allocation type selector with visual hints
+- Conditional investor dropdown (shows only when "Specific Investor" selected)
+- Investor list displays full name and email for easy identification
+- Real-time form validation and error handling
+- Full internationalization support (EN/PT-BR)
+
+**Business Logic:**
+- When allocation type is "specific" + investor selected → share created automatically
+- When allocation type is "open" → asset stays in stock status for manual allocation later
+- Share creation includes 2% monthly return and active status
+- Purchase value and date inherited from trailer
+
+### Automatic Trailer ID Generation (November 2025)
+
+Implemented intelligent sequential ID generation system by trailer type:
+- **TRS001, TRS002...** for Seco (Dry Van)
+- **TRC001, TRC002...** for Climatizado (Refrigerated)
+- **TRL001, TRL002...** for Lonado (Flatbed)
+- Each type maintains independent sequential numbering
+- IDs auto-generated on backend, eliminating manual entry errors
+- User-friendly hint in creation form explaining ID pattern
+
+### Table Column Enhancement (November 2025)
+
+Added "Tipo" (Type) column to Assets Management table:
+- Visual badge display for trailer types
+- Positioned between ID and Model columns
+- Fully translated (Seco/Dry Van, Climatizado/Refrigerated, Lonado/Flatbed)
+- Consistent with existing badge design system
+
 ### Mobile Responsiveness + Dark Mode Fix (October 2025)
 
 Completed comprehensive mobile-first responsive redesign across all 9 platform pages with full dark mode support:

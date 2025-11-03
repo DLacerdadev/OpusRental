@@ -210,6 +210,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Investors list (Manager/Admin only)
+  app.get("/api/investors", authorize(), async (req, res) => {
+    try {
+      const investors = await storage.getAllInvestors();
+      const investorsWithoutPasswords = investors.map(({ password, ...investor }) => investor);
+      res.json(investorsWithoutPasswords);
+    } catch (error) {
+      console.error("Get investors error:", error);
+      res.status(500).json({ message: "Failed to fetch investors" });
+    }
+  });
+
   // Dashboard routes
   app.get("/api/dashboard/stats", authorize(), async (req, res) => {
     try {
@@ -308,15 +320,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         longitude: req.body.longitude === "" || req.body.longitude === null ? null : req.body.longitude,
       };
       
-      const validated = insertTrailerSchema.parse(cleanedData);
+      // Extract allocation type and investor ID
+      const { allocationType, investorId, ...trailerData } = cleanedData;
+      
+      const validated = insertTrailerSchema.parse(trailerData);
       const trailer = await storage.createTrailer(validated);
+      
+      // If allocated to specific investor, create share automatically
+      if (allocationType === "specific" && investorId) {
+        await storage.createShare({
+          userId: investorId,
+          trailerId: trailer.id,
+          purchaseValue: trailer.purchaseValue,
+          purchaseDate: trailer.purchaseDate,
+          status: "active",
+          monthlyReturn: "2.00",
+          totalReturns: "0.00",
+        });
+        
+        // Update trailer status to active since share is sold
+        await storage.updateTrailer(trailer.id, { status: "active" });
+      }
       
       await storage.createAuditLog({
         userId: req.session.userId!,
         action: "create_trailer",
         entityType: "trailer",
         entityId: trailer.id,
-        details: validated,
+        details: { ...validated, allocationType, investorId },
         ipAddress: req.ip,
       });
       
