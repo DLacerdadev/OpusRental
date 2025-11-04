@@ -166,25 +166,23 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
                 <span>{t('dashboard.revenueOverview')}</span>
-                <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +12.5%
-                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64 sm:h-72 lg:h-80">
-                <PerformanceChart
-                  data={revenueChartData.length > 0 ? revenueChartData : [
-                    { month: 'Jan', value: 45000 },
-                    { month: 'Fev', value: 52000 },
-                    { month: 'Mar', value: 61000 },
-                    { month: 'Abr', value: 58000 },
-                    { month: 'Mai', value: 67000 },
-                    { month: 'Jun', value: 73000 }
-                  ]}
-                  color="#10b981"
-                />
+                {revenueChartData.length > 0 ? (
+                  <PerformanceChart
+                    data={revenueChartData}
+                    color="#10b981"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="text-center">
+                      <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">{t('dashboard.noDataAvailable')}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -197,32 +195,12 @@ export default function Dashboard() {
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">{t('dashboard.revenueGoal')}</span>
-                    <span className="text-sm font-bold text-foreground">73%</span>
-                  </div>
-                  <Progress value={73} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatCurrency(73000, 'USD')} / {formatCurrency(100000, 'USD')}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">{t('dashboard.salesTarget')}</span>
-                    <span className="text-sm font-bold text-foreground">85%</span>
-                  </div>
-                  <Progress value={85} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    17 / 20 {t('dashboard.shares')}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-foreground">{t('dashboard.fleetUtilization')}</span>
-                    <span className="text-sm font-bold text-foreground">92%</span>
+                    <span className="text-sm font-bold text-foreground">
+                      {companyStats.totalTrailers > 0 ? Math.round((companyStats.activeTrailers / companyStats.totalTrailers) * 100) : 0}%
+                    </span>
                   </div>
-                  <Progress value={92} className="h-2" />
+                  <Progress value={companyStats.totalTrailers > 0 ? (companyStats.activeTrailers / companyStats.totalTrailers) * 100 : 0} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-1">
                     {companyStats.activeTrailers} / {companyStats.totalTrailers} {t('dashboard.active')}
                   </p>
@@ -235,12 +213,12 @@ export default function Dashboard() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{t('dashboard.avgRevenue')}</span>
-                      <span className="text-sm font-semibold text-foreground">{formatCurrency(12167, 'USD')}</span>
+                      <span className="text-xs text-muted-foreground">{t('dashboard.totalRevenue')}</span>
+                      <span className="text-sm font-semibold text-foreground">{formatCurrency(companyStats.totalRevenue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{t('dashboard.growthRate')}</span>
-                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">+12.5%</span>
+                      <span className="text-xs text-muted-foreground">{t('dashboard.totalMargin')}</span>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">{formatCurrency(companyStats.totalMargin, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
                     </div>
                   </div>
                 </div>
@@ -257,7 +235,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">3</p>
+                  <p className="text-3xl font-bold text-foreground">0</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('dashboard.requiresAction')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -274,7 +252,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">2</p>
+                  <p className="text-3xl font-bold text-foreground">0</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('dashboard.scheduled')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
@@ -291,7 +269,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">8</p>
+                  <p className="text-3xl font-bold text-foreground">0</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('dashboard.transactions')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
