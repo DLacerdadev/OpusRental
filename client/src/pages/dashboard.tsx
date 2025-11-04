@@ -483,10 +483,6 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
               <span>{t('dashboard.performanceOverview')}</span>
-              <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                +8.2%
-              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
