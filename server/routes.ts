@@ -75,7 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      const user = await storage.getUserByEmail(email);
+      // Normalize email to lowercase for consistent comparison
+      const normalizedEmail = email.toLowerCase().trim();
+      
+      const user = await storage.getUserByEmail(normalizedEmail);
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -127,8 +130,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { firstName, lastName, email, username, password } = req.body;
 
+      // Normalize email to lowercase for consistent storage and comparison
+      const normalizedEmail = email.toLowerCase().trim();
+
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
+      const existingUser = await storage.getUserByEmail(normalizedEmail);
       if (existingUser) {
         return res.status(400).json({ message: "emailExists" });
       }
@@ -143,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newUser = await storage.createUser({
         firstName,
         lastName,
-        email,
+        email: normalizedEmail,
         username,
         password,
         role: "investor",
