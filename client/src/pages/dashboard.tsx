@@ -491,17 +491,19 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-64 sm:h-72 lg:h-80">
-              <PerformanceChart
-                data={performanceData.length > 0 ? performanceData : [
-                  { month: 'Jan', value: 560 },
-                  { month: 'Fev', value: 1120 },
-                  { month: 'Mar', value: 1680 },
-                  { month: 'Abr', value: 1680 },
-                  { month: 'Mai', value: 2240 },
-                  { month: 'Jun', value: 2800 }
-                ]}
-                color="#10b981"
-              />
+              {performanceData.length > 0 ? (
+                <PerformanceChart
+                  data={performanceData}
+                  color="#10b981"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">{t('dashboard.noDataAvailable')}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -518,7 +520,7 @@ export default function Dashboard() {
                   <span className="text-xs font-medium text-muted-foreground">{t('dashboard.totalInvested')}</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(investorStats?.totalValue || 28000, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                  {formatCurrency(investorStats?.totalValue || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
                 </p>
               </div>
 
@@ -527,7 +529,7 @@ export default function Dashboard() {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('dashboard.monthlyReturn')}</p>
                     <p className="text-lg font-bold text-foreground">
-                      {formatCurrency(investorStats?.monthlyReturn || 560, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                      {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
                     </p>
                   </div>
                   <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -537,7 +539,7 @@ export default function Dashboard() {
                   <div>
                     <p className="text-xs text-muted-foreground">{t('dashboard.totalReturns')}</p>
                     <p className="text-lg font-bold text-foreground">
-                      {formatCurrency(investorStats?.totalReturns || 2800, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                      {formatCurrency(investorStats?.totalReturns || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
                     </p>
                   </div>
                   <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -546,22 +548,28 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                   <div>
                     <p className="text-xs text-muted-foreground">{t('dashboard.roi')}</p>
-                    <p className="text-lg font-bold text-foreground">10.0%</p>
+                    <p className="text-lg font-bold text-foreground">
+                      {investorStats?.totalValue ? '2.0%' : '0.0%'}
+                    </p>
                   </div>
                   <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                    5 {t('dashboard.months')}
+                    {investorStats?.recentPayments?.length || 0} {t('dashboard.months')}
                   </Badge>
                 </div>
               </div>
 
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-muted-foreground">{t('dashboard.nextPayment')}</span>
-                  <span className="text-xs font-semibold text-foreground">{format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'dd/MM/yyyy')}</span>
+              {investorStats?.totalValue && investorStats.totalValue > 0 && (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">{t('dashboard.nextPayment')}</span>
+                    <span className="text-xs font-semibold text-foreground">{format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'dd/MM/yyyy')}</span>
+                  </div>
+                  <Progress value={65} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {Math.ceil((new Date(new Date().setMonth(new Date().getMonth() + 1)).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} {t('dashboard.daysRemaining')}
+                  </p>
                 </div>
-                <Progress value={65} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-1">19 {t('dashboard.daysRemaining')}</p>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -575,7 +583,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-foreground">{investorStats?.activeShares || 1}</p>
+                <p className="text-3xl font-bold text-foreground">{investorStats?.activeShares || 0}</p>
                 <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
                   {t('dashboard.allActive')}
@@ -595,7 +603,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-foreground">{investorStats?.recentPayments?.length || 5}</p>
+                <p className="text-3xl font-bold text-foreground">{investorStats?.recentPayments?.length || 0}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t('dashboard.received')}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -613,7 +621,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {formatCurrency(560, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                  {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
                 </p>
                 <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">2% {t('dashboard.fixed')}</p>
               </div>
