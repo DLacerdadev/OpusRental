@@ -21,6 +21,8 @@ import {
   CheckCircle,
   UserCog,
   Users,
+  Satellite,
+  Building2,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -60,6 +62,8 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
     { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
     { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
     { path: "/tracking", icon: MapPin, label: t('nav.tracking'), roles: ["manager", "admin"] },
+    { path: "/gps-config", icon: Satellite, label: "GPS Config", roles: ["manager", "admin"] },
+    { path: "/rental-clients", icon: Building2, label: "Rental Clients", roles: ["manager", "admin"] },
     { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
     { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
     { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },

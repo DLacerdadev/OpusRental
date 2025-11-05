@@ -25,6 +25,8 @@ import Compliance from "@/pages/compliance";
 import Settings from "@/pages/settings";
 import Approvals from "@/pages/approvals";
 import InvestorShares from "@/pages/investor-shares";
+import GpsConfig from "@/pages/gps-config";
+import RentalClients from "@/pages/rental-clients";
 
 function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -130,6 +132,12 @@ function Router() {
       </Route>
       <Route path="/investor-shares">
         {() => <ProtectedRoute component={InvestorShares} titleKey="pageTitles.investorShares" />}
+      </Route>
+      <Route path="/gps-config">
+        {() => <ProtectedRoute component={GpsConfig} titleKey="pageTitles.gpsConfig" />}
+      </Route>
+      <Route path="/rental-clients">
+        {() => <ProtectedRoute component={RentalClients} titleKey="pageTitles.rentalClients" />}
       </Route>
       <Route component={NotFound} />
     </Switch>
