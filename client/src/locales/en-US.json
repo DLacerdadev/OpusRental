@@ -408,7 +408,12 @@
     "compliance": "Compliance",
     "settings": "Settings",
     "approvals": "Approvals",
-    "investorShares": "Investor Shares"
+    "investorShares": "Investor Shares",
+    "gpsConfig": "GPS Configuration",
+    "rentalClients": "Rental Clients",
+    "rentalContracts": "Rental Contracts",
+    "invoices": "Invoices",
+    "inspections": "Inspections"
   },
   "common": {
     "loading": "Loading...",

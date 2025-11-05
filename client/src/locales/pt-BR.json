@@ -408,7 +408,12 @@
     "compliance": "Compliance",
     "settings": "Configurações",
     "approvals": "Aprovações",
-    "investorShares": "Cotas dos Investidores"
+    "investorShares": "Cotas dos Investidores",
+    "gpsConfig": "Configuração GPS",
+    "rentalClients": "Clientes Locação",
+    "rentalContracts": "Contratos Locação",
+    "invoices": "Faturas",
+    "inspections": "Inspeções"
   },
   "common": {
     "loading": "Carregando...",
