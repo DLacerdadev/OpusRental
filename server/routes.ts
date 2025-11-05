@@ -642,6 +642,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Invoice routes (Manager/Admin only)
+  app.get("/api/invoices", authorize(), async (req, res) => {
+    try {
+      const invoices = await storage.getAllInvoices();
+      res.json(invoices);
+    } catch (error) {
+      console.error("Get invoices error:", error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.get("/api/invoices/overdue", authorize(), async (req, res) => {
+    try {
+      const invoices = await storage.getOverdueInvoices();
+      res.json(invoices);
+    } catch (error) {
+      console.error("Get overdue invoices error:", error);
+      res.status(500).json({ message: "Failed to fetch overdue invoices" });
+    }
+  });
+
+  app.get("/api/invoices/contract/:contractId", authorize(), async (req, res) => {
+    try {
+      const invoices = await storage.getInvoicesByContractId(req.params.contractId);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Get invoices by contract error:", error);
+      res.status(500).json({ message: "Failed to fetch invoices by contract" });
+    }
+  });
+
+  app.get("/api/invoices/:id", authorize(), async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(invoice);
+    } catch (error) {
+      console.error("Get invoice error:", error);
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.post("/api/invoices", authorize(), async (req, res) => {
+    try {
+      const validation = insertInvoiceSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const invoice = await storage.createInvoice(validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "invoice",
+        entityId: invoice.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.status(201).json(invoice);
+    } catch (error) {
+      console.error("Create invoice error:", error);
+      res.status(500).json({ message: "Failed to create invoice" });
+    }
+  });
+
+  app.put("/api/invoices/:id/status", authorize(), async (req, res) => {
+    try {
+      const statusUpdateSchema = z.object({
+        status: z.enum(["pending", "paid", "overdue", "cancelled"]),
+        paidDate: z.string().optional(),
+      }).strict();
+
+      const validation = statusUpdateSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const paidDate = validation.data.paidDate ? new Date(validation.data.paidDate) : undefined;
+      
+      const invoice = await storage.updateInvoiceStatus(
+        req.params.id, 
+        validation.data.status,
+        paidDate
+      );
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "invoice",
+        entityId: invoice.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.json(invoice);
+    } catch (error) {
+      console.error("Update invoice status error:", error);
+      res.status(500).json({ message: "Failed to update invoice status" });
+    }
+  });
+
+  app.delete("/api/invoices/:id", authorize(), async (req, res) => {
+    try {
+      // Validate empty body with strict Zod schema
+      const deleteSchema = z.object({}).strict();
+      const validation = deleteSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      await storage.deleteInvoice(req.params.id);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "delete",
+        entityType: "invoice",
+        entityId: req.params.id,
+        details: {},
+        ipAddress: req.ip,
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete invoice error:", error);
+      res.status(500).json({ message: "Failed to delete invoice" });
+    }
+  });
+
   // Trailer/Asset routes (Manager/Admin only)
   app.get("/api/trailers", authorize(), async (req, res) => {
     try {
