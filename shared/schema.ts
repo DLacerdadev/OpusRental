@@ -127,6 +127,148 @@ export const financialRecords = pgTable("financial_records", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// GPS Devices table
+export const gpsDevices = pgTable("gps_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  deviceId: text("device_id").notNull().unique(), // IMEI or unique device identifier
+  provider: text("provider").notNull().default("generic"), // geotab, samsara, traccar, generic
+  apiKey: text("api_key"), // Encrypted API key/credentials
+  status: text("status").notNull().default("inactive"), // online, offline, inactive
+  lastPing: timestamp("last_ping"),
+  configData: jsonb("config_data"), // Provider-specific configuration
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Rental Clients table (Transportation companies)
+export const rentalClients = pgTable("rental_clients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull(), // Razão Social
+  tradeName: text("trade_name"), // Nome Fantasia
+  taxId: text("tax_id").notNull().unique(), // CNPJ/EIN
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country").notNull().default("US"),
+  status: text("status").notNull().default("active"), // active, inactive
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Rental Contracts table
+export const rentalContracts = pgTable("rental_contracts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contractNumber: text("contract_number").notNull().unique(), // RC001, RC002, etc.
+  clientId: varchar("client_id").notNull().references(() => rentalClients.id),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  monthlyRate: decimal("monthly_rate", { precision: 10, scale: 2 }).notNull(), // $1,500/month
+  duration: integer("duration").notNull(), // 3, 6, or 12 months
+  status: text("status").notNull().default("active"), // active, expired, cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (t) => ({
+  idxClientId: index("idx_contracts_client").on(t.clientId),
+  idxTrailerId: index("idx_contracts_trailer").on(t.trailerId),
+  idxStatus: index("idx_contracts_status").on(t.status),
+}));
+
+// Invoices table (Commercial invoices for rental)
+export const invoices = pgTable("invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  invoiceNumber: text("invoice_number").notNull().unique(), // INV-001, INV-002, etc.
+  contractId: varchar("contract_id").notNull().references(() => rentalContracts.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  dueDate: date("due_date").notNull(),
+  paidDate: date("paid_date"),
+  status: text("status").notNull().default("pending"), // pending, paid, overdue, cancelled
+  referenceMonth: varchar("reference_month", { length: 7 }).notNull(), // "2025-11" format YYYY-MM
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+  uniqContractMonth: uniqueIndex("uniq_invoices_contract_month").on(t.contractId, t.referenceMonth),
+  idxStatus: index("idx_invoices_status").on(t.status),
+  idxDueDate: index("idx_invoices_due_date").on(t.dueDate),
+}));
+
+// Checklists table (Inspections)
+export const checklists = pgTable("checklists", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  type: text("type").notNull(), // pre_rental, maintenance, arrival
+  items: jsonb("items").notNull(), // [{item: "Tires", status: "ok", notes: ""}]
+  approved: boolean("approved").notNull().default(false),
+  inspector: text("inspector").notNull(),
+  photos: jsonb("photos"), // Array of photo URLs
+  notes: text("notes"),
+  inspectionDate: timestamp("inspection_date").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+  idxTrailerId: index("idx_checklists_trailer").on(t.trailerId),
+  idxType: index("idx_checklists_type").on(t.type),
+}));
+
+// Maintenance Schedules table
+export const maintenanceSchedules = pgTable("maintenance_schedules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  scheduleType: text("schedule_type").notNull(), // time_based, km_based
+  intervalDays: integer("interval_days"), // For time-based: every X days
+  intervalKm: decimal("interval_km", { precision: 10, scale: 2 }), // For km-based: every X km
+  lastMaintenanceDate: date("last_maintenance_date"),
+  lastMaintenanceKm: decimal("last_maintenance_km", { precision: 10, scale: 2 }),
+  nextMaintenanceDate: date("next_maintenance_date"),
+  nextMaintenanceKm: decimal("next_maintenance_km", { precision: 10, scale: 2 }),
+  status: text("status").notNull().default("scheduled"), // scheduled, urgent, completed
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (t) => ({
+  idxTrailerId: index("idx_maintenance_trailer").on(t.trailerId),
+  idxStatus: index("idx_maintenance_status").on(t.status),
+}));
+
+// Partner Shops table (Maintenance partner workshops)
+export const partnerShops = pgTable("partner_shops", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  zipCode: text("zip_code"),
+  country: text("country").notNull().default("US"),
+  phone: text("phone").notNull(),
+  email: text("email"),
+  specialties: jsonb("specialties"), // ["refrigeration", "tires", "brakes"]
+  status: text("status").notNull().default("active"), // active, inactive
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Broker Emails table (Email templates and history)
+export const brokerEmails = pgTable("broker_emails", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  brokerEmail: text("broker_email").notNull(),
+  trailerPlate: text("trailer_plate").notNull(),
+  trailerType: text("trailer_type").notNull(),
+  currentLocation: text("current_location").notNull(),
+  destination: text("destination").notNull(),
+  estimatedDate: date("estimated_date"),
+  emailBody: text("email_body").notNull(),
+  status: text("status").notNull().default("sent"), // sent, delivered, failed
+  sentAt: timestamp("sent_at").defaultNow(),
+}, (t) => ({
+  idxTrailerId: index("idx_broker_emails_trailer").on(t.trailerId),
+  idxStatus: index("idx_broker_emails_status").on(t.status),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   shares: many(shares),
@@ -138,6 +280,11 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const trailersRelations = relations(trailers, ({ many }) => ({
   shares: many(shares),
   trackingData: many(trackingData),
+  gpsDevices: many(gpsDevices),
+  rentalContracts: many(rentalContracts),
+  checklists: many(checklists),
+  maintenanceSchedules: many(maintenanceSchedules),
+  brokerEmails: many(brokerEmails),
 }));
 
 export const sharesRelations = relations(shares, ({ one, many }) => ({
@@ -179,6 +326,57 @@ export const documentsRelations = relations(documents, ({ one }) => ({
   share: one(shares, {
     fields: [documents.shareId],
     references: [shares.id],
+  }),
+}));
+
+export const gpsDevicesRelations = relations(gpsDevices, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [gpsDevices.trailerId],
+    references: [trailers.id],
+  }),
+}));
+
+export const rentalClientsRelations = relations(rentalClients, ({ many }) => ({
+  contracts: many(rentalContracts),
+}));
+
+export const rentalContractsRelations = relations(rentalContracts, ({ one, many }) => ({
+  client: one(rentalClients, {
+    fields: [rentalContracts.clientId],
+    references: [rentalClients.id],
+  }),
+  trailer: one(trailers, {
+    fields: [rentalContracts.trailerId],
+    references: [trailers.id],
+  }),
+  invoices: many(invoices),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  contract: one(rentalContracts, {
+    fields: [invoices.contractId],
+    references: [rentalContracts.id],
+  }),
+}));
+
+export const checklistsRelations = relations(checklists, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [checklists.trailerId],
+    references: [trailers.id],
+  }),
+}));
+
+export const maintenanceSchedulesRelations = relations(maintenanceSchedules, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [maintenanceSchedules.trailerId],
+    references: [trailers.id],
+  }),
+}));
+
+export const brokerEmailsRelations = relations(brokerEmails, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [brokerEmails.trailerId],
+    references: [trailers.id],
   }),
 }));
 
@@ -227,6 +425,51 @@ export const insertFinancialRecordSchema = createInsertSchema(financialRecords).
   createdAt: true,
 });
 
+export const insertGpsDeviceSchema = createInsertSchema(gpsDevices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRentalClientSchema = createInsertSchema(rentalClients).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRentalContractSchema = createInsertSchema(rentalContracts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChecklistSchema = createInsertSchema(checklists).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMaintenanceScheduleSchema = createInsertSchema(maintenanceSchedules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPartnerShopSchema = createInsertSchema(partnerShops).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBrokerEmailSchema = createInsertSchema(brokerEmails).omit({
+  id: true,
+  sentAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -251,3 +494,27 @@ export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
 export type FinancialRecord = typeof financialRecords.$inferSelect;
 export type InsertFinancialRecord = z.infer<typeof insertFinancialRecordSchema>;
+
+export type GpsDevice = typeof gpsDevices.$inferSelect;
+export type InsertGpsDevice = z.infer<typeof insertGpsDeviceSchema>;
+
+export type RentalClient = typeof rentalClients.$inferSelect;
+export type InsertRentalClient = z.infer<typeof insertRentalClientSchema>;
+
+export type RentalContract = typeof rentalContracts.$inferSelect;
+export type InsertRentalContract = z.infer<typeof insertRentalContractSchema>;
+
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+export type Checklist = typeof checklists.$inferSelect;
+export type InsertChecklist = z.infer<typeof insertChecklistSchema>;
+
+export type MaintenanceSchedule = typeof maintenanceSchedules.$inferSelect;
+export type InsertMaintenanceSchedule = z.infer<typeof insertMaintenanceScheduleSchema>;
+
+export type PartnerShop = typeof partnerShops.$inferSelect;
+export type InsertPartnerShop = z.infer<typeof insertPartnerShopSchema>;
+
+export type BrokerEmail = typeof brokerEmails.$inferSelect;
+export type InsertBrokerEmail = z.infer<typeof insertBrokerEmailSchema>;

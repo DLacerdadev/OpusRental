@@ -1,0 +1,472 @@
+1. Fluxo do sistema baseado nas anotações
+1.1. Módulos principais do sistema
+
+Pelos pontos da reunião, eu enxergo os seguintes módulos:
+
+Cadastro & Frota
+
+Modelos de trailer: Refrigerado, Seco, Lonado (cada um com preço, custo, receita, regras de manutenção).
+
+Cadastro de trailers: placa, tipo, ano, chassi, status (disponível, em revisão, alugado, em manutenção, em trânsito, etc.).
+
+Checklist & Inspeções
+
+Checklist de pré-aluguel.
+
+Checklist de manutenção (periódica por tempo/KM e na chegada ao destino).
+
+Histórico de inspeções.
+
+Locação & Contratos
+
+Criação de contrato de aluguel (3, 6, 12 meses).
+
+Associação do contrato ao trailer (“vida” do trailer).
+
+Datas de início/fim, valores, reajustes, cláusulas.
+
+Financeiro & Invoice
+
+Geração de Invoice (documento comercial de cobrança).
+
+Geração de boletos (primeira, segunda e mensal recorrente).
+
+Controle de pagamento (status pago/atrasado, verde/vermelho, botão “confirmar pagamento”).
+
+Rastreamento & GPS
+
+Configuração da unidade de GPS do trailer.
+
+Visualização em tempo real.
+
+Registro de quilometragem/tempo para disparar manutenção.
+
+Manutenção & Revisões
+
+Regras por tipo de trailer: "após X tempo ou X km, precisa parar".
+
+Gatilhos para avisar o cliente (ou operação) de que o trailer precisa ir a uma loja parceira.
+
+Execução de manutenção com novo checklist.
+
+Envio via Broker (método de envio de trailer)
+
+Tela para compor o formato de e-mail.
+
+Campos configuráveis + e-mail do Broker.
+
+Envio de e-mail com formulário preenchido:
+
+Email do Broker
+
+Placa do Trailer
+
+Tipo do Trailer
+
+Local atual
+
+Destino
+
+Chegada ao destino
+
+Checklist de manutenção na chegada.
+
+Registro de emplacamento (novo licenciamento/local).
+
+1.2. Fluxo detalhado (passo a passo)
+
+Vou montar como se fosse um fluxo operacional.
+
+1) Compra e cadastro do trailer
+
+Empresa compra o trailer.
+
+Usuário acessa o módulo Cadastro:
+
+Cadastra ou escolhe o Modelo (Refrigerado/Seco/Lonado).
+
+Informa a placa, tipo, ano, chassi, etc.
+
+Define:
+
+Valor de compra.
+
+Valor de aluguel.
+
+Margem/receita esperada.
+
+Sistema registra esse ativo como “Disponível para inspeção”.
+
+2) Pré-aluguel: checklist de inspeção
+
+Antes de alugar, o trailer precisa passar pelo checklist de inspeção.
+
+Usuário abre o trailer no sistema e clica em “Nova inspeção” (tipo: Pré-aluguel).
+
+Preenche o checklist (itens de segurança, estado da carroceria, refrigeração, pneus, etc.).
+
+Decisão:
+
+Checklist OK?
+
+Sim: status do trailer vai para “Apto para aluguel”.
+
+Não: status vai para “Necessita manutenção” e dispara fluxo de manutenção.
+
+3) Criação de contrato de aluguel
+
+Cliente escolhe um trailer > sistema mostra apenas trailers com status “Apto para aluguel”.
+
+Usuário seleciona:
+
+Período do contrato: 3, 6 ou 12 meses.
+
+Cliente (locatário).
+
+Modelo, placa do trailer.
+
+Valor de aluguel (mensal).
+
+Sistema:
+
+Cria o contrato.
+
+Associa o contrato à “vida” do trailer.
+
+Muda status do trailer para “Alugado”.
+
+4) Geração de Invoice & cobranças
+
+Ao confirmar o contrato:
+
+Gera-se a Invoice inicial (pode ser a primeira + segunda + mês corrente, de acordo com a regra “Sempre paga a primeira e a segunda e a do mês” – aqui a regra ainda precisa ser refinada).
+
+Todo mês, na data do aluguel:
+
+Sistema gera automaticamente uma Invoice mensal.
+
+A Invoice gera o boleto correspondente.
+
+Cada invoice fica com status:
+
+Pendente
+
+Pago
+
+Atrasado
+
+5) Módulo financeiro / controle de pagamentos
+
+Tela de Financeiro lista todas as invoices/boletos:
+
+Com colunas: Cliente, Trailer, Contrato, Data vencimento, Valor, Status.
+
+Visual: Vermelho = não pago/atrasado, Verde = pago.
+
+No início será manual:
+
+Usuário clica em “Confirmar pagamento”.
+
+Sistema muda status para “Pago” (vermelho → verde).
+
+No futuro:
+
+Integração com banco/gateway para marcar como pago automaticamente.
+
+6) GPS & rastreamento
+
+Ao disponibilizar o trailer:
+
+Sistema precisa ter uma tela para configurar o dispositivo GPS do veículo (ID do dispositivo, API key, etc.).
+
+Durante o período de aluguel:
+
+Sistema mostra o trailer em tempo real no mapa.
+
+Armazena km rodados e/ou tempo de uso.
+
+Essa informação alimenta o módulo de manutenção.
+
+7) Manutenção por tempo ou quilometragem
+
+Cada modelo ou trailer terá no cadastro:
+
+Intervalo de manutenção por tempo (ex: a cada 3 meses).
+
+Intervalo por quilometragem (ex: a cada 10.000 km).
+
+Sistema monitora:
+
+Data da última manutenção.
+
+Km rodados desde a última manutenção.
+
+Quando alcançar o limite:
+
+Sistema dispara aviso:
+
+“Trailer X precisa ser revisado em uma loja parceira.”
+
+Pode enviar notificação ao cliente e/ou operação.
+
+Quando o trailer for para manutenção:
+
+Status: “Em manutenção”.
+
+É feito o checklist de manutenção.
+
+Ao concluir com sucesso, volta para “Apto para aluguel”.
+
+8) Método de envio de trailer via Broker
+
+Tela “Método de envio de trailer”:
+
+Usuário escolhe formato de e-mail (template).
+
+Consegue adicionar/remover campos no corpo do e-mail:
+
+Email do Broker
+
+Placa do Trailer
+
+Tipo do Trailer
+
+Local atual
+
+Destino
+
+Outros campos (data, observações etc.)
+
+Usuário informa o e-mail do Broker.
+
+Sistema monta o e-mail com os dados do trailer e do destino.
+
+Sistema envia o e-mail para o Broker, que posta na plataforma dele o job do trailer.
+
+9) Chegada ao destino
+
+Quando o trailer chega ao destino:
+
+Operação registra no sistema a chegada (pode ser manual ou via GPS + confirmação).
+
+Sistema exige:
+
+Checklist de manutenção/inspeção de chegada.
+
+Registro de emplacamento (nova placa/local, se for o caso).
+
+Após isso:
+
+Atualiza status (disponível em novo local / alugado para outro cliente / em manutenção).
+
+2. O que não foi mencionado e é importante o sistema ter
+
+Aqui entram coisas que normalmente aparecem depois, mas é melhor pensar agora:
+
+Cadastro de Clientes
+
+Dados completos (CNPJ/CPF, contatos, endereços, condições de pagamento).
+
+Histórico de contratos, pagamentos, inadimplências.
+
+Cadastro de Lojas Parceiras / Oficinas
+
+Onde serão feitas as manutenções.
+
+Regras por região, por tipo de trailer, prazos médios.
+
+Gestão de Usuários e Permissões
+
+Quem pode:
+
+Confirmar pagamento?
+
+Encerrar contrato?
+
+Aprovar checklist?
+
+Alterar valores de contrato?
+
+Perfis: Financeiro, Operação, Manutenção, Admin, etc.
+
+Controle de disponibilidade da frota
+
+Evitar conflito de alocação: trailer alugado aparecer como disponível.
+
+Status bem definidos: Disponível, Reservado, Em revisão, Em manutenção, Alugado, Em trânsito, Inativo.
+
+Regras fiscais e documentos oficiais
+
+Necessidade de nota fiscal além da Invoice?
+
+Regras de impostos (ISS, ICMS, etc.) dependendo do modelo de negócio.
+
+Integração com sistema fiscal/ERP (se existir).
+
+Templates de Contrato
+
+Versões de contrato por tipo de cliente ou modelo de trailer.
+
+Campo para anexar PDF do contrato assinado.
+
+Integração com ferramenta de assinatura digital (DocuSign, Clicksign etc.) – se for necessário.
+
+Log / Auditoria
+
+Quem marcou um pagamento como pago.
+
+Quem alterou um contrato ou mudou o status de um trailer.
+
+Histórico de alterações (para compliance e segurança).
+
+Relatórios & BI
+
+Taxa de ocupação da frota.
+
+Receita por tipo de trailer, por cliente, por região.
+
+Custo de manutenção x receita daquele trailer (lifetime value do ativo).
+
+Inadimplência, atrasos, etc.
+
+Definição clara da regra de cobrança
+
+“Sempre paga a primeira e a segunda e a do mês” é ambíguo:
+
+Paga 2 meses adiantados + mês corrente?
+
+Paga 1 entrada + 2 primeiras mensalidades?
+
+Isso precisa virar regra de negócio bem escrita para o dev implementar sem dúvida.
+
+Integração com GPS e e-mail
+
+Qual fornecedor de GPS vai ser usado?
+
+Como será a integração (API, webhook)?
+
+Serviço de e-mail (SMTP, SendGrid, etc.).
+
+3. O que eu faria no seu lugar para criar esse sistema (em partes)
+
+Se eu estivesse no seu lugar, eu seguiria mais ou menos esse plano:
+
+Etapa 1 – Organizar requisitos em formato “de sistema”
+
+Pegar todo esse texto (incluindo essa resposta) e transformar em:
+
+User stories (ex.: “Como financeiro, quero listar todas as invoices em aberto para confirmar pagamento.”).
+
+Listas de regras de negócio (ex.: “Um trailer só pode ser alugado se o último checklist de pré-aluguel estiver aprovado.”).
+
+Separar por módulos:
+
+Frota, Contratos, Financeiro, GPS, Manutenção, Broker, Chegada.
+
+Etapa 2 – Desenhar os fluxos e entidades
+
+Fazer diagramas simples (pode ser no papel, Miro, Draw.io, Figma):
+
+Fluxo de aluguel do início ao fim.
+
+Fluxo de manutenção.
+
+Fluxo de pagamento.
+
+Definir as entidades principais:
+
+Trailer, Modelo, Cliente, Contrato, Checklist, Invoice, Pagamento, Manutenção, Broker, Loja Parceira.
+
+Para cada entidade, definir campos básicos (ID, datas, status, referências a outras).
+
+Etapa 3 – Definir o MVP (o que entra na primeira versão)
+
+Eu colocaria no MVP:
+
+Cadastros básicos:
+
+Modelos de trailer.
+
+Trailers.
+
+Clientes.
+
+Fluxo de checklist + contrato:
+
+Checklist de pré-aluguel.
+
+Criação de contrato 3/6/12 meses.
+
+Financeiro simples:
+
+Geração de Invoice.
+
+Geração de boletos (nem que seja só registrar os dados).
+
+Tela com status de pagamento (vermelho/verde) e botão “Confirmar pagamento”.
+
+GPS (primeiro passo):
+
+Cadastro do ID de GPS por trailer.
+
+Tela simples que mostra localização (mesmo que comece só simulada ou com integração básica).
+
+Manutenção:
+
+Cadastro de intervalo de manutenção por tipo.
+
+Alerta manual/simples (lista de trailers próximos da manutenção).
+
+E-mail para Broker:
+
+Tela com campos fixos (Broker, Placa, Tipo, Local atual, Destino).
+
+Envio de e-mail com esses dados.
+
+O resto (templates de contrato avançados, relatórios complexos, automação bancária, dashboards avançados) eu deixaria para Versão 2.
+
+Etapa 4 – Desenhar telas (UI/UX)
+
+Criar wireframes das telas principais:
+
+Lista de trailers + detalhes do trailer.
+
+Tela de checklist (marcar OK/Não OK nos itens).
+
+Tela de criação de contrato.
+
+Tela do Financeiro com os pagamentos (lista, filtros, botão de “pago”).
+
+Tela de envio para Broker.
+
+Tela de manutenção (alertas).
+
+Isso ajuda muito a alinhar com devs e stakeholders antes de começar a codar.
+
+Etapa 5 – Escolher tecnologia e arquitetura
+
+Decidir com o time:
+
+Vai ser web (provavelmente sim).
+
+Se precisa de app mobile ou PWA.
+
+Banco de dados (SQL, por exemplo).
+
+Serviços de e-mail, integração com GPS e, no futuro, com banco.
+
+Etapa 6 – Implementar em sprints pequenos
+
+Sprint 1: Cadastros + tela de trailers.
+
+Sprint 2: Checklist de pré-aluguel + alteração de status.
+
+Sprint 3: Contratos + associação ao trailer.
+
+Sprint 4: Invoices + tela financeira e confirmação manual de pagamento.
+
+Sprint 5: Envio de e-mail para Broker.
+
+Sprint 6: GPS + alertas básicos de manutenção.
+
+Sempre com testes e ajustes com você/usuários.
