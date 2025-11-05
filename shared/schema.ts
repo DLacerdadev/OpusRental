@@ -269,6 +269,33 @@ export const brokerEmails = pgTable("broker_emails", {
   idxStatus: index("idx_broker_emails_status").on(t.status),
 }));
 
+// Broker Dispatches table (Trailer dispatch to brokers)
+export const brokerDispatches = pgTable("broker_dispatches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  dispatchNumber: text("dispatch_number").notNull().unique(), // DISPATCH-001, DISPATCH-002, etc.
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
+  brokerName: text("broker_name").notNull(),
+  brokerEmail: text("broker_email").notNull(),
+  brokerPhone: text("broker_phone"),
+  pickupLocation: text("pickup_location").notNull(),
+  pickupDate: date("pickup_date").notNull(),
+  deliveryLocation: text("delivery_location").notNull(),
+  estimatedDeliveryDate: date("estimated_delivery_date"),
+  actualDeliveryDate: date("actual_delivery_date"),
+  loadType: text("load_type").notNull(), // full_load, partial_load, empty
+  specialInstructions: text("special_instructions"),
+  dispatchDocumentUrl: text("dispatch_document_url"), // PDF document URL
+  status: text("status").notNull().default("pending"), // pending, in_transit, delivered, cancelled
+  notes: text("notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (t) => ({
+  idxTrailerId: index("idx_broker_dispatch_trailer").on(t.trailerId),
+  idxStatus: index("idx_broker_dispatch_status").on(t.status),
+  idxPickupDate: index("idx_broker_dispatch_pickup").on(t.pickupDate),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   shares: many(shares),
@@ -285,6 +312,7 @@ export const trailersRelations = relations(trailers, ({ many }) => ({
   checklists: many(checklists),
   maintenanceSchedules: many(maintenanceSchedules),
   brokerEmails: many(brokerEmails),
+  brokerDispatches: many(brokerDispatches),
 }));
 
 export const sharesRelations = relations(shares, ({ one, many }) => ({
@@ -380,6 +408,17 @@ export const brokerEmailsRelations = relations(brokerEmails, ({ one }) => ({
   }),
 }));
 
+export const brokerDispatchesRelations = relations(brokerDispatches, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [brokerDispatches.trailerId],
+    references: [trailers.id],
+  }),
+  creator: one(users, {
+    fields: [brokerDispatches.createdBy],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -470,6 +509,12 @@ export const insertBrokerEmailSchema = createInsertSchema(brokerEmails).omit({
   sentAt: true,
 });
 
+export const insertBrokerDispatchSchema = createInsertSchema(brokerDispatches).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -518,3 +563,6 @@ export type InsertPartnerShop = z.infer<typeof insertPartnerShopSchema>;
 
 export type BrokerEmail = typeof brokerEmails.$inferSelect;
 export type InsertBrokerEmail = z.infer<typeof insertBrokerEmailSchema>;
+
+export type BrokerDispatch = typeof brokerDispatches.$inferSelect;
+export type InsertBrokerDispatch = z.infer<typeof insertBrokerDispatchSchema>;
