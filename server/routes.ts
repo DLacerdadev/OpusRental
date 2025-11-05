@@ -2,13 +2,23 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
-import { insertUserSchema, insertTrailerSchema, insertShareSchema, financialRecords } from "@shared/schema";
+import { 
+  insertUserSchema, 
+  insertTrailerSchema, 
+  insertShareSchema, 
+  financialRecords, 
+  insertGpsDeviceSchema,
+  insertRentalClientSchema,
+  insertRentalContractSchema,
+  insertInvoiceSchema
+} from "@shared/schema";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
+import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -256,6 +266,261 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Portfolio error:", error);
       res.status(500).json({ message: "Failed to fetch portfolio" });
+    }
+  });
+
+  // GPS Device routes (Manager/Admin only)
+  // GPS Webhook endpoint (Public - requires HMAC/API key validation in production)
+  app.post("/api/gps/webhook", apiLimiter, async (req, res) => {
+    try {
+      const { provider, trailerId, data } = req.body;
+
+      if (!provider || !trailerId || !data) {
+        return res.status(400).json({ message: "Missing required fields: provider, trailerId, data" });
+      }
+
+      const gpsProvider = provider as GpsProvider;
+      const adapter = GpsAdapterFactory.getAdapter(gpsProvider);
+
+      if (!adapter.validate(data)) {
+        return res.status(400).json({ message: "Invalid GPS data format for provider" });
+      }
+
+      const normalized = adapter.normalize(data);
+
+      const device = await storage.getGpsDeviceByTrailerId(trailerId);
+      if (device) {
+        await storage.updateGpsDevice(device.id, { lastPing: new Date() });
+      }
+
+      await storage.createTrackingData({
+        trailerId,
+        latitude: normalized.latitude.toString(),
+        longitude: normalized.longitude.toString(),
+        speed: normalized.speed?.toString(),
+        status: normalized.status,
+      });
+
+      res.json({ message: "GPS data received successfully", normalized });
+    } catch (error) {
+      console.error("GPS webhook error:", error);
+      res.status(500).json({ message: "Failed to process GPS data" });
+    }
+  });
+
+  app.get("/api/gps/devices", authorize(), async (req, res) => {
+    try {
+      const devices = await storage.getAllGpsDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("GPS devices error:", error);
+      res.status(500).json({ message: "Failed to fetch GPS devices" });
+    }
+  });
+
+  app.get("/api/gps/devices/trailer/:trailerId", authorize(), async (req, res) => {
+    try {
+      const device = await storage.getGpsDeviceByTrailerId(req.params.trailerId);
+      if (!device) {
+        return res.status(404).json({ message: "GPS device not found for this trailer" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("GPS device error:", error);
+      res.status(500).json({ message: "Failed to fetch GPS device" });
+    }
+  });
+
+  app.post("/api/gps/devices", authorize(), async (req, res) => {
+    try {
+      const validation = insertGpsDeviceSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid GPS device data", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const existing = await storage.getGpsDeviceByTrailerId(validation.data.trailerId);
+      if (existing) {
+        return res.status(400).json({ message: "GPS device already exists for this trailer" });
+      }
+
+      const device = await storage.createGpsDevice(validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "gps_device",
+        entityId: device.id,
+        details: { trailerId: device.trailerId, provider: device.provider },
+        ipAddress: req.ip,
+      });
+
+      res.json(device);
+    } catch (error) {
+      console.error("Create GPS device error:", error);
+      res.status(500).json({ message: "Failed to create GPS device" });
+    }
+  });
+
+  app.put("/api/gps/devices/:id", authorize(), async (req, res) => {
+    try {
+      const device = await storage.updateGpsDevice(req.params.id, req.body);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "gps_device",
+        entityId: device.id,
+        details: req.body,
+        ipAddress: req.ip,
+      });
+
+      res.json(device);
+    } catch (error) {
+      console.error("Update GPS device error:", error);
+      res.status(500).json({ message: "Failed to update GPS device" });
+    }
+  });
+
+  app.delete("/api/gps/devices/:id", authorize(), async (req, res) => {
+    try {
+      await storage.deleteGpsDevice(req.params.id);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "delete",
+        entityType: "gps_device",
+        entityId: req.params.id,
+        details: {},
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "GPS device deleted successfully" });
+    } catch (error) {
+      console.error("Delete GPS device error:", error);
+      res.status(500).json({ message: "Failed to delete GPS device" });
+    }
+  });
+
+  app.post("/api/gps/simulate", authorize(), async (req, res) => {
+    try {
+      const { trailerId, latitude, longitude } = req.body;
+
+      if (!trailerId || !latitude || !longitude) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      await storage.createTrackingData({
+        trailerId,
+        latitude: latitude.toString(),
+        longitude: longitude.toString(),
+        speed: (Math.random() * 80).toFixed(2),
+        status: "active",
+      });
+
+      const device = await storage.getGpsDeviceByTrailerId(trailerId);
+      if (device) {
+        await storage.updateGpsDevice(device.id, { lastPing: new Date() });
+      }
+
+      res.json({ message: "Simulated GPS data created successfully" });
+    } catch (error) {
+      console.error("GPS simulate error:", error);
+      res.status(500).json({ message: "Failed to simulate GPS data" });
+    }
+  });
+
+  // Rental Client routes (Manager/Admin only)
+  app.get("/api/rental-clients", authorize(), async (req, res) => {
+    try {
+      const clients = await storage.getAllRentalClients();
+      res.json(clients);
+    } catch (error) {
+      console.error("Rental clients error:", error);
+      res.status(500).json({ message: "Failed to fetch rental clients" });
+    }
+  });
+
+  app.get("/api/rental-clients/:id", authorize(), async (req, res) => {
+    try {
+      const client = await storage.getRentalClient(req.params.id);
+      if (!client) {
+        return res.status(404).json({ message: "Rental client not found" });
+      }
+      res.json(client);
+    } catch (error) {
+      console.error("Rental client error:", error);
+      res.status(500).json({ message: "Failed to fetch rental client" });
+    }
+  });
+
+  app.post("/api/rental-clients", authorize(), async (req, res) => {
+    try {
+      const validation = insertRentalClientSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid rental client data", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const client = await storage.createRentalClient(validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "rental_client",
+        entityId: client.id,
+        details: { companyName: client.companyName, taxId: client.taxId },
+        ipAddress: req.ip,
+      });
+
+      res.json(client);
+    } catch (error) {
+      console.error("Create rental client error:", error);
+      res.status(500).json({ message: "Failed to create rental client" });
+    }
+  });
+
+  app.put("/api/rental-clients/:id", authorize(), async (req, res) => {
+    try {
+      const client = await storage.updateRentalClient(req.params.id, req.body);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "rental_client",
+        entityId: client.id,
+        details: req.body,
+        ipAddress: req.ip,
+      });
+
+      res.json(client);
+    } catch (error) {
+      console.error("Update rental client error:", error);
+      res.status(500).json({ message: "Failed to update rental client" });
+    }
+  });
+
+  app.delete("/api/rental-clients/:id", authorize(), async (req, res) => {
+    try {
+      await storage.deleteRentalClient(req.params.id);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "delete",
+        entityType: "rental_client",
+        entityId: req.params.id,
+        details: {},
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "Rental client deleted successfully" });
+    } catch (error) {
+      console.error("Delete rental client error:", error);
+      res.status(500).json({ message: "Failed to delete rental client" });
     }
   });
 
