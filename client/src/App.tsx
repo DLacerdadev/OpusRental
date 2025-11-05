@@ -27,6 +27,7 @@ import Approvals from "@/pages/approvals";
 import InvestorShares from "@/pages/investor-shares";
 import GpsConfig from "@/pages/gps-config";
 import RentalClients from "@/pages/rental-clients";
+import RentalContracts from "@/pages/rental-contracts";
 
 function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -138,6 +139,9 @@ function Router() {
       </Route>
       <Route path="/rental-clients">
         {() => <ProtectedRoute component={RentalClients} titleKey="pageTitles.rentalClients" />}
+      </Route>
+      <Route path="/rental-contracts">
+        {() => <ProtectedRoute component={RentalContracts} titleKey="pageTitles.rentalContracts" />}
       </Route>
       <Route component={NotFound} />
     </Switch>

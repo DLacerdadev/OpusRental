@@ -12,6 +12,7 @@ import {
   insertRentalContractSchema,
   insertInvoiceSchema
 } from "@shared/schema";
+import { z } from "zod";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import rateLimit from "express-rate-limit";
@@ -521,6 +522,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Delete rental client error:", error);
       res.status(500).json({ message: "Failed to delete rental client" });
+    }
+  });
+
+  // Rental Contracts routes (Manager/Admin only)
+  app.get("/api/rental-contracts", authorize(), async (req, res) => {
+    try {
+      const contracts = await storage.getAllRentalContracts();
+      res.json(contracts);
+    } catch (error) {
+      console.error("Rental contracts error:", error);
+      res.status(500).json({ message: "Failed to fetch rental contracts" });
+    }
+  });
+
+  app.get("/api/rental-contracts/:id", authorize(), async (req, res) => {
+    try {
+      const contract = await storage.getRentalContract(req.params.id);
+      if (!contract) {
+        return res.status(404).json({ message: "Rental contract not found" });
+      }
+      res.json(contract);
+    } catch (error) {
+      console.error("Rental contract error:", error);
+      res.status(500).json({ message: "Failed to fetch rental contract" });
+    }
+  });
+
+  app.get("/api/rental-contracts/client/:clientId", authorize(), async (req, res) => {
+    try {
+      const contracts = await storage.getContractsByClientId(req.params.clientId);
+      res.json(contracts);
+    } catch (error) {
+      console.error("Client contracts error:", error);
+      res.status(500).json({ message: "Failed to fetch client contracts" });
+    }
+  });
+
+  app.get("/api/rental-contracts/trailer/:trailerId", authorize(), async (req, res) => {
+    try {
+      const contracts = await storage.getContractsByTrailerId(req.params.trailerId);
+      res.json(contracts);
+    } catch (error) {
+      console.error("Trailer contracts error:", error);
+      res.status(500).json({ message: "Failed to fetch trailer contracts" });
+    }
+  });
+
+  app.post("/api/rental-contracts", authorize(), async (req, res) => {
+    try {
+      const validatedData = insertRentalContractSchema.parse(req.body);
+      const contract = await storage.createRentalContract(validatedData);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "rental_contract",
+        entityId: contract.id,
+        details: validatedData,
+        ipAddress: req.ip,
+      });
+
+      res.status(201).json(contract);
+    } catch (error) {
+      console.error("Create rental contract error:", error);
+      res.status(500).json({ message: "Failed to create rental contract" });
+    }
+  });
+
+  app.put("/api/rental-contracts/:id", authorize(), async (req, res) => {
+    try {
+      const validatedData = insertRentalContractSchema.partial().parse(req.body);
+      const contract = await storage.updateRentalContract(req.params.id, validatedData);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "rental_contract",
+        entityId: contract.id,
+        details: validatedData,
+        ipAddress: req.ip,
+      });
+
+      res.json(contract);
+    } catch (error) {
+      console.error("Update rental contract error:", error);
+      res.status(500).json({ message: "Failed to update rental contract" });
+    }
+  });
+
+  app.post("/api/rental-contracts/:id/terminate", authorize(), async (req, res) => {
+    try {
+      // Validate empty body with strict Zod schema
+      const terminateSchema = z.object({}).strict();
+      const validation = terminateSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const contract = await storage.terminateContract(req.params.id);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "terminate",
+        entityType: "rental_contract",
+        entityId: contract.id,
+        details: { status: "cancelled" },
+        ipAddress: req.ip,
+      });
+
+      res.json(contract);
+    } catch (error) {
+      console.error("Terminate contract error:", error);
+      res.status(500).json({ message: "Failed to terminate contract" });
     }
   });
 
