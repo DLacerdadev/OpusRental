@@ -10,7 +10,8 @@ import {
   insertGpsDeviceSchema,
   insertRentalClientSchema,
   insertRentalContractSchema,
-  insertInvoiceSchema
+  insertInvoiceSchema,
+  insertChecklistSchema
 } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
@@ -783,6 +784,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Delete invoice error:", error);
       res.status(500).json({ message: "Failed to delete invoice" });
+    }
+  });
+
+  // Checklist/Inspection routes (Manager/Admin only)
+  app.get("/api/checklists/trailer/:trailerId", authorize(), async (req, res) => {
+    try {
+      const checklists = await storage.getChecklistsByTrailerId(req.params.trailerId);
+      res.json(checklists);
+    } catch (error) {
+      console.error("Get checklists by trailer error:", error);
+      res.status(500).json({ message: "Failed to fetch checklists by trailer" });
+    }
+  });
+
+  app.get("/api/checklists/type/:type", authorize(), async (req, res) => {
+    try {
+      const checklists = await storage.getChecklistsByType(req.params.type);
+      res.json(checklists);
+    } catch (error) {
+      console.error("Get checklists by type error:", error);
+      res.status(500).json({ message: "Failed to fetch checklists by type" });
+    }
+  });
+
+  app.get("/api/checklists/:id", authorize(), async (req, res) => {
+    try {
+      const checklist = await storage.getChecklist(req.params.id);
+      if (!checklist) {
+        return res.status(404).json({ message: "Checklist not found" });
+      }
+      res.json(checklist);
+    } catch (error) {
+      console.error("Get checklist error:", error);
+      res.status(500).json({ message: "Failed to fetch checklist" });
+    }
+  });
+
+  app.post("/api/checklists", authorize(), async (req, res) => {
+    try {
+      const validation = insertChecklistSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const checklist = await storage.createChecklist(validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "checklist",
+        entityId: checklist.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.status(201).json(checklist);
+    } catch (error) {
+      console.error("Create checklist error:", error);
+      res.status(500).json({ message: "Failed to create checklist" });
+    }
+  });
+
+  app.put("/api/checklists/:id", authorize(), async (req, res) => {
+    try {
+      const validation = insertChecklistSchema.partial().safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const checklist = await storage.updateChecklist(req.params.id, validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "checklist",
+        entityId: checklist.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.json(checklist);
+    } catch (error) {
+      console.error("Update checklist error:", error);
+      res.status(500).json({ message: "Failed to update checklist" });
+    }
+  });
+
+  app.post("/api/checklists/:id/complete", authorize(), async (req, res) => {
+    try {
+      const completeSchema = z.object({
+        approved: z.boolean(),
+        notes: z.string().optional(),
+      }).strict();
+
+      const validation = completeSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const checklist = await storage.completeChecklist(
+        req.params.id,
+        validation.data.approved,
+        validation.data.notes
+      );
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "complete",
+        entityType: "checklist",
+        entityId: checklist.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.json(checklist);
+    } catch (error) {
+      console.error("Complete checklist error:", error);
+      res.status(500).json({ message: "Failed to complete checklist" });
     }
   });
 
