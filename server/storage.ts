@@ -120,6 +120,7 @@ export interface IStorage {
   getAllRentalClients(): Promise<RentalClient[]>;
   createRentalClient(client: InsertRentalClient): Promise<RentalClient>;
   updateRentalClient(id: string, client: Partial<RentalClient>): Promise<RentalClient>;
+  deleteRentalClient(id: string): Promise<void>;
   
   // Rental Contract operations
   getRentalContract(id: string): Promise<RentalContract | undefined>;
@@ -128,6 +129,7 @@ export interface IStorage {
   getContractsByTrailerId(trailerId: string): Promise<RentalContract[]>;
   createRentalContract(contract: InsertRentalContract): Promise<RentalContract>;
   updateRentalContract(id: string, contract: Partial<RentalContract>): Promise<RentalContract>;
+  terminateContract(id: string): Promise<RentalContract>;
   
   // Invoice operations
   getInvoice(id: string): Promise<Invoice | undefined>;
@@ -136,6 +138,7 @@ export interface IStorage {
   getOverdueInvoices(): Promise<any[]>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoiceStatus(id: string, status: string, paidDate?: Date): Promise<Invoice>;
+  deleteInvoice(id: string): Promise<void>;
   
   // Checklist operations
   getChecklist(id: string): Promise<Checklist | undefined>;
@@ -143,6 +146,7 @@ export interface IStorage {
   getChecklistsByType(type: string): Promise<Checklist[]>;
   createChecklist(checklist: InsertChecklist): Promise<Checklist>;
   updateChecklist(id: string, checklist: Partial<Checklist>): Promise<Checklist>;
+  completeChecklist(id: string, approved: boolean, notes?: string): Promise<Checklist>;
   
   // Maintenance Schedule operations
   getMaintenanceSchedule(id: string): Promise<MaintenanceSchedule | undefined>;
@@ -150,18 +154,21 @@ export interface IStorage {
   getMaintenanceAlerts(): Promise<MaintenanceSchedule[]>;
   createMaintenanceSchedule(schedule: InsertMaintenanceSchedule): Promise<MaintenanceSchedule>;
   updateMaintenanceSchedule(id: string, schedule: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule>;
+  completeMaintenance(id: string, completionDate: Date, cost?: string, notes?: string): Promise<MaintenanceSchedule>;
   
   // Partner Shop operations
   getPartnerShop(id: string): Promise<PartnerShop | undefined>;
   getAllPartnerShops(): Promise<PartnerShop[]>;
   createPartnerShop(shop: InsertPartnerShop): Promise<PartnerShop>;
   updatePartnerShop(id: string, shop: Partial<PartnerShop>): Promise<PartnerShop>;
+  deletePartnerShop(id: string): Promise<void>;
   
   // Broker Email operations
   getBrokerEmail(id: string): Promise<BrokerEmail | undefined>;
   getBrokerEmailsByTrailerId(trailerId: string): Promise<BrokerEmail[]>;
   getAllBrokerEmails(): Promise<BrokerEmail[]>;
   createBrokerEmail(email: InsertBrokerEmail): Promise<BrokerEmail>;
+  deleteBrokerEmail(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -620,6 +627,10 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async deleteRentalClient(id: string): Promise<void> {
+    await db.delete(rentalClients).where(eq(rentalClients.id, id));
+  }
+
   // Rental Contract operations
   async getRentalContract(id: string): Promise<RentalContract | undefined> {
     const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, id));
@@ -682,6 +693,25 @@ export class DatabaseStorage implements IStorage {
       .where(eq(rentalContracts.id, id))
       .returning();
     return updated;
+  }
+
+  async terminateContract(id: string): Promise<RentalContract> {
+    const contract = await this.getRentalContract(id);
+    if (!contract) {
+      throw new Error("Contract not found");
+    }
+
+    const [terminated] = await db
+      .update(rentalContracts)
+      .set({ status: "terminated", updatedAt: new Date() })
+      .where(eq(rentalContracts.id, id))
+      .returning();
+
+    if (contract.trailerId) {
+      await this.updateTrailer(contract.trailerId, { status: "stock" });
+    }
+
+    return terminated;
   }
 
   // Invoice operations
@@ -764,6 +794,10 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async deleteInvoice(id: string): Promise<void> {
+    await db.delete(invoices).where(eq(invoices.id, id));
+  }
+
   // Checklist operations
   async getChecklist(id: string): Promise<Checklist | undefined> {
     const [checklist] = await db.select().from(checklists).where(eq(checklists.id, id));
@@ -798,6 +832,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(checklists.id, id))
       .returning();
     return updated;
+  }
+
+  async completeChecklist(id: string, approved: boolean, notes?: string): Promise<Checklist> {
+    const updateData: any = { 
+      approved,
+      completedAt: new Date()
+    };
+    if (notes) {
+      updateData.notes = notes;
+    }
+    const [completed] = await db
+      .update(checklists)
+      .set(updateData)
+      .where(eq(checklists.id, id))
+      .returning();
+    return completed;
   }
 
   // Maintenance Schedule operations
@@ -836,6 +886,26 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async completeMaintenance(id: string, completionDate: Date, cost?: string, notes?: string): Promise<MaintenanceSchedule> {
+    const updateData: any = {
+      lastMaintenanceDate: completionDate,
+      status: "completed",
+      updatedAt: new Date()
+    };
+    if (cost) {
+      updateData.cost = cost;
+    }
+    if (notes) {
+      updateData.notes = notes;
+    }
+    const [completed] = await db
+      .update(maintenanceSchedules)
+      .set(updateData)
+      .where(eq(maintenanceSchedules.id, id))
+      .returning();
+    return completed;
+  }
+
   // Partner Shop operations
   async getPartnerShop(id: string): Promise<PartnerShop | undefined> {
     const [shop] = await db.select().from(partnerShops).where(eq(partnerShops.id, id));
@@ -860,6 +930,10 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async deletePartnerShop(id: string): Promise<void> {
+    await db.delete(partnerShops).where(eq(partnerShops.id, id));
+  }
+
   // Broker Email operations
   async getBrokerEmail(id: string): Promise<BrokerEmail | undefined> {
     const [email] = await db.select().from(brokerEmails).where(eq(brokerEmails.id, id));
@@ -881,6 +955,10 @@ export class DatabaseStorage implements IStorage {
   async createBrokerEmail(email: InsertBrokerEmail): Promise<BrokerEmail> {
     const [newEmail] = await db.insert(brokerEmails).values(email).returning();
     return newEmail;
+  }
+
+  async deleteBrokerEmail(id: string): Promise<void> {
+    await db.delete(brokerEmails).where(eq(brokerEmails.id, id));
   }
 }
 
