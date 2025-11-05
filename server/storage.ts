@@ -15,6 +15,7 @@ import {
   maintenanceSchedules,
   partnerShops,
   brokerEmails,
+  brokerDispatches,
   type User,
   type InsertUser,
   type Trailer,
@@ -47,6 +48,8 @@ import {
   type InsertPartnerShop,
   type BrokerEmail,
   type InsertBrokerEmail,
+  type BrokerDispatch,
+  type InsertBrokerDispatch,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -169,6 +172,13 @@ export interface IStorage {
   getAllBrokerEmails(): Promise<BrokerEmail[]>;
   createBrokerEmail(email: InsertBrokerEmail): Promise<BrokerEmail>;
   deleteBrokerEmail(id: string): Promise<void>;
+
+  // Broker Dispatch operations
+  createBrokerDispatch(data: InsertBrokerDispatch): Promise<BrokerDispatch>;
+  getBrokerDispatchById(id: string): Promise<BrokerDispatch | null>;
+  getAllBrokerDispatches(): Promise<BrokerDispatch[]>;
+  updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>): Promise<BrokerDispatch>;
+  getBrokerDispatchesByTrailer(trailerId: string): Promise<BrokerDispatch[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -959,6 +969,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBrokerEmail(id: string): Promise<void> {
     await db.delete(brokerEmails).where(eq(brokerEmails.id, id));
+  }
+
+  // Broker Dispatch operations
+  async createBrokerDispatch(data: InsertBrokerDispatch): Promise<BrokerDispatch> {
+    const [dispatch] = await db.insert(brokerDispatches).values(data).returning();
+    return dispatch;
+  }
+
+  async getBrokerDispatchById(id: string): Promise<BrokerDispatch | null> {
+    const [dispatch] = await db.select().from(brokerDispatches).where(eq(brokerDispatches.id, id));
+    return dispatch || null;
+  }
+
+  async getAllBrokerDispatches(): Promise<BrokerDispatch[]> {
+    return await db.select().from(brokerDispatches).orderBy(desc(brokerDispatches.createdAt));
+  }
+
+  async updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>): Promise<BrokerDispatch> {
+    const [updated] = await db
+      .update(brokerDispatches)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(brokerDispatches.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getBrokerDispatchesByTrailer(trailerId: string): Promise<BrokerDispatch[]> {
+    return await db.select().from(brokerDispatches).where(eq(brokerDispatches.trailerId, trailerId));
   }
 }
 

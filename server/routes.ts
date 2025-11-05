@@ -12,7 +12,8 @@ import {
   insertRentalContractSchema,
   insertInvoiceSchema,
   insertChecklistSchema,
-  insertMaintenanceScheduleSchema
+  insertMaintenanceScheduleSchema,
+  insertBrokerDispatchSchema
 } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
@@ -1484,6 +1485,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Payments by share error:", error);
       res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  // Broker Dispatch routes
+  app.get("/api/broker-dispatches", authorize(), isManager, async (req, res) => {
+    try {
+      const dispatches = await storage.getAllBrokerDispatches();
+      
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "list_broker_dispatches",
+        entityType: "broker_dispatch",
+        entityId: null,
+        details: { count: dispatches.length },
+        ipAddress: req.ip,
+      });
+      
+      res.json(dispatches);
+    } catch (error) {
+      console.error("Broker dispatches error:", error);
+      res.status(500).json({ message: "Failed to fetch broker dispatches" });
+    }
+  });
+
+  app.get("/api/broker-dispatches/:id", authorize(), isManager, async (req, res) => {
+    try {
+      const dispatch = await storage.getBrokerDispatchById(req.params.id);
+      if (!dispatch) {
+        return res.status(404).json({ message: "Broker dispatch not found" });
+      }
+      res.json(dispatch);
+    } catch (error) {
+      console.error("Broker dispatch by id error:", error);
+      res.status(500).json({ message: "Failed to fetch broker dispatch" });
+    }
+  });
+
+  app.get("/api/broker-dispatches/trailer/:trailerId", authorize(), isManager, async (req, res) => {
+    try {
+      const dispatches = await storage.getBrokerDispatchesByTrailer(req.params.trailerId);
+      res.json(dispatches);
+    } catch (error) {
+      console.error("Broker dispatches by trailer error:", error);
+      res.status(500).json({ message: "Failed to fetch broker dispatches" });
+    }
+  });
+
+  app.post("/api/broker-dispatches", authorize(), isManager, async (req, res) => {
+    try {
+      const validation = insertBrokerDispatchSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: validation.error.errors 
+        });
+      }
+
+      // Generate dispatch number
+      const allDispatches = await storage.getAllBrokerDispatches();
+      const dispatchNumber = `DISPATCH-${String(allDispatches.length + 1).padStart(3, '0')}`;
+
+      const dispatch = await storage.createBrokerDispatch({
+        ...validation.data,
+        dispatchNumber,
+        createdBy: req.session.userId!,
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create_broker_dispatch",
+        entityType: "broker_dispatch",
+        entityId: dispatch.id,
+        details: { dispatchNumber, trailerId: dispatch.trailerId },
+        ipAddress: req.ip,
+      });
+
+      res.json(dispatch);
+    } catch (error) {
+      console.error("Create broker dispatch error:", error);
+      res.status(500).json({ message: "Failed to create broker dispatch" });
+    }
+  });
+
+  app.put("/api/broker-dispatches/:id", authorize(), isManager, async (req, res) => {
+    try {
+      const validation = insertBrokerDispatchSchema.partial().safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: validation.error.errors 
+        });
+      }
+
+      // Check if dispatch exists
+      const existing = await storage.getBrokerDispatchById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ message: "Broker dispatch not found" });
+      }
+
+      const dispatch = await storage.updateBrokerDispatch(req.params.id, validation.data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update_broker_dispatch",
+        entityType: "broker_dispatch",
+        entityId: dispatch.id,
+        details: { updates: validation.data },
+        ipAddress: req.ip,
+      });
+
+      res.json(dispatch);
+    } catch (error) {
+      console.error("Update broker dispatch error:", error);
+      res.status(500).json({ message: "Failed to update broker dispatch" });
     }
   });
 
