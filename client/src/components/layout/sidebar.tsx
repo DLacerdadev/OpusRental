@@ -25,6 +25,7 @@ import {
   Building2,
   Receipt,
   ClipboardCheck,
+  Wrench,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -69,6 +70,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
     { path: "/rental-contracts", icon: FileText, label: "Rental Contracts", roles: ["manager", "admin"] },
     { path: "/invoices", icon: Receipt, label: "Invoices", roles: ["manager", "admin"] },
     { path: "/inspections", icon: ClipboardCheck, label: "Inspections", roles: ["manager", "admin"] },
+    { path: "/maintenance", icon: Wrench, label: "Maintenance", roles: ["manager", "admin"] },
     { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
     { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
     { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },

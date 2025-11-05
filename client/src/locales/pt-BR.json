@@ -413,7 +413,8 @@
     "rentalClients": "Clientes Locação",
     "rentalContracts": "Contratos Locação",
     "invoices": "Faturas",
-    "inspections": "Inspeções"
+    "inspections": "Inspeções",
+    "maintenance": "Manutenção"
   },
   "common": {
     "loading": "Carregando...",
