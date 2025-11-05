@@ -11,7 +11,8 @@ import {
   insertRentalClientSchema,
   insertRentalContractSchema,
   insertInvoiceSchema,
-  insertChecklistSchema
+  insertChecklistSchema,
+  insertMaintenanceScheduleSchema
 } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
@@ -914,6 +915,218 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Complete checklist error:", error);
       res.status(500).json({ message: "Failed to complete checklist" });
+    }
+  });
+
+  // Maintenance Schedule routes (Manager/Admin only)
+  app.get("/api/maintenance", authorize(), async (req, res) => {
+    try {
+      // Get all maintenance schedules
+      const trailers = await storage.getAllTrailers();
+      const allSchedules = await Promise.all(
+        trailers.map(async (trailer) => {
+          return await storage.getMaintenanceSchedulesByTrailerId(trailer.id);
+        })
+      );
+      res.json(allSchedules.flat());
+    } catch (error) {
+      console.error("Get all maintenance schedules error:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance schedules" });
+    }
+  });
+
+  app.get("/api/maintenance/trailer/:trailerId", authorize(), async (req, res) => {
+    try {
+      const schedules = await storage.getMaintenanceSchedulesByTrailerId(req.params.trailerId);
+      res.json(schedules);
+    } catch (error) {
+      console.error("Get maintenance schedules by trailer error:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance schedules by trailer" });
+    }
+  });
+
+  app.get("/api/maintenance/alerts", authorize(), async (req, res) => {
+    try {
+      const alerts = await storage.getMaintenanceAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Get maintenance alerts error:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance alerts" });
+    }
+  });
+
+  app.get("/api/maintenance/:id", authorize(), async (req, res) => {
+    try {
+      const schedule = await storage.getMaintenanceSchedule(req.params.id);
+      if (!schedule) {
+        return res.status(404).json({ message: "Maintenance schedule not found" });
+      }
+      res.json(schedule);
+    } catch (error) {
+      console.error("Get maintenance schedule error:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance schedule" });
+    }
+  });
+
+  app.post("/api/maintenance", authorize(), async (req, res) => {
+    try {
+      const validation = insertMaintenanceScheduleSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      // Calculate next maintenance date/km based on schedule type
+      const data = validation.data;
+      const now = new Date();
+
+      if (data.scheduleType === "time_based" && data.intervalDays && data.lastMaintenanceDate) {
+        const lastDate = new Date(data.lastMaintenanceDate);
+        const nextDate = new Date(lastDate);
+        nextDate.setDate(nextDate.getDate() + data.intervalDays);
+        data.nextMaintenanceDate = nextDate.toISOString().split('T')[0];
+        
+        // Calculate status
+        const daysUntil = Math.floor((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysUntil < 7) {
+          data.status = "urgent";
+        } else {
+          data.status = "scheduled";
+        }
+      } else if (data.scheduleType === "km_based" && data.intervalKm && data.lastMaintenanceKm) {
+        const nextKm = parseFloat(data.lastMaintenanceKm) + parseFloat(data.intervalKm);
+        data.nextMaintenanceKm = nextKm.toString();
+        data.status = "scheduled";
+      }
+
+      const schedule = await storage.createMaintenanceSchedule(data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create",
+        entityType: "maintenance_schedule",
+        entityId: schedule.id,
+        details: data,
+        ipAddress: req.ip,
+      });
+
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error("Create maintenance schedule error:", error);
+      res.status(500).json({ message: "Failed to create maintenance schedule" });
+    }
+  });
+
+  app.put("/api/maintenance/:id", authorize(), async (req, res) => {
+    try {
+      const validation = insertMaintenanceScheduleSchema.partial().safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      // Recalculate next maintenance if interval or last maintenance changed
+      const data = validation.data;
+      const existing = await storage.getMaintenanceSchedule(req.params.id);
+      
+      if (!existing) {
+        return res.status(404).json({ message: "Maintenance schedule not found" });
+      }
+      
+      if (existing) {
+        const now = new Date();
+        
+        if (data.scheduleType === "time_based" || existing.scheduleType === "time_based") {
+          const intervalDays = data.intervalDays || existing.intervalDays;
+          const lastDate = data.lastMaintenanceDate ? new Date(data.lastMaintenanceDate) : existing.lastMaintenanceDate ? new Date(existing.lastMaintenanceDate) : null;
+          
+          if (intervalDays && lastDate) {
+            const nextDate = new Date(lastDate);
+            nextDate.setDate(nextDate.getDate() + intervalDays);
+            data.nextMaintenanceDate = nextDate.toISOString().split('T')[0];
+            
+            // Only recalculate status if not already completed
+            if (existing.status !== "completed" && data.status !== "completed") {
+              const daysUntil = Math.floor((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              if (daysUntil < 7) {
+                data.status = "urgent";
+              } else {
+                data.status = "scheduled";
+              }
+            }
+          }
+        } else if (data.scheduleType === "km_based" || existing.scheduleType === "km_based") {
+          const intervalKm = data.intervalKm || existing.intervalKm;
+          const lastKm = data.lastMaintenanceKm || existing.lastMaintenanceKm;
+          
+          if (intervalKm && lastKm) {
+            const nextKm = parseFloat(lastKm) + parseFloat(intervalKm);
+            data.nextMaintenanceKm = nextKm.toString();
+          }
+        }
+      }
+
+      const schedule = await storage.updateMaintenanceSchedule(req.params.id, data);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "update",
+        entityType: "maintenance_schedule",
+        entityId: schedule.id,
+        details: data,
+        ipAddress: req.ip,
+      });
+
+      res.json(schedule);
+    } catch (error) {
+      console.error("Update maintenance schedule error:", error);
+      res.status(500).json({ message: "Failed to update maintenance schedule" });
+    }
+  });
+
+  app.post("/api/maintenance/:id/complete", authorize(), async (req, res) => {
+    try {
+      const completeSchema = z.object({
+        completionDate: z.string(),
+        cost: z.string().optional(),
+        notes: z.string().optional(),
+      }).strict();
+
+      const validation = completeSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid payload", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const schedule = await storage.completeMaintenance(
+        req.params.id,
+        new Date(validation.data.completionDate),
+        validation.data.cost,
+        validation.data.notes
+      );
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "complete",
+        entityType: "maintenance_schedule",
+        entityId: schedule.id,
+        details: validation.data,
+        ipAddress: req.ip,
+      });
+
+      res.json(schedule);
+    } catch (error) {
+      console.error("Complete maintenance error:", error);
+      res.status(500).json({ message: "Failed to complete maintenance" });
     }
   });
 
