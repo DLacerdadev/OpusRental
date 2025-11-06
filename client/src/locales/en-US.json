@@ -645,6 +645,16 @@
       "updateSuccess": "Dispatch updated successfully",
       "createError": "Failed to create dispatch",
       "updateError": "Failed to update dispatch"
+    },
+    "validation": {
+      "trailerRequired": "Trailer is required",
+      "brokerNameRequired": "Broker name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+      "pickupLocationRequired": "Pickup location is required",
+      "pickupDateRequired": "Pickup date is required",
+      "deliveryLocationRequired": "Delivery location is required",
+      "loadTypeRequired": "Load type is required"
     }
   }
 }

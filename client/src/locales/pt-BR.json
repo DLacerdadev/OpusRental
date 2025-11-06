@@ -645,6 +645,16 @@
       "updateSuccess": "Despacho atualizado com sucesso",
       "createError": "Falha ao criar despacho",
       "updateError": "Falha ao atualizar despacho"
+    },
+    "validation": {
+      "trailerRequired": "Trailer é obrigatório",
+      "brokerNameRequired": "Nome do corretor é obrigatório",
+      "emailRequired": "Email é obrigatório",
+      "emailInvalid": "Endereço de email inválido",
+      "pickupLocationRequired": "Local de coleta é obrigatório",
+      "pickupDateRequired": "Data de coleta é obrigatória",
+      "deliveryLocationRequired": "Local de entrega é obrigatório",
+      "loadTypeRequired": "Tipo de carga é obrigatório"
     }
   }
 }

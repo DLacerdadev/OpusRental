@@ -73,27 +73,29 @@ type Trailer = {
   status: string;
 };
 
-const brokerDispatchFormSchema = z.object({
-  trailerId: z.string().min(1, "Trailer is required"),
-  brokerName: z.string().min(1, "Broker name is required"),
-  brokerEmail: z.string().email("Invalid email"),
+type BrokerDispatchFormData = z.infer<ReturnType<typeof getBrokerDispatchFormSchema>>;
+
+const getBrokerDispatchFormSchema = (t: (key: string) => string) => z.object({
+  trailerId: z.string().min(1, t("broker.validation.trailerRequired")),
+  brokerName: z.string().min(1, t("broker.validation.brokerNameRequired")),
+  brokerEmail: z.string().min(1, t("broker.validation.emailRequired")).email(t("broker.validation.emailInvalid")),
   brokerPhone: z.string().optional(),
-  pickupLocation: z.string().min(1, "Pickup location is required"),
-  pickupDate: z.string().min(1, "Pickup date is required"),
-  deliveryLocation: z.string().min(1, "Delivery location is required"),
+  pickupLocation: z.string().min(1, t("broker.validation.pickupLocationRequired")),
+  pickupDate: z.string().min(1, t("broker.validation.pickupDateRequired")),
+  deliveryLocation: z.string().min(1, t("broker.validation.deliveryLocationRequired")),
   estimatedDeliveryDate: z.string().optional(),
-  loadType: z.string().min(1, "Load type is required"),
+  loadType: z.string().min(1, t("broker.validation.loadTypeRequired")),
   specialInstructions: z.string().optional(),
   notes: z.string().optional(),
 });
-
-type BrokerDispatchFormData = z.infer<typeof brokerDispatchFormSchema>;
 
 export default function BrokerPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedDispatch, setSelectedDispatch] = useState<BrokerDispatch | null>(null);
+
+  const brokerDispatchFormSchema = getBrokerDispatchFormSchema(t);
 
   const { data: dispatches, isLoading } = useQuery<BrokerDispatch[]>({
     queryKey: ["/api/broker-dispatches"],
