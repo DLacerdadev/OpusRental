@@ -6,7 +6,8 @@ import {
   insertUserSchema, 
   insertTrailerSchema, 
   insertShareSchema, 
-  financialRecords, 
+  financialRecords,
+  payments, 
   insertGpsDeviceSchema,
   insertRentalClientSchema,
   insertRentalContractSchema,
@@ -23,6 +24,7 @@ import helmet from "helmet";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
+import { PDFService } from "./services/pdf.service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -1599,6 +1601,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Update broker dispatch error:", error);
       res.status(500).json({ message: "Failed to update broker dispatch" });
+    }
+  });
+
+  app.post("/api/broker-dispatches/:id/generate-pdf", authorize(), isManager, async (req, res) => {
+    try {
+      const dispatch = await storage.getBrokerDispatchById(req.params.id);
+      if (!dispatch) {
+        return res.status(404).json({ message: "Broker dispatch not found" });
+      }
+
+      const trailer = await storage.getTrailer(dispatch.trailerId);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+
+      const pdfBuffer = PDFService.generateDispatchPDF({
+        ...dispatch,
+        trailer
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "generate_dispatch_pdf",
+        entityType: "broker_dispatch",
+        entityId: dispatch.id,
+        details: { dispatchNumber: dispatch.dispatchNumber },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=dispatch-${dispatch.dispatchNumber}.pdf`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Generate dispatch PDF error:", error);
+      res.status(500).json({ message: "Failed to generate dispatch PDF" });
+    }
+  });
+
+  app.post("/api/rental-contracts/:id/generate-pdf", authorize(), isManager, async (req, res) => {
+    try {
+      const contract = await storage.getRentalContract(req.params.id);
+      if (!contract) {
+        return res.status(404).json({ message: "Rental contract not found" });
+      }
+
+      const client = await storage.getRentalClient(contract.clientId);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const trailer = await storage.getTrailer(contract.trailerId);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+
+      const pdfBuffer = PDFService.generateContractPDF({
+        ...contract,
+        client,
+        trailer
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "generate_contract_pdf",
+        entityType: "rental_contract",
+        entityId: contract.id,
+        details: { contractNumber: contract.contractNumber },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=contract-${contract.contractNumber}.pdf`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Generate contract PDF error:", error);
+      res.status(500).json({ message: "Failed to generate contract PDF" });
+    }
+  });
+
+  app.post("/api/invoices/:id/generate-pdf", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const contract = await storage.getRentalContract(invoice.contractId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const client = await storage.getRentalClient(contract.clientId);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const trailer = await storage.getTrailer(contract.trailerId);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+
+      const pdfBuffer = PDFService.generateInvoicePDF({
+        ...invoice,
+        contract: {
+          ...contract,
+          client,
+          trailer
+        }
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "generate_invoice_pdf",
+        entityType: "invoice",
+        entityId: invoice.id,
+        details: { invoiceNumber: invoice.invoiceNumber },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=invoice-${invoice.invoiceNumber}.pdf`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Generate invoice PDF error:", error);
+      res.status(500).json({ message: "Failed to generate invoice PDF" });
+    }
+  });
+
+  app.post("/api/financial/report/:month/generate-pdf", authorize(), isManager, async (req, res) => {
+    try {
+      const { month } = req.params;
+      
+      const monthRegex = /^\d{4}-\d{2}$/;
+      if (!monthRegex.test(month)) {
+        return res.status(400).json({ message: "Invalid month format. Use YYYY-MM" });
+      }
+
+      const financialRecord = await storage.getFinancialRecordByMonth(month);
+      if (!financialRecord) {
+        return res.status(404).json({ message: "Financial record not found for this month" });
+      }
+
+      const allPayments = await db.select().from(payments).execute();
+      const filteredPayments = allPayments.filter((p: any) => p.referenceMonth === month);
+      const investors = await storage.getAllInvestors();
+      const trailers = await storage.getAllTrailers();
+
+      const paymentsByInvestor = filteredPayments.reduce((acc: Record<string, { investor: string; shares: number; amount: number }>, payment: any) => {
+        if (!acc[payment.userId]) {
+          const investor = investors.find((i: any) => i.id === payment.userId);
+          acc[payment.userId] = {
+            investor: investor ? `${investor.firstName} ${investor.lastName}` : 'Unknown',
+            shares: 0,
+            amount: 0
+          };
+        }
+        acc[payment.userId].shares += 1;
+        acc[payment.userId].amount += parseFloat(payment.amount.toString());
+        return acc;
+      }, {});
+
+      const reportData = {
+        month,
+        totalRevenue: parseFloat(financialRecord.totalRevenue.toString()),
+        investorPayouts: parseFloat(financialRecord.investorPayouts.toString()),
+        operationalCosts: parseFloat(financialRecord.operationalCosts.toString()),
+        companyMargin: parseFloat(financialRecord.companyMargin.toString()),
+        activeTrailers: trailers.filter((t: any) => t.status === 'active').length,
+        totalInvestors: Object.keys(paymentsByInvestor).length,
+        payments: Object.values(paymentsByInvestor) as Array<{ investor: string; shares: number; amount: number }>
+      };
+
+      const pdfBuffer = PDFService.generateFinancialReportPDF(reportData);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "generate_financial_report_pdf",
+        entityType: "financial_record",
+        entityId: financialRecord.id,
+        details: { month },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=financial-report-${month}.pdf`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Generate financial report PDF error:", error);
+      res.status(500).json({ message: "Failed to generate financial report PDF" });
     }
   });
 

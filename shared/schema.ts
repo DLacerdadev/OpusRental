@@ -434,7 +434,6 @@ export const insertTrailerSchema = createInsertSchema(trailers).omit({
 
 export const insertShareSchema = createInsertSchema(shares).omit({
   id: true,
-  userId: true,
   createdAt: true,
   updatedAt: true,
 });
