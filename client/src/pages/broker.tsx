@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,39 +11,197 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Truck, Package, Clock, CheckCircle, Plus, MapPin, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 type BrokerDispatch = {
   id: string;
   dispatchNumber: string;
   trailerId: string;
   brokerName: string;
-  brokerContact: string;
+  brokerEmail: string;
+  brokerPhone: string | null;
   pickupLocation: string;
   pickupDate: string;
   deliveryLocation: string;
-  deliveryDate: string;
+  estimatedDeliveryDate: string | null;
+  actualDeliveryDate: string | null;
   loadType: string;
-  weight: string;
+  specialInstructions: string | null;
+  dispatchDocumentUrl: string | null;
   status: "pending" | "dispatched" | "in_transit" | "delivered" | "cancelled";
-  documentUrl: string | null;
   notes: string | null;
-  dispatchedAt: string | null;
-  deliveredAt: string | null;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
+type Trailer = {
+  id: string;
+  trailerId: string;
+  model: string;
+  status: string;
+};
+
+const brokerDispatchFormSchema = z.object({
+  trailerId: z.string().min(1, "Trailer is required"),
+  brokerName: z.string().min(1, "Broker name is required"),
+  brokerEmail: z.string().email("Invalid email"),
+  brokerPhone: z.string().optional(),
+  pickupLocation: z.string().min(1, "Pickup location is required"),
+  pickupDate: z.string().min(1, "Pickup date is required"),
+  deliveryLocation: z.string().min(1, "Delivery location is required"),
+  estimatedDeliveryDate: z.string().optional(),
+  loadType: z.string().min(1, "Load type is required"),
+  specialInstructions: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type BrokerDispatchFormData = z.infer<typeof brokerDispatchFormSchema>;
+
 export default function BrokerPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedDispatch, setSelectedDispatch] = useState<BrokerDispatch | null>(null);
 
   const { data: dispatches, isLoading } = useQuery<BrokerDispatch[]>({
     queryKey: ["/api/broker-dispatches"],
   });
+
+  const { data: trailers } = useQuery<Trailer[]>({
+    queryKey: ["/api/trailers"],
+  });
+
+  const createForm = useForm<BrokerDispatchFormData>({
+    resolver: zodResolver(brokerDispatchFormSchema),
+    defaultValues: {
+      trailerId: "",
+      brokerName: "",
+      brokerEmail: "",
+      brokerPhone: "",
+      pickupLocation: "",
+      pickupDate: "",
+      deliveryLocation: "",
+      estimatedDeliveryDate: "",
+      loadType: "",
+      specialInstructions: "",
+      notes: "",
+    },
+  });
+
+  const editForm = useForm<BrokerDispatchFormData>({
+    resolver: zodResolver(brokerDispatchFormSchema),
+    defaultValues: {
+      trailerId: "",
+      brokerName: "",
+      brokerEmail: "",
+      brokerPhone: "",
+      pickupLocation: "",
+      pickupDate: "",
+      deliveryLocation: "",
+      estimatedDeliveryDate: "",
+      loadType: "",
+      specialInstructions: "",
+      notes: "",
+    },
+  });
+
+  useEffect(() => {
+    if (selectedDispatch) {
+      editForm.reset({
+        trailerId: selectedDispatch.trailerId,
+        brokerName: selectedDispatch.brokerName,
+        brokerEmail: selectedDispatch.brokerEmail,
+        brokerPhone: selectedDispatch.brokerPhone || "",
+        pickupLocation: selectedDispatch.pickupLocation,
+        pickupDate: selectedDispatch.pickupDate,
+        deliveryLocation: selectedDispatch.deliveryLocation,
+        estimatedDeliveryDate: selectedDispatch.estimatedDeliveryDate || "",
+        loadType: selectedDispatch.loadType,
+        specialInstructions: selectedDispatch.specialInstructions || "",
+        notes: selectedDispatch.notes || "",
+      });
+    }
+  }, [selectedDispatch, editForm]);
+
+  const createMutation = useMutation({
+    mutationFn: async (data: BrokerDispatchFormData) => {
+      return await apiRequest("/api/broker-dispatches", "POST", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/broker-dispatches"] });
+      toast({
+        title: t("broker.messages.createSuccess"),
+      });
+      setIsCreateDialogOpen(false);
+      createForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: t("broker.messages.createError"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: BrokerDispatchFormData) => {
+      return await apiRequest(`/api/broker-dispatches/${selectedDispatch!.id}`, "PUT", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/broker-dispatches"] });
+      toast({
+        title: t("broker.messages.updateSuccess"),
+      });
+      setSelectedDispatch(null);
+      editForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: t("broker.messages.updateError"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onCreateSubmit = (data: BrokerDispatchFormData) => {
+    createMutation.mutate(data);
+  };
+
+  const onEditSubmit = (data: BrokerDispatchFormData) => {
+    updateMutation.mutate(data);
+  };
 
   const stats = {
     total: dispatches?.length || 0,
@@ -198,7 +356,7 @@ export default function BrokerPage() {
                           <div>
                             <div className="font-medium">{dispatch.brokerName}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {dispatch.brokerContact}
+                              {dispatch.brokerEmail}
                             </div>
                           </div>
                         </TableCell>
@@ -219,10 +377,12 @@ export default function BrokerPage() {
                             <MapPin className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
                             <div>
                               <div className="text-sm">{dispatch.deliveryLocation}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {format(new Date(dispatch.deliveryDate), "MMM dd, yyyy")}
-                              </div>
+                              {dispatch.estimatedDeliveryDate && (
+                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {format(new Date(dispatch.estimatedDeliveryDate), "MMM dd, yyyy")}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </TableCell>
@@ -265,6 +425,448 @@ export default function BrokerPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-dispatch">
+          <DialogHeader>
+            <DialogTitle>{t("broker.createDispatch")}</DialogTitle>
+            <DialogDescription>{t("broker.form.title")}</DialogDescription>
+          </DialogHeader>
+          <Form {...createForm}>
+            <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
+              <FormField
+                control={createForm.control}
+                name="trailerId"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-trailer">
+                    <FormLabel>{t("broker.form.trailer")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-trailer">
+                          <SelectValue placeholder={t("broker.form.trailerPlaceholder")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {trailers?.map((trailer) => (
+                          <SelectItem 
+                            key={trailer.id} 
+                            value={trailer.id}
+                            data-testid={`select-option-trailer-${trailer.id}`}
+                          >
+                            {trailer.trailerId} - {trailer.model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={createForm.control}
+                  name="brokerName"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-broker-name">
+                      <FormLabel>{t("broker.form.brokerName")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-broker-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="brokerEmail"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-broker-email">
+                      <FormLabel>{t("broker.form.brokerEmail")}</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} data-testid="input-broker-email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={createForm.control}
+                name="brokerPhone"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-broker-phone">
+                    <FormLabel>{t("broker.form.brokerPhone")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-broker-phone" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={createForm.control}
+                  name="pickupLocation"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-pickup-location">
+                      <FormLabel>{t("broker.form.pickupLocation")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-pickup-location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="pickupDate"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-pickup-date">
+                      <FormLabel>{t("broker.form.pickupDate")}</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-pickup-date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={createForm.control}
+                  name="deliveryLocation"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-delivery-location">
+                      <FormLabel>{t("broker.form.deliveryLocation")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-delivery-location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={createForm.control}
+                  name="estimatedDeliveryDate"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-estimated-delivery-date">
+                      <FormLabel>{t("broker.form.estimatedDeliveryDate")}</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-estimated-delivery-date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={createForm.control}
+                name="loadType"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-load-type">
+                    <FormLabel>{t("broker.form.loadType")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-load-type">
+                          <SelectValue placeholder={t("broker.form.loadTypePlaceholder")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="full_load" data-testid="select-option-full-load">
+                          {t("broker.form.loadTypes.full_load")}
+                        </SelectItem>
+                        <SelectItem value="partial_load" data-testid="select-option-partial-load">
+                          {t("broker.form.loadTypes.partial_load")}
+                        </SelectItem>
+                        <SelectItem value="empty" data-testid="select-option-empty">
+                          {t("broker.form.loadTypes.empty")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createForm.control}
+                name="specialInstructions"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-special-instructions">
+                    <FormLabel>{t("broker.form.specialInstructions")}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} data-testid="textarea-special-instructions" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-notes">
+                    <FormLabel>{t("broker.form.notes")}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} data-testid="textarea-notes" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  data-testid="button-cancel-create"
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending}
+                  data-testid="button-submit-create"
+                >
+                  {createMutation.isPending ? t("broker.form.creating") : t("broker.form.create")}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!selectedDispatch} onOpenChange={(open) => !open && setSelectedDispatch(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-dispatch">
+          <DialogHeader>
+            <DialogTitle>{t("common.edit")} - {selectedDispatch?.dispatchNumber}</DialogTitle>
+            <DialogDescription>{t("broker.form.title")}</DialogDescription>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="trailerId"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-edit-trailer">
+                    <FormLabel>{t("broker.form.trailer")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-edit-trailer">
+                          <SelectValue placeholder={t("broker.form.trailerPlaceholder")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {trailers?.map((trailer) => (
+                          <SelectItem 
+                            key={trailer.id} 
+                            value={trailer.id}
+                            data-testid={`select-edit-option-trailer-${trailer.id}`}
+                          >
+                            {trailer.trailerId} - {trailer.model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="brokerName"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-broker-name">
+                      <FormLabel>{t("broker.form.brokerName")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-edit-broker-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="brokerEmail"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-broker-email">
+                      <FormLabel>{t("broker.form.brokerEmail")}</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} data-testid="input-edit-broker-email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={editForm.control}
+                name="brokerPhone"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-edit-broker-phone">
+                    <FormLabel>{t("broker.form.brokerPhone")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-edit-broker-phone" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="pickupLocation"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-pickup-location">
+                      <FormLabel>{t("broker.form.pickupLocation")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-edit-pickup-location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="pickupDate"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-pickup-date">
+                      <FormLabel>{t("broker.form.pickupDate")}</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-edit-pickup-date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={editForm.control}
+                  name="deliveryLocation"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-delivery-location">
+                      <FormLabel>{t("broker.form.deliveryLocation")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} data-testid="input-edit-delivery-location" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editForm.control}
+                  name="estimatedDeliveryDate"
+                  render={({ field }) => (
+                    <FormItem data-testid="form-item-edit-estimated-delivery-date">
+                      <FormLabel>{t("broker.form.estimatedDeliveryDate")}</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-edit-estimated-delivery-date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={editForm.control}
+                name="loadType"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-edit-load-type">
+                    <FormLabel>{t("broker.form.loadType")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-edit-load-type">
+                          <SelectValue placeholder={t("broker.form.loadTypePlaceholder")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="full_load" data-testid="select-edit-option-full-load">
+                          {t("broker.form.loadTypes.full_load")}
+                        </SelectItem>
+                        <SelectItem value="partial_load" data-testid="select-edit-option-partial-load">
+                          {t("broker.form.loadTypes.partial_load")}
+                        </SelectItem>
+                        <SelectItem value="empty" data-testid="select-edit-option-empty">
+                          {t("broker.form.loadTypes.empty")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="specialInstructions"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-edit-special-instructions">
+                    <FormLabel>{t("broker.form.specialInstructions")}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} data-testid="textarea-edit-special-instructions" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem data-testid="form-item-edit-notes">
+                    <FormLabel>{t("broker.form.notes")}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={3} data-testid="textarea-edit-notes" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSelectedDispatch(null)}
+                  data-testid="button-cancel-edit"
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={updateMutation.isPending}
+                  data-testid="button-submit-edit"
+                >
+                  {updateMutation.isPending ? t("broker.form.updating") : t("broker.form.update")}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

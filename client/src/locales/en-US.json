@@ -414,7 +414,8 @@
     "rentalContracts": "Rental Contracts",
     "invoices": "Invoices",
     "inspections": "Inspections",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "broker": "Broker Dispatch"
   },
   "common": {
     "loading": "Loading...",
@@ -576,6 +577,74 @@
     "footer": {
       "tagline": "Investments Backed by Real Assets",
       "copyright": "© 2025 Opus Rental Capital. All rights reserved."
+    }
+  },
+  "broker": {
+    "title": "Broker Dispatch",
+    "subtitle": "Manage freight broker dispatches and loads",
+    "createDispatch": "Create New Dispatch",
+    "stats": {
+      "totalDispatches": "Total Dispatches",
+      "pending": "Pending",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "allTime": "All time",
+      "awaitingDispatch": "Awaiting dispatch",
+      "onTheRoad": "On the road",
+      "completed": "Completed"
+    },
+    "table": {
+      "title": "All Dispatches",
+      "dispatchNumber": "Dispatch #",
+      "trailer": "Trailer",
+      "broker": "Broker",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "loadType": "Load Type",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "dispatched": "Dispatched",
+      "inTransit": "In Transit",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "emptyState": {
+      "title": "No dispatches yet",
+      "description": "Create your first broker dispatch to start tracking loads"
+    },
+    "form": {
+      "title": "Dispatch Details",
+      "trailer": "Select Trailer",
+      "trailerPlaceholder": "Choose a trailer",
+      "brokerName": "Broker Name",
+      "brokerEmail": "Broker Email",
+      "brokerPhone": "Broker Phone",
+      "pickupLocation": "Pickup Location",
+      "pickupDate": "Pickup Date",
+      "deliveryLocation": "Delivery Location",
+      "estimatedDeliveryDate": "Estimated Delivery",
+      "loadType": "Load Type",
+      "loadTypePlaceholder": "Select load type",
+      "loadTypes": {
+        "full_load": "Full Load",
+        "partial_load": "Partial Load",
+        "empty": "Empty"
+      },
+      "specialInstructions": "Special Instructions",
+      "notes": "Notes",
+      "create": "Create Dispatch",
+      "update": "Update Dispatch",
+      "creating": "Creating...",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "createSuccess": "Dispatch created successfully",
+      "updateSuccess": "Dispatch updated successfully",
+      "createError": "Failed to create dispatch",
+      "updateError": "Failed to update dispatch"
     }
   }
 }

@@ -414,7 +414,8 @@
     "rentalContracts": "Contratos Locação",
     "invoices": "Faturas",
     "inspections": "Inspeções",
-    "maintenance": "Manutenção"
+    "maintenance": "Manutenção",
+    "broker": "Despacho de Corretores"
   },
   "common": {
     "loading": "Carregando...",
@@ -576,6 +577,74 @@
     "footer": {
       "tagline": "Investimentos Garantidos por Ativos Reais",
       "copyright": "© 2025 Opus Rental Capital. Todos os direitos reservados."
+    }
+  },
+  "broker": {
+    "title": "Despacho de Corretores",
+    "subtitle": "Gerencie despachos e cargas de corretores de frete",
+    "createDispatch": "Criar Novo Despacho",
+    "stats": {
+      "totalDispatches": "Total de Despachos",
+      "pending": "Pendentes",
+      "inTransit": "Em Trânsito",
+      "delivered": "Entregues",
+      "allTime": "Todos os tempos",
+      "awaitingDispatch": "Aguardando despacho",
+      "onTheRoad": "Na estrada",
+      "completed": "Completos"
+    },
+    "table": {
+      "title": "Todos os Despachos",
+      "dispatchNumber": "Despacho #",
+      "trailer": "Trailer",
+      "broker": "Corretor",
+      "pickup": "Coleta",
+      "delivery": "Entrega",
+      "loadType": "Tipo de Carga",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "status": {
+      "pending": "Pendente",
+      "dispatched": "Despachado",
+      "inTransit": "Em Trânsito",
+      "delivered": "Entregue",
+      "cancelled": "Cancelado"
+    },
+    "emptyState": {
+      "title": "Nenhum despacho ainda",
+      "description": "Crie seu primeiro despacho de corretor para começar a rastrear cargas"
+    },
+    "form": {
+      "title": "Detalhes do Despacho",
+      "trailer": "Selecionar Trailer",
+      "trailerPlaceholder": "Escolha um trailer",
+      "brokerName": "Nome do Corretor",
+      "brokerEmail": "Email do Corretor",
+      "brokerPhone": "Telefone do Corretor",
+      "pickupLocation": "Local de Coleta",
+      "pickupDate": "Data de Coleta",
+      "deliveryLocation": "Local de Entrega",
+      "estimatedDeliveryDate": "Entrega Estimada",
+      "loadType": "Tipo de Carga",
+      "loadTypePlaceholder": "Selecione o tipo",
+      "loadTypes": {
+        "full_load": "Carga Completa",
+        "partial_load": "Carga Parcial",
+        "empty": "Vazio"
+      },
+      "specialInstructions": "Instruções Especiais",
+      "notes": "Observações",
+      "create": "Criar Despacho",
+      "update": "Atualizar Despacho",
+      "creating": "Criando...",
+      "updating": "Atualizando..."
+    },
+    "messages": {
+      "createSuccess": "Despacho criado com sucesso",
+      "updateSuccess": "Despacho atualizado com sucesso",
+      "createError": "Falha ao criar despacho",
+      "updateError": "Falha ao atualizar despacho"
     }
   }
 }
