@@ -44,6 +44,45 @@ An idempotent payment service (`server/services/finance.service.ts`) automatical
 
 ## Recent Changes
 
+### Broker Dispatch System - COMPLETE (November 6, 2025)
+
+Implemented comprehensive broker dispatch management system for freight broker operations:
+
+**Backend Implementation (5 endpoints):**
+- `GET /api/broker-dispatches` - List all dispatches (manager-only)
+- `GET /api/broker-dispatches/:id` - Get dispatch details with 404 handling
+- `GET /api/broker-dispatches/trailer/:trailerId` - Get dispatch history by trailer
+- `POST /api/broker-dispatches` - Create dispatch with auto-generated number (DISPATCH-001, DISPATCH-002...)
+- `PUT /api/broker-dispatches/:id` - Update dispatch with audit logging
+
+**Frontend Implementation (882 lines, 82 data-testids):**
+- Complete `/broker` page with 4 stats cards (Total, Pending, In Transit, Delivered)
+- Responsive table with status badges and load type display
+- Create dialog with 11 form fields (trailer selection, broker info, pickup/delivery locations and dates, load type, instructions)
+- Edit dialog with same fields pre-populated
+- Form validation using Zod + React Hook Form with fully translated error messages
+- Query/mutation management with React Query + cache invalidation
+- Mobile-responsive design (1-col mobile → 2-col tablet → 3-col desktop)
+
+**Internationalization:**
+- Full EN/PT-BR support with 77 new translation keys
+- Translated validation messages using `getBrokerDispatchFormSchema(t)` pattern
+- All UI text, form labels, errors, and status messages fully translated
+
+**Business Logic:**
+- Auto-generated sequential dispatch numbers
+- Status workflow: pending → dispatched → in_transit → delivered → cancelled
+- Load types: full_load, partial_load, empty
+- Broker contact information (name, email, phone)
+- Pickup and delivery tracking with dates
+- Special instructions and notes fields
+- Complete audit logging of all operations
+
+**Testing:**
+- 82 unique data-testid attributes for E2E testing
+- Pattern: `{action}-{target}` for interactive elements, `{type}-{content}` for display
+- Dynamic IDs for list items: `{type}-{description}-{id}`
+
 ### Asset Allocation System (November 2025)
 
 Implemented comprehensive asset allocation functionality allowing managers to assign trailers to specific investors or open quotation for all:
