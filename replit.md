@@ -261,3 +261,73 @@ Created a sophisticated, security-focused landing page with complete translation
 - `/login` - Client login page
 - `/register` - Account opening page
 - `/dashboard` - Protected client dashboard (previously `/`)
+
+### Invoice Automation System - COMPLETE (November 7, 2025)
+
+Implemented comprehensive automated invoice generation and payment reminder system with professional email delivery:
+
+**EmailService (server/services/email.service.ts):**
+- **Production SMTP**: Real email delivery via nodemailer with environment-based configuration
+- **Development Mock**: Console logging for testing without sending real emails
+- **Connection Management**: Cached SMTP transporter with connection verification
+- **Professional Templates**: HTML/text email templates for invoices and payment reminders
+- **Error Handling**: Proper error propagation with detailed logging
+
+**InvoiceAutomationService (server/services/invoice-automation.service.ts):**
+- **Monthly Generation**: Auto-generates invoices on 1st of month at 00:01 (cron: `1 0 1 * *`)
+- **Overdue Checks**: Daily checks at 09:00 for overdue invoices (cron: `0 9 * * *`)
+- **Payment Reminders**: Sends reminders every 7 days for overdue invoices
+- **Due Date Reminders**: Notifies clients 3 days before due date
+- **Email Logging**: Complete audit trail of all email attempts (sent/failed with error details)
+- **Resilient Processing**: Continues workflow even if individual emails fail
+
+**Frontend Dashboard (client/src/pages/invoice-automation.tsx):**
+- **Email Logs Table**: Searchable history of all email deliveries with status, timestamps, and error messages
+- **Manual Triggers**: Buttons to manually run monthly generation or overdue checks
+- **Stats Cards**: Real-time automation statistics (total sent, failed, success rate)
+- **Email Type Filtering**: Filter logs by type (invoice, payment_reminder, due_reminder)
+- **Status Badges**: Visual indicators for sent/failed status
+- **Mobile Responsive**: Fully responsive design with proper table overflow handling
+
+**API Endpoints:**
+- `GET /api/email-logs` - Retrieve complete email log history
+- `POST /api/invoices/generate-monthly` - Manually trigger monthly invoice generation
+- `POST /api/invoices/check-overdue` - Manually trigger overdue invoice check
+
+**Database Schema:**
+- `emailLogs` table - Complete audit trail (recipient, subject, type, status, error, timestamp)
+- `emailSettings` table - Future configuration storage
+- `rentalContracts.autoGenerateInvoices` - Toggle automatic invoice generation per contract
+
+**Production SMTP Configuration:**
+
+Required environment variables for production email delivery:
+```bash
+SMTP_HOST=smtp.example.com          # SMTP server hostname
+SMTP_PORT=587                        # SMTP port (587 for TLS, 465 for SSL)
+SMTP_USER=your-email@example.com    # SMTP username
+SMTP_PASS=your-smtp-password        # SMTP password
+SMTP_FROM=noreply@opusrentalcapital.com  # From address
+NODE_ENV=production                  # Enables real SMTP (defaults to mock in development)
+```
+
+**Email Modes:**
+- **Development** (`NODE_ENV !== "production"`): Mock mode logs to console, no real emails sent
+- **Production** (`NODE_ENV === "production"`): Real SMTP delivery with validation and error handling
+
+**Security:**
+- SMTP credentials only from environment variables (never hardcoded)
+- No credential exposure in logs or error messages
+- Graceful degradation if SMTP not configured
+- Connection verification on initialization
+
+**Cron Schedule:**
+- **Monthly Generation**: 1st of month at 00:01 - Generates invoices for all active contracts with auto-generation enabled
+- **Overdue Checks**: Daily at 09:00 - Updates invoice status and sends reminders (every 7 days)
+- **Due Reminders**: Daily at 09:00 - Sends friendly reminders 3 days before due date
+
+**Testing & Monitoring:**
+- Email logs table provides complete visibility into delivery status
+- Manual triggers allow testing automation without waiting for cron schedule
+- Error messages captured and logged for troubleshooting
+- Development mock mode enables safe testing without sending real emails
