@@ -14,9 +14,14 @@ import {
   insertInvoiceSchema,
   insertChecklistSchema,
   insertMaintenanceScheduleSchema,
-  insertBrokerDispatchSchema
+  insertBrokerDispatchSchema,
+  auditLogs,
+  users
 } from "@shared/schema";
 import { PDFService } from "./services/pdf.service";
+import { ExportService } from "./services/export.service";
+import { ImportService } from "./services/import.service";
+import { MonitoringService } from "./services/monitoring.service";
 import { z } from "zod";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
@@ -25,6 +30,7 @@ import helmet from "helmet";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
+import multer from "multer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -1980,6 +1986,305 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Generate financial report PDF error:", error);
       res.status(500).json({ message: "Failed to generate financial report PDF" });
+    }
+  });
+
+  // ===========================
+  // Export/Import Endpoints
+  // ===========================
+
+  const upload = multer({ storage: multer.memoryStorage() });
+
+  // Export trailers to Excel
+  app.get("/api/export/trailers", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const buffer = await ExportService.exportTrailers();
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "export_trailers",
+        entityType: "trailer",
+        entityId: null,
+        details: { format: "xlsx" },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=trailers-${Date.now()}.xlsx`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Export trailers error:", error);
+      res.status(500).json({ message: "Failed to export trailers" });
+    }
+  });
+
+  // Export invoices to Excel
+  app.get("/api/export/invoices", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const buffer = await ExportService.exportInvoices(
+        startDate as string | undefined, 
+        endDate as string | undefined
+      );
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "export_invoices",
+        entityType: "invoice",
+        entityId: null,
+        details: { format: "xlsx", startDate, endDate },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=invoices-${Date.now()}.xlsx`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Export invoices error:", error);
+      res.status(500).json({ message: "Failed to export invoices" });
+    }
+  });
+
+  // Export shares to Excel
+  app.get("/api/export/shares", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const buffer = await ExportService.exportShares();
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "export_shares",
+        entityType: "share",
+        entityId: null,
+        details: { format: "xlsx" },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=investment-shares-${Date.now()}.xlsx`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Export shares error:", error);
+      res.status(500).json({ message: "Failed to export shares" });
+    }
+  });
+
+  // Export rental clients to Excel
+  app.get("/api/export/clients", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const buffer = await ExportService.exportRentalClients();
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "export_clients",
+        entityType: "rental_client",
+        entityId: null,
+        details: { format: "xlsx" },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=rental-clients-${Date.now()}.xlsx`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Export clients error:", error);
+      res.status(500).json({ message: "Failed to export clients" });
+    }
+  });
+
+  // Export financial report to Excel
+  app.get("/api/export/financial-report", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const year = parseInt(req.query.year as string) || new Date().getFullYear();
+      const month = parseInt(req.query.month as string) || new Date().getMonth() + 1;
+
+      const buffer = await ExportService.exportFinancialReport(year, month);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "export_financial_report",
+        entityType: "financial_record",
+        entityId: null,
+        details: { format: "xlsx", year, month },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=financial-report-${year}-${String(month).padStart(2, '0')}.xlsx`);
+      res.send(buffer);
+    } catch (error) {
+      console.error("Export financial report error:", error);
+      res.status(500).json({ message: "Failed to export financial report" });
+    }
+  });
+
+  // Download trailer import template
+  app.get("/api/import/templates/trailers", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const buffer = ImportService.generateTrailerTemplate();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=trailer-import-template.xlsx');
+      res.send(buffer);
+    } catch (error) {
+      console.error("Generate trailer template error:", error);
+      res.status(500).json({ message: "Failed to generate trailer template" });
+    }
+  });
+
+  // Download client import template
+  app.get("/api/import/templates/clients", adminLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const buffer = ImportService.generateClientTemplate();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=client-import-template.xlsx');
+      res.send(buffer);
+    } catch (error) {
+      console.error("Generate client template error:", error);
+      res.status(500).json({ message: "Failed to generate client template" });
+    }
+  });
+
+  // Import trailers from Excel
+  app.post("/api/import/trailers", adminLimiter, isAuthenticated, isManager, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const result = await ImportService.importTrailers(req.file.buffer);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "import_trailers",
+        entityType: "trailer",
+        entityId: null,
+        details: { 
+          total: result.total, 
+          imported: result.imported, 
+          failed: result.failed 
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Import trailers error:", error);
+      res.status(500).json({ message: "Failed to import trailers" });
+    }
+  });
+
+  // Import rental clients from Excel
+  app.post("/api/import/clients", adminLimiter, isAuthenticated, isManager, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const result = await ImportService.importRentalClients(req.file.buffer);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "import_clients",
+        entityType: "rental_client",
+        entityId: null,
+        details: { 
+          total: result.total, 
+          imported: result.imported, 
+          failed: result.failed 
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Import clients error:", error);
+      res.status(500).json({ message: "Failed to import clients" });
+    }
+  });
+
+  // ===========================
+  // Monitoring & Logs Endpoints
+  // ===========================
+
+  // Get filtered audit logs
+  app.get("/api/monitoring/logs", adminLimiter, isAuthenticated, isManager, async (req, res) => {
+    try {
+      const filter = {
+        startDate: req.query.startDate as string | undefined,
+        endDate: req.query.endDate as string | undefined,
+        userId: req.query.userId as string | undefined,
+        action: req.query.action as string | undefined,
+        entityType: req.query.entityType as string | undefined,
+        ipAddress: req.query.ipAddress as string | undefined,
+        search: req.query.search as string | undefined,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+      };
+
+      const result = await MonitoringService.getFilteredLogs(filter);
+
+      res.json(result);
+    } catch (error) {
+      console.error("Get logs error:", error);
+      res.status(500).json({ message: "Failed to retrieve logs" });
+    }
+  });
+
+  // Detect suspicious activities
+  app.get("/api/monitoring/suspicious", adminLimiter, isAuthenticated, isManager, async (req, res) => {
+    try {
+      const lookbackHours = req.query.hours ? parseInt(req.query.hours as string) : 24;
+      const activities = await MonitoringService.detectSuspiciousActivities(lookbackHours);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "view_suspicious_activities",
+        entityType: "audit_log",
+        entityId: null,
+        details: { lookbackHours, foundActivities: activities.length },
+        ipAddress: req.ip,
+      });
+
+      res.json({
+        activities,
+        lookbackHours,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("Detect suspicious activities error:", error);
+      res.status(500).json({ message: "Failed to detect suspicious activities" });
+    }
+  });
+
+  // Get activity statistics
+  app.get("/api/monitoring/statistics", adminLimiter, isAuthenticated, isManager, async (req, res) => {
+    try {
+      const hours = req.query.hours ? parseInt(req.query.hours as string) : 24;
+      const stats = await MonitoringService.getActivityStatistics(hours);
+
+      res.json(stats);
+    } catch (error) {
+      console.error("Get activity statistics error:", error);
+      res.status(500).json({ message: "Failed to retrieve activity statistics" });
+    }
+  });
+
+  // Get unique values for filters (for dropdown autocomplete)
+  app.get("/api/monitoring/filter-options", adminLimiter, isAuthenticated, isManager, async (req, res) => {
+    try {
+      const distinctActions = await db.selectDistinct({ action: auditLogs.action }).from(auditLogs).limit(100);
+      const distinctEntityTypes = await db.selectDistinct({ entityType: auditLogs.entityType }).from(auditLogs).limit(100);
+      const distinctUsers = await db.select({ id: users.id, username: users.username, email: users.email }).from(users).limit(100);
+
+      res.json({
+        actions: distinctActions.map(a => a.action).filter(Boolean),
+        entityTypes: distinctEntityTypes.map(e => e.entityType).filter(Boolean),
+        users: distinctUsers,
+      });
+    } catch (error) {
+      console.error("Get filter options error:", error);
+      res.status(500).json({ message: "Failed to retrieve filter options" });
     }
   });
 
