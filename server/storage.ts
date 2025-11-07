@@ -11,6 +11,8 @@ import {
   rentalClients,
   rentalContracts,
   invoices,
+  emailSettings,
+  emailLogs,
   checklists,
   maintenanceSchedules,
   partnerShops,
@@ -40,6 +42,10 @@ import {
   type InsertRentalContract,
   type Invoice,
   type InsertInvoice,
+  type EmailSetting,
+  type InsertEmailSetting,
+  type EmailLog,
+  type InsertEmailLog,
   type Checklist,
   type InsertChecklist,
   type MaintenanceSchedule,
@@ -140,8 +146,14 @@ export interface IStorage {
   getInvoicesByContractId(contractId: string): Promise<Invoice[]>;
   getOverdueInvoices(): Promise<any[]>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  updateInvoice(id: string, updates: Partial<InsertInvoice>): Promise<Invoice>;
   updateInvoiceStatus(id: string, status: string, paidDate?: Date): Promise<Invoice>;
   deleteInvoice(id: string): Promise<void>;
+
+  // Email Log operations
+  createEmailLog(emailLog: InsertEmailLog): Promise<EmailLog>;
+  getAllEmailLogs(): Promise<EmailLog[]>;
+  getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
   
   // Checklist operations
   getChecklist(id: string): Promise<Checklist | undefined>;
@@ -804,8 +816,31 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async updateInvoice(id: string, updates: Partial<InsertInvoice>): Promise<Invoice> {
+    const [updated] = await db
+      .update(invoices)
+      .set(updates)
+      .where(eq(invoices.id, id))
+      .returning();
+    return updated;
+  }
+
   async deleteInvoice(id: string): Promise<void> {
     await db.delete(invoices).where(eq(invoices.id, id));
+  }
+
+  // Email Log operations
+  async createEmailLog(emailLog: InsertEmailLog): Promise<EmailLog> {
+    const [newLog] = await db.insert(emailLogs).values(emailLog).returning();
+    return newLog;
+  }
+
+  async getAllEmailLogs(): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).orderBy(desc(emailLogs.sentAt));
+  }
+
+  async getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).where(eq(emailLogs.recipientEmail, recipientEmail)).orderBy(desc(emailLogs.sentAt));
   }
 
   // Checklist operations

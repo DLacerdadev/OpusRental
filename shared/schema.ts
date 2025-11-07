@@ -170,6 +170,9 @@ export const rentalContracts = pgTable("rental_contracts", {
   monthlyRate: decimal("monthly_rate", { precision: 10, scale: 2 }).notNull(), // $1,500/month
   duration: integer("duration").notNull(), // 3, 6, or 12 months
   status: text("status").notNull().default("active"), // active, expired, cancelled
+  autoGenerateInvoices: boolean("auto_generate_invoices").notNull().default(true), // Auto-generate monthly invoices
+  invoiceDayOfMonth: integer("invoice_day_of_month").notNull().default(1), // Day of month to generate invoice (1-28)
+  paymentDueDays: integer("payment_due_days").notNull().default(15), // Days after invoice generation until due
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -195,6 +198,33 @@ export const invoices = pgTable("invoices", {
   uniqContractMonth: uniqueIndex("uniq_invoices_contract_month").on(t.contractId, t.referenceMonth),
   idxStatus: index("idx_invoices_status").on(t.status),
   idxDueDate: index("idx_invoices_due_date").on(t.dueDate),
+}));
+
+// Email Settings table (Global email configuration)
+export const emailSettings = pgTable("email_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingKey: text("setting_key").notNull().unique(), // smtp_host, smtp_port, smtp_user, from_email, etc.
+  settingValue: text("setting_value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Email Logs table (Track all emails sent)
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipientEmail: text("recipient_email").notNull(),
+  recipientName: text("recipient_name"),
+  subject: text("subject").notNull(),
+  emailType: text("email_type").notNull(), // invoice, payment_reminder, overdue_notice, etc.
+  entityType: text("entity_type"), // invoice, payment, etc.
+  entityId: varchar("entity_id"), // Reference to invoice ID, payment ID, etc.
+  status: text("status").notNull().default("sent"), // sent, failed, bounced
+  errorMessage: text("error_message"),
+  sentAt: timestamp("sent_at").defaultNow(),
+}, (t) => ({
+  idxRecipient: index("idx_email_logs_recipient").on(t.recipientEmail),
+  idxType: index("idx_email_logs_type").on(t.emailType),
+  idxEntity: index("idx_email_logs_entity").on(t.entityType, t.entityId),
 }));
 
 // Checklists table (Inspections)
@@ -491,6 +521,16 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   createdAt: true,
 });
 
+export const insertEmailSettingSchema = createInsertSchema(emailSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
+  id: true,
+  sentAt: true,
+});
+
 export const insertChecklistSchema = createInsertSchema(checklists).omit({
   id: true,
   createdAt: true,
@@ -555,6 +595,12 @@ export type InsertRentalContract = z.infer<typeof insertRentalContractSchema>;
 
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+export type EmailSetting = typeof emailSettings.$inferSelect;
+export type InsertEmailSetting = z.infer<typeof insertEmailSettingSchema>;
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
 
 export type Checklist = typeof checklists.$inferSelect;
 export type InsertChecklist = z.infer<typeof insertChecklistSchema>;
