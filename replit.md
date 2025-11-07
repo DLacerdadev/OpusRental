@@ -42,6 +42,47 @@ An idempotent payment service (`server/services/finance.service.ts`) automatical
 - **Backend Libraries**: Express.js, Drizzle ORM, bcrypt, express-session, node-cron
 - **Development Tools**: TypeScript, Vite, ESBuild
 
+## Development Credentials
+
+**⚠️ FOR DEVELOPMENT ENVIRONMENT ONLY - NEVER USE IN PRODUCTION**
+
+The database has been populated with test data. Use these credentials to log in:
+
+### Manager Account (Full Access)
+- **Email:** manager@example.com
+- **Password:** manager123
+- **Role:** manager
+- **Username:** manager1
+- **Permissions:** Full platform access, can manage trailers, investors, financial records, etc.
+
+### Investor Accounts (Portfolio View Only)
+- **Account 1:**
+  - Email: investor@example.com
+  - Password: investor123
+  - Role: investor
+  - Username: investor1
+  - Shares: 4 active shares (TR001, TR002, TR003, TRuxPq)
+
+- **Account 2:**
+  - Email: investor2@example.com
+  - Password: investor123
+  - Role: investor
+  - Username: investor2
+  - Shares: None
+
+### Test Data Summary
+- **Users:** 3 (1 manager, 2 investors)
+- **Trailers:** 10 assets in fleet
+- **Shares:** 4 active shares (all owned by investor1)
+- **Payments:** 12 payment records
+- **Audit Logs:** 141 activity records
+
+### Password Reset
+To reset development passwords, run:
+```bash
+tsx scripts/reset-dev-passwords.ts
+```
+
 ## Recent Changes
 
 ### Broker Dispatch System - COMPLETE (November 6, 2025)
