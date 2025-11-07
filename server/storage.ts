@@ -116,6 +116,12 @@ export interface IStorage {
   getDashboardStats(userId: string): Promise<any>;
   getPortfolioData(userId: string): Promise<any>;
   
+  // Advanced Analytics operations
+  getRevenueTrend(months: number): Promise<any[]>;
+  getTrailerROI(): Promise<any[]>;
+  getPerformanceComparison(): Promise<any>;
+  getRevenueForecast(months: number): Promise<any[]>;
+  
   // GPS Device operations
   getGpsDevice(id: string): Promise<GpsDevice | undefined>;
   getGpsDeviceByTrailerId(trailerId: string): Promise<GpsDevice | undefined>;
@@ -590,6 +596,217 @@ export class DatabaseStorage implements IStorage {
       shares: sharesWithTrailers,
       payments: userPayments,
     };
+  }
+
+  // Advanced Analytics operations
+  async getRevenueTrend(months: number): Promise<any[]> {
+    const allPayments = await db.select().from(payments).orderBy(desc(payments.paymentDate));
+    const allInvoices = await db.select().from(invoices).orderBy(desc(invoices.dueDate));
+    
+    // Group payments by month
+    const now = new Date();
+    const monthlyData: Record<string, { investor: number; rental: number }> = {};
+    
+    for (let i = 0; i < months; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyData[monthKey] = { investor: 0, rental: 0 };
+    }
+    
+    // Sum investor payments
+    allPayments.forEach(payment => {
+      const date = new Date(payment.paymentDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].investor += parseFloat(payment.amount || "0");
+      }
+    });
+    
+    // Sum rental invoices (paid only)
+    allInvoices.forEach(invoice => {
+      if (invoice.status === "paid" && invoice.paidDate) {
+        const date = new Date(invoice.paidDate);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (monthlyData[monthKey]) {
+          monthlyData[monthKey].rental += parseFloat(invoice.amount || "0");
+        }
+      }
+    });
+    
+    // Convert to array and sort
+    return Object.entries(monthlyData)
+      .map(([month, data]) => ({
+        month,
+        investorPayouts: data.investor,
+        rentalRevenue: data.rental,
+        totalRevenue: data.investor + data.rental,
+        margin: data.rental - data.investor,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  async getTrailerROI(): Promise<any[]> {
+    // Optimized: Get all data in bulk to avoid N+1 queries
+    // Don't use getAllTrailers() here as it has N+1 for shares - fetch directly
+    const allTrailers = await db.select().from(trailers);
+    const allContracts = await db.select().from(rentalContracts);
+    const allShares = await db.select().from(shares);
+    const allPayments = await db.select().from(payments);
+    
+    const roiData = allTrailers.map((trailer) => {
+      // Filter contracts for this trailer
+      const trailerContracts = allContracts.filter(c => c.trailerId === trailer.id);
+      
+      // Calculate rental revenue considering contract status and end dates
+      const totalRentalRevenue = trailerContracts.reduce((sum, contract) => {
+        if (contract.status === "pending") {
+          return sum; // Don't count pending contracts
+        }
+        
+        const startDate = new Date(contract.startDate);
+        const now = new Date();
+        
+        // Use end date if contract is terminated, otherwise use current date
+        const endDate = contract.endDate ? new Date(contract.endDate) : now;
+        const effectiveEndDate = contract.status === "terminated" ? endDate : now;
+        
+        // Calculate months between start and effective end
+        const monthsDiff = Math.max(0, Math.floor(
+          (effectiveEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
+        ));
+        
+        return sum + parseFloat(contract.monthlyRate || "0") * monthsDiff;
+      }, 0);
+      
+      // Filter shares and payments for this trailer
+      const trailerShares = allShares.filter(s => s.trailerId === trailer.id);
+      const shareIds = trailerShares.map(s => s.id);
+      const trailerPayments = allPayments.filter(p => shareIds.includes(p.shareId));
+      
+      const totalInvestorPayouts = trailerPayments.reduce((sum, payment) => 
+        sum + parseFloat(payment.amount || "0"), 0
+      );
+      
+      const purchaseValue = parseFloat(trailer.purchaseValue || "0");
+      const netProfit = totalRentalRevenue - totalInvestorPayouts;
+      const roi = purchaseValue > 0 ? (netProfit / purchaseValue) * 100 : 0;
+      
+      return {
+        trailerId: trailer.id,
+        trailerName: `${trailer.trailerType} - ${trailer.model}`,
+        purchaseValue,
+        rentalRevenue: totalRentalRevenue,
+        investorPayouts: totalInvestorPayouts,
+        netProfit,
+        roi: Math.round(roi * 100) / 100,
+      };
+    });
+    
+    // Ensure results are sorted by ROI descending
+    return roiData.sort((a, b) => b.roi - a.roi);
+  }
+
+  async getPerformanceComparison(): Promise<any> {
+    // Optimized: Get all data in bulk
+    // Don't use getAllTrailers() here as it has N+1 for shares - fetch directly
+    const allTrailers = await db.select().from(trailers);
+    const allContracts = await db.select().from(rentalContracts);
+    
+    const typeData: Record<string, { count: number; revenue: number; avgROI: number }> = {};
+    
+    for (const trailer of allTrailers) {
+      if (!typeData[trailer.trailerType]) {
+        typeData[trailer.trailerType] = { count: 0, revenue: 0, avgROI: 0 };
+      }
+      
+      typeData[trailer.trailerType].count++;
+      
+      // Calculate revenue for this trailer considering contract status
+      const trailerContracts = allContracts.filter(c => c.trailerId === trailer.id);
+      const revenue = trailerContracts.reduce((sum, contract) => {
+        if (contract.status === "pending") {
+          return sum;
+        }
+        
+        const startDate = new Date(contract.startDate);
+        const now = new Date();
+        const endDate = contract.endDate ? new Date(contract.endDate) : now;
+        const effectiveEndDate = contract.status === "terminated" ? endDate : now;
+        
+        const monthsDiff = Math.max(0, Math.floor(
+          (effectiveEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
+        ));
+        
+        return sum + parseFloat(contract.monthlyRate || "0") * monthsDiff;
+      }, 0);
+      
+      typeData[trailer.trailerType].revenue += revenue;
+      
+      const purchaseValue = parseFloat(trailer.purchaseValue || "0");
+      if (purchaseValue > 0) {
+        typeData[trailer.trailerType].avgROI += (revenue / purchaseValue) * 100;
+      }
+    }
+    
+    // Calculate averages
+    const comparison = Object.entries(typeData).map(([type, data]) => ({
+      type,
+      count: data.count,
+      totalRevenue: data.revenue,
+      avgRevenue: data.count > 0 ? data.revenue / data.count : 0,
+      avgROI: data.count > 0 ? Math.round((data.avgROI / data.count) * 100) / 100 : 0,
+    }));
+    
+    return {
+      byType: comparison,
+      totalTrailers: allTrailers.length,
+      activeTrailers: allTrailers.filter(t => t.status === "active").length,
+    };
+  }
+
+  async getRevenueForecast(months: number): Promise<any[]> {
+    // Get historical data (last 6 months)
+    const historical = await this.getRevenueTrend(6);
+    
+    if (historical.length === 0) {
+      return [];
+    }
+    
+    // Calculate average monthly growth rate
+    let totalGrowth = 0;
+    let growthCount = 0;
+    
+    for (let i = 1; i < historical.length; i++) {
+      const prev = historical[i - 1].totalRevenue;
+      const curr = historical[i].totalRevenue;
+      if (prev > 0) {
+        totalGrowth += ((curr - prev) / prev) * 100;
+        growthCount++;
+      }
+    }
+    
+    const avgGrowthRate = growthCount > 0 ? totalGrowth / growthCount : 2; // Default 2% growth
+    const lastRevenue = historical[historical.length - 1].totalRevenue;
+    
+    // Generate forecast
+    const forecast = [];
+    const lastMonth = historical[historical.length - 1].month;
+    const [year, month] = lastMonth.split('-').map(Number);
+    
+    for (let i = 1; i <= months; i++) {
+      const forecastDate = new Date(year, month - 1 + i, 1);
+      const forecastMonth = `${forecastDate.getFullYear()}-${String(forecastDate.getMonth() + 1).padStart(2, '0')}`;
+      const forecastRevenue = lastRevenue * Math.pow(1 + (avgGrowthRate / 100), i);
+      
+      forecast.push({
+        month: forecastMonth,
+        forecastRevenue: Math.round(forecastRevenue * 100) / 100,
+        growthRate: avgGrowthRate,
+        confidence: Math.max(50, 95 - (i * 5)), // Confidence decreases over time
+      });
+    }
+    
+    return forecast;
   }
 
   // GPS Device operations

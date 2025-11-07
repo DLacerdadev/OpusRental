@@ -264,6 +264,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Analytics Routes
+  app.get("/api/analytics/revenue-trend", authorize(), async (req, res) => {
+    try {
+      const months = parseInt(req.query.months as string) || 12;
+      const trend = await storage.getRevenueTrend(months);
+      res.json(trend);
+    } catch (error) {
+      console.error("Revenue trend error:", error);
+      res.status(500).json({ message: "Failed to fetch revenue trend" });
+    }
+  });
+
+  app.get("/api/analytics/trailer-roi", authorize(), async (req, res) => {
+    try {
+      const roiData = await storage.getTrailerROI();
+      res.json(roiData);
+    } catch (error) {
+      console.error("Trailer ROI error:", error);
+      res.status(500).json({ message: "Failed to fetch trailer ROI" });
+    }
+  });
+
+  app.get("/api/analytics/performance-comparison", authorize(), async (req, res) => {
+    try {
+      const comparison = await storage.getPerformanceComparison();
+      res.json(comparison);
+    } catch (error) {
+      console.error("Performance comparison error:", error);
+      res.status(500).json({ message: "Failed to fetch performance comparison" });
+    }
+  });
+
+  app.get("/api/analytics/revenue-forecast", authorize(), async (req, res) => {
+    try {
+      const months = parseInt(req.query.months as string) || 6;
+      const forecast = await storage.getRevenueForecast(months);
+      res.json(forecast);
+    } catch (error) {
+      console.error("Revenue forecast error:", error);
+      res.status(500).json({ message: "Failed to fetch revenue forecast" });
+    }
+  });
+
   // Portfolio routes
   app.get("/api/portfolio", authorize(), async (req, res) => {
     try {

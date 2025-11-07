@@ -33,6 +33,7 @@ import Inspections from "@/pages/inspections";
 import Maintenance from "@/pages/maintenance";
 import BrokerPage from "@/pages/broker";
 import InvoiceAutomation from "@/pages/invoice-automation";
+import Analytics from "@/pages/analytics";
 
 function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -162,6 +163,9 @@ function Router() {
       </Route>
       <Route path="/invoice-automation">
         {() => <ProtectedRoute component={InvoiceAutomation} titleKey="pageTitles.invoiceAutomation" />}
+      </Route>
+      <Route path="/analytics">
+        {() => <ProtectedRoute component={Analytics} titleKey="pageTitles.analytics" />}
       </Route>
       <Route component={NotFound} />
     </Switch>
