@@ -307,6 +307,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notification routes
+  app.get("/api/notifications", authorize(), async (req, res) => {
+    try {
+      const notifications = await storage.getNotifications(req.session.userId!);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", authorize(), async (req, res) => {
+    try {
+      const count = await storage.getUnreadNotificationCount(req.session.userId!);
+      res.json({ count });
+    } catch (error) {
+      console.error("Get unread count error:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", authorize(), async (req, res) => {
+    try {
+      const success = await storage.markNotificationAsRead(req.params.id, req.session.userId!);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Notification not found" });
+      }
+    } catch (error) {
+      console.error("Mark notification read error:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", authorize(), async (req, res) => {
+    try {
+      const success = await storage.deleteNotification(req.params.id, req.session.userId!);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ message: "Notification not found" });
+      }
+    } catch (error) {
+      console.error("Delete notification error:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
   // Portfolio routes
   app.get("/api/portfolio", authorize(), async (req, res) => {
     try {

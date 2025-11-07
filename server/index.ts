@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startScheduler } from "./scheduler";
 import { InvoiceAutomationService } from "./services/invoice-automation.service";
+import { initializeWebSocket } from "./websocket";
 
 const app = express();
 
@@ -56,6 +57,10 @@ app.use((req, res, next) => {
   
   // Iniciar automação de faturas (geração mensal e lembretes)
   InvoiceAutomationService.initialize();
+  
+  // Iniciar WebSocket server para notificações em tempo real
+  initializeWebSocket(server);
+  log('WebSocket server initialized for real-time notifications');
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

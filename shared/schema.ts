@@ -331,6 +331,26 @@ export const brokerDispatches = pgTable("broker_dispatches", {
   idxPickupDate: index("idx_broker_dispatch_pickup").on(t.pickupDate),
 }));
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // payment_overdue, maintenance_due, gps_geofence, system_alert, invoice_reminder
+  severity: text("severity").notNull().default("info"), // info, warning, critical
+  read: boolean("read").notNull().default(false),
+  trailerId: varchar("trailer_id").references(() => trailers.id), // Optional: link to specific trailer
+  metadata: jsonb("metadata"), // Additional context data
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+}, (t) => ({
+  idxUserId: index("idx_notification_user").on(t.userId),
+  idxRead: index("idx_notification_read").on(t.read),
+  idxType: index("idx_notification_type").on(t.type),
+  idxCreatedAt: index("idx_notification_created").on(t.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   shares: many(shares),
@@ -454,6 +474,17 @@ export const brokerDispatchesRelations = relations(brokerDispatches, ({ one }) =
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  trailer: one(trailers, {
+    fields: [notifications.trailerId],
+    references: [trailers.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -559,6 +590,12 @@ export const insertBrokerDispatchSchema = createInsertSchema(brokerDispatches).o
   updatedAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -616,3 +653,6 @@ export type InsertBrokerEmail = z.infer<typeof insertBrokerEmailSchema>;
 
 export type BrokerDispatch = typeof brokerDispatches.$inferSelect;
 export type InsertBrokerDispatch = z.infer<typeof insertBrokerDispatchSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

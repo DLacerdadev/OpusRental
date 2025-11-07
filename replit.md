@@ -331,3 +331,57 @@ NODE_ENV=production                  # Enables real SMTP (defaults to mock in de
 - Manual triggers allow testing automation without waiting for cron schedule
 - Error messages captured and logged for troubleshooting
 - Development mock mode enables safe testing without sending real emails
+
+### Advanced Dashboard Analytics - COMPLETE (November 7, 2025)
+
+Implemented comprehensive analytics system with configurable timeframes and professional data visualizations:
+
+**Backend Analytics Endpoints (server/storage.ts):**
+1. **Revenue Trend** (`getRevenueTrend`) - Line 605-649:
+   - Bulk fetches payments and invoices to avoid N+1 queries
+   - Groups data by month with revenue and payment counts
+   - Returns chronologically sorted results
+   - Accepts configurable timeframe parameter (months)
+
+2. **Trailer ROI Analysis** (`getTrailerROI`) - Line 651-707:
+   - Bulk fetches all data (trailers, contracts, shares, payments) in 4 queries
+   - Calculates ROI respecting contract lifecycle (skips pending, uses end dates for terminated)
+   - Returns results sorted by ROI descending for accurate "top performer" display
+   - Includes revenue, investor payouts, net profit per trailer
+
+3. **Performance Comparison** (`getPerformanceComparison`) - Line 711-766:
+   - Aggregates trailers by type (Seco, Climatizado, Lonado)
+   - Calculates average ROI and total revenue per type
+   - Respects contract status and end dates in calculations
+
+4. **Revenue Forecast** (`getRevenueForecast`) - Line 768-810:
+   - Generates 6-month forward-looking projections
+   - Uses historical averages with declining confidence over time
+   - Provides forecast basis for transparency
+
+**Frontend Dashboard (client/src/pages/analytics.tsx):**
+- **4 Analytics Tabs**:
+  - Revenue Trend: Area chart with timeframe selector (3/6/12 months)
+  - Trailer ROI: Bar chart with top performer card highlight
+  - Performance Comparison: Radar chart comparing trailer types
+  - Revenue Forecast: Line chart with projected vs actual revenue
+- **Professional Recharts visualizations** with responsive design
+- **Query parameter integration**: Timeframe selections sent as `?months=${value}`
+- **Loading states**: Skeleton loaders during data fetch
+- **Mobile responsive**: Adapts from 1-col to 2-col layouts
+
+**Performance Optimizations:**
+- **Bulk Query Strategy**: 4 database queries total instead of O(N) per trailer
+- **In-Memory Filtering**: All aggregations done in application layer after bulk fetch
+- **No N+1 Patterns**: Direct `db.select().from(trailers)` instead of `getAllTrailers()` to avoid nested share queries
+- **Efficient Sorting**: ROI results sorted once before return (line 706)
+
+**Internationalization:**
+- Full EN/PT-BR support for all analytics labels, tooltips, and messages
+- Translated chart axes, legends, and data labels
+
+**API Endpoints:**
+- `GET /api/analytics/revenue-trend?months=6` - Revenue trend with configurable timeframe
+- `GET /api/analytics/trailer-roi?months=12` - ROI analysis sorted by performance
+- `GET /api/analytics/performance-comparison` - Type-based aggregation
+- `GET /api/analytics/revenue-forecast?months=6` - Forward-looking projections
