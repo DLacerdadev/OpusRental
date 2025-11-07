@@ -791,6 +791,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual invoice generation
+  app.post("/api/invoices/generate-monthly", authorize(), async (req, res) => {
+    try {
+      const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
+      await InvoiceAutomationService.generateInvoicesNow();
+      
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "manual_invoice_generation",
+        entityType: "invoice",
+        entityId: null,
+        details: { triggeredBy: "manual" },
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "Monthly invoices generated successfully" });
+    } catch (error) {
+      console.error("Manual invoice generation error:", error);
+      res.status(500).json({ message: "Failed to generate invoices" });
+    }
+  });
+
+  // Manual overdue check
+  app.post("/api/invoices/check-overdue", authorize(), async (req, res) => {
+    try {
+      const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
+      await InvoiceAutomationService.checkOverdueNow();
+      
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "manual_overdue_check",
+        entityType: "invoice",
+        entityId: null,
+        details: { triggeredBy: "manual" },
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "Overdue check completed" });
+    } catch (error) {
+      console.error("Manual overdue check error:", error);
+      res.status(500).json({ message: "Failed to check overdue invoices" });
+    }
+  });
+
+  // Get email logs
+  app.get("/api/email-logs", authorize(), async (req, res) => {
+    try {
+      const logs = await storage.getAllEmailLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Get email logs error:", error);
+      res.status(500).json({ message: "Failed to get email logs" });
+    }
+  });
+
   // Checklist/Inspection routes (Manager/Admin only)
   app.get("/api/checklists/trailer/:trailerId", authorize(), async (req, res) => {
     try {
