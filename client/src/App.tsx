@@ -34,6 +34,8 @@ import Maintenance from "@/pages/maintenance";
 import BrokerPage from "@/pages/broker";
 import InvoiceAutomation from "@/pages/invoice-automation";
 import Analytics from "@/pages/analytics";
+import CheckoutShare from "@/pages/checkout-share";
+import CheckoutInvoice from "@/pages/checkout-invoice";
 
 function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -167,6 +169,8 @@ function Router() {
       <Route path="/analytics">
         {() => <ProtectedRoute component={Analytics} titleKey="pageTitles.analytics" />}
       </Route>
+      <Route path="/checkout/share" component={CheckoutShare} />
+      <Route path="/checkout/invoice" component={CheckoutInvoice} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import Stripe from "stripe";
 import { 
   insertUserSchema, 
   insertTrailerSchema, 
@@ -31,6 +32,14 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
+
+// Initialize Stripe with secret key
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-10-29.clover",
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -2285,6 +2294,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get filter options error:", error);
       res.status(500).json({ message: "Failed to retrieve filter options" });
+    }
+  });
+
+  // ===========================
+  // Stripe Payment Endpoints
+  // ===========================
+
+  // Create payment intent for share purchase ($28,000 fixed)
+  app.post("/api/stripe/create-share-payment", apiLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const { shareId, investorUserId } = req.body;
+
+      if (!shareId || !investorUserId) {
+        return res.status(400).json({ message: "Missing shareId or investorUserId" });
+      }
+
+      // Verify share exists and is available
+      const share = await storage.getShare(shareId);
+      if (!share) {
+        return res.status(404).json({ message: "Share not found" });
+      }
+
+      if (share.status !== "available") {
+        return res.status(400).json({ message: "Share is not available for purchase" });
+      }
+
+      // Create Stripe payment intent for $28,000
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 2800000, // $28,000 in cents
+        currency: "usd",
+        metadata: {
+          type: "share_purchase",
+          shareId: shareId,
+          investorUserId: investorUserId,
+          trailerId: share.trailerId,
+        },
+        description: `Purchase of Share #${shareId} - Trailer Investment`,
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create_share_payment_intent",
+        entityType: "share",
+        entityId: shareId,
+        details: { 
+          paymentIntentId: paymentIntent.id,
+          amount: 28000,
+          investorUserId 
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        amount: 28000,
+      });
+    } catch (error: any) {
+      console.error("Create share payment intent error:", error);
+      res.status(500).json({ message: "Failed to create payment intent: " + error.message });
+    }
+  });
+
+  // Create payment intent for invoice payment (variable amount)
+  app.post("/api/stripe/create-invoice-payment", apiLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const { invoiceId } = req.body;
+
+      if (!invoiceId) {
+        return res.status(400).json({ message: "Missing invoiceId" });
+      }
+
+      // Get invoice details
+      const invoice = await storage.getInvoice(invoiceId);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (invoice.status === "paid") {
+        return res.status(400).json({ message: "Invoice is already paid" });
+      }
+
+      // Calculate amount in cents
+      const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: "usd",
+        metadata: {
+          type: "invoice_payment",
+          invoiceId: invoiceId,
+          contractId: invoice.contractId,
+        },
+        description: `Payment for Invoice #${invoice.invoiceNumber} - Rental Fee`,
+      });
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "create_invoice_payment_intent",
+        entityType: "invoice",
+        entityId: invoiceId,
+        details: { 
+          paymentIntentId: paymentIntent.id,
+          amount: invoice.amount,
+          invoiceNumber: invoice.invoiceNumber 
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        amount: parseFloat(invoice.amount),
+        invoiceNumber: invoice.invoiceNumber,
+      });
+    } catch (error: any) {
+      console.error("Create invoice payment intent error:", error);
+      res.status(500).json({ message: "Failed to create payment intent: " + error.message });
+    }
+  });
+
+  // Webhook to handle successful payments from Stripe
+  app.post("/api/stripe/webhook", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    if (!sig) {
+      return res.status(400).send('Missing Stripe signature');
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      // Verify webhook signature (requires STRIPE_WEBHOOK_SECRET in production)
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (webhookSecret) {
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      } else {
+        // In development, accept without verification (not recommended for production)
+        event = req.body as Stripe.Event;
+      }
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+      switch (event.type) {
+        case 'payment_intent.succeeded': {
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          const metadata = paymentIntent.metadata;
+
+          if (metadata.type === 'share_purchase') {
+            // Update share status to sold and link to investor
+            await storage.updateShare(metadata.shareId, {
+              userId: metadata.investorUserId,
+              status: "sold",
+              purchaseDate: new Date().toISOString(),
+            });
+
+            // Create financial record for share purchase
+            await storage.createFinancialRecord({
+              month: new Date().toISOString().slice(0, 7),
+              totalRevenue: (paymentIntent.amount / 100).toFixed(2),
+              investorPayouts: "0",
+              operationalCosts: "0",
+              companyMargin: (paymentIntent.amount / 100).toFixed(2),
+            });
+
+            console.log(`✅ Share ${metadata.shareId} purchased by user ${metadata.investorUserId}`);
+
+          } else if (metadata.type === 'invoice_payment') {
+            // Update invoice status to paid
+            await storage.updateInvoice(metadata.invoiceId, {
+              status: "paid",
+              paidDate: new Date().toISOString(),
+            });
+
+            console.log(`✅ Invoice ${metadata.invoiceId} paid via Stripe`);
+          }
+
+          break;
+        }
+
+        case 'payment_intent.payment_failed': {
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          console.error(`❌ Payment failed: ${paymentIntent.id}`);
+          break;
+        }
+
+        default:
+          console.log(`Unhandled Stripe event type: ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook processing error:', error);
+      res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
+  // Get payment status
+  app.get("/api/stripe/payment-status/:paymentIntentId", apiLimiter, isAuthenticated, async (req, res) => {
+    try {
+      const { paymentIntentId } = req.params;
+
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      res.json({
+        status: paymentIntent.status,
+        amount: paymentIntent.amount / 100,
+        currency: paymentIntent.currency,
+        metadata: paymentIntent.metadata,
+      });
+    } catch (error: any) {
+      console.error("Get payment status error:", error);
+      res.status(500).json({ message: "Failed to retrieve payment status: " + error.message });
     }
   });
 

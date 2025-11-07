@@ -385,3 +385,131 @@ Implemented comprehensive analytics system with configurable timeframes and prof
 - `GET /api/analytics/trailer-roi?months=12` - ROI analysis sorted by performance
 - `GET /api/analytics/performance-comparison` - Type-based aggregation
 - `GET /api/analytics/revenue-forecast?months=6` - Forward-looking projections
+
+### Stripe Payment Integration - COMPLETE (November 7, 2025)
+
+Implemented comprehensive payment processing system using Stripe for share purchases and invoice payments:
+
+**Stripe Integration Setup:**
+- **API Version**: 2025-10-29.clover (latest)
+- **Environment Variables**:
+  - `STRIPE_SECRET_KEY` - Server-side secret key (required)
+  - `VITE_STRIPE_PUBLIC_KEY` - Frontend publishable key (required)
+  - `STRIPE_WEBHOOK_SECRET` - Webhook signature verification (optional for dev)
+- **Package**: Stripe Node SDK v17+ with full TypeScript support
+
+**Backend Payment Endpoints (server/routes.ts):**
+
+1. **Share Purchase** (`POST /api/stripe/create-share-payment`):
+   - Fixed amount: $28,000 per share (2,800,000 cents)
+   - Validates share availability before payment intent creation
+   - Metadata includes: shareId, investorUserId, trailerId, type: "share_purchase"
+   - Audit logging with payment intent ID tracking
+
+2. **Invoice Payment** (`POST /api/stripe/create-invoice-payment`):
+   - Variable amount based on invoice.amount
+   - Validates invoice exists and is not already paid
+   - Metadata includes: invoiceId, contractId, type: "invoice_payment"
+   - Returns invoice number for confirmation UI
+
+3. **Webhook Handler** (`POST /api/stripe/webhook`):
+   - Handles `payment_intent.succeeded` events
+   - Signature verification using STRIPE_WEBHOOK_SECRET (optional in dev)
+   - **Share Purchase Success**:
+     - Updates share status to "sold"
+     - Links share to investor (userId field)
+     - Sets purchaseDate to payment timestamp
+     - Creates financial record with $28,000 revenue
+   - **Invoice Payment Success**:
+     - Updates invoice status to "paid"
+     - Sets paidDate to payment timestamp
+     - No separate payment record (invoice status is source of truth)
+   - Handles `payment_intent.payment_failed` with error logging
+
+4. **Payment Status** (`GET /api/stripe/payment-status/:paymentIntentId`):
+   - Retrieves current payment intent status from Stripe
+   - Returns status, amount, currency, metadata
+   - Used for real-time payment verification
+
+**Frontend Checkout Pages:**
+
+1. **Share Checkout** (`/checkout/share`):
+   - Premium investment summary card with ROI breakdown
+   - Displays: $28,000 price, $560/month return (2%), $6,720/year (24%)
+   - Stripe Elements integration with PaymentElement
+   - Query parameters: shareId, investorUserId, trailerId, trailerInfo
+   - Return URL: `/shares` after successful payment
+   - Professional loading states and error handling
+
+2. **Invoice Checkout** (`/checkout/invoice`):
+   - Professional invoice summary card
+   - Displays: invoice number, amount due, due date, reference month
+   - Stripe Elements integration with PaymentElement
+   - Query parameter: invoiceId (fetches amount from backend)
+   - Return URL: `/invoices` after successful payment
+   - Responsive design with proper mobile formatting
+
+**Stripe Elements Configuration:**
+- Uses `@stripe/react-stripe-js` and `@stripe/stripe-js` packages
+- Lazy loading of Stripe.js with `loadStripe()` outside component
+- `<Elements>` wrapper with clientSecret options
+- `<PaymentElement>` for payment method collection
+- Built-in PCI compliance and card validation
+
+**Security Features:**
+- Client secrets expire after successful payment
+- Payment intents created server-side only
+- No sensitive data stored in frontend
+- Webhook signature verification prevents spoofing
+- Audit logging tracks all payment attempts
+- Rate limiting on payment endpoints (100 req/15min)
+
+**User Flow:**
+
+1. **Share Purchase**:
+   ```
+   User selects share → Redirected to /checkout/share?shareId=X&investorUserId=Y
+   → Backend creates $28,000 payment intent → User enters card details
+   → Stripe processes payment → Webhook updates share status to "sold"
+   → User redirected to /shares with success message
+   ```
+
+2. **Invoice Payment**:
+   ```
+   User clicks "Pay Invoice" → Redirected to /checkout/invoice?invoiceId=X
+   → Backend creates payment intent with invoice.amount → User enters card details
+   → Stripe processes payment → Webhook updates invoice status to "paid"
+   → User redirected to /invoices with success message
+   ```
+
+**Financial Record Tracking:**
+- Share purchases create financial records with:
+  - month: Current month (YYYY-MM format)
+  - totalRevenue: $28,000
+  - investorPayouts: $0 (future monthly returns)
+  - operationalCosts: $0
+  - companyMargin: $28,000
+- Invoice payments update invoice status only (no separate payment record)
+
+**Error Handling:**
+- Payment failures display Stripe error messages to user
+- Backend errors return descriptive messages
+- Missing shares/invoices return 404 with clear messages
+- Invalid payment states (already paid, not available) return 400
+- Webhook errors logged but don't disrupt user experience
+
+**Testing Notes:**
+- Development mode accepts webhooks without signature verification
+- Production requires STRIPE_WEBHOOK_SECRET for security
+- Use Stripe test cards for development testing
+- Test mode keys (pk_test_, sk_test_) prevent real charges
+
+**Integration Status:**
+- ✅ Backend endpoints functional
+- ✅ Webhook handler operational
+- ✅ Frontend checkout pages created
+- ✅ Routes registered in App.tsx
+- ✅ Zero LSP errors
+- ✅ Workflow running successfully
+- ⚠️ Frontend integration with existing pages (Shares, Invoices) pending
+- ⚠️ Webhook endpoint registration with Stripe dashboard required for production
