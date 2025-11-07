@@ -1,3 +1,5 @@
+import nodemailer from "nodemailer";
+import type { Transporter } from "nodemailer";
 import type { Invoice, RentalClient, RentalContract, InsertEmailLog } from "@shared/schema";
 
 export interface EmailOptions {
@@ -15,10 +17,60 @@ export interface InvoiceEmailData {
 }
 
 export class EmailService {
+  private static transporter: Transporter | null = null;
   private static isDevelopment = process.env.NODE_ENV !== "production";
 
   /**
-   * Send an email (mock in development, real in production)
+   * Initialize SMTP transporter for production use
+   */
+  private static async getTransporter(): Promise<Transporter | null> {
+    if (this.isDevelopment) {
+      return null; // Mock mode in development
+    }
+
+    // Return cached transporter if already initialized
+    if (this.transporter) {
+      return this.transporter;
+    }
+
+    // Check for required SMTP environment variables
+    const host = process.env.SMTP_HOST;
+    const port = process.env.SMTP_PORT;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    const from = process.env.SMTP_FROM;
+
+    if (!host || !port || !user || !pass || !from) {
+      console.error("⚠️ SMTP credentials not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM environment variables.");
+      return null;
+    }
+
+    try {
+      // Create transporter with SMTP credentials
+      this.transporter = nodemailer.createTransport({
+        host,
+        port: parseInt(port, 10),
+        secure: parseInt(port, 10) === 465, // true for 465, false for other ports
+        auth: {
+          user,
+          pass,
+        },
+      });
+
+      // Verify connection
+      await this.transporter.verify();
+      console.log("✅ SMTP connection verified successfully");
+      
+      return this.transporter;
+    } catch (error) {
+      console.error("❌ SMTP connection failed:", error instanceof Error ? error.message : "Unknown error");
+      this.transporter = null;
+      return null;
+    }
+  }
+
+  /**
+   * Send an email (mock in development, real SMTP in production)
    */
   static async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
@@ -31,12 +83,28 @@ export class EmailService {
         return true;
       }
 
-      // TODO: Implement real SMTP sending in production
-      // For now, return true to simulate success
+      // Production: Send real email via SMTP
+      const transporter = await this.getTransporter();
+      
+      if (!transporter) {
+        throw new Error("SMTP transporter not configured. Please set SMTP environment variables.");
+      }
+
+      const from = process.env.SMTP_FROM || "noreply@opusrentalcapital.com";
+
+      const info = await transporter.sendMail({
+        from: `"Opus Rental Capital" <${from}>`,
+        to: options.toName ? `"${options.toName}" <${options.to}>` : options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
+
+      console.log("✅ Email sent successfully:", info.messageId);
       return true;
     } catch (error) {
-      console.error("Email sending error:", error);
-      return false;
+      console.error("❌ Email sending error:", error instanceof Error ? error.message : "Unknown error");
+      throw error; // Propagate error for proper logging
     }
   }
 

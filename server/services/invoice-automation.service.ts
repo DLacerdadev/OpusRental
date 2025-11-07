@@ -101,13 +101,23 @@ export class InvoiceAutomationService {
           // Send invoice email to client
           const client = await storage.getRentalClient(contract.clientId);
           if (client) {
-            const emailSent = await EmailService.sendInvoiceEmail({
-              invoice,
-              contract,
-              client,
-            });
+            let emailStatus: "sent" | "failed" = "failed";
+            let errorMessage: string | undefined;
 
-            // Log email
+            try {
+              await EmailService.sendInvoiceEmail({
+                invoice,
+                contract,
+                client,
+              });
+              emailStatus = "sent";
+            } catch (error) {
+              emailStatus = "failed";
+              errorMessage = error instanceof Error ? error.message : "Unknown error sending email";
+              console.log(`   ❌ Failed to send email to ${client.email}: ${errorMessage}`);
+            }
+
+            // Log email attempt
             const emailLog = EmailService.createEmailLog(
               client.email,
               client.tradeName || client.companyName,
@@ -115,15 +125,13 @@ export class InvoiceAutomationService {
               "invoice",
               "invoice",
               invoice.id,
-              emailSent ? "sent" : "failed",
-              emailSent ? undefined : "Failed to send email"
+              emailStatus,
+              errorMessage
             );
             await storage.createEmailLog(emailLog);
 
-            if (emailSent) {
+            if (emailStatus === "sent") {
               console.log(`   📧 Email sent to ${client.email}`);
-            } else {
-              console.log(`   ❌ Failed to send email to ${client.email}`);
             }
           }
         } catch (error) {
@@ -188,12 +196,21 @@ export class InvoiceAutomationService {
           }
 
           // Send reminder email
-          const emailSent = await EmailService.sendPaymentReminderEmail(
-            { invoice, contract, client },
-            daysOverdue
-          );
+          let emailStatus: "sent" | "failed" = "failed";
+          let errorMessage: string | undefined;
 
-          // Log email
+          try {
+            await EmailService.sendPaymentReminderEmail(
+              { invoice, contract, client },
+              daysOverdue
+            );
+            emailStatus = "sent";
+          } catch (error) {
+            emailStatus = "failed";
+            errorMessage = error instanceof Error ? error.message : "Unknown error sending reminder";
+          }
+
+          // Log email attempt
           const emailLog = EmailService.createEmailLog(
             client.email,
             client.tradeName || client.companyName,
@@ -201,16 +218,16 @@ export class InvoiceAutomationService {
             "payment_reminder",
             "invoice",
             invoice.id,
-            emailSent ? "sent" : "failed",
-            emailSent ? undefined : "Failed to send reminder"
+            emailStatus,
+            errorMessage
           );
           await storage.createEmailLog(emailLog);
 
-          if (emailSent) {
+          if (emailStatus === "sent") {
             console.log(`   📧 Reminder sent for ${invoice.invoiceNumber} (${daysOverdue} days overdue)`);
             sent++;
           } else {
-            console.log(`   ❌ Failed to send reminder for ${invoice.invoiceNumber}`);
+            console.log(`   ❌ Failed to send reminder for ${invoice.invoiceNumber}: ${errorMessage}`);
             errors++;
           }
         } catch (error) {
@@ -262,23 +279,35 @@ export class InvoiceAutomationService {
           if (!client) continue;
 
           // Send friendly reminder email
-          const emailSent = await EmailService.sendInvoiceEmail({
-            invoice,
-            contract,
-            client,
-          });
+          let emailStatus: "sent" | "failed" = "failed";
+          let errorMessage: string | undefined;
 
-          if (emailSent) {
-            const emailLog = EmailService.createEmailLog(
-              client.email,
-              client.tradeName || client.companyName,
-              `Reminder: Invoice ${invoice.invoiceNumber} due in 3 days`,
-              "due_reminder",
-              "invoice",
-              invoice.id,
-              "sent"
-            );
-            await storage.createEmailLog(emailLog);
+          try {
+            await EmailService.sendInvoiceEmail({
+              invoice,
+              contract,
+              client,
+            });
+            emailStatus = "sent";
+          } catch (error) {
+            emailStatus = "failed";
+            errorMessage = error instanceof Error ? error.message : "Unknown error sending due reminder";
+          }
+
+          // Log email attempt
+          const emailLog = EmailService.createEmailLog(
+            client.email,
+            client.tradeName || client.companyName,
+            `Reminder: Invoice ${invoice.invoiceNumber} due in 3 days`,
+            "due_reminder",
+            "invoice",
+            invoice.id,
+            emailStatus,
+            errorMessage
+          );
+          await storage.createEmailLog(emailLog);
+
+          if (emailStatus === "sent") {
             console.log(`   📧 Due date reminder sent for ${invoice.invoiceNumber}`);
             sent++;
           } else {
