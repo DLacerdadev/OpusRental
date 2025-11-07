@@ -204,7 +204,11 @@ export const checklists = pgTable("checklists", {
   type: text("type").notNull(), // pre_rental, maintenance, arrival
   items: jsonb("items").notNull(), // [{item: "Tires", status: "ok", notes: ""}]
   approved: boolean("approved").notNull().default(false),
+  rejected: boolean("rejected").notNull().default(false),
+  rejectionReason: text("rejection_reason"),
   inspector: text("inspector").notNull(),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
   photos: jsonb("photos"), // Array of photo URLs
   notes: text("notes"),
   inspectionDate: timestamp("inspection_date").notNull().defaultNow(),
@@ -212,6 +216,7 @@ export const checklists = pgTable("checklists", {
 }, (t) => ({
   idxTrailerId: index("idx_checklists_trailer").on(t.trailerId),
   idxType: index("idx_checklists_type").on(t.type),
+  idxApproved: index("idx_checklists_approved").on(t.approved),
 }));
 
 // Maintenance Schedules table

@@ -149,7 +149,7 @@ export interface IStorage {
   getChecklistsByType(type: string): Promise<Checklist[]>;
   createChecklist(checklist: InsertChecklist): Promise<Checklist>;
   updateChecklist(id: string, checklist: Partial<Checklist>): Promise<Checklist>;
-  completeChecklist(id: string, approved: boolean, notes?: string): Promise<Checklist>;
+  completeChecklist(id: string, approved: boolean, approvedById: string, notes?: string, rejectionReason?: string): Promise<Checklist>;
   
   // Maintenance Schedule operations
   getMaintenanceSchedule(id: string): Promise<MaintenanceSchedule | undefined>;
@@ -844,13 +844,18 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async completeChecklist(id: string, approved: boolean, notes?: string): Promise<Checklist> {
+  async completeChecklist(id: string, approved: boolean, approvedById: string, notes?: string, rejectionReason?: string): Promise<Checklist> {
     const updateData: any = { 
       approved,
-      completedAt: new Date()
+      rejected: !approved,
+      approvedBy: approvedById,
+      approvedAt: new Date()
     };
     if (notes) {
       updateData.notes = notes;
+    }
+    if (!approved && rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
     }
     const [completed] = await db
       .update(checklists)

@@ -16,6 +16,7 @@ import {
   insertMaintenanceScheduleSchema,
   insertBrokerDispatchSchema
 } from "@shared/schema";
+import { PDFService } from "./services/pdf.service";
 import { z } from "zod";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
@@ -24,7 +25,6 @@ import helmet from "helmet";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
-import { PDFService } from "./services/pdf.service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -883,11 +883,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate checklist/inspection PDF
+  app.post("/api/checklists/:id/generate-pdf", authorize(), async (req, res) => {
+    try {
+      const checklist = await storage.getChecklist(req.params.id);
+      if (!checklist) {
+        return res.status(404).json({ message: "Checklist not found" });
+      }
+
+      const trailer = await storage.getTrailer(checklist.trailerId);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+
+      const pdfBuffer = PDFService.generateInspectionReport(checklist, trailer);
+
+      await storage.createAuditLog({
+        userId: req.session.userId!,
+        action: "generate_pdf",
+        entityType: "checklist",
+        entityId: checklist.id,
+        details: { type: "inspection_report" },
+        ipAddress: req.ip,
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Inspection-${checklist.id.substring(0, 8)}.pdf`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Generate checklist PDF error:", error);
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
+
   app.post("/api/checklists/:id/complete", authorize(), async (req, res) => {
     try {
       const completeSchema = z.object({
         approved: z.boolean(),
         notes: z.string().optional(),
+        rejectionReason: z.string().optional(),
       }).strict();
 
       const validation = completeSchema.safeParse(req.body);
@@ -899,15 +933,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // If rejected, require a rejection reason
+      if (validation.data.approved === false && !validation.data.rejectionReason) {
+        return res.status(400).json({ 
+          message: "Rejection reason is required when rejecting a checklist" 
+        });
+      }
+
       const checklist = await storage.completeChecklist(
         req.params.id,
         validation.data.approved,
-        validation.data.notes
+        req.session.userId!,
+        validation.data.notes,
+        validation.data.rejectionReason
       );
 
       await storage.createAuditLog({
         userId: req.session.userId!,
-        action: "complete",
+        action: validation.data.approved ? "approve_checklist" : "reject_checklist",
         entityType: "checklist",
         entityId: checklist.id,
         details: validation.data,

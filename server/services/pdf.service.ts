@@ -561,4 +561,186 @@ export class PDFService {
     
     return Buffer.from(doc.output('arraybuffer'));
   }
+
+  static generateInspectionReport(checklist: any, trailer: Trailer): Buffer {
+    const doc = new jsPDF();
+    
+    // Header
+    this.addHeader(doc, 'Inspection Report');
+    
+    // Checklist Info Section
+    let yPos = 50;
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Inspection Details', 20, yPos);
+    
+    yPos += 10;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    
+    // Info grid
+    const infoData = [
+      ['Inspection ID:', checklist.id.substring(0, 8).toUpperCase()],
+      ['Trailer ID:', trailer.trailerId],
+      ['Inspection Type:', this.getInspectionTypeLabel(checklist.type)],
+      ['Inspector:', checklist.inspector],
+      ['Inspection Date:', this.formatDate(checklist.inspectionDate)],
+      ['Status:', checklist.approved ? '✓ APPROVED' : (checklist.rejected ? '✗ REJECTED' : '⏳ PENDING')],
+    ];
+
+    if (checklist.approvedBy) {
+      const approvedDate = checklist.approvedAt ? this.formatDate(checklist.approvedAt) : 'N/A';
+      infoData.push(['Reviewed on:', approvedDate]);
+    }
+
+    if (checklist.rejectionReason) {
+      infoData.push(['Rejection Reason:', checklist.rejectionReason]);
+    }
+
+    autoTable(doc, {
+      startY: yPos,
+      body: infoData,
+      theme: 'plain',
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 50 },
+        1: { cellWidth: 120 }
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      }
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    // Inspection Items Section
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Inspection Checklist', 20, yPos);
+    yPos += 5;
+
+    const items = checklist.items || [];
+    const itemsData = items.map((item: any) => [
+      item.item,
+      this.getStatusLabel(item.status),
+      item.notes || '-'
+    ]);
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Item', 'Status', 'Notes']],
+      body: itemsData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [33, 51, 82],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      columnStyles: {
+        0: { cellWidth: 60 },
+        1: { cellWidth: 30, halign: 'center' },
+        2: { cellWidth: 90 }
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 4,
+      },
+      didParseCell: (data) => {
+        if (data.column.index === 1 && data.section === 'body') {
+          const status = items[data.row.index]?.status;
+          if (status === 'ok') {
+            data.cell.styles.textColor = [34, 197, 94]; // Green
+            data.cell.styles.fontStyle = 'bold';
+          } else if (status === 'issue') {
+            data.cell.styles.textColor = [239, 68, 68]; // Red
+            data.cell.styles.fontStyle = 'bold';
+          } else {
+            data.cell.styles.textColor = [107, 114, 128]; // Gray
+          }
+        }
+      }
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    // Summary Section
+    if (yPos > doc.internal.pageSize.height - 80) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    const okCount = items.filter((item: any) => item.status === 'ok').length;
+    const issueCount = items.filter((item: any) => item.status === 'issue').length;
+    const naCount = items.filter((item: any) => item.status === 'na').length;
+    const totalItems = items.length;
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Inspection Summary', 20, yPos);
+    yPos += 10;
+
+    const summaryData = [
+      ['Total Items Checked:', totalItems.toString()],
+      ['Items OK:', `${okCount} (${totalItems > 0 ? Math.round((okCount / totalItems) * 100) : 0}%)`],
+      ['Items with Issues:', `${issueCount} (${totalItems > 0 ? Math.round((issueCount / totalItems) * 100) : 0}%)`],
+      ['Items N/A:', `${naCount} (${totalItems > 0 ? Math.round((naCount / totalItems) * 100) : 0}%)`],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: summaryData,
+      theme: 'plain',
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 60 },
+        1: { cellWidth: 50 }
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      }
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 10;
+
+    // Additional Notes
+    if (checklist.notes) {
+      if (yPos > doc.internal.pageSize.height - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Additional Notes:', 20, yPos);
+      yPos += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const splitNotes = doc.splitTextToSize(checklist.notes, 170);
+      doc.text(splitNotes, 20, yPos);
+    }
+
+    // Footer
+    this.addFooter(doc);
+
+    return Buffer.from(doc.output('arraybuffer'));
+  }
+
+  private static getInspectionTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      pre_rental: 'Pre-Rental Inspection',
+      maintenance: 'Maintenance Inspection',
+      arrival: 'Arrival Inspection',
+    };
+    return labels[type] || type;
+  }
+
+  private static getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      ok: '✓ OK',
+      issue: '✗ Issue',
+      na: '- N/A',
+    };
+    return labels[status] || status;
+  }
 }
