@@ -15,11 +15,41 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Tenants table - Multi-tenancy support
+export const tenants = pgTable("tenants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // Company name
+  slug: text("slug").notNull().unique(), // URL-friendly identifier (e.g., "opus-rental")
+  domain: text("domain"), // Custom domain (e.g., "app.opusrental.com")
+  
+  // White-label customization
+  logoUrl: text("logo_url"),
+  primaryColor: text("primary_color").default("#2563eb"), // Tailwind blue-600
+  secondaryColor: text("secondary_color").default("#3b82f6"), // Tailwind blue-500
+  accentColor: text("accent_color").default("#1d4ed8"), // Tailwind blue-700
+  
+  // Billing configuration
+  subscriptionPlan: text("subscription_plan").notNull().default("basic"), // basic, professional, enterprise
+  billingEmail: text("billing_email"),
+  maxUsers: integer("max_users").default(10),
+  maxTrailers: integer("max_trailers").default(50),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  
+  // Status
+  status: text("status").notNull().default("active"), // active, suspended, cancelled
+  trialEndsAt: timestamp("trial_ends_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Users table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  username: text("username").notNull(),
+  email: text("email").notNull(),
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
@@ -27,12 +57,16 @@ export const users = pgTable("users", {
   country: text("country").default("US"), // US, BR, etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  uniqTenantUsername: uniqueIndex("uniq_tenant_username").on(t.tenantId, t.username),
+  uniqTenantEmail: uniqueIndex("uniq_tenant_email").on(t.tenantId, t.email),
+}));
 
 // Trailers (Assets) table
 export const trailers = pgTable("trailers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  trailerId: text("trailer_id").notNull().unique(), // TR001, TR002, etc.
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  trailerId: text("trailer_id").notNull(), // TR001, TR002, etc.
   trailerType: text("trailer_type").notNull().default("Seco"), // Seco, Climatizado, Lonado
   model: text("model").notNull().default("Dry Van 53ft"), // Dry Van 53ft, Refrigerado 48ft, etc.
   purchaseValue: decimal("purchase_value", { precision: 10, scale: 2 }).notNull(),
@@ -48,11 +82,14 @@ export const trailers = pgTable("trailers", {
   totalShares: integer("total_shares").notNull().default(1), // Total number of shares available for this trailer
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  uniqTenantTrailerId: uniqueIndex("uniq_tenant_trailer_id").on(t.tenantId, t.trailerId),
+}));
 
 // Shares (Cotas) table
 export const shares = pgTable("shares", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   userId: varchar("user_id").notNull().references(() => users.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   purchaseValue: decimal("purchase_value", { precision: 10, scale: 2 }).notNull(),
@@ -62,7 +99,11 @@ export const shares = pgTable("shares", {
   totalReturns: decimal("total_returns", { precision: 10, scale: 2 }).notNull().default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  idxTenant: index("idx_shares_tenant").on(t.tenantId),
+  idxUser: index("idx_shares_user").on(t.userId),
+  idxTrailer: index("idx_shares_trailer").on(t.trailerId),
+}));
 
 // Payments table
 export const payments = pgTable("payments", {
@@ -107,6 +148,7 @@ export const documents = pgTable("documents", {
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   userId: varchar("user_id").references(() => users.id),
   action: text("action").notNull(),
   entityType: text("entity_type").notNull(), // user, share, payment, document, etc.
@@ -114,24 +156,30 @@ export const auditLogs = pgTable("audit_logs", {
   details: jsonb("details"),
   ipAddress: text("ip_address"),
   timestamp: timestamp("timestamp").defaultNow(),
-});
+}, (t) => ({
+  idxTenant: index("idx_audit_logs_tenant").on(t.tenantId),
+}));
 
 // Financial records table
 export const financialRecords = pgTable("financial_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  month: varchar("month", { length: 7 }).notNull().unique(), // "2025-10" format YYYY-MM
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  month: varchar("month", { length: 7 }).notNull(), // "2025-10" format YYYY-MM
   totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).notNull().default("0"),
   investorPayouts: decimal("investor_payouts", { precision: 12, scale: 2 }).notNull().default("0"),
   operationalCosts: decimal("operational_costs", { precision: 12, scale: 2 }).notNull().default("0"),
   companyMargin: decimal("company_margin", { precision: 12, scale: 2 }).notNull().default("0"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => ({
+  uniqTenantMonth: uniqueIndex("uniq_tenant_month").on(t.tenantId, t.month),
+}));
 
 // GPS Devices table
 export const gpsDevices = pgTable("gps_devices", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
-  deviceId: text("device_id").notNull().unique(), // IMEI or unique device identifier
+  deviceId: text("device_id").notNull(), // IMEI or unique device identifier
   provider: text("provider").notNull().default("generic"), // geotab, samsara, traccar, generic
   apiKey: text("api_key"), // Encrypted API key/credentials
   status: text("status").notNull().default("inactive"), // online, offline, inactive
@@ -139,14 +187,17 @@ export const gpsDevices = pgTable("gps_devices", {
   configData: jsonb("config_data"), // Provider-specific configuration
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  uniqTenantDeviceId: uniqueIndex("uniq_tenant_device_id").on(t.tenantId, t.deviceId),
+}));
 
 // Rental Clients table (Transportation companies)
 export const rentalClients = pgTable("rental_clients", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   companyName: text("company_name").notNull(), // Razão Social
   tradeName: text("trade_name"), // Nome Fantasia
-  taxId: text("tax_id").notNull().unique(), // CNPJ/EIN
+  taxId: text("tax_id").notNull(), // CNPJ/EIN
   email: text("email").notNull(),
   phone: text("phone").notNull(),
   address: text("address"),
@@ -157,12 +208,15 @@ export const rentalClients = pgTable("rental_clients", {
   status: text("status").notNull().default("active"), // active, inactive
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  uniqTenantTaxId: uniqueIndex("uniq_tenant_tax_id").on(t.tenantId, t.taxId),
+}));
 
 // Rental Contracts table
 export const rentalContracts = pgTable("rental_contracts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  contractNumber: text("contract_number").notNull().unique(), // RC001, RC002, etc.
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  contractNumber: text("contract_number").notNull(), // RC001, RC002, etc.
   clientId: varchar("client_id").notNull().references(() => rentalClients.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   startDate: date("start_date").notNull(),
@@ -177,6 +231,7 @@ export const rentalContracts = pgTable("rental_contracts", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => ({
+  uniqTenantContractNumber: uniqueIndex("uniq_tenant_contract_number").on(t.tenantId, t.contractNumber),
   idxClientId: index("idx_contracts_client").on(t.clientId),
   idxTrailerId: index("idx_contracts_trailer").on(t.trailerId),
   idxStatus: index("idx_contracts_status").on(t.status),
@@ -272,6 +327,7 @@ export const maintenanceSchedules = pgTable("maintenance_schedules", {
 // Partner Shops table (Maintenance partner workshops)
 export const partnerShops = pgTable("partner_shops", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   name: text("name").notNull(),
   address: text("address").notNull(),
   city: text("city").notNull(),
@@ -284,7 +340,9 @@ export const partnerShops = pgTable("partner_shops", {
   status: text("status").notNull().default("active"), // active, inactive
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (t) => ({
+  idxTenant: index("idx_partner_shops_tenant").on(t.tenantId),
+}));
 
 // Broker Emails table (Email templates and history)
 export const brokerEmails = pgTable("broker_emails", {
@@ -307,7 +365,8 @@ export const brokerEmails = pgTable("broker_emails", {
 // Broker Dispatches table (Trailer dispatch to brokers)
 export const brokerDispatches = pgTable("broker_dispatches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  dispatchNumber: text("dispatch_number").notNull().unique(), // DISPATCH-001, DISPATCH-002, etc.
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  dispatchNumber: text("dispatch_number").notNull(), // DISPATCH-001, DISPATCH-002, etc.
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   brokerName: text("broker_name").notNull(),
   brokerEmail: text("broker_email").notNull(),
@@ -326,6 +385,7 @@ export const brokerDispatches = pgTable("broker_dispatches", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => ({
+  uniqTenantDispatchNumber: uniqueIndex("uniq_tenant_dispatch_number").on(t.tenantId, t.dispatchNumber),
   idxTrailerId: index("idx_broker_dispatch_trailer").on(t.trailerId),
   idxStatus: index("idx_broker_dispatch_status").on(t.status),
   idxPickupDate: index("idx_broker_dispatch_pickup").on(t.pickupDate),
@@ -486,6 +546,12 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 }));
 
 // Insert schemas
+export const insertTenantSchema = createInsertSchema(tenants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -597,6 +663,9 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 });
 
 // Types
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
