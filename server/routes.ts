@@ -26,6 +26,7 @@ import { MonitoringService } from "./services/monitoring.service";
 import { z } from "zod";
 import session from "express-session";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
+import { tenantMiddleware, requireTenant } from "./tenant-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { db } from "./db";
@@ -97,6 +98,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       },
     })
   );
+
+  // Tenant context middleware - detect tenant from domain/header/session
+  app.use(tenantMiddleware);
 
   // Access logging
   app.use(logAccess());
