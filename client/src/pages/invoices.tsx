@@ -43,7 +43,9 @@ import {
   Eye,
   Edit,
   Trash2,
+  CreditCard,
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { format } from "date-fns";
 
 const invoiceFormSchema = insertInvoiceSchema.extend({
@@ -56,6 +58,7 @@ type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
 
 export default function Invoices() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -344,16 +347,30 @@ export default function Invoices() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {invoice.status === "pending" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleMarkAsPaid(invoice)}
-                              className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                              data-testid={`button-mark-paid-${invoice.id}`}
-                            >
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            </Button>
+                          {(invoice.status === "pending" || invoice.status === "overdue") && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setLocation(`/checkout/invoice?invoiceId=${invoice.id}&dueDate=${invoice.dueDate}&referenceMonth=${invoice.referenceMonth}`);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
+                                data-testid={`button-pay-${invoice.id}`}
+                                title="Pay Online with Stripe"
+                              >
+                                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMarkAsPaid(invoice)}
+                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
+                                data-testid={`button-mark-paid-${invoice.id}`}
+                              >
+                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              </Button>
+                            </>
                           )}
                           <Button
                             variant="ghost"

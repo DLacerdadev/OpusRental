@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Bell, Shield, Palette, Globe } from "lucide-react";
+import { User, Bell, Shield, Palette, Globe, CreditCard, Mail, Settings as SettingsIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -158,6 +158,189 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {user?.role === "manager" && (
+          <Card className="shadow-lg border-l-4 border-l-blue-500 lg:col-span-2">
+            <CardHeader className="border-b bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-2xl">
+                  <SettingsIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">System Integrations</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Configure payment gateways and external services</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Stripe Configuration */}
+                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-purple-50 dark:bg-purple-950 p-2 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Stripe Payment Gateway</h3>
+                      <p className="text-xs text-muted-foreground">Configure online payment processing</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="stripe-public-key" className="text-xs">Publishable Key</Label>
+                      <Input 
+                        id="stripe-public-key" 
+                        placeholder="pk_live_..." 
+                        data-testid="input-stripe-public-key"
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="stripe-secret-key" className="text-xs">Secret Key</Label>
+                      <Input 
+                        id="stripe-secret-key" 
+                        type="password" 
+                        placeholder="sk_live_..." 
+                        data-testid="input-stripe-secret-key"
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="stripe-webhook-secret" className="text-xs">Webhook Secret (Optional)</Label>
+                      <Input 
+                        id="stripe-webhook-secret" 
+                        type="password" 
+                        placeholder="whsec_..." 
+                        data-testid="input-stripe-webhook-secret"
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-2">
+                        <Switch data-testid="switch-stripe-test-mode" />
+                        <span className="text-xs text-muted-foreground">Test Mode</span>
+                      </div>
+                      <Button size="sm" variant="outline" data-testid="button-save-stripe">
+                        Save Configuration
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-border">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Status:</span>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-green-600 dark:text-green-400 font-medium">Connected</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SMTP Configuration */}
+                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded-lg">
+                      <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Email Service (SMTP)</h3>
+                      <p className="text-xs text-muted-foreground">Configure email delivery settings</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="smtp-host" className="text-xs">SMTP Host</Label>
+                      <Input 
+                        id="smtp-host" 
+                        placeholder="smtp.example.com" 
+                        data-testid="input-smtp-host"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="smtp-port" className="text-xs">Port</Label>
+                        <Input 
+                          id="smtp-port" 
+                          placeholder="587" 
+                          data-testid="input-smtp-port"
+                          className="text-xs"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="smtp-from" className="text-xs">From Address</Label>
+                        <Input 
+                          id="smtp-from" 
+                          placeholder="noreply@..." 
+                          data-testid="input-smtp-from"
+                          className="text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="smtp-user" className="text-xs">Username</Label>
+                      <Input 
+                        id="smtp-user" 
+                        placeholder="smtp-username" 
+                        data-testid="input-smtp-user"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="smtp-pass" className="text-xs">Password</Label>
+                      <Input 
+                        id="smtp-pass" 
+                        type="password" 
+                        placeholder="••••••••" 
+                        data-testid="input-smtp-pass"
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="flex justify-end pt-2">
+                      <Button size="sm" variant="outline" data-testid="button-save-smtp">
+                        Save Configuration
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-border">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Status:</span>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">Using Development Mock</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
+                      <SettingsIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">Configuration Note</h4>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                      Integration settings are currently managed via environment variables in Replit Secrets. 
+                      This UI will be fully functional in a future update for easier configuration management.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-view-docs">
+                        View Documentation
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-test-connection">
+                        Test Connection
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
