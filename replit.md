@@ -386,9 +386,9 @@ Implemented comprehensive analytics system with configurable timeframes and prof
 - `GET /api/analytics/performance-comparison` - Type-based aggregation
 - `GET /api/analytics/revenue-forecast?months=6` - Forward-looking projections
 
-### Stripe Payment Integration - COMPLETE (November 7, 2025)
+### Stripe Payment Integration - COMPLETE (November 8, 2025)
 
-Implemented comprehensive payment processing system using Stripe for share purchases and invoice payments:
+Implemented comprehensive payment processing system using Stripe for share purchases and invoice payments with complete UI integration:
 
 **Stripe Integration Setup:**
 - **API Version**: 2025-10-29.clover (latest)
@@ -438,7 +438,7 @@ Implemented comprehensive payment processing system using Stripe for share purch
    - Displays: $28,000 price, $560/month return (2%), $6,720/year (24%)
    - Stripe Elements integration with PaymentElement
    - Query parameters: shareId, investorUserId, trailerId, trailerInfo
-   - Return URL: `/shares` after successful payment
+   - Return URL: `/investor-shares` after successful payment (corrected from /shares)
    - Professional loading states and error handling
 
 2. **Invoice Checkout** (`/checkout/invoice`):
@@ -449,6 +449,35 @@ Implemented comprehensive payment processing system using Stripe for share purch
    - Return URL: `/invoices` after successful payment
    - Responsive design with proper mobile formatting
 
+**System Integrations Configuration UI (client/src/pages/settings.tsx):**
+- **Manager-Only Section**: Settings → System Integrations (role="manager" only)
+- **Stripe Payment Gateway Card**:
+  - Publishable Key input (monospace font)
+  - Secret Key input (password protected)
+  - Webhook Secret input (optional)
+  - Test Mode toggle switch
+  - Status indicator: "Connected" with green pulse badge
+  - Save Configuration button (future database integration)
+- **SMTP Email Service Card**:
+  - SMTP Host, Port, From Address inputs
+  - Username and Password fields (password protected)
+  - Status indicator: "Using Development Mock" with yellow badge
+  - Save Configuration button (future database integration)
+- **Documentation Section**:
+  - Blue info banner explaining environment variable management
+  - "View Documentation" and "Test Connection" buttons
+  - Note about future database-backed configuration
+- **Responsive Design**: 1-col mobile → 2-col desktop grid
+- **Professional Styling**: Colored card borders, icon badges, proper spacing
+
+**Invoice Payment UI Integration (client/src/pages/invoices.tsx):**
+- **Pay Online Button**: CreditCard icon (blue) added to invoice actions
+- **Visibility**: Shows only for `status === "pending"` OR `status === "overdue"`
+- **Placement**: Between "View" and "Mark as Paid" buttons
+- **Action**: Redirects to `/checkout/invoice?invoiceId=X&dueDate=Y&referenceMonth=Z`
+- **Tooltip**: "Pay Online with Stripe" hover text
+- **data-testid**: `button-pay-${invoice.id}` for E2E testing
+
 **Stripe Elements Configuration:**
 - Uses `@stripe/react-stripe-js` and `@stripe/stripe-js` packages
 - Lazy loading of Stripe.js with `loadStripe()` outside component
@@ -457,6 +486,10 @@ Implemented comprehensive payment processing system using Stripe for share purch
 - Built-in PCI compliance and card validation
 
 **Security Features:**
+- **CSP Configuration**: Helmet middleware allows required Stripe domains:
+  - `script-src`: `https://js.stripe.com` (Stripe.js SDK)
+  - `frame-src`: `https://js.stripe.com` (Stripe iframes)
+  - `connect-src`: `https://api.stripe.com` (API calls)
 - Client secrets expire after successful payment
 - Payment intents created server-side only
 - No sensitive data stored in frontend
