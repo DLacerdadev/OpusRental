@@ -31,12 +31,6 @@ export async function tenantMiddleware(
   try {
     let tenant: typeof tenants.$inferSelect | undefined;
 
-    // Skip tenant detection for auth endpoints (login/register need to work before tenant is set)
-    const skipPaths = ["/api/auth/login", "/api/auth/register", "/api/health"];
-    if (skipPaths.some(path => req.path === path)) {
-      return next();
-    }
-
     // 1. Try to detect tenant from X-Tenant-ID header (for API clients)
     const tenantIdHeader = req.headers["x-tenant-id"] as string | undefined;
     if (tenantIdHeader) {
@@ -100,6 +94,25 @@ export async function tenantMiddleware(
         .limit(1);
       if (defaultTenant) {
         tenant = defaultTenant;
+      }
+    }
+
+    // SECURITY: Validate tenant matches session for authenticated users
+    // Prevent cross-tenant access via header/domain spoofing
+    if (tenant && req.session && req.session.tenantId) {
+      if (tenant.id !== req.session.tenantId) {
+        console.error("Security: Tenant mismatch detected", {
+          userId: req.session.userId,
+          sessionTenantId: req.session.tenantId,
+          requestTenantId: tenant.id,
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+        });
+        return res.status(403).json({
+          error: "Tenant mismatch: Your session belongs to a different tenant",
+          message: "Please log out and log in to the correct tenant",
+        });
       }
     }
 

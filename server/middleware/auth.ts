@@ -5,6 +5,7 @@ import { matchPolicy, type UserRole } from "../policies";
 declare module 'express-session' {
   interface SessionData {
     userId: string;
+    tenantId: string;
     user?: {
       id: string;
       email: string;
@@ -31,11 +32,11 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
 export const requireRole = (allowedRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.session.userId) {
+      if (!req.session.userId || !req.tenantId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const user = await storage.getUser(req.session.userId);
+      const user = await storage.getUser(req.session.userId, req.tenantId);
       
       if (!user) {
         return res.status(401).json({ message: "User not found" });
@@ -64,8 +65,8 @@ export const isAdmin = requireRole(["admin"]);
 
 export const attachUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (req.session.userId) {
-      const user = await storage.getUser(req.session.userId);
+    if (req.session.userId && req.tenantId) {
+      const user = await storage.getUser(req.session.userId, req.tenantId);
       if (user) {
         req.user = user;
       }
@@ -167,7 +168,7 @@ export const logAccess = () => {
 export const checkOwnership = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.session.user) {
+      if (!req.session.user || !req.tenantId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
@@ -181,9 +182,10 @@ export const checkOwnership = () => {
       const userId = req.session.user.id;
 
       if (req.path.includes("/shares/") && shareId) {
-        const share = await storage.getShare(shareId);
+        const share = await storage.getShare(shareId, req.tenantId);
         if (!share || share.userId !== userId) {
           await storage.createAuditLog({
+            tenantId: req.tenantId,
             userId,
             action: "ownership_violation",
             entityType: "share",
@@ -201,9 +203,10 @@ export const checkOwnership = () => {
       }
 
       if (req.path.includes("/payments/") && shareId) {
-        const share = await storage.getShare(shareId);
+        const share = await storage.getShare(shareId, req.tenantId);
         if (!share || share.userId !== userId) {
           await storage.createAuditLog({
+            tenantId: req.tenantId,
             userId,
             action: "ownership_violation",
             entityType: "payment",

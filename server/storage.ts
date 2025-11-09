@@ -61,172 +61,173 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, gte } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
   // User operations
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getAllInvestors(): Promise<User[]>;
+  getUser(id: string, tenantId: string): Promise<User | undefined>;
+  getUserByUsername(username: string, tenantId: string): Promise<User | undefined>;
+  getUserByEmail(email: string, tenantId: string): Promise<User | undefined>;
+  getAllInvestors(tenantId: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   
   // Trailer operations
-  getTrailer(id: string): Promise<Trailer | undefined>;
-  getTrailerByTrailerId(trailerId: string): Promise<Trailer | undefined>;
-  getAllTrailers(): Promise<Trailer[]>;
-  getAvailableTrailers(): Promise<Trailer[]>;
+  getTrailer(id: string, tenantId: string): Promise<Trailer | undefined>;
+  getTrailerByTrailerId(trailerId: string, tenantId: string): Promise<Trailer | undefined>;
+  getAllTrailers(tenantId: string): Promise<Trailer[]>;
+  getAvailableTrailers(tenantId: string): Promise<Trailer[]>;
   createTrailer(trailer: InsertTrailer): Promise<Trailer>;
-  updateTrailer(id: string, trailer: Partial<Trailer>): Promise<Trailer>;
+  updateTrailer(id: string, trailer: Partial<Trailer>, tenantId: string): Promise<Trailer>;
   
   // Share operations
-  getShare(id: string): Promise<Share | undefined>;
-  getSharesByUserId(userId: string): Promise<Share[]>;
-  getSharesByTrailerId(trailerId: string): Promise<Share[]>;
-  getAllShares(): Promise<Share[]>;
-  getAllSharesWithDetails(): Promise<any[]>;
+  getShare(id: string, tenantId: string): Promise<Share | undefined>;
+  getSharesByUserId(userId: string, tenantId: string): Promise<Share[]>;
+  getSharesByTrailerId(trailerId: string, tenantId: string): Promise<Share[]>;
+  getAllShares(tenantId: string): Promise<Share[]>;
+  getAllSharesWithDetails(tenantId: string): Promise<any[]>;
   createShare(share: InsertShare): Promise<Share>;
-  updateShare(id: string, share: Partial<Share>): Promise<Share>;
+  updateShare(id: string, share: Partial<Share>, tenantId: string): Promise<Share>;
   
   // Payment operations
-  getPayment(id: string): Promise<Payment | undefined>;
-  getPaymentsByUserId(userId: string): Promise<Payment[]>;
-  getPaymentsByShareId(shareId: string): Promise<Payment[]>;
+  getPayment(id: string, tenantId: string): Promise<Payment | undefined>;
+  getPaymentsByUserId(userId: string, tenantId: string): Promise<Payment[]>;
+  getPaymentsByShareId(shareId: string, tenantId: string): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   
   // Tracking operations
-  getLatestTrackingByTrailerId(trailerId: string): Promise<TrackingData | undefined>;
-  getTrackingHistory(trailerId: string, limit?: number): Promise<TrackingData[]>;
-  getAllLatestTracking(): Promise<TrackingData[]>;
+  getLatestTrackingByTrailerId(trailerId: string, tenantId: string): Promise<TrackingData | undefined>;
+  getTrackingHistory(trailerId: string, tenantId: string, limit?: number): Promise<TrackingData[]>;
+  getAllLatestTracking(tenantId: string): Promise<TrackingData[]>;
   createTrackingData(data: InsertTrackingData): Promise<TrackingData>;
   
   // Document operations
-  getDocumentsByUserId(userId: string): Promise<Document[]>;
-  getDocumentsByShareId(shareId: string): Promise<Document[]>;
+  getDocumentsByUserId(userId: string, tenantId: string): Promise<Document[]>;
+  getDocumentsByShareId(shareId: string, tenantId: string): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
   
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
-  getRecentAuditLogs(limit?: number): Promise<AuditLog[]>;
+  getRecentAuditLogs(tenantId: string, limit?: number): Promise<AuditLog[]>;
   
   // Financial operations
-  getFinancialRecordByMonth(month: string): Promise<FinancialRecord | undefined>;
-  getAllFinancialRecords(): Promise<FinancialRecord[]>;
+  getFinancialRecordByMonth(month: string, tenantId: string): Promise<FinancialRecord | undefined>;
+  getAllFinancialRecords(tenantId: string): Promise<FinancialRecord[]>;
   createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord>;
   
   // Dashboard data
-  getDashboardStats(userId: string): Promise<any>;
-  getPortfolioData(userId: string): Promise<any>;
+  getDashboardStats(userId: string, tenantId: string): Promise<any>;
+  getPortfolioData(userId: string, tenantId: string): Promise<any>;
+  getCompanyStats(tenantId: string): Promise<any>;
   
   // Advanced Analytics operations
-  getRevenueTrend(months: number): Promise<any[]>;
-  getTrailerROI(): Promise<any[]>;
-  getPerformanceComparison(): Promise<any>;
-  getRevenueForecast(months: number): Promise<any[]>;
+  getRevenueTrend(months: number, tenantId: string): Promise<any[]>;
+  getTrailerROI(tenantId: string): Promise<any[]>;
+  getPerformanceComparison(tenantId: string): Promise<any>;
+  getRevenueForecast(months: number, tenantId: string): Promise<any[]>;
   
   // GPS Device operations
-  getGpsDevice(id: string): Promise<GpsDevice | undefined>;
-  getGpsDeviceByTrailerId(trailerId: string): Promise<GpsDevice | undefined>;
-  getAllGpsDevices(): Promise<GpsDevice[]>;
+  getGpsDevice(id: string, tenantId: string): Promise<GpsDevice | undefined>;
+  getGpsDeviceByTrailerId(trailerId: string, tenantId: string): Promise<GpsDevice | undefined>;
+  getAllGpsDevices(tenantId: string): Promise<GpsDevice[]>;
   createGpsDevice(device: InsertGpsDevice): Promise<GpsDevice>;
-  updateGpsDevice(id: string, device: Partial<GpsDevice>): Promise<GpsDevice>;
-  deleteGpsDevice(id: string): Promise<void>;
+  updateGpsDevice(id: string, device: Partial<GpsDevice>, tenantId: string): Promise<GpsDevice>;
+  deleteGpsDevice(id: string, tenantId: string): Promise<void>;
   
   // Rental Client operations
-  getRentalClient(id: string): Promise<RentalClient | undefined>;
-  getAllRentalClients(): Promise<RentalClient[]>;
+  getRentalClient(id: string, tenantId: string): Promise<RentalClient | undefined>;
+  getAllRentalClients(tenantId: string): Promise<RentalClient[]>;
   createRentalClient(client: InsertRentalClient): Promise<RentalClient>;
-  updateRentalClient(id: string, client: Partial<RentalClient>): Promise<RentalClient>;
-  deleteRentalClient(id: string): Promise<void>;
+  updateRentalClient(id: string, client: Partial<RentalClient>, tenantId: string): Promise<RentalClient>;
+  deleteRentalClient(id: string, tenantId: string): Promise<void>;
   
   // Rental Contract operations
-  getRentalContract(id: string): Promise<RentalContract | undefined>;
-  getAllRentalContracts(): Promise<any[]>;
-  getContractsByClientId(clientId: string): Promise<RentalContract[]>;
-  getContractsByTrailerId(trailerId: string): Promise<RentalContract[]>;
+  getRentalContract(id: string, tenantId: string): Promise<RentalContract | undefined>;
+  getAllRentalContracts(tenantId: string): Promise<any[]>;
+  getContractsByClientId(clientId: string, tenantId: string): Promise<RentalContract[]>;
+  getContractsByTrailerId(trailerId: string, tenantId: string): Promise<RentalContract[]>;
   createRentalContract(contract: InsertRentalContract): Promise<RentalContract>;
-  updateRentalContract(id: string, contract: Partial<RentalContract>): Promise<RentalContract>;
-  terminateContract(id: string): Promise<RentalContract>;
+  updateRentalContract(id: string, contract: Partial<RentalContract>, tenantId: string): Promise<RentalContract>;
+  terminateContract(id: string, tenantId: string): Promise<RentalContract>;
   
   // Invoice operations
-  getInvoice(id: string): Promise<Invoice | undefined>;
-  getAllInvoices(): Promise<any[]>;
-  getInvoicesByContractId(contractId: string): Promise<Invoice[]>;
-  getOverdueInvoices(): Promise<any[]>;
+  getInvoice(id: string, tenantId: string): Promise<Invoice | undefined>;
+  getAllInvoices(tenantId: string): Promise<any[]>;
+  getInvoicesByContractId(contractId: string, tenantId: string): Promise<Invoice[]>;
+  getOverdueInvoices(tenantId: string): Promise<any[]>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
-  updateInvoice(id: string, updates: Partial<InsertInvoice>): Promise<Invoice>;
-  updateInvoiceStatus(id: string, status: string, paidDate?: Date): Promise<Invoice>;
-  deleteInvoice(id: string): Promise<void>;
+  updateInvoice(id: string, updates: Partial<InsertInvoice>, tenantId: string): Promise<Invoice>;
+  updateInvoiceStatus(id: string, status: string, tenantId: string, paidDate?: Date): Promise<Invoice>;
+  deleteInvoice(id: string, tenantId: string): Promise<void>;
 
   // Email Log operations
   createEmailLog(emailLog: InsertEmailLog): Promise<EmailLog>;
-  getAllEmailLogs(): Promise<EmailLog[]>;
-  getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
+  getAllEmailLogs(tenantId: string): Promise<EmailLog[]>;
+  getEmailLogsByRecipient(recipientEmail: string, tenantId: string): Promise<EmailLog[]>;
   
   // Checklist operations
-  getChecklist(id: string): Promise<Checklist | undefined>;
-  getChecklistsByTrailerId(trailerId: string): Promise<Checklist[]>;
-  getChecklistsByType(type: string): Promise<Checklist[]>;
+  getChecklist(id: string, tenantId: string): Promise<Checklist | undefined>;
+  getChecklistsByTrailerId(trailerId: string, tenantId: string): Promise<Checklist[]>;
+  getChecklistsByType(type: string, tenantId: string): Promise<Checklist[]>;
   createChecklist(checklist: InsertChecklist): Promise<Checklist>;
-  updateChecklist(id: string, checklist: Partial<Checklist>): Promise<Checklist>;
-  completeChecklist(id: string, approved: boolean, approvedById: string, notes?: string, rejectionReason?: string): Promise<Checklist>;
+  updateChecklist(id: string, checklist: Partial<Checklist>, tenantId: string): Promise<Checklist>;
+  completeChecklist(id: string, approved: boolean, approvedById: string, tenantId: string, notes?: string, rejectionReason?: string): Promise<Checklist>;
   
   // Maintenance Schedule operations
-  getMaintenanceSchedule(id: string): Promise<MaintenanceSchedule | undefined>;
-  getMaintenanceSchedulesByTrailerId(trailerId: string): Promise<MaintenanceSchedule[]>;
-  getMaintenanceAlerts(): Promise<MaintenanceSchedule[]>;
+  getMaintenanceSchedule(id: string, tenantId: string): Promise<MaintenanceSchedule | undefined>;
+  getMaintenanceSchedulesByTrailerId(trailerId: string, tenantId: string): Promise<MaintenanceSchedule[]>;
+  getMaintenanceAlerts(tenantId: string): Promise<MaintenanceSchedule[]>;
   createMaintenanceSchedule(schedule: InsertMaintenanceSchedule): Promise<MaintenanceSchedule>;
-  updateMaintenanceSchedule(id: string, schedule: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule>;
-  completeMaintenance(id: string, completionDate: Date, cost?: string, notes?: string): Promise<MaintenanceSchedule>;
+  updateMaintenanceSchedule(id: string, schedule: Partial<MaintenanceSchedule>, tenantId: string): Promise<MaintenanceSchedule>;
+  completeMaintenance(id: string, completionDate: Date, tenantId: string, cost?: string, notes?: string): Promise<MaintenanceSchedule>;
   
   // Partner Shop operations
-  getPartnerShop(id: string): Promise<PartnerShop | undefined>;
-  getAllPartnerShops(): Promise<PartnerShop[]>;
+  getPartnerShop(id: string, tenantId: string): Promise<PartnerShop | undefined>;
+  getAllPartnerShops(tenantId: string): Promise<PartnerShop[]>;
   createPartnerShop(shop: InsertPartnerShop): Promise<PartnerShop>;
-  updatePartnerShop(id: string, shop: Partial<PartnerShop>): Promise<PartnerShop>;
-  deletePartnerShop(id: string): Promise<void>;
+  updatePartnerShop(id: string, shop: Partial<PartnerShop>, tenantId: string): Promise<PartnerShop>;
+  deletePartnerShop(id: string, tenantId: string): Promise<void>;
   
   // Broker Email operations
-  getBrokerEmail(id: string): Promise<BrokerEmail | undefined>;
-  getBrokerEmailsByTrailerId(trailerId: string): Promise<BrokerEmail[]>;
-  getAllBrokerEmails(): Promise<BrokerEmail[]>;
+  getBrokerEmail(id: string, tenantId: string): Promise<BrokerEmail | undefined>;
+  getBrokerEmailsByTrailerId(trailerId: string, tenantId: string): Promise<BrokerEmail[]>;
+  getAllBrokerEmails(tenantId: string): Promise<BrokerEmail[]>;
   createBrokerEmail(email: InsertBrokerEmail): Promise<BrokerEmail>;
-  deleteBrokerEmail(id: string): Promise<void>;
+  deleteBrokerEmail(id: string, tenantId: string): Promise<void>;
 
   // Broker Dispatch operations
   createBrokerDispatch(data: InsertBrokerDispatch): Promise<BrokerDispatch>;
-  getBrokerDispatchById(id: string): Promise<BrokerDispatch | null>;
-  getAllBrokerDispatches(): Promise<BrokerDispatch[]>;
-  updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>): Promise<BrokerDispatch>;
-  getBrokerDispatchesByTrailer(trailerId: string): Promise<BrokerDispatch[]>;
+  getBrokerDispatchById(id: string, tenantId: string): Promise<BrokerDispatch | null>;
+  getAllBrokerDispatches(tenantId: string): Promise<BrokerDispatch[]>;
+  updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>, tenantId: string): Promise<BrokerDispatch>;
+  getBrokerDispatchesByTrailer(trailerId: string, tenantId: string): Promise<BrokerDispatch[]>;
 
   // Notification operations
-  getNotifications(userId: string): Promise<Notification[]>;
-  getUnreadNotificationCount(userId: string): Promise<number>;
-  markNotificationAsRead(notificationId: string, userId: string): Promise<boolean>;
-  deleteNotification(notificationId: string, userId: string): Promise<boolean>;
+  getNotifications(userId: string, tenantId: string): Promise<Notification[]>;
+  getUnreadNotificationCount(userId: string, tenantId: string): Promise<number>;
+  markNotificationAsRead(notificationId: string, userId: string, tenantId: string): Promise<boolean>;
+  deleteNotification(notificationId: string, userId: string, tenantId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+  async getUser(id: string, tenantId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(and(eq(users.id, id), eq(users.tenantId, tenantId)));
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  async getUserByUsername(username: string, tenantId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(and(eq(users.username, username), eq(users.tenantId, tenantId)));
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+  async getUserByEmail(email: string, tenantId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(and(eq(users.email, email), eq(users.tenantId, tenantId)));
     return user;
   }
 
-  async getAllInvestors(): Promise<User[]> {
-    const investors = await db.select().from(users).where(eq(users.role, "investor"));
+  async getAllInvestors(tenantId: string): Promise<User[]> {
+    const investors = await db.select().from(users).where(and(eq(users.role, "investor"), eq(users.tenantId, tenantId)));
     return investors;
   }
 
@@ -240,18 +241,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Trailer operations
-  async getTrailer(id: string): Promise<Trailer | undefined> {
-    const [trailer] = await db.select().from(trailers).where(eq(trailers.id, id));
+  async getTrailer(id: string, tenantId: string): Promise<Trailer | undefined> {
+    const [trailer] = await db.select().from(trailers).where(and(eq(trailers.id, id), eq(trailers.tenantId, tenantId)));
     return trailer;
   }
 
-  async getTrailerByTrailerId(trailerId: string): Promise<Trailer | undefined> {
-    const [trailer] = await db.select().from(trailers).where(eq(trailers.trailerId, trailerId));
+  async getTrailerByTrailerId(trailerId: string, tenantId: string): Promise<Trailer | undefined> {
+    const [trailer] = await db.select().from(trailers).where(and(eq(trailers.trailerId, trailerId), eq(trailers.tenantId, tenantId)));
     return trailer;
   }
 
-  async getAllTrailers(): Promise<any[]> {
-    const allTrailers = await db.select().from(trailers).orderBy(desc(trailers.createdAt));
+  async getAllTrailers(tenantId: string): Promise<any[]> {
+    const allTrailers = await db.select().from(trailers).where(eq(trailers.tenantId, tenantId)).orderBy(desc(trailers.createdAt));
     
     // For each trailer, count sold shares
     const trailersWithShareInfo = await Promise.all(
@@ -259,7 +260,7 @@ export class DatabaseStorage implements IStorage {
         const soldShares = await db
           .select()
           .from(shares)
-          .where(eq(shares.trailerId, trailer.id));
+          .where(and(eq(shares.trailerId, trailer.id), eq(shares.tenantId, tenantId)));
         
         const totalShares = parseInt(trailer.totalShares?.toString() || "1");
         
@@ -274,11 +275,12 @@ export class DatabaseStorage implements IStorage {
     return trailersWithShareInfo;
   }
 
-  async getAvailableTrailers(): Promise<any[]> {
+  async getAvailableTrailers(tenantId: string): Promise<any[]> {
     // Get all trailers except expired ones
     const availableTrailers = await db
       .select()
       .from(trailers)
+      .where(eq(trailers.tenantId, tenantId))
       .orderBy(desc(trailers.createdAt));
     
     // For each trailer, count sold shares and calculate available shares
@@ -287,7 +289,7 @@ export class DatabaseStorage implements IStorage {
         const soldShares = await db
           .select()
           .from(shares)
-          .where(eq(shares.trailerId, trailer.id));
+          .where(and(eq(shares.trailerId, trailer.id), eq(shares.tenantId, tenantId)));
         
         const totalShares = parseInt(trailer.totalShares?.toString() || "1");
         const availableShares = totalShares - soldShares.length;
@@ -309,34 +311,35 @@ export class DatabaseStorage implements IStorage {
     return newTrailer;
   }
 
-  async updateTrailer(id: string, trailer: Partial<Trailer>): Promise<Trailer> {
+  async updateTrailer(id: string, trailer: Partial<Trailer>, tenantId: string): Promise<Trailer> {
     const [updated] = await db
       .update(trailers)
       .set({ ...trailer, updatedAt: new Date() })
-      .where(eq(trailers.id, id))
+      .where(and(eq(trailers.id, id), eq(trailers.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Trailer not found or access denied");
     return updated;
   }
 
   // Share operations
-  async getShare(id: string): Promise<Share | undefined> {
-    const [share] = await db.select().from(shares).where(eq(shares.id, id));
+  async getShare(id: string, tenantId: string): Promise<Share | undefined> {
+    const [share] = await db.select().from(shares).where(and(eq(shares.id, id), eq(shares.tenantId, tenantId)));
     return share;
   }
 
-  async getSharesByUserId(userId: string): Promise<Share[]> {
-    return await db.select().from(shares).where(eq(shares.userId, userId));
+  async getSharesByUserId(userId: string, tenantId: string): Promise<Share[]> {
+    return await db.select().from(shares).where(and(eq(shares.userId, userId), eq(shares.tenantId, tenantId)));
   }
 
-  async getSharesByTrailerId(trailerId: string): Promise<Share[]> {
-    return await db.select().from(shares).where(eq(shares.trailerId, trailerId));
+  async getSharesByTrailerId(trailerId: string, tenantId: string): Promise<Share[]> {
+    return await db.select().from(shares).where(and(eq(shares.trailerId, trailerId), eq(shares.tenantId, tenantId)));
   }
 
-  async getAllShares(): Promise<Share[]> {
-    return await db.select().from(shares).orderBy(desc(shares.createdAt));
+  async getAllShares(tenantId: string): Promise<Share[]> {
+    return await db.select().from(shares).where(eq(shares.tenantId, tenantId)).orderBy(desc(shares.createdAt));
   }
 
-  async getAllSharesWithDetails(): Promise<any[]> {
+  async getAllSharesWithDetails(tenantId: string): Promise<any[]> {
     const result = await db
       .select({
         id: shares.id,
@@ -361,6 +364,7 @@ export class DatabaseStorage implements IStorage {
       .from(shares)
       .leftJoin(users, eq(shares.userId, users.id))
       .leftJoin(trailers, eq(shares.trailerId, trailers.id))
+      .where(eq(shares.tenantId, tenantId))
       .orderBy(desc(shares.createdAt));
     
     return result;
@@ -371,34 +375,35 @@ export class DatabaseStorage implements IStorage {
     return newShare;
   }
 
-  async updateShare(id: string, share: Partial<Share>): Promise<Share> {
+  async updateShare(id: string, share: Partial<Share>, tenantId: string): Promise<Share> {
     const [updated] = await db
       .update(shares)
       .set({ ...share, updatedAt: new Date() })
-      .where(eq(shares.id, id))
+      .where(and(eq(shares.id, id), eq(shares.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Share not found or access denied");
     return updated;
   }
 
   // Payment operations
-  async getPayment(id: string): Promise<Payment | undefined> {
-    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+  async getPayment(id: string, tenantId: string): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(and(eq(payments.id, id), eq(payments.tenantId, tenantId)));
     return payment;
   }
 
-  async getPaymentsByUserId(userId: string): Promise<Payment[]> {
+  async getPaymentsByUserId(userId: string, tenantId: string): Promise<Payment[]> {
     return await db
       .select()
       .from(payments)
-      .where(eq(payments.userId, userId))
+      .where(and(eq(payments.userId, userId), eq(payments.tenantId, tenantId)))
       .orderBy(desc(payments.paymentDate));
   }
 
-  async getPaymentsByShareId(shareId: string): Promise<Payment[]> {
+  async getPaymentsByShareId(shareId: string, tenantId: string): Promise<Payment[]> {
     return await db
       .select()
       .from(payments)
-      .where(eq(payments.shareId, shareId))
+      .where(and(eq(payments.shareId, shareId), eq(payments.tenantId, tenantId)))
       .orderBy(desc(payments.paymentDate));
   }
 
@@ -408,29 +413,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Tracking operations
-  async getLatestTrackingByTrailerId(trailerId: string): Promise<TrackingData | undefined> {
+  async getLatestTrackingByTrailerId(trailerId: string, tenantId: string): Promise<TrackingData | undefined> {
     const [tracking] = await db
       .select()
       .from(trackingData)
-      .where(eq(trackingData.trailerId, trailerId))
+      .where(and(eq(trackingData.trailerId, trailerId), eq(trackingData.tenantId, tenantId)))
       .orderBy(desc(trackingData.timestamp))
       .limit(1);
     return tracking;
   }
 
-  async getTrackingHistory(trailerId: string, limit: number = 50): Promise<TrackingData[]> {
+  async getTrackingHistory(trailerId: string, tenantId: string, limit: number = 50): Promise<TrackingData[]> {
     return await db
       .select()
       .from(trackingData)
-      .where(eq(trackingData.trailerId, trailerId))
+      .where(and(eq(trackingData.trailerId, trailerId), eq(trackingData.tenantId, tenantId)))
       .orderBy(desc(trackingData.timestamp))
       .limit(limit);
   }
 
-  async getAllLatestTracking(): Promise<TrackingData[]> {
+  async getAllLatestTracking(tenantId: string): Promise<TrackingData[]> {
     const latestTracking = await db
       .select()
       .from(trackingData)
+      .where(eq(trackingData.tenantId, tenantId))
       .orderBy(desc(trackingData.timestamp));
     
     const trackingMap = new Map<string, TrackingData>();
@@ -449,19 +455,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Document operations
-  async getDocumentsByUserId(userId: string): Promise<Document[]> {
+  async getDocumentsByUserId(userId: string, tenantId: string): Promise<Document[]> {
     return await db
       .select()
       .from(documents)
-      .where(eq(documents.userId, userId))
+      .where(and(eq(documents.userId, userId), eq(documents.tenantId, tenantId)))
       .orderBy(desc(documents.uploadedAt));
   }
 
-  async getDocumentsByShareId(shareId: string): Promise<Document[]> {
+  async getDocumentsByShareId(shareId: string, tenantId: string): Promise<Document[]> {
     return await db
       .select()
       .from(documents)
-      .where(eq(documents.shareId, shareId))
+      .where(and(eq(documents.shareId, shareId), eq(documents.tenantId, tenantId)))
       .orderBy(desc(documents.uploadedAt));
   }
 
@@ -476,27 +482,29 @@ export class DatabaseStorage implements IStorage {
     return auditLog;
   }
 
-  async getRecentAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+  async getRecentAuditLogs(tenantId: string, limit: number = 100): Promise<AuditLog[]> {
     return await db
       .select()
       .from(auditLogs)
+      .where(eq(auditLogs.tenantId, tenantId))
       .orderBy(desc(auditLogs.timestamp))
       .limit(limit);
   }
 
   // Financial operations
-  async getFinancialRecordByMonth(month: string): Promise<FinancialRecord | undefined> {
+  async getFinancialRecordByMonth(month: string, tenantId: string): Promise<FinancialRecord | undefined> {
     const [record] = await db
       .select()
       .from(financialRecords)
-      .where(eq(financialRecords.month, month));
+      .where(and(eq(financialRecords.month, month), eq(financialRecords.tenantId, tenantId)));
     return record;
   }
 
-  async getAllFinancialRecords(): Promise<FinancialRecord[]> {
+  async getAllFinancialRecords(tenantId: string): Promise<FinancialRecord[]> {
     return await db
       .select()
       .from(financialRecords)
+      .where(eq(financialRecords.tenantId, tenantId))
       .orderBy(desc(financialRecords.createdAt));
   }
 
@@ -506,9 +514,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Dashboard data
-  async getDashboardStats(userId: string): Promise<any> {
-    const userShares = await this.getSharesByUserId(userId);
-    const userPayments = await this.getPaymentsByUserId(userId);
+  async getDashboardStats(userId: string, tenantId: string): Promise<any> {
+    const userShares = await this.getSharesByUserId(userId, tenantId);
+    const userPayments = await this.getPaymentsByUserId(userId, tenantId);
     
     const totalValue = userShares.reduce((sum, share) => 
       sum + parseFloat(share.purchaseValue || "0"), 0);
@@ -542,13 +550,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Company-wide statistics for managers
-  async getCompanyStats(): Promise<any> {
-    const allTrailers = await this.getAllTrailers();
-    const allShares = await db.select().from(shares);
-    const allPayments = await db.select().from(payments);
+  async getCompanyStats(tenantId: string): Promise<any> {
+    const allTrailers = await this.getAllTrailers(tenantId);
+    const allShares = await db.select().from(shares).where(eq(shares.tenantId, tenantId));
+    const allPayments = await db.select().from(payments).where(eq(payments.tenantId, tenantId));
     const recentRecords = await db
       .select()
       .from(financialRecords)
+      .where(eq(financialRecords.tenantId, tenantId))
       .orderBy(sql`month desc`)
       .limit(6);
     
@@ -575,6 +584,7 @@ export class DatabaseStorage implements IStorage {
     const recentActivity = await db
       .select()
       .from(payments)
+      .where(eq(payments.tenantId, tenantId))
       .orderBy(desc(payments.paymentDate))
       .limit(10);
 
@@ -590,13 +600,13 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getPortfolioData(userId: string): Promise<any> {
-    const userShares = await this.getSharesByUserId(userId);
-    const userPayments = await this.getPaymentsByUserId(userId);
+  async getPortfolioData(userId: string, tenantId: string): Promise<any> {
+    const userShares = await this.getSharesByUserId(userId, tenantId);
+    const userPayments = await this.getPaymentsByUserId(userId, tenantId);
     
     const sharesWithTrailers = await Promise.all(
       userShares.map(async (share) => {
-        const trailer = await this.getTrailer(share.trailerId);
+        const trailer = await this.getTrailer(share.trailerId, tenantId);
         return { ...share, trailer };
       })
     );
@@ -608,9 +618,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Advanced Analytics operations
-  async getRevenueTrend(months: number): Promise<any[]> {
-    const allPayments = await db.select().from(payments).orderBy(desc(payments.paymentDate));
-    const allInvoices = await db.select().from(invoices).orderBy(desc(invoices.dueDate));
+  async getRevenueTrend(months: number, tenantId: string): Promise<any[]> {
+    const allPayments = await db.select().from(payments).where(eq(payments.tenantId, tenantId)).orderBy(desc(payments.paymentDate));
+    // Get invoices through their contracts to filter by tenantId
+    const allInvoices = await db
+      .select({
+        id: invoices.id,
+        amount: invoices.amount,
+        status: invoices.status,
+        paidDate: invoices.paidDate,
+        contractId: invoices.contractId,
+      })
+      .from(invoices)
+      .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
+      .where(eq(rentalContracts.tenantId, tenantId))
+      .orderBy(desc(invoices.dueDate));
     
     // Group payments by month
     const now = new Date();
@@ -654,13 +676,13 @@ export class DatabaseStorage implements IStorage {
       .sort((a, b) => a.month.localeCompare(b.month));
   }
 
-  async getTrailerROI(): Promise<any[]> {
+  async getTrailerROI(tenantId: string): Promise<any[]> {
     // Optimized: Get all data in bulk to avoid N+1 queries
     // Don't use getAllTrailers() here as it has N+1 for shares - fetch directly
-    const allTrailers = await db.select().from(trailers);
-    const allContracts = await db.select().from(rentalContracts);
-    const allShares = await db.select().from(shares);
-    const allPayments = await db.select().from(payments);
+    const allTrailers = await db.select().from(trailers).where(eq(trailers.tenantId, tenantId));
+    const allContracts = await db.select().from(rentalContracts).where(eq(rentalContracts.tenantId, tenantId));
+    const allShares = await db.select().from(shares).where(eq(shares.tenantId, tenantId));
+    const allPayments = await db.select().from(payments).where(eq(payments.tenantId, tenantId));
     
     const roiData = allTrailers.map((trailer) => {
       // Filter contracts for this trailer
@@ -715,11 +737,11 @@ export class DatabaseStorage implements IStorage {
     return roiData.sort((a, b) => b.roi - a.roi);
   }
 
-  async getPerformanceComparison(): Promise<any> {
+  async getPerformanceComparison(tenantId: string): Promise<any> {
     // Optimized: Get all data in bulk
     // Don't use getAllTrailers() here as it has N+1 for shares - fetch directly
-    const allTrailers = await db.select().from(trailers);
-    const allContracts = await db.select().from(rentalContracts);
+    const allTrailers = await db.select().from(trailers).where(eq(trailers.tenantId, tenantId));
+    const allContracts = await db.select().from(rentalContracts).where(eq(rentalContracts.tenantId, tenantId));
     
     const typeData: Record<string, { count: number; revenue: number; avgROI: number }> = {};
     
@@ -773,9 +795,9 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getRevenueForecast(months: number): Promise<any[]> {
+  async getRevenueForecast(months: number, tenantId: string): Promise<any[]> {
     // Get historical data (last 6 months)
-    const historical = await this.getRevenueTrend(6);
+    const historical = await this.getRevenueTrend(6, tenantId);
     
     if (historical.length === 0) {
       return [];
@@ -819,18 +841,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   // GPS Device operations
-  async getGpsDevice(id: string): Promise<GpsDevice | undefined> {
-    const [device] = await db.select().from(gpsDevices).where(eq(gpsDevices.id, id));
+  async getGpsDevice(id: string, tenantId: string): Promise<GpsDevice | undefined> {
+    const [device] = await db.select().from(gpsDevices).where(and(eq(gpsDevices.id, id), eq(gpsDevices.tenantId, tenantId)));
     return device;
   }
 
-  async getGpsDeviceByTrailerId(trailerId: string): Promise<GpsDevice | undefined> {
-    const [device] = await db.select().from(gpsDevices).where(eq(gpsDevices.trailerId, trailerId));
+  async getGpsDeviceByTrailerId(trailerId: string, tenantId: string): Promise<GpsDevice | undefined> {
+    const [device] = await db.select().from(gpsDevices).where(and(eq(gpsDevices.trailerId, trailerId), eq(gpsDevices.tenantId, tenantId)));
     return device;
   }
 
-  async getAllGpsDevices(): Promise<GpsDevice[]> {
-    return await db.select().from(gpsDevices).orderBy(desc(gpsDevices.createdAt));
+  async getAllGpsDevices(tenantId: string): Promise<GpsDevice[]> {
+    return await db.select().from(gpsDevices).where(eq(gpsDevices.tenantId, tenantId)).orderBy(desc(gpsDevices.createdAt));
   }
 
   async createGpsDevice(device: InsertGpsDevice): Promise<GpsDevice> {
@@ -838,27 +860,28 @@ export class DatabaseStorage implements IStorage {
     return newDevice;
   }
 
-  async updateGpsDevice(id: string, device: Partial<GpsDevice>): Promise<GpsDevice> {
+  async updateGpsDevice(id: string, device: Partial<GpsDevice>, tenantId: string): Promise<GpsDevice> {
     const [updated] = await db
       .update(gpsDevices)
       .set({ ...device, updatedAt: new Date() })
-      .where(eq(gpsDevices.id, id))
+      .where(and(eq(gpsDevices.id, id), eq(gpsDevices.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("GPS device not found or access denied");
     return updated;
   }
 
-  async deleteGpsDevice(id: string): Promise<void> {
-    await db.delete(gpsDevices).where(eq(gpsDevices.id, id));
+  async deleteGpsDevice(id: string, tenantId: string): Promise<void> {
+    await db.delete(gpsDevices).where(and(eq(gpsDevices.id, id), eq(gpsDevices.tenantId, tenantId)));
   }
 
   // Rental Client operations
-  async getRentalClient(id: string): Promise<RentalClient | undefined> {
-    const [client] = await db.select().from(rentalClients).where(eq(rentalClients.id, id));
+  async getRentalClient(id: string, tenantId: string): Promise<RentalClient | undefined> {
+    const [client] = await db.select().from(rentalClients).where(and(eq(rentalClients.id, id), eq(rentalClients.tenantId, tenantId)));
     return client;
   }
 
-  async getAllRentalClients(): Promise<RentalClient[]> {
-    return await db.select().from(rentalClients).orderBy(desc(rentalClients.createdAt));
+  async getAllRentalClients(tenantId: string): Promise<RentalClient[]> {
+    return await db.select().from(rentalClients).where(eq(rentalClients.tenantId, tenantId)).orderBy(desc(rentalClients.createdAt));
   }
 
   async createRentalClient(client: InsertRentalClient): Promise<RentalClient> {
@@ -866,26 +889,27 @@ export class DatabaseStorage implements IStorage {
     return newClient;
   }
 
-  async updateRentalClient(id: string, client: Partial<RentalClient>): Promise<RentalClient> {
+  async updateRentalClient(id: string, client: Partial<RentalClient>, tenantId: string): Promise<RentalClient> {
     const [updated] = await db
       .update(rentalClients)
       .set({ ...client, updatedAt: new Date() })
-      .where(eq(rentalClients.id, id))
+      .where(and(eq(rentalClients.id, id), eq(rentalClients.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Rental client not found or access denied");
     return updated;
   }
 
-  async deleteRentalClient(id: string): Promise<void> {
-    await db.delete(rentalClients).where(eq(rentalClients.id, id));
+  async deleteRentalClient(id: string, tenantId: string): Promise<void> {
+    await db.delete(rentalClients).where(and(eq(rentalClients.id, id), eq(rentalClients.tenantId, tenantId)));
   }
 
   // Rental Contract operations
-  async getRentalContract(id: string): Promise<RentalContract | undefined> {
-    const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, id));
+  async getRentalContract(id: string, tenantId: string): Promise<RentalContract | undefined> {
+    const [contract] = await db.select().from(rentalContracts).where(and(eq(rentalContracts.id, id), eq(rentalContracts.tenantId, tenantId)));
     return contract;
   }
 
-  async getAllRentalContracts(): Promise<any[]> {
+  async getAllRentalContracts(tenantId: string): Promise<any[]> {
     const contracts = await db
       .select({
         id: rentalContracts.id,
@@ -908,24 +932,25 @@ export class DatabaseStorage implements IStorage {
       .from(rentalContracts)
       .leftJoin(rentalClients, eq(rentalContracts.clientId, rentalClients.id))
       .leftJoin(trailers, eq(rentalContracts.trailerId, trailers.id))
+      .where(eq(rentalContracts.tenantId, tenantId))
       .orderBy(desc(rentalContracts.createdAt));
     
     return contracts;
   }
 
-  async getContractsByClientId(clientId: string): Promise<RentalContract[]> {
+  async getContractsByClientId(clientId: string, tenantId: string): Promise<RentalContract[]> {
     return await db
       .select()
       .from(rentalContracts)
-      .where(eq(rentalContracts.clientId, clientId))
+      .where(and(eq(rentalContracts.clientId, clientId), eq(rentalContracts.tenantId, tenantId)))
       .orderBy(desc(rentalContracts.createdAt));
   }
 
-  async getContractsByTrailerId(trailerId: string): Promise<RentalContract[]> {
+  async getContractsByTrailerId(trailerId: string, tenantId: string): Promise<RentalContract[]> {
     return await db
       .select()
       .from(rentalContracts)
-      .where(eq(rentalContracts.trailerId, trailerId))
+      .where(and(eq(rentalContracts.trailerId, trailerId), eq(rentalContracts.tenantId, tenantId)))
       .orderBy(desc(rentalContracts.createdAt));
   }
 
@@ -934,41 +959,57 @@ export class DatabaseStorage implements IStorage {
     return newContract;
   }
 
-  async updateRentalContract(id: string, contract: Partial<RentalContract>): Promise<RentalContract> {
+  async updateRentalContract(id: string, contract: Partial<RentalContract>, tenantId: string): Promise<RentalContract> {
     const [updated] = await db
       .update(rentalContracts)
       .set({ ...contract, updatedAt: new Date() })
-      .where(eq(rentalContracts.id, id))
+      .where(and(eq(rentalContracts.id, id), eq(rentalContracts.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Rental contract not found or access denied");
     return updated;
   }
 
-  async terminateContract(id: string): Promise<RentalContract> {
-    const contract = await this.getRentalContract(id);
+  async terminateContract(id: string, tenantId: string): Promise<RentalContract> {
+    const contract = await this.getRentalContract(id, tenantId);
     if (!contract) {
-      throw new Error("Contract not found");
+      throw new Error("Contract not found or access denied");
     }
 
     const [terminated] = await db
       .update(rentalContracts)
       .set({ status: "terminated", updatedAt: new Date() })
-      .where(eq(rentalContracts.id, id))
+      .where(and(eq(rentalContracts.id, id), eq(rentalContracts.tenantId, tenantId)))
       .returning();
 
     if (contract.trailerId) {
-      await this.updateTrailer(contract.trailerId, { status: "stock" });
+      await this.updateTrailer(contract.trailerId, { status: "stock" }, tenantId);
     }
 
     return terminated;
   }
 
   // Invoice operations
-  async getInvoice(id: string): Promise<Invoice | undefined> {
-    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+  async getInvoice(id: string, tenantId: string): Promise<Invoice | undefined> {
+    const [invoice] = await db
+      .select({
+        id: invoices.id,
+        invoiceNumber: invoices.invoiceNumber,
+        contractId: invoices.contractId,
+        amount: invoices.amount,
+        dueDate: invoices.dueDate,
+        paidDate: invoices.paidDate,
+        status: invoices.status,
+        referenceMonth: invoices.referenceMonth,
+        notes: invoices.notes,
+        createdAt: invoices.createdAt,
+      })
+      .from(invoices)
+      .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
+      .where(and(eq(invoices.id, id), eq(rentalContracts.tenantId, tenantId)));
     return invoice;
   }
 
-  async getAllInvoices(): Promise<any[]> {
+  async getAllInvoices(tenantId: string): Promise<any[]> {
     const allInvoices = await db
       .select({
         id: invoices.id,
@@ -989,20 +1030,34 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
       .leftJoin(rentalClients, eq(rentalContracts.clientId, rentalClients.id))
       .leftJoin(trailers, eq(rentalContracts.trailerId, trailers.id))
+      .where(eq(rentalContracts.tenantId, tenantId))
       .orderBy(desc(invoices.createdAt));
     
     return allInvoices;
   }
 
-  async getInvoicesByContractId(contractId: string): Promise<Invoice[]> {
-    return await db
-      .select()
+  async getInvoicesByContractId(contractId: string, tenantId: string): Promise<Invoice[]> {
+    const invoicesList = await db
+      .select({
+        id: invoices.id,
+        invoiceNumber: invoices.invoiceNumber,
+        contractId: invoices.contractId,
+        amount: invoices.amount,
+        dueDate: invoices.dueDate,
+        paidDate: invoices.paidDate,
+        status: invoices.status,
+        referenceMonth: invoices.referenceMonth,
+        notes: invoices.notes,
+        createdAt: invoices.createdAt,
+      })
       .from(invoices)
-      .where(eq(invoices.contractId, contractId))
+      .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
+      .where(and(eq(invoices.contractId, contractId), eq(rentalContracts.tenantId, tenantId)))
       .orderBy(desc(invoices.dueDate));
+    return invoicesList as Invoice[];
   }
 
-  async getOverdueInvoices(): Promise<any[]> {
+  async getOverdueInvoices(tenantId: string): Promise<any[]> {
     const overdueInvoices = await db
       .select({
         id: invoices.id,
@@ -1018,7 +1073,7 @@ export class DatabaseStorage implements IStorage {
       .from(invoices)
       .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
       .leftJoin(rentalClients, eq(rentalContracts.clientId, rentalClients.id))
-      .where(eq(invoices.status, "overdue"))
+      .where(and(eq(invoices.status, "overdue"), eq(rentalContracts.tenantId, tenantId)))
       .orderBy(invoices.dueDate);
     
     return overdueInvoices;
@@ -1029,7 +1084,7 @@ export class DatabaseStorage implements IStorage {
     return newInvoice;
   }
 
-  async updateInvoiceStatus(id: string, status: string, paidDate?: Date): Promise<Invoice> {
+  async updateInvoiceStatus(id: string, status: string, tenantId: string, paidDate?: Date): Promise<Invoice> {
     const updateData: any = { status };
     if (paidDate) {
       updateData.paidDate = paidDate;
@@ -1037,22 +1092,31 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(invoices)
       .set(updateData)
-      .where(eq(invoices.id, id))
+      .from(rentalContracts)
+      .where(and(eq(invoices.id, id), eq(invoices.contractId, rentalContracts.id), eq(rentalContracts.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Invoice not found or access denied");
     return updated;
   }
 
-  async updateInvoice(id: string, updates: Partial<InsertInvoice>): Promise<Invoice> {
+  async updateInvoice(id: string, updates: Partial<InsertInvoice>, tenantId: string): Promise<Invoice> {
     const [updated] = await db
       .update(invoices)
       .set(updates)
-      .where(eq(invoices.id, id))
+      .from(rentalContracts)
+      .where(and(eq(invoices.id, id), eq(invoices.contractId, rentalContracts.id), eq(rentalContracts.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Invoice not found or access denied");
     return updated;
   }
 
-  async deleteInvoice(id: string): Promise<void> {
-    await db.delete(invoices).where(eq(invoices.id, id));
+  async deleteInvoice(id: string, tenantId: string): Promise<void> {
+    await db
+      .delete(invoices)
+      .where(and(
+        eq(invoices.id, id),
+        sql`${invoices.contractId} IN (SELECT id FROM ${rentalContracts} WHERE ${rentalContracts.tenantId} = ${tenantId})`
+      ));
   }
 
   // Email Log operations
@@ -1061,34 +1125,72 @@ export class DatabaseStorage implements IStorage {
     return newLog;
   }
 
-  async getAllEmailLogs(): Promise<EmailLog[]> {
-    return db.select().from(emailLogs).orderBy(desc(emailLogs.sentAt));
+  async getAllEmailLogs(tenantId: string): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).where(eq(emailLogs.tenantId, tenantId)).orderBy(desc(emailLogs.sentAt));
   }
 
-  async getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]> {
-    return db.select().from(emailLogs).where(eq(emailLogs.recipientEmail, recipientEmail)).orderBy(desc(emailLogs.sentAt));
+  async getEmailLogsByRecipient(recipientEmail: string, tenantId: string): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).where(and(eq(emailLogs.recipientEmail, recipientEmail), eq(emailLogs.tenantId, tenantId))).orderBy(desc(emailLogs.sentAt));
   }
 
   // Checklist operations
-  async getChecklist(id: string): Promise<Checklist | undefined> {
-    const [checklist] = await db.select().from(checklists).where(eq(checklists.id, id));
-    return checklist;
-  }
-
-  async getChecklistsByTrailerId(trailerId: string): Promise<Checklist[]> {
-    return await db
+  async getChecklist(id: string, tenantId: string): Promise<Checklist | undefined> {
+    const [checklist] = await db
       .select()
       .from(checklists)
-      .where(eq(checklists.trailerId, trailerId))
-      .orderBy(desc(checklists.inspectionDate));
+      .leftJoin(trailers, eq(checklists.trailerId, trailers.id))
+      .where(and(eq(checklists.id, id), eq(trailers.tenantId, tenantId)));
+    return checklist ? checklist.checklists : undefined;
   }
 
-  async getChecklistsByType(type: string): Promise<Checklist[]> {
-    return await db
-      .select()
+  async getChecklistsByTrailerId(trailerId: string, tenantId: string): Promise<Checklist[]> {
+    const results = await db
+      .select({
+        id: checklists.id,
+        trailerId: checklists.trailerId,
+        type: checklists.type,
+        items: checklists.items,
+        approved: checklists.approved,
+        rejected: checklists.rejected,
+        rejectionReason: checklists.rejectionReason,
+        inspector: checklists.inspector,
+        approvedBy: checklists.approvedBy,
+        approvedAt: checklists.approvedAt,
+        photos: checklists.photos,
+        notes: checklists.notes,
+        inspectionDate: checklists.inspectionDate,
+        createdAt: checklists.createdAt,
+      })
       .from(checklists)
-      .where(eq(checklists.type, type))
+      .leftJoin(trailers, eq(checklists.trailerId, trailers.id))
+      .where(and(eq(checklists.trailerId, trailerId), eq(trailers.tenantId, tenantId)))
       .orderBy(desc(checklists.inspectionDate));
+    return results as Checklist[];
+  }
+
+  async getChecklistsByType(type: string, tenantId: string): Promise<Checklist[]> {
+    const results = await db
+      .select({
+        id: checklists.id,
+        trailerId: checklists.trailerId,
+        type: checklists.type,
+        items: checklists.items,
+        approved: checklists.approved,
+        rejected: checklists.rejected,
+        rejectionReason: checklists.rejectionReason,
+        inspector: checklists.inspector,
+        approvedBy: checklists.approvedBy,
+        approvedAt: checklists.approvedAt,
+        photos: checklists.photos,
+        notes: checklists.notes,
+        inspectionDate: checklists.inspectionDate,
+        createdAt: checklists.createdAt,
+      })
+      .from(checklists)
+      .leftJoin(trailers, eq(checklists.trailerId, trailers.id))
+      .where(and(eq(checklists.type, type), eq(trailers.tenantId, tenantId)))
+      .orderBy(desc(checklists.inspectionDate));
+    return results as Checklist[];
   }
 
   async createChecklist(checklist: InsertChecklist): Promise<Checklist> {
@@ -1096,16 +1198,18 @@ export class DatabaseStorage implements IStorage {
     return newChecklist;
   }
 
-  async updateChecklist(id: string, checklist: Partial<Checklist>): Promise<Checklist> {
+  async updateChecklist(id: string, checklist: Partial<Checklist>, tenantId: string): Promise<Checklist> {
     const [updated] = await db
       .update(checklists)
       .set(checklist)
-      .where(eq(checklists.id, id))
+      .from(trailers)
+      .where(and(eq(checklists.id, id), eq(checklists.trailerId, trailers.id), eq(trailers.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Checklist not found or access denied");
     return updated;
   }
 
-  async completeChecklist(id: string, approved: boolean, approvedById: string, notes?: string, rejectionReason?: string): Promise<Checklist> {
+  async completeChecklist(id: string, approved: boolean, approvedById: string, tenantId: string, notes?: string, rejectionReason?: string): Promise<Checklist> {
     const updateData: any = { 
       approved,
       rejected: !approved,
@@ -1121,31 +1225,69 @@ export class DatabaseStorage implements IStorage {
     const [completed] = await db
       .update(checklists)
       .set(updateData)
-      .where(eq(checklists.id, id))
+      .from(trailers)
+      .where(and(eq(checklists.id, id), eq(checklists.trailerId, trailers.id), eq(trailers.tenantId, tenantId)))
       .returning();
+    if (!completed) throw new Error("Checklist not found or access denied");
     return completed;
   }
 
   // Maintenance Schedule operations
-  async getMaintenanceSchedule(id: string): Promise<MaintenanceSchedule | undefined> {
-    const [schedule] = await db.select().from(maintenanceSchedules).where(eq(maintenanceSchedules.id, id));
-    return schedule;
-  }
-
-  async getMaintenanceSchedulesByTrailerId(trailerId: string): Promise<MaintenanceSchedule[]> {
-    return await db
+  async getMaintenanceSchedule(id: string, tenantId: string): Promise<MaintenanceSchedule | undefined> {
+    const [schedule] = await db
       .select()
       .from(maintenanceSchedules)
-      .where(eq(maintenanceSchedules.trailerId, trailerId))
+      .leftJoin(trailers, eq(maintenanceSchedules.trailerId, trailers.id))
+      .where(and(eq(maintenanceSchedules.id, id), eq(trailers.tenantId, tenantId)));
+    return schedule ? schedule.maintenance_schedules : undefined;
+  }
+
+  async getMaintenanceSchedulesByTrailerId(trailerId: string, tenantId: string): Promise<MaintenanceSchedule[]> {
+    const results = await db
+      .select({
+        id: maintenanceSchedules.id,
+        trailerId: maintenanceSchedules.trailerId,
+        scheduleType: maintenanceSchedules.scheduleType,
+        intervalDays: maintenanceSchedules.intervalDays,
+        intervalKm: maintenanceSchedules.intervalKm,
+        lastMaintenanceDate: maintenanceSchedules.lastMaintenanceDate,
+        lastMaintenanceKm: maintenanceSchedules.lastMaintenanceKm,
+        nextMaintenanceDate: maintenanceSchedules.nextMaintenanceDate,
+        nextMaintenanceKm: maintenanceSchedules.nextMaintenanceKm,
+        status: maintenanceSchedules.status,
+        notes: maintenanceSchedules.notes,
+        createdAt: maintenanceSchedules.createdAt,
+        updatedAt: maintenanceSchedules.updatedAt,
+      })
+      .from(maintenanceSchedules)
+      .leftJoin(trailers, eq(maintenanceSchedules.trailerId, trailers.id))
+      .where(and(eq(maintenanceSchedules.trailerId, trailerId), eq(trailers.tenantId, tenantId)))
       .orderBy(desc(maintenanceSchedules.createdAt));
+    return results as MaintenanceSchedule[];
   }
 
-  async getMaintenanceAlerts(): Promise<MaintenanceSchedule[]> {
-    return await db
-      .select()
+  async getMaintenanceAlerts(tenantId: string): Promise<MaintenanceSchedule[]> {
+    const results = await db
+      .select({
+        id: maintenanceSchedules.id,
+        trailerId: maintenanceSchedules.trailerId,
+        scheduleType: maintenanceSchedules.scheduleType,
+        intervalDays: maintenanceSchedules.intervalDays,
+        intervalKm: maintenanceSchedules.intervalKm,
+        lastMaintenanceDate: maintenanceSchedules.lastMaintenanceDate,
+        lastMaintenanceKm: maintenanceSchedules.lastMaintenanceKm,
+        nextMaintenanceDate: maintenanceSchedules.nextMaintenanceDate,
+        nextMaintenanceKm: maintenanceSchedules.nextMaintenanceKm,
+        status: maintenanceSchedules.status,
+        notes: maintenanceSchedules.notes,
+        createdAt: maintenanceSchedules.createdAt,
+        updatedAt: maintenanceSchedules.updatedAt,
+      })
       .from(maintenanceSchedules)
-      .where(eq(maintenanceSchedules.status, "urgent"))
+      .leftJoin(trailers, eq(maintenanceSchedules.trailerId, trailers.id))
+      .where(and(eq(maintenanceSchedules.status, "urgent"), eq(trailers.tenantId, tenantId)))
       .orderBy(maintenanceSchedules.nextMaintenanceDate);
+    return results as MaintenanceSchedule[];
   }
 
   async createMaintenanceSchedule(schedule: InsertMaintenanceSchedule): Promise<MaintenanceSchedule> {
@@ -1153,16 +1295,18 @@ export class DatabaseStorage implements IStorage {
     return newSchedule;
   }
 
-  async updateMaintenanceSchedule(id: string, schedule: Partial<MaintenanceSchedule>): Promise<MaintenanceSchedule> {
+  async updateMaintenanceSchedule(id: string, schedule: Partial<MaintenanceSchedule>, tenantId: string): Promise<MaintenanceSchedule> {
     const [updated] = await db
       .update(maintenanceSchedules)
       .set({ ...schedule, updatedAt: new Date() })
-      .where(eq(maintenanceSchedules.id, id))
+      .from(trailers)
+      .where(and(eq(maintenanceSchedules.id, id), eq(maintenanceSchedules.trailerId, trailers.id), eq(trailers.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Maintenance schedule not found or access denied");
     return updated;
   }
 
-  async completeMaintenance(id: string, completionDate: Date, cost?: string, notes?: string): Promise<MaintenanceSchedule> {
+  async completeMaintenance(id: string, completionDate: Date, tenantId: string, cost?: string, notes?: string): Promise<MaintenanceSchedule> {
     const updateData: any = {
       lastMaintenanceDate: completionDate,
       status: "completed",
@@ -1177,19 +1321,21 @@ export class DatabaseStorage implements IStorage {
     const [completed] = await db
       .update(maintenanceSchedules)
       .set(updateData)
-      .where(eq(maintenanceSchedules.id, id))
+      .from(trailers)
+      .where(and(eq(maintenanceSchedules.id, id), eq(maintenanceSchedules.trailerId, trailers.id), eq(trailers.tenantId, tenantId)))
       .returning();
+    if (!completed) throw new Error("Maintenance schedule not found or access denied");
     return completed;
   }
 
   // Partner Shop operations
-  async getPartnerShop(id: string): Promise<PartnerShop | undefined> {
-    const [shop] = await db.select().from(partnerShops).where(eq(partnerShops.id, id));
+  async getPartnerShop(id: string, tenantId: string): Promise<PartnerShop | undefined> {
+    const [shop] = await db.select().from(partnerShops).where(and(eq(partnerShops.id, id), eq(partnerShops.tenantId, tenantId)));
     return shop;
   }
 
-  async getAllPartnerShops(): Promise<PartnerShop[]> {
-    return await db.select().from(partnerShops).orderBy(partnerShops.name);
+  async getAllPartnerShops(tenantId: string): Promise<PartnerShop[]> {
+    return await db.select().from(partnerShops).where(eq(partnerShops.tenantId, tenantId)).orderBy(partnerShops.name);
   }
 
   async createPartnerShop(shop: InsertPartnerShop): Promise<PartnerShop> {
@@ -1197,35 +1343,68 @@ export class DatabaseStorage implements IStorage {
     return newShop;
   }
 
-  async updatePartnerShop(id: string, shop: Partial<PartnerShop>): Promise<PartnerShop> {
+  async updatePartnerShop(id: string, shop: Partial<PartnerShop>, tenantId: string): Promise<PartnerShop> {
     const [updated] = await db
       .update(partnerShops)
       .set({ ...shop, updatedAt: new Date() })
-      .where(eq(partnerShops.id, id))
+      .where(and(eq(partnerShops.id, id), eq(partnerShops.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Partner shop not found or access denied");
     return updated;
   }
 
-  async deletePartnerShop(id: string): Promise<void> {
-    await db.delete(partnerShops).where(eq(partnerShops.id, id));
+  async deletePartnerShop(id: string, tenantId: string): Promise<void> {
+    await db.delete(partnerShops).where(and(eq(partnerShops.id, id), eq(partnerShops.tenantId, tenantId)));
   }
 
   // Broker Email operations
-  async getBrokerEmail(id: string): Promise<BrokerEmail | undefined> {
-    const [email] = await db.select().from(brokerEmails).where(eq(brokerEmails.id, id));
-    return email;
-  }
-
-  async getBrokerEmailsByTrailerId(trailerId: string): Promise<BrokerEmail[]> {
-    return await db
+  async getBrokerEmail(id: string, tenantId: string): Promise<BrokerEmail | undefined> {
+    const [email] = await db
       .select()
       .from(brokerEmails)
-      .where(eq(brokerEmails.trailerId, trailerId))
-      .orderBy(desc(brokerEmails.sentAt));
+      .leftJoin(trailers, eq(brokerEmails.trailerId, trailers.id))
+      .where(and(eq(brokerEmails.id, id), eq(trailers.tenantId, tenantId)));
+    return email ? email.broker_emails : undefined;
   }
 
-  async getAllBrokerEmails(): Promise<BrokerEmail[]> {
-    return await db.select().from(brokerEmails).orderBy(desc(brokerEmails.sentAt));
+  async getBrokerEmailsByTrailerId(trailerId: string, tenantId: string): Promise<BrokerEmail[]> {
+    const results = await db
+      .select({
+        id: brokerEmails.id,
+        trailerId: brokerEmails.trailerId,
+        brokerEmail: brokerEmails.brokerEmail,
+        trailerPlate: brokerEmails.trailerPlate,
+        trailerType: brokerEmails.trailerType,
+        emailSubject: brokerEmails.emailSubject,
+        emailBody: brokerEmails.emailBody,
+        sentAt: brokerEmails.sentAt,
+        status: brokerEmails.status,
+      })
+      .from(brokerEmails)
+      .leftJoin(trailers, eq(brokerEmails.trailerId, trailers.id))
+      .where(and(eq(brokerEmails.trailerId, trailerId), eq(trailers.tenantId, tenantId)))
+      .orderBy(desc(brokerEmails.sentAt));
+    return results as BrokerEmail[];
+  }
+
+  async getAllBrokerEmails(tenantId: string): Promise<BrokerEmail[]> {
+    const results = await db
+      .select({
+        id: brokerEmails.id,
+        trailerId: brokerEmails.trailerId,
+        brokerEmail: brokerEmails.brokerEmail,
+        trailerPlate: brokerEmails.trailerPlate,
+        trailerType: brokerEmails.trailerType,
+        emailSubject: brokerEmails.emailSubject,
+        emailBody: brokerEmails.emailBody,
+        sentAt: brokerEmails.sentAt,
+        status: brokerEmails.status,
+      })
+      .from(brokerEmails)
+      .leftJoin(trailers, eq(brokerEmails.trailerId, trailers.id))
+      .where(eq(trailers.tenantId, tenantId))
+      .orderBy(desc(brokerEmails.sentAt));
+    return results as BrokerEmail[];
   }
 
   async createBrokerEmail(email: InsertBrokerEmail): Promise<BrokerEmail> {
@@ -1233,8 +1412,13 @@ export class DatabaseStorage implements IStorage {
     return newEmail;
   }
 
-  async deleteBrokerEmail(id: string): Promise<void> {
-    await db.delete(brokerEmails).where(eq(brokerEmails.id, id));
+  async deleteBrokerEmail(id: string, tenantId: string): Promise<void> {
+    await db
+      .delete(brokerEmails)
+      .where(and(
+        eq(brokerEmails.id, id),
+        sql`${brokerEmails.trailerId} IN (SELECT id FROM ${trailers} WHERE ${trailers.tenantId} = ${tenantId})`
+      ));
   }
 
   // Broker Dispatch operations
@@ -1243,52 +1427,54 @@ export class DatabaseStorage implements IStorage {
     return dispatch;
   }
 
-  async getBrokerDispatchById(id: string): Promise<BrokerDispatch | null> {
-    const [dispatch] = await db.select().from(brokerDispatches).where(eq(brokerDispatches.id, id));
+  async getBrokerDispatchById(id: string, tenantId: string): Promise<BrokerDispatch | null> {
+    const [dispatch] = await db.select().from(brokerDispatches).where(and(eq(brokerDispatches.id, id), eq(brokerDispatches.tenantId, tenantId)));
     return dispatch || null;
   }
 
-  async getAllBrokerDispatches(): Promise<BrokerDispatch[]> {
-    return await db.select().from(brokerDispatches).orderBy(desc(brokerDispatches.createdAt));
+  async getAllBrokerDispatches(tenantId: string): Promise<BrokerDispatch[]> {
+    return await db.select().from(brokerDispatches).where(eq(brokerDispatches.tenantId, tenantId)).orderBy(desc(brokerDispatches.createdAt));
   }
 
-  async updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>): Promise<BrokerDispatch> {
+  async updateBrokerDispatch(id: string, data: Partial<InsertBrokerDispatch>, tenantId: string): Promise<BrokerDispatch> {
     const [updated] = await db
       .update(brokerDispatches)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(brokerDispatches.id, id))
+      .where(and(eq(brokerDispatches.id, id), eq(brokerDispatches.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("Broker dispatch not found or access denied");
     return updated;
   }
 
-  async getBrokerDispatchesByTrailer(trailerId: string): Promise<BrokerDispatch[]> {
-    return await db.select().from(brokerDispatches).where(eq(brokerDispatches.trailerId, trailerId));
+  async getBrokerDispatchesByTrailer(trailerId: string, tenantId: string): Promise<BrokerDispatch[]> {
+    return await db.select().from(brokerDispatches).where(and(eq(brokerDispatches.trailerId, trailerId), eq(brokerDispatches.tenantId, tenantId)));
   }
 
   // Notification operations
-  async getNotifications(userId: string): Promise<any[]> {
+  async getNotifications(userId: string, tenantId: string): Promise<any[]> {
     return await db
       .select()
       .from(notifications)
-      .where(eq(notifications.userId, userId))
+      .where(and(eq(notifications.userId, userId), eq(notifications.tenantId, tenantId)))
       .orderBy(desc(notifications.createdAt))
       .limit(50);
   }
 
-  async getUnreadNotificationCount(userId: string): Promise<number> {
+  async getUnreadNotificationCount(userId: string, tenantId: string): Promise<number> {
     const result = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(notifications)
       .where(
         and(
           eq(notifications.userId, userId),
+          eq(notifications.tenantId, tenantId),
           eq(notifications.read, false)
         )
       );
     return result[0]?.count || 0;
   }
 
-  async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {
+  async markNotificationAsRead(notificationId: string, userId: string, tenantId: string): Promise<boolean> {
     const result = await db
       .update(notifications)
       .set({ 
@@ -1298,20 +1484,22 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(notifications.id, notificationId),
-          eq(notifications.userId, userId)
+          eq(notifications.userId, userId),
+          eq(notifications.tenantId, tenantId)
         )
       )
       .returning();
     return result.length > 0;
   }
 
-  async deleteNotification(notificationId: string, userId: string): Promise<boolean> {
+  async deleteNotification(notificationId: string, userId: string, tenantId: string): Promise<boolean> {
     const result = await db
       .delete(notifications)
       .where(
         and(
           eq(notifications.id, notificationId),
-          eq(notifications.userId, userId)
+          eq(notifications.userId, userId),
+          eq(notifications.tenantId, tenantId)
         )
       )
       .returning();
