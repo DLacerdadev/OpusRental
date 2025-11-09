@@ -49,16 +49,16 @@ export default function GpsConfig() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gps/devices"] });
       toast({
-        title: "GPS device created",
-        description: "GPS device has been successfully registered",
+        title: t('gpsConfig.toastCreateTitle'),
+        description: t('gpsConfig.toastCreateDescription'),
       });
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating device",
-        description: error.message || "Failed to create GPS device",
+        title: t('gpsConfig.toastCreateErrorTitle'),
+        description: error?.message ?? t('gpsConfig.toastCreateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -71,8 +71,8 @@ export default function GpsConfig() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gps/devices"] });
       toast({
-        title: "GPS device updated",
-        description: "GPS device has been successfully updated",
+        title: t('gpsConfig.toastUpdateTitle'),
+        description: t('gpsConfig.toastUpdateDescription'),
       });
       setDialogOpen(false);
       setEditingDevice(null);
@@ -80,8 +80,8 @@ export default function GpsConfig() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating device",
-        description: error.message || "Failed to update GPS device",
+        title: t('gpsConfig.toastUpdateErrorTitle'),
+        description: error?.message ?? t('gpsConfig.toastUpdateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -94,14 +94,14 @@ export default function GpsConfig() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gps/devices"] });
       toast({
-        title: "GPS device deleted",
-        description: "GPS device has been successfully removed",
+        title: t('gpsConfig.toastDeleteTitle'),
+        description: t('gpsConfig.toastDeleteDescription'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error deleting device",
-        description: error.message || "Failed to delete GPS device",
+        title: t('gpsConfig.toastDeleteErrorTitle'),
+        description: error?.message ?? t('gpsConfig.toastDeleteErrorDescription'),
         variant: "destructive",
       });
     },
@@ -127,7 +127,7 @@ export default function GpsConfig() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this GPS device?")) {
+    if (confirm(t('gpsConfig.confirmDelete'))) {
       deleteDeviceMutation.mutate(id);
     }
   };
@@ -148,13 +148,13 @@ export default function GpsConfig() {
       (new Date().getTime() - new Date(device.lastPing).getTime()) < 1800000; // 30 minutes
 
     if (device.status === "inactive") {
-      return <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800">Inactive</Badge>;
+      return <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800">{t('gpsConfig.statusInactive')}</Badge>;
     }
 
     return isOnline ? (
-      <Badge variant="default" className="bg-green-600 dark:bg-green-400">Online</Badge>
+      <Badge variant="default" className="bg-green-600 dark:bg-green-400">{t('gpsConfig.statusOnline')}</Badge>
     ) : (
-      <Badge variant="destructive">Offline</Badge>
+      <Badge variant="destructive">{t('gpsConfig.statusOffline')}</Badge>
     );
   };
 
@@ -166,15 +166,22 @@ export default function GpsConfig() {
       traccar: "bg-orange-600 dark:bg-orange-400",
     };
 
+    const labels: Record<string, string> = {
+      generic: t('gpsConfig.providerGeneric'),
+      geotab: t('gpsConfig.providerGeotab'),
+      samsara: t('gpsConfig.providerSamsara'),
+      traccar: t('gpsConfig.providerTraccar'),
+    };
+
     return (
       <Badge className={`${colors[provider] || colors.generic} text-white`}>
-        {provider.charAt(0).toUpperCase() + provider.slice(1)}
+        {labels[provider] || provider}
       </Badge>
     );
   };
 
   const getLastPingText = (lastPing: string | null) => {
-    if (!lastPing) return "Never";
+    if (!lastPing) return t('gpsConfig.lastPingNever');
     
     const locale = i18n.language === 'pt-BR' ? ptBR : enUS;
     return formatDistanceToNow(new Date(lastPing), { addSuffix: true, locale });
@@ -199,10 +206,10 @@ export default function GpsConfig() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-gps-config">
-            GPS Configuration
+            {t('gpsConfig.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage GPS devices and tracking systems
+            {t('gpsConfig.subtitle')}
           </p>
         </div>
         <Button
@@ -211,8 +218,8 @@ export default function GpsConfig() {
           data-testid="button-new-device"
         >
           <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">New GPS Device</span>
-          <span className="sm:hidden">New Device</span>
+          <span className="hidden sm:inline">{t('gpsConfig.newDevice')}</span>
+          <span className="sm:hidden">{t('gpsConfig.newDeviceShort')}</span>
         </Button>
       </div>
 
@@ -225,7 +232,7 @@ export default function GpsConfig() {
                 <Satellite className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">TOTAL DEVICES</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('gpsConfig.totalDevices')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-total-devices">
               {devices?.length || 0}
             </p>
@@ -239,7 +246,7 @@ export default function GpsConfig() {
                 <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">ONLINE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('gpsConfig.online')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-online-devices">
               {devices?.filter((d: any) => {
                 const isOnline = d.lastPing && 
@@ -257,7 +264,7 @@ export default function GpsConfig() {
                 <Satellite className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">OFFLINE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('gpsConfig.offline')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-offline-devices">
               {devices?.filter((d: any) => {
                 const isOnline = d.lastPing && 
@@ -275,7 +282,7 @@ export default function GpsConfig() {
                 <Satellite className="h-6 w-6 text-gray-600 dark:text-gray-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">INACTIVE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('gpsConfig.inactive')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-inactive-devices">
               {devices?.filter((d: any) => d.status === "inactive").length || 0}
             </p>
@@ -286,7 +293,7 @@ export default function GpsConfig() {
       {/* GPS Devices Table */}
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">GPS Devices</CardTitle>
+          <CardTitle className="text-lg font-bold">{t('gpsConfig.gpsDevices')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -294,22 +301,22 @@ export default function GpsConfig() {
               <thead className="bg-muted/50 border-b">
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Trailer
+                    {t('gpsConfig.tableTrailer')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
-                    Provider
+                    {t('gpsConfig.tableProvider')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Device ID
+                    {t('gpsConfig.tableDeviceId')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
-                    Last Ping
+                    {t('gpsConfig.tableLastPing')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Status
+                    {t('gpsConfig.tableStatus')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Actions
+                    {t('gpsConfig.tableActions')}
                   </th>
                 </tr>
               </thead>
@@ -371,8 +378,8 @@ export default function GpsConfig() {
                     <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="text-center text-muted-foreground">
                         <Satellite className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">No GPS devices registered</p>
-                        <p className="text-xs mt-1">Click "New GPS Device" to add your first device</p>
+                        <p className="text-sm">{t('gpsConfig.noDevices')}</p>
+                        <p className="text-xs mt-1">{t('gpsConfig.noDevicesHint')}</p>
                       </div>
                     </td>
                   </tr>
@@ -388,12 +395,12 @@ export default function GpsConfig() {
         <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingDevice ? "Edit GPS Device" : "New GPS Device"}
+              {editingDevice ? t('gpsConfig.dialogEditTitle') : t('gpsConfig.dialogNewTitle')}
             </DialogTitle>
             <DialogDescription>
               {editingDevice 
-                ? "Update GPS device information" 
-                : "Register a new GPS tracking device"}
+                ? t('gpsConfig.dialogEditDescription')
+                : t('gpsConfig.dialogNewDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -404,7 +411,7 @@ export default function GpsConfig() {
                 name="trailerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trailer *</FormLabel>
+                    <FormLabel>{t('gpsConfig.formTrailer')}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -412,7 +419,7 @@ export default function GpsConfig() {
                     >
                       <FormControl>
                         <SelectTrigger data-testid="select-trailer">
-                          <SelectValue placeholder="Select a trailer" />
+                          <SelectValue placeholder={t('gpsConfig.placeholderSelectTrailer')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -433,18 +440,18 @@ export default function GpsConfig() {
                 name="provider"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>GPS Provider *</FormLabel>
+                    <FormLabel>{t('gpsConfig.formProvider')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-provider">
-                          <SelectValue placeholder="Select provider" />
+                          <SelectValue placeholder={t('gpsConfig.placeholderSelectProvider')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="generic">Generic</SelectItem>
-                        <SelectItem value="geotab">Geotab</SelectItem>
-                        <SelectItem value="samsara">Samsara</SelectItem>
-                        <SelectItem value="traccar">Traccar</SelectItem>
+                        <SelectItem value="generic">{t('gpsConfig.providerGeneric')}</SelectItem>
+                        <SelectItem value="geotab">{t('gpsConfig.providerGeotab')}</SelectItem>
+                        <SelectItem value="samsara">{t('gpsConfig.providerSamsara')}</SelectItem>
+                        <SelectItem value="traccar">{t('gpsConfig.providerTraccar')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -457,10 +464,10 @@ export default function GpsConfig() {
                 name="deviceId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Device ID *</FormLabel>
+                    <FormLabel>{t('gpsConfig.formDeviceId')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="GPS-001 or provider-specific ID"
+                        placeholder={t('gpsConfig.placeholderDeviceId')}
                         {...field}
                         data-testid="input-device-id"
                       />
@@ -475,16 +482,16 @@ export default function GpsConfig() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status *</FormLabel>
+                    <FormLabel>{t('gpsConfig.formStatus')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-status">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t('gpsConfig.placeholderSelectStatus')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="active">{t('gpsConfig.selectStatusActive')}</SelectItem>
+                        <SelectItem value="inactive">{t('gpsConfig.selectStatusInactive')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -503,7 +510,7 @@ export default function GpsConfig() {
                   }}
                   data-testid="button-cancel"
                 >
-                  Cancel
+                  {t('gpsConfig.buttonCancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -511,7 +518,7 @@ export default function GpsConfig() {
                   disabled={createDeviceMutation.isPending || updateDeviceMutation.isPending}
                   data-testid="button-submit"
                 >
-                  {editingDevice ? "Update Device" : "Create Device"}
+                  {editingDevice ? t('gpsConfig.buttonUpdate') : t('gpsConfig.buttonCreate')}
                 </Button>
               </div>
             </form>

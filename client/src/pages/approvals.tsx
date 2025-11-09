@@ -14,7 +14,7 @@ export default function Approvals() {
       amount: "$50,000.00",
       date: "2024-01-15",
       status: "pending",
-      description: "Solicitação de investimento em 1 cota",
+      description: t('approvals.mockDescriptionInvestment'),
     },
     {
       id: 2,
@@ -23,7 +23,7 @@ export default function Approvals() {
       amount: "-",
       date: "2024-01-14",
       status: "pending",
-      description: "Documentos KYC para análise",
+      description: t('approvals.mockDescriptionDocument'),
     },
     {
       id: 3,
@@ -32,7 +32,7 @@ export default function Approvals() {
       amount: "$3,000.00",
       date: "2024-01-13",
       status: "pending",
-      description: "Solicitação de resgate parcial",
+      description: t('approvals.mockDescriptionWithdrawal'),
     },
   ];
 

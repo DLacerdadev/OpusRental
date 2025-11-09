@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 type ChecklistItem = {
   item: string;
@@ -42,42 +43,48 @@ type Trailer = {
   trailerId: string;
 };
 
-const checklistFormSchema = z.object({
-  trailerId: z.string().min(1, "Trailer is required"),
-  type: z.enum(["pre_rental", "maintenance", "arrival"]),
-  inspector: z.string().min(1, "Inspector name is required"),
-  notes: z.string().optional(),
-});
-
-type ChecklistFormData = z.infer<typeof checklistFormSchema>;
-
-const defaultItems: Record<string, ChecklistItem[]> = {
-  pre_rental: [
-    { item: "Tires condition", status: "ok", notes: "" },
-    { item: "Brakes functionality", status: "ok", notes: "" },
-    { item: "Lights and signals", status: "ok", notes: "" },
-    { item: "Body and paint", status: "ok", notes: "" },
-    { item: "Floor condition", status: "ok", notes: "" },
-    { item: "Doors operation", status: "ok", notes: "" },
-    { item: "Registration documents", status: "ok", notes: "" },
-  ],
-  maintenance: [
-    { item: "Oil level", status: "ok", notes: "" },
-    { item: "Tire pressure", status: "ok", notes: "" },
-    { item: "Brake pads", status: "ok", notes: "" },
-    { item: "Light bulbs", status: "ok", notes: "" },
-    { item: "Suspension", status: "ok", notes: "" },
-    { item: "Hydraulic system", status: "ok", notes: "" },
-  ],
-  arrival: [
-    { item: "Trailer condition", status: "ok", notes: "" },
-    { item: "Cargo integrity", status: "ok", notes: "" },
-    { item: "No damage visible", status: "ok", notes: "" },
-    { item: "All items accounted", status: "ok", notes: "" },
-  ],
+type ChecklistFormData = {
+  trailerId: string;
+  type: "pre_rental" | "maintenance" | "arrival";
+  inspector: string;
+  notes?: string;
 };
 
 export default function Inspections() {
+  const { t } = useTranslation();
+  
+  const checklistFormSchema = z.object({
+    trailerId: z.string().min(1, t('inspections.validationTrailerRequired')),
+    type: z.enum(["pre_rental", "maintenance", "arrival"]),
+    inspector: z.string().min(1, t('inspections.validationInspectorRequired')),
+    notes: z.string().optional(),
+  });
+  
+  const defaultItems: Record<string, ChecklistItem[]> = {
+    pre_rental: [
+      { item: t('inspections.itemTiresCondition'), status: "ok", notes: "" },
+      { item: t('inspections.itemBrakesFunctionality'), status: "ok", notes: "" },
+      { item: t('inspections.itemLightsSignals'), status: "ok", notes: "" },
+      { item: t('inspections.itemBodyPaint'), status: "ok", notes: "" },
+      { item: t('inspections.itemFloorCondition'), status: "ok", notes: "" },
+      { item: t('inspections.itemDoorsOperation'), status: "ok", notes: "" },
+      { item: t('inspections.itemRegistrationDocuments'), status: "ok", notes: "" },
+    ],
+    maintenance: [
+      { item: t('inspections.itemOilLevel'), status: "ok", notes: "" },
+      { item: t('inspections.itemTirePressure'), status: "ok", notes: "" },
+      { item: t('inspections.itemBrakePads'), status: "ok", notes: "" },
+      { item: t('inspections.itemLightBulbs'), status: "ok", notes: "" },
+      { item: t('inspections.itemSuspension'), status: "ok", notes: "" },
+      { item: t('inspections.itemHydraulicSystem'), status: "ok", notes: "" },
+    ],
+    arrival: [
+      { item: t('inspections.itemTrailerCondition'), status: "ok", notes: "" },
+      { item: t('inspections.itemCargoIntegrity'), status: "ok", notes: "" },
+      { item: t('inspections.itemNoDamageVisible'), status: "ok", notes: "" },
+      { item: t('inspections.itemAllItemsAccounted'), status: "ok", notes: "" },
+    ],
+  };
   const { toast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -131,13 +138,13 @@ export default function Inspections() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/checklists/type/all"] });
-      toast({ title: "Checklist created successfully" });
+      toast({ title: t('inspections.toastCreateSuccess') });
       setIsCreateOpen(false);
       createForm.reset();
       setEditingItems([]);
     },
     onError: () => {
-      toast({ title: "Failed to create checklist", variant: "destructive" });
+      toast({ title: t('inspections.toastCreateError'), variant: "destructive" });
     },
   });
 
@@ -147,13 +154,13 @@ export default function Inspections() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/checklists/type/all"] });
-      toast({ title: "Checklist updated successfully" });
+      toast({ title: t('inspections.toastUpdateSuccess') });
       setIsEditOpen(false);
       setSelectedChecklist(null);
       setEditingItems([]);
     },
     onError: () => {
-      toast({ title: "Failed to update checklist", variant: "destructive" });
+      toast({ title: t('inspections.toastUpdateError'), variant: "destructive" });
     },
   });
 
@@ -163,12 +170,12 @@ export default function Inspections() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/checklists/type/all"] });
-      toast({ title: "Checklist approval submitted" });
+      toast({ title: t('inspections.toastApprovalSuccess') });
       setIsApprovalOpen(false);
       setSelectedChecklist(null);
     },
     onError: () => {
-      toast({ title: "Failed to submit approval", variant: "destructive" });
+      toast({ title: t('inspections.toastApprovalError'), variant: "destructive" });
     },
   });
 
@@ -230,9 +237,9 @@ export default function Inspections() {
 
   const getTypeLabel = (type: string) => {
     const labels = {
-      pre_rental: "Pre-Rental",
-      maintenance: "Maintenance",
-      arrival: "Arrival",
+      pre_rental: t('inspections.preRental'),
+      maintenance: t('inspections.maintenance'),
+      arrival: t('inspections.arrival'),
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -253,9 +260,9 @@ export default function Inspections() {
       na: "secondary",
     };
     const labels = {
-      ok: "OK",
-      issue: "Issue",
-      na: "N/A",
+      ok: t('inspections.badgeOk'),
+      issue: t('inspections.badgeIssue'),
+      na: t('inspections.badgeNA'),
     };
     return <Badge variant={variants[status as keyof typeof variants] as any}>{labels[status as keyof typeof labels]}</Badge>;
   };
@@ -265,21 +272,21 @@ export default function Inspections() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">
-            Inspections & Checklists
+            {t('inspections.title')}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage trailer inspection checklists</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('inspections.subtitle')}</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-create-checklist">
               <Plus className="h-4 w-4 mr-2" />
-              New Checklist
+              {t('inspections.newChecklist')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Inspection Checklist</DialogTitle>
-              <DialogDescription>Fill in the inspection details below</DialogDescription>
+              <DialogTitle>{t('inspections.dialogCreateTitle')}</DialogTitle>
+              <DialogDescription>{t('inspections.dialogCreateDescription')}</DialogDescription>
             </DialogHeader>
             <Form {...createForm}>
               <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-4">
@@ -288,11 +295,11 @@ export default function Inspections() {
                   name="trailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trailer</FormLabel>
+                      <FormLabel>{t('inspections.formTrailer')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-trailer">
-                            <SelectValue placeholder="Select trailer" />
+                            <SelectValue placeholder={t('inspections.placeholderSelectTrailer')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -312,7 +319,7 @@ export default function Inspections() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Inspection Type</FormLabel>
+                      <FormLabel>{t('inspections.formType')}</FormLabel>
                       <Select onValueChange={(value) => handleTypeChange(value as any, createForm)} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-type">
@@ -320,9 +327,9 @@ export default function Inspections() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="pre_rental">Pre-Rental Inspection</SelectItem>
-                          <SelectItem value="maintenance">Maintenance Inspection</SelectItem>
-                          <SelectItem value="arrival">Arrival Inspection</SelectItem>
+                          <SelectItem value="pre_rental">{t('inspections.typePreRental')}</SelectItem>
+                          <SelectItem value="maintenance">{t('inspections.typeMaintenance')}</SelectItem>
+                          <SelectItem value="arrival">{t('inspections.typeArrival')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -334,16 +341,16 @@ export default function Inspections() {
                   name="inspector"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Inspector Name</FormLabel>
+                      <FormLabel>{t('inspections.formInspector')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="John Smith" data-testid="input-inspector" />
+                        <Input {...field} placeholder={t('inspections.placeholderInspectorName')} data-testid="input-inspector" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <div className="space-y-2">
-                  <FormLabel>Checklist Items</FormLabel>
+                  <FormLabel>{t('inspections.formChecklistItems')}</FormLabel>
                   <div className="space-y-3 border border-gray-200 dark:border-gray-700 rounded-md p-3">
                     {editingItems.map((item, index) => (
                       <div key={index} className="space-y-2 pb-3 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
@@ -357,7 +364,7 @@ export default function Inspections() {
                               onClick={() => updateItemStatus(index, "ok")}
                               data-testid={`button-item-ok-${index}`}
                             >
-                              OK
+                              {t('inspections.buttonOk')}
                             </Button>
                             <Button
                               type="button"
@@ -366,7 +373,7 @@ export default function Inspections() {
                               onClick={() => updateItemStatus(index, "issue")}
                               data-testid={`button-item-issue-${index}`}
                             >
-                              Issue
+                              {t('inspections.buttonIssue')}
                             </Button>
                             <Button
                               type="button"
@@ -375,12 +382,12 @@ export default function Inspections() {
                               onClick={() => updateItemStatus(index, "na")}
                               data-testid={`button-item-na-${index}`}
                             >
-                              N/A
+                              {t('inspections.buttonNA')}
                             </Button>
                           </div>
                         </div>
                         <Input
-                          placeholder="Additional notes..."
+                          placeholder={t('inspections.placeholderItemNotes')}
                           value={item.notes || ""}
                           onChange={(e) => updateItemNotes(index, e.target.value)}
                           className="text-sm"
@@ -395,9 +402,9 @@ export default function Inspections() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>General Notes</FormLabel>
+                      <FormLabel>{t('inspections.formGeneralNotes')}</FormLabel>
                       <FormControl>
-                        <Textarea {...field} placeholder="Overall inspection notes..." rows={3} data-testid="textarea-notes" />
+                        <Textarea {...field} placeholder={t('inspections.placeholderGeneralNotes')} rows={3} data-testid="textarea-notes" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -405,10 +412,10 @@ export default function Inspections() {
                 />
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)} data-testid="button-cancel">
-                    Cancel
+                    {t('inspections.buttonCancel')}
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending} data-testid="button-submit">
-                    {createMutation.isPending ? "Creating..." : "Create Checklist"}
+                    {createMutation.isPending ? t('inspections.buttonCreating') : t('inspections.buttonCreate')}
                   </Button>
                 </div>
               </form>
@@ -420,7 +427,7 @@ export default function Inspections() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inspections</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inspections.totalInspections')}</CardTitle>
             <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -433,7 +440,7 @@ export default function Inspections() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pre-Rental</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inspections.preRental')}</CardTitle>
             <ClipboardCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
@@ -446,7 +453,7 @@ export default function Inspections() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inspections.maintenance')}</CardTitle>
             <ClipboardCheck className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           </CardHeader>
           <CardContent>
@@ -459,7 +466,7 @@ export default function Inspections() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Arrival</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('inspections.arrival')}</CardTitle>
             <ClipboardCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
@@ -474,19 +481,19 @@ export default function Inspections() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Inspections</CardTitle>
+          <CardTitle>{t('inspections.allInspections')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Trailer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Inspector</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('inspections.tableDate')}</TableHead>
+                  <TableHead>{t('inspections.tableTrailer')}</TableHead>
+                  <TableHead>{t('inspections.tableType')}</TableHead>
+                  <TableHead>{t('inspections.tableInspector')}</TableHead>
+                  <TableHead>{t('inspections.tableStatus')}</TableHead>
+                  <TableHead className="text-right">{t('inspections.tableActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -504,7 +511,7 @@ export default function Inspections() {
                 ) : checklists.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      No inspections found
+                      {t('inspections.noInspections')}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -522,10 +529,10 @@ export default function Inspections() {
                         {checklist.approved ? (
                           <Badge variant="default" className="bg-green-600 dark:bg-green-500">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Approved
+                            {t('inspections.statusApproved')}
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Pending</Badge>
+                          <Badge variant="secondary">{t('inspections.statusPending')}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
@@ -576,8 +583,8 @@ export default function Inspections() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Inspection Checklist</DialogTitle>
-            <DialogDescription>Update the inspection details</DialogDescription>
+            <DialogTitle>{t('inspections.dialogEditTitle')}</DialogTitle>
+            <DialogDescription>{t('inspections.dialogEditDescription')}</DialogDescription>
           </DialogHeader>
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
@@ -586,7 +593,7 @@ export default function Inspections() {
                 name="trailerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trailer</FormLabel>
+                    <FormLabel>{t('inspections.formTrailer')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="edit-select-trailer">
@@ -610,7 +617,7 @@ export default function Inspections() {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inspection Type</FormLabel>
+                    <FormLabel>{t('inspections.formType')}</FormLabel>
                     <Select onValueChange={(value) => handleTypeChange(value as any, editForm)} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="edit-select-type">
@@ -618,9 +625,9 @@ export default function Inspections() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="pre_rental">Pre-Rental Inspection</SelectItem>
-                        <SelectItem value="maintenance">Maintenance Inspection</SelectItem>
-                        <SelectItem value="arrival">Arrival Inspection</SelectItem>
+                        <SelectItem value="pre_rental">{t('inspections.typePreRental')}</SelectItem>
+                        <SelectItem value="maintenance">{t('inspections.typeMaintenance')}</SelectItem>
+                        <SelectItem value="arrival">{t('inspections.typeArrival')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -632,7 +639,7 @@ export default function Inspections() {
                 name="inspector"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inspector Name</FormLabel>
+                    <FormLabel>{t('inspections.formInspector')}</FormLabel>
                     <FormControl>
                       <Input {...field} data-testid="edit-input-inspector" />
                     </FormControl>
@@ -641,7 +648,7 @@ export default function Inspections() {
                 )}
               />
               <div className="space-y-2">
-                <FormLabel>Checklist Items</FormLabel>
+                <FormLabel>{t('inspections.formChecklistItems')}</FormLabel>
                 <div className="space-y-3 border border-gray-200 dark:border-gray-700 rounded-md p-3">
                   {editingItems.map((item, index) => (
                     <div key={index} className="space-y-2 pb-3 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
@@ -655,7 +662,7 @@ export default function Inspections() {
                             onClick={() => updateItemStatus(index, "ok")}
                             data-testid={`edit-button-item-ok-${index}`}
                           >
-                            OK
+                            {t('inspections.buttonOk')}
                           </Button>
                           <Button
                             type="button"
@@ -664,7 +671,7 @@ export default function Inspections() {
                             onClick={() => updateItemStatus(index, "issue")}
                             data-testid={`edit-button-item-issue-${index}`}
                           >
-                            Issue
+                            {t('inspections.buttonIssue')}
                           </Button>
                           <Button
                             type="button"
@@ -673,12 +680,12 @@ export default function Inspections() {
                             onClick={() => updateItemStatus(index, "na")}
                             data-testid={`edit-button-item-na-${index}`}
                           >
-                            N/A
+                            {t('inspections.buttonNA')}
                           </Button>
                         </div>
                       </div>
                       <Input
-                        placeholder="Additional notes..."
+                        placeholder={t('inspections.placeholderItemNotes')}
                         value={item.notes || ""}
                         onChange={(e) => updateItemNotes(index, e.target.value)}
                         className="text-sm"
@@ -693,7 +700,7 @@ export default function Inspections() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>General Notes</FormLabel>
+                    <FormLabel>{t('inspections.formGeneralNotes')}</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={3} data-testid="edit-textarea-notes" />
                     </FormControl>
@@ -703,10 +710,10 @@ export default function Inspections() {
               />
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} data-testid="edit-button-cancel">
-                  Cancel
+                  {t('inspections.buttonCancel')}
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending} data-testid="edit-button-submit">
-                  {updateMutation.isPending ? "Updating..." : "Update Checklist"}
+                  {updateMutation.isPending ? t('inspections.buttonUpdating') : t('inspections.buttonUpdate')}
                 </Button>
               </div>
             </form>
@@ -717,32 +724,32 @@ export default function Inspections() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Inspection Details</DialogTitle>
+            <DialogTitle>{t('inspections.dialogDetailsTitle')}</DialogTitle>
           </DialogHeader>
           {selectedChecklist && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Trailer</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formTrailer')}</p>
                   <p className="font-medium">
                     {trailers.find((t) => t.id === selectedChecklist.trailerId)?.trailerId || selectedChecklist.trailerId}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Type</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formType')}</p>
                   <p className="font-medium">{getTypeLabel(selectedChecklist.type)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Inspector</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formInspector')}</p>
                   <p className="font-medium">{selectedChecklist.inspector}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.tableDate')}</p>
                   <p className="font-medium">{format(new Date(selectedChecklist.inspectionDate), "MMM dd, yyyy")}</p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Checklist Items</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('inspections.formChecklistItems')}</p>
                 <div className="space-y-2">
                   {selectedChecklist.items.map((item: any, index: number) => (
                     <div key={index} className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
@@ -757,20 +764,20 @@ export default function Inspections() {
               </div>
               {selectedChecklist.notes && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">General Notes</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formGeneralNotes')}</p>
                   <p className="mt-1">{selectedChecklist.notes}</p>
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Approval Status</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.tableStatus')}</p>
                 <div className="mt-1">
                   {selectedChecklist.approved ? (
                     <Badge variant="default" className="bg-green-600 dark:bg-green-500">
                       <CheckCircle className="h-3 w-3 mr-1" />
-                      Approved
+                      {t('inspections.statusApproved')}
                     </Badge>
                   ) : (
-                    <Badge variant="secondary">Pending Approval</Badge>
+                    <Badge variant="secondary">{t('inspections.statusPending')}</Badge>
                   )}
                 </div>
               </div>
@@ -782,26 +789,26 @@ export default function Inspections() {
       <Dialog open={isApprovalOpen} onOpenChange={setIsApprovalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Approve Inspection</DialogTitle>
-            <DialogDescription>Review and approve or reject this inspection</DialogDescription>
+            <DialogTitle>{t('inspections.dialogApproveTitle')}</DialogTitle>
+            <DialogDescription>{t('inspections.dialogDetailsDescription')}</DialogDescription>
           </DialogHeader>
           {selectedChecklist && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Trailer</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formTrailer')}</p>
                 <p className="font-medium">
                   {trailers.find((t) => t.id === selectedChecklist.trailerId)?.trailerId || selectedChecklist.trailerId}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Inspector</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formInspector')}</p>
                 <p className="font-medium">{selectedChecklist.inspector}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500 dark:text-gray-400">Approval Notes (Optional)</label>
+                <label className="text-sm text-gray-500 dark:text-gray-400">{t('inspections.formApprovalNotes')}</label>
                 <Textarea
                   id="approval-notes"
-                  placeholder="Add any comments..."
+                  placeholder={t('inspections.placeholderApprovalNotes')}
                   rows={3}
                   className="mt-1"
                   data-testid="textarea-approval-notes"
@@ -819,7 +826,7 @@ export default function Inspections() {
                   data-testid="button-reject"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
-                  Reject
+                  {t('inspections.buttonReject')}
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
@@ -831,7 +838,7 @@ export default function Inspections() {
                   data-testid="button-approve"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve
+                  {t('inspections.buttonApprove')}
                 </Button>
               </div>
             </div>
