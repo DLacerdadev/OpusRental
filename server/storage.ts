@@ -19,6 +19,7 @@ import {
   brokerEmails,
   brokerDispatches,
   notifications,
+  tenants,
   type User,
   type InsertUser,
   type Trailer,
@@ -59,6 +60,8 @@ import {
   type InsertBrokerDispatch,
   type Notification,
   type InsertNotification,
+  type Tenant,
+  type InsertTenant,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, gte } from "drizzle-orm";
@@ -207,6 +210,9 @@ export interface IStorage {
   getUnreadNotificationCount(userId: string, tenantId: string): Promise<number>;
   markNotificationAsRead(notificationId: string, userId: string, tenantId: string): Promise<boolean>;
   deleteNotification(notificationId: string, userId: string, tenantId: string): Promise<boolean>;
+
+  // Tenant operations
+  updateTenant(tenantId: string, data: Partial<Tenant>): Promise<Tenant>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1375,7 +1381,9 @@ export class DatabaseStorage implements IStorage {
         brokerEmail: brokerEmails.brokerEmail,
         trailerPlate: brokerEmails.trailerPlate,
         trailerType: brokerEmails.trailerType,
-        emailSubject: brokerEmails.emailSubject,
+        currentLocation: brokerEmails.currentLocation,
+        destination: brokerEmails.destination,
+        estimatedDate: brokerEmails.estimatedDate,
         emailBody: brokerEmails.emailBody,
         sentAt: brokerEmails.sentAt,
         status: brokerEmails.status,
@@ -1395,7 +1403,9 @@ export class DatabaseStorage implements IStorage {
         brokerEmail: brokerEmails.brokerEmail,
         trailerPlate: brokerEmails.trailerPlate,
         trailerType: brokerEmails.trailerType,
-        emailSubject: brokerEmails.emailSubject,
+        currentLocation: brokerEmails.currentLocation,
+        destination: brokerEmails.destination,
+        estimatedDate: brokerEmails.estimatedDate,
         emailBody: brokerEmails.emailBody,
         sentAt: brokerEmails.sentAt,
         status: brokerEmails.status,
@@ -1504,6 +1514,21 @@ export class DatabaseStorage implements IStorage {
       )
       .returning();
     return result.length > 0;
+  }
+
+  // Tenant operations
+  async updateTenant(tenantId: string, data: Partial<Tenant>): Promise<Tenant> {
+    const [updated] = await db
+      .update(tenants)
+      .set(data)
+      .where(eq(tenants.id, tenantId))
+      .returning();
+    
+    if (!updated) {
+      throw new Error("Tenant not found");
+    }
+    
+    return updated;
   }
 }
 

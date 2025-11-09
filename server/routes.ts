@@ -256,6 +256,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current tenant information (branding, logo, colors)
+  // Returns only public branding fields, no sensitive data
+  app.get("/api/tenant", async (req, res) => {
+    try {
+      if (!req.tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      // Sanitize response - only return public branding fields
+      const publicTenantData = {
+        id: req.tenant.id,
+        name: req.tenant.name,
+        slug: req.tenant.slug,
+        logoUrl: req.tenant.logoUrl,
+        primaryColor: req.tenant.primaryColor,
+        secondaryColor: req.tenant.secondaryColor,
+        status: req.tenant.status,
+      };
+
+      res.json(publicTenantData);
+    } catch (error) {
+      console.error("Get tenant error:", error);
+      res.status(500).json({ message: "Failed to fetch tenant" });
+    }
+  });
+
+  // Update tenant branding (Manager only)
+  app.put("/api/tenant", authorize(), async (req, res) => {
+    try {
+      const updateSchema = z.object({
+        name: z.string().min(1).optional(),
+        primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
+        secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
+        logoUrl: z.string().url().optional().nullable(),
+      });
+
+      const data = updateSchema.parse(req.body);
+      const updatedTenant = await storage.updateTenant(req.tenantId!, data);
+
+      if (!updatedTenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      // Audit logging for tenant branding changes
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "update_tenant_branding",
+        entityType: "tenant",
+        entityId: req.tenantId!,
+        details: { 
+          changes: data,
+          updatedBy: req.session.user?.email 
+        },
+        ipAddress: req.ip,
+      });
+
+      // Return sanitized response
+      const publicTenantData = {
+        id: updatedTenant.id,
+        name: updatedTenant.name,
+        slug: updatedTenant.slug,
+        logoUrl: updatedTenant.logoUrl,
+        primaryColor: updatedTenant.primaryColor,
+        secondaryColor: updatedTenant.secondaryColor,
+        status: updatedTenant.status,
+      };
+
+      res.json(publicTenantData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid tenant data", errors: error.errors });
+      }
+      console.error("Update tenant error:", error);
+      res.status(500).json({ message: "Failed to update tenant" });
+    }
+  });
+
   // Investors list (Manager/Admin only)
   app.get("/api/investors", authorize(), async (req, res) => {
     try {
@@ -416,6 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.createTrackingData({
+        tenantId: req.tenantId!,
         trailerId,
         latitude: normalized.latitude.toString(),
         longitude: normalized.longitude.toString(),
@@ -538,6 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.createTrackingData({
+        tenantId: req.tenantId!,
         trailerId,
         latitude: latitude.toString(),
         longitude: longitude.toString(),

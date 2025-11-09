@@ -108,6 +108,7 @@ export const shares = pgTable("shares", {
 // Payments table
 export const payments = pgTable("payments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   shareId: varchar("share_id").notNull().references(() => shares.id),
   userId: varchar("user_id").notNull().references(() => users.id),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
@@ -118,11 +119,13 @@ export const payments = pgTable("payments", {
 }, (t) => ({
   uniqShareMonth: uniqueIndex("uniq_payments_share_month").on(t.shareId, t.referenceMonth),
   idxUserMonth: index("idx_payments_user_month").on(t.userId, t.referenceMonth),
+  idxTenant: index("idx_payments_tenant").on(t.tenantId),
 }));
 
 // Tracking data table
 export const trackingData = pgTable("tracking_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   latitude: decimal("latitude", { precision: 10, scale: 7 }).notNull(),
   longitude: decimal("longitude", { precision: 10, scale: 7 }).notNull(),
@@ -131,11 +134,15 @@ export const trackingData = pgTable("tracking_data", {
   status: text("status").notNull().default("moving"), // moving, stopped, maintenance
   distanceToday: decimal("distance_today", { precision: 10, scale: 2 }),
   timestamp: timestamp("timestamp").defaultNow(),
-});
+}, (t) => ({
+  idxTenant: index("idx_tracking_tenant").on(t.tenantId),
+  idxTrailerId: index("idx_tracking_trailer").on(t.trailerId),
+}));
 
 // Documents table
 export const documents = pgTable("documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   userId: varchar("user_id").references(() => users.id),
   shareId: varchar("share_id").references(() => shares.id),
   documentType: text("document_type").notNull(), // contract, kyc, compliance, etc.
@@ -143,7 +150,10 @@ export const documents = pgTable("documents", {
   fileUrl: text("file_url").notNull(),
   status: text("status").notNull().default("verified"), // verified, pending, rejected
   uploadedAt: timestamp("uploaded_at").defaultNow(),
-});
+}, (t) => ({
+  idxTenant: index("idx_documents_tenant").on(t.tenantId),
+  idxUser: index("idx_documents_user").on(t.userId),
+}));
 
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
@@ -240,6 +250,7 @@ export const rentalContracts = pgTable("rental_contracts", {
 // Invoices table (Commercial invoices for rental)
 export const invoices = pgTable("invoices", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   invoiceNumber: text("invoice_number").notNull().unique(), // INV-001, INV-002, etc.
   contractId: varchar("contract_id").notNull().references(() => rentalContracts.id),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
@@ -251,6 +262,7 @@ export const invoices = pgTable("invoices", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (t) => ({
   uniqContractMonth: uniqueIndex("uniq_invoices_contract_month").on(t.contractId, t.referenceMonth),
+  idxTenant: index("idx_invoices_tenant").on(t.tenantId),
   idxStatus: index("idx_invoices_status").on(t.status),
   idxDueDate: index("idx_invoices_due_date").on(t.dueDate),
 }));
@@ -267,6 +279,7 @@ export const emailSettings = pgTable("email_settings", {
 // Email Logs table (Track all emails sent)
 export const emailLogs = pgTable("email_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   recipientEmail: text("recipient_email").notNull(),
   recipientName: text("recipient_name"),
   subject: text("subject").notNull(),
@@ -277,6 +290,7 @@ export const emailLogs = pgTable("email_logs", {
   errorMessage: text("error_message"),
   sentAt: timestamp("sent_at").defaultNow(),
 }, (t) => ({
+  idxTenant: index("idx_email_logs_tenant").on(t.tenantId),
   idxRecipient: index("idx_email_logs_recipient").on(t.recipientEmail),
   idxType: index("idx_email_logs_type").on(t.emailType),
   idxEntity: index("idx_email_logs_entity").on(t.entityType, t.entityId),
@@ -285,6 +299,7 @@ export const emailLogs = pgTable("email_logs", {
 // Checklists table (Inspections)
 export const checklists = pgTable("checklists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   type: text("type").notNull(), // pre_rental, maintenance, arrival
   items: jsonb("items").notNull(), // [{item: "Tires", status: "ok", notes: ""}]
@@ -299,6 +314,7 @@ export const checklists = pgTable("checklists", {
   inspectionDate: timestamp("inspection_date").notNull().defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 }, (t) => ({
+  idxTenant: index("idx_checklists_tenant").on(t.tenantId),
   idxTrailerId: index("idx_checklists_trailer").on(t.trailerId),
   idxType: index("idx_checklists_type").on(t.type),
   idxApproved: index("idx_checklists_approved").on(t.approved),
@@ -307,6 +323,7 @@ export const checklists = pgTable("checklists", {
 // Maintenance Schedules table
 export const maintenanceSchedules = pgTable("maintenance_schedules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id),
   scheduleType: text("schedule_type").notNull(), // time_based, km_based
   intervalDays: integer("interval_days"), // For time-based: every X days
@@ -320,6 +337,7 @@ export const maintenanceSchedules = pgTable("maintenance_schedules", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => ({
+  idxTenant: index("idx_maintenance_tenant").on(t.tenantId),
   idxTrailerId: index("idx_maintenance_trailer").on(t.trailerId),
   idxStatus: index("idx_maintenance_status").on(t.status),
 }));
@@ -394,6 +412,7 @@ export const brokerDispatches = pgTable("broker_dispatches", {
 // Notifications table
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   userId: varchar("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
   message: text("message").notNull(),
@@ -405,6 +424,7 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
   readAt: timestamp("read_at"),
 }, (t) => ({
+  idxTenant: index("idx_notification_tenant").on(t.tenantId),
   idxUserId: index("idx_notification_user").on(t.userId),
   idxRead: index("idx_notification_read").on(t.read),
   idxType: index("idx_notification_type").on(t.type),
