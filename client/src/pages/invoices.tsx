@@ -49,7 +49,7 @@ import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
-const invoiceFormSchema = insertInvoiceSchema.omit({ id: true, createdAt: true, updatedAt: true, tenantId: true });
+const invoiceFormSchema = insertInvoiceSchema.omit({ tenantId: true });
 type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
 
 export default function Invoices() {
@@ -76,6 +76,7 @@ export default function Invoices() {
       contractId: "",
       amount: "",
       dueDate: "",
+      paidDate: "",
       status: "pending",
       referenceMonth: "",
       notes: "",
