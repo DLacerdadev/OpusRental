@@ -121,8 +121,8 @@ export default function Assets() {
   });
 
   const onSubmit = (data: AssetFormData) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form errors:", form.formState.errors);
+    console.log("✅ Form submitted with data:", data);
+    console.log("✅ Form errors:", form.formState.errors);
     
     // Remove latitude/longitude if they're empty strings
     const cleanedData = {
@@ -133,8 +133,23 @@ export default function Assets() {
       investorId: data.allocationType === "specific" ? data.investorId : undefined,
     };
     
-    console.log("Cleaned data:", cleanedData);
+    console.log("✅ Cleaned data:", cleanedData);
     createTrailerMutation.mutate(cleanedData as any);
+  };
+
+  const onFormError = (errors: any) => {
+    console.error("❌ Form validation failed:", errors);
+    
+    // Show toast with validation errors
+    const errorMessages = Object.entries(errors)
+      .map(([field, error]: [string, any]) => `${field}: ${error.message}`)
+      .join('\n');
+    
+    toast({
+      title: t('assets.validationError', 'Erros de validação'),
+      description: errorMessages,
+      variant: "destructive",
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -294,7 +309,7 @@ export default function Assets() {
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
