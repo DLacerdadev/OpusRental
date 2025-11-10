@@ -53,14 +53,14 @@ export default function Portfolio() {
       queryClient.invalidateQueries({ queryKey: ["/api/shares"] });
       setIsDialogOpen(false);
       toast({
-        title: "Cota adquirida com sucesso!",
-        description: "Sua nova cota foi registrada e já está gerando retornos.",
+        title: t('portfolio.toastSuccessTitle'),
+        description: t('portfolio.toastSuccessDescription'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao comprar cota",
-        description: error.message || "Não foi possível processar sua compra. Tente novamente.",
+        title: t('portfolio.toastErrorTitle'),
+        description: error.message || t('portfolio.toastErrorDescription'),
         variant: "destructive",
       });
     },
@@ -93,15 +93,15 @@ export default function Portfolio() {
           <DialogTrigger asChild>
             <Button className="gap-2 h-11 px-4" data-testid="button-buy-share">
               <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline">Comprar Nova Cota</span>
-              <span className="sm:hidden">Comprar</span>
+              <span className="hidden sm:inline">{t('portfolio.buyNewShare')}</span>
+              <span className="sm:hidden">{t('portfolio.buy')}</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto" data-testid="dialog-buy-share">
             <DialogHeader>
-              <DialogTitle>Trailers Disponíveis</DialogTitle>
+              <DialogTitle>{t('portfolio.availableTrailers')}</DialogTitle>
               <DialogDescription>
-                Selecione um trailer para adquirir sua cota. Cada cota representa a propriedade de um trailer completo.
+                {t('portfolio.selectTrailerDescription')}
               </DialogDescription>
             </DialogHeader>
 
@@ -127,10 +127,10 @@ export default function Portfolio() {
                                 {trailer.trailerId}
                               </h3>
                               <div className="flex gap-2 items-center mt-1 flex-wrap">
-                                <Badge variant="secondary">Disponível</Badge>
+                                <Badge variant="secondary">{t('portfolio.available')}</Badge>
                                 {trailer.availableShares !== undefined && (
                                   <Badge variant={trailer.availableShares > 0 ? "default" : "destructive"} className="text-xs">
-                                    {trailer.availableShares} {trailer.availableShares === 1 ? "cota disponível" : "cotas disponíveis"}
+                                    {trailer.availableShares} {trailer.availableShares === 1 ? t('portfolio.shareAvailable') : t('portfolio.sharesAvailable')}
                                   </Badge>
                                 )}
                               </div>
@@ -141,7 +141,7 @@ export default function Portfolio() {
                             <div className="flex items-center gap-2 text-sm">
                               <DollarSign className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="text-muted-foreground">Valor da Cota</p>
+                                <p className="text-muted-foreground">{t('portfolio.shareValue')}</p>
                                 <p className="font-bold" data-testid={`text-value-${trailer.id}`}>
                                   ${parseFloat(trailer.purchaseValue).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                 </p>
@@ -152,7 +152,7 @@ export default function Portfolio() {
                               <div className="flex items-center gap-2 text-sm">
                                 <MapPin className="h-4 w-4 text-muted-foreground" />
                                 <div>
-                                  <p className="text-muted-foreground">Localização</p>
+                                  <p className="text-muted-foreground">{t('portfolio.location')}</p>
                                   <p className="font-medium">{trailer.location}</p>
                                 </div>
                               </div>
@@ -161,7 +161,7 @@ export default function Portfolio() {
 
                           <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
                             <p className="text-sm text-green-800 dark:text-green-300">
-                              <span className="font-semibold">Retorno mensal: </span>
+                              <span className="font-semibold">{t('portfolio.monthlyReturnLabel')} </span>
                               ${(parseFloat(trailer.purchaseValue) * 0.02).toLocaleString("en-US", { minimumFractionDigits: 2 })} (2%)
                             </p>
                           </div>
@@ -173,7 +173,7 @@ export default function Portfolio() {
                           className="ml-4"
                           data-testid={`button-purchase-${trailer.id}`}
                         >
-                          {purchaseMutation.isPending ? "Processando..." : "Comprar"}
+                          {purchaseMutation.isPending ? t('portfolio.processing') : t('portfolio.purchase')}
                         </Button>
                       </div>
                     </CardContent>
@@ -183,7 +183,7 @@ export default function Portfolio() {
             ) : (
               <div className="text-center py-12" data-testid="text-no-trailers">
                 <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhum trailer disponível no momento</p>
+                <p className="text-muted-foreground">{t('portfolio.noTrailersAvailable')}</p>
               </div>
             )}
           </DialogContent>
@@ -194,17 +194,17 @@ export default function Portfolio() {
         <div className="xl:col-span-2">
           <Card className="shadow-lg">
             <CardHeader className="border-b bg-muted/30">
-              <CardTitle className="text-lg font-bold">Histórico de Retornos</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('portfolio.returnsHistory')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">MÊS/ANO</th>
-                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">VALOR PAGO</th>
-                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">DATA</th>
-                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">STATUS</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.monthYear')}</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.amountPaid')}</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.date')}</th>
+                      <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.statusLabel')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -217,7 +217,7 @@ export default function Portfolio() {
                         <td className="py-4 px-4 sm:px-6 whitespace-nowrap">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
                         <td className="py-4 px-4 sm:px-6">
                           <Badge variant={payment.status === "paid" ? "default" : "secondary"} className="rounded-full whitespace-nowrap">
-                            {payment.status === "paid" ? "Pago" : "Pendente"}
+                            {payment.status === "paid" ? t('portfolio.paid') : t('portfolio.pending')}
                           </Badge>
                         </td>
                       </tr>
@@ -225,7 +225,7 @@ export default function Portfolio() {
                     {(!portfolio?.payments || portfolio.payments.length === 0) && (
                       <tr>
                         <td colSpan={4} className="text-center py-12 text-muted-foreground">
-                          Nenhum pagamento registrado
+                          {t('portfolio.noPaymentsRegistered')}
                         </td>
                       </tr>
                     )}
@@ -239,13 +239,13 @@ export default function Portfolio() {
         <div className="space-y-6">
           <Card className="shadow-lg border-l-4 border-l-accent">
             <CardHeader>
-              <CardTitle className="text-lg font-bold">Projeção de Ganhos</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('portfolio.earningsProjection')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-5">
                 <div className="bg-muted/30 p-4 rounded-xl">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-semibold text-muted-foreground">Próximos 3 meses</span>
+                    <span className="font-semibold text-muted-foreground">{t('portfolio.next3Months')}</span>
                     <span className="font-bold text-accent">
                       {formatCurrency(calculateProjection(portfolio?.shares || [], 3), user?.country)}
                     </span>
@@ -254,7 +254,7 @@ export default function Portfolio() {
                 </div>
                 <div className="bg-muted/30 p-4 rounded-xl">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-semibold text-muted-foreground">Próximos 6 meses</span>
+                    <span className="font-semibold text-muted-foreground">{t('portfolio.next6Months')}</span>
                     <span className="font-bold text-accent">
                       {formatCurrency(calculateProjection(portfolio?.shares || [], 6), user?.country)}
                     </span>
@@ -263,7 +263,7 @@ export default function Portfolio() {
                 </div>
                 <div className="bg-muted/30 p-4 rounded-xl">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-semibold text-muted-foreground">Próximos 12 meses</span>
+                    <span className="font-semibold text-muted-foreground">{t('portfolio.next12Months')}</span>
                     <span className="font-bold text-accent">
                       {formatCurrency(calculateProjection(portfolio?.shares || [], 12), user?.country)}
                     </span>
@@ -276,30 +276,30 @@ export default function Portfolio() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Minhas Cotas</CardTitle>
+              <CardTitle>{t('portfolio.myShares')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {portfolio?.shares?.map((share: any) => (
                   <div key={share.id} className="p-3 bg-muted/50 rounded-md" data-testid={`share-card-${share.id}`}>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <span className="font-medium truncate" title={`Cota #${share.id}`}>Cota #{share.id.slice(0, 8)}</span>
+                      <span className="font-medium truncate" title={`${t('portfolio.share')} #${share.id}`}>{t('portfolio.share')} #{share.id.slice(0, 8)}</span>
                       <Badge variant={share.status === "active" ? "default" : "secondary"} className="flex-shrink-0">
-                        {share.status === "active" ? "Ativa" : "Inativa"}
+                        {share.status === "active" ? t('portfolio.active') : t('portfolio.inactive')}
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="break-all">Valor: {formatCurrency(parseFloat(share.purchaseValue), user?.country)}</p>
-                      <p>Adquirida: {format(new Date(share.purchaseDate), "dd/MM/yyyy")}</p>
+                      <p className="break-all">{t('portfolio.value')} {formatCurrency(parseFloat(share.purchaseValue), user?.country)}</p>
+                      <p>{t('portfolio.acquired')} {format(new Date(share.purchaseDate), "dd/MM/yyyy")}</p>
                       <p className="text-green-600 font-medium break-all">
-                        Retorno mensal: {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, user?.country)}
+                        {t('portfolio.monthlyReturnValue')} {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, user?.country)}
                       </p>
                     </div>
                   </div>
                 ))}
                 {(!portfolio?.shares || portfolio.shares.length === 0) && (
                   <div className="text-center text-muted-foreground py-8">
-                    Nenhuma cota ativa
+                    {t('portfolio.noActiveShares')}
                   </div>
                 )}
               </div>
