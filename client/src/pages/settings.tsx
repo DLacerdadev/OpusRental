@@ -167,8 +167,8 @@ export default function Settings() {
                   <SettingsIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">System Integrations</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Configure payment gateways and external services</p>
+                  <CardTitle className="text-lg font-bold">{t('settings.systemIntegrations')}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">{t('settings.systemIntegrationsDesc')}</p>
                 </div>
               </div>
             </CardHeader>
@@ -181,13 +181,13 @@ export default function Settings() {
                       <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Stripe Payment Gateway</h3>
-                      <p className="text-xs text-muted-foreground">Configure online payment processing</p>
+                      <h3 className="font-semibold text-foreground">{t('settings.stripeTitle')}</h3>
+                      <p className="text-xs text-muted-foreground">{t('settings.stripeDesc')}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="stripe-public-key" className="text-xs">Publishable Key</Label>
+                      <Label htmlFor="stripe-public-key" className="text-xs">{t('settings.publishableKey')}</Label>
                       <Input 
                         id="stripe-public-key" 
                         placeholder="pk_live_..." 
@@ -196,7 +196,7 @@ export default function Settings() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="stripe-secret-key" className="text-xs">Secret Key</Label>
+                      <Label htmlFor="stripe-secret-key" className="text-xs">{t('settings.secretKey')}</Label>
                       <Input 
                         id="stripe-secret-key" 
                         type="password" 
@@ -206,7 +206,7 @@ export default function Settings() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="stripe-webhook-secret" className="text-xs">Webhook Secret (Optional)</Label>
+                      <Label htmlFor="stripe-webhook-secret" className="text-xs">{t('settings.webhookSecret')}</Label>
                       <Input 
                         id="stripe-webhook-secret" 
                         type="password" 
@@ -218,19 +218,19 @@ export default function Settings() {
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center gap-2">
                         <Switch data-testid="switch-stripe-test-mode" />
-                        <span className="text-xs text-muted-foreground">Test Mode</span>
+                        <span className="text-xs text-muted-foreground">{t('settings.testMode')}</span>
                       </div>
                       <Button size="sm" variant="outline" data-testid="button-save-stripe">
-                        Save Configuration
+                        {t('settings.saveConfiguration')}
                       </Button>
                     </div>
                   </div>
                   <div className="pt-3 border-t border-border">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('settings.status')}</span>
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-green-600 dark:text-green-400 font-medium">Connected</span>
+                        <span className="text-green-600 dark:text-green-400 font-medium">{t('settings.connected')}</span>
                       </div>
                     </div>
                   </div>
@@ -243,13 +243,13 @@ export default function Settings() {
                       <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Email Service (SMTP)</h3>
-                      <p className="text-xs text-muted-foreground">Configure email delivery settings</p>
+                      <h3 className="font-semibold text-foreground">{t('settings.emailServiceTitle')}</h3>
+                      <p className="text-xs text-muted-foreground">{t('settings.emailServiceDesc')}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="smtp-host" className="text-xs">SMTP Host</Label>
+                      <Label htmlFor="smtp-host" className="text-xs">{t('settings.smtpHost')}</Label>
                       <Input 
                         id="smtp-host" 
                         placeholder="smtp.example.com" 
@@ -259,7 +259,7 @@ export default function Settings() {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-2">
-                        <Label htmlFor="smtp-port" className="text-xs">Port</Label>
+                        <Label htmlFor="smtp-port" className="text-xs">{t('settings.port')}</Label>
                         <Input 
                           id="smtp-port" 
                           placeholder="587" 
@@ -268,7 +268,7 @@ export default function Settings() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="smtp-from" className="text-xs">From Address</Label>
+                        <Label htmlFor="smtp-from" className="text-xs">{t('settings.fromAddress')}</Label>
                         <Input 
                           id="smtp-from" 
                           placeholder="noreply@..." 
@@ -278,7 +278,7 @@ export default function Settings() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="smtp-user" className="text-xs">Username</Label>
+                      <Label htmlFor="smtp-user" className="text-xs">{t('settings.username')}</Label>
                       <Input 
                         id="smtp-user" 
                         placeholder="smtp-username" 
@@ -287,7 +287,7 @@ export default function Settings() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="smtp-pass" className="text-xs">Password</Label>
+                      <Label htmlFor="smtp-pass" className="text-xs">{t('settings.password')}</Label>
                       <Input 
                         id="smtp-pass" 
                         type="password" 
@@ -298,16 +298,16 @@ export default function Settings() {
                     </div>
                     <div className="flex justify-end pt-2">
                       <Button size="sm" variant="outline" data-testid="button-save-smtp">
-                        Save Configuration
+                        {t('settings.saveConfiguration')}
                       </Button>
                     </div>
                   </div>
                   <div className="pt-3 border-t border-border">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Status:</span>
+                      <span className="text-muted-foreground">{t('settings.status')}</span>
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">Using Development Mock</span>
+                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">{t('settings.usingDevMock')}</span>
                       </div>
                     </div>
                   </div>
@@ -322,17 +322,16 @@ export default function Settings() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">Configuration Note</h4>
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">{t('settings.configurationNote')}</h4>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      Integration settings are currently managed via environment variables in Replit Secrets. 
-                      This UI will be fully functional in a future update for easier configuration management.
+                      {t('settings.configurationNoteDesc')}
                     </p>
                     <div className="mt-3 flex gap-2">
                       <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-view-docs">
-                        View Documentation
+                        {t('settings.viewDocumentation')}
                       </Button>
                       <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-test-connection">
-                        Test Connection
+                        {t('settings.testConnection')}
                       </Button>
                     </div>
                   </div>
