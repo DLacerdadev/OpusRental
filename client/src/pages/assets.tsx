@@ -121,6 +121,9 @@ export default function Assets() {
   });
 
   const onSubmit = (data: AssetFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     // Remove latitude/longitude if they're empty strings
     const cleanedData = {
       ...data,
@@ -129,6 +132,8 @@ export default function Assets() {
       allocationType: data.allocationType || "open",
       investorId: data.allocationType === "specific" ? data.investorId : undefined,
     };
+    
+    console.log("Cleaned data:", cleanedData);
     createTrailerMutation.mutate(cleanedData as any);
   };
 
