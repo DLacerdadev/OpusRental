@@ -5,8 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Shield, Clock, History, Upload, Eye, Download } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function Compliance() {
+  const { t } = useTranslation();
   const { data: documents, isLoading: docsLoading } = useQuery({
     queryKey: ["/api/documents"],
   });
@@ -27,13 +29,13 @@ export default function Compliance() {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Compliance</h1>
-          <p className="text-sm text-muted-foreground mt-1">Documentação e auditoria completa</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t("compliance.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("compliance.subtitle")}</p>
         </div>
         <Button className="bg-accent hover:bg-accent/90 shadow-lg h-11 w-full sm:w-auto" data-testid="button-upload-document">
           <Upload className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Upload Documento</span>
-          <span className="sm:hidden">Upload</span>
+          <span className="hidden sm:inline">{t("compliance.uploadDocument")}</span>
+          <span className="sm:hidden">{t("compliance.upload")}</span>
         </Button>
       </div>
 
@@ -45,7 +47,7 @@ export default function Compliance() {
                 <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">CONTRATOS ATIVOS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t("compliance.activeContracts")}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-active-contracts">
               {documents?.filter((d: any) => d.documentType === "contract").length || 0}
             </p>
@@ -59,7 +61,7 @@ export default function Compliance() {
                 <Shield className="h-6 w-6 text-accent" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">VERIFICADOS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t("compliance.verified")}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-verified-docs">
               {documents?.filter((d: any) => d.status === "verified").length || 0}
             </p>
@@ -73,7 +75,7 @@ export default function Compliance() {
                 <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">PENDÊNCIAS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t("compliance.pending")}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-pending-items">
               {documents?.filter((d: any) => d.status === "pending").length || 0}
             </p>
@@ -87,7 +89,7 @@ export default function Compliance() {
                 <History className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">LOGS AUDITORIA</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t("compliance.auditLogs")}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-audit-logs">
               {auditLogs?.length || 0}
             </p>
@@ -98,7 +100,7 @@ export default function Compliance() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="shadow-lg">
           <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="text-lg font-bold">Contratos Digitais</CardTitle>
+            <CardTitle className="text-lg font-bold">{t("compliance.digitalContracts")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-3">
@@ -131,7 +133,7 @@ export default function Compliance() {
               ))}
               {(!documents || documents.filter((d: any) => d.documentType === "contract").length === 0) && (
                 <div className="text-center text-muted-foreground py-12">
-                  Nenhum contrato digital disponível
+                  {t("compliance.noContracts")}
                 </div>
               )}
             </div>
@@ -140,7 +142,7 @@ export default function Compliance() {
 
         <Card className="shadow-lg border-l-4 border-l-purple-500">
           <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="text-lg font-bold">Trilha de Auditoria</CardTitle>
+            <CardTitle className="text-lg font-bold">{t("compliance.auditTrail")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -164,7 +166,7 @@ export default function Compliance() {
               ))}
               {(!auditLogs || auditLogs.length === 0) && (
                 <div className="text-center text-muted-foreground py-12">
-                  Nenhum log de auditoria disponível
+                  {t("compliance.noAuditLogs")}
                 </div>
               )}
             </div>

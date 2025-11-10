@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 type MaintenanceSchedule = {
   id: string;
@@ -39,8 +40,18 @@ type Trailer = {
   trailerId: string;
 };
 
-const maintenanceFormSchema = z.object({
-  trailerId: z.string().min(1, "Trailer is required"),
+type MaintenanceFormData = {
+  trailerId: string;
+  scheduleType: "time_based" | "km_based";
+  intervalDays?: number;
+  intervalKm?: string;
+  lastMaintenanceDate?: string;
+  lastMaintenanceKm?: string;
+  notes?: string;
+};
+
+const getMaintenanceFormSchema = (t: (key: string) => string) => z.object({
+  trailerId: z.string().min(1, t("maintenance.validation.trailerRequired")),
   scheduleType: z.enum(["time_based", "km_based"]),
   intervalDays: z.coerce.number().optional(),
   intervalKm: z.string().optional(),
@@ -49,10 +60,10 @@ const maintenanceFormSchema = z.object({
   notes: z.string().optional(),
 });
 
-type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
-
 export default function Maintenance() {
+  const { t } = useTranslation();
   const { toast } = useToast();
+  const maintenanceFormSchema = getMaintenanceFormSchema(t);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -100,12 +111,16 @@ export default function Maintenance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance"] });
-      toast({ title: "Maintenance schedule created successfully" });
+      toast({ title: t("maintenance.toastCreateSuccess") });
       setIsCreateOpen(false);
       createForm.reset();
     },
-    onError: () => {
-      toast({ title: "Failed to create maintenance schedule", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ 
+        title: t("maintenance.toastCreateError"), 
+        description: error?.message || t("maintenance.toastCreateErrorDescription"),
+        variant: "destructive" 
+      });
     },
   });
 
@@ -115,12 +130,16 @@ export default function Maintenance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance"] });
-      toast({ title: "Maintenance schedule updated successfully" });
+      toast({ title: t("maintenance.toastUpdateSuccess") });
       setIsEditOpen(false);
       setSelectedSchedule(null);
     },
-    onError: () => {
-      toast({ title: "Failed to update maintenance schedule", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ 
+        title: t("maintenance.toastUpdateError"),
+        description: error?.message || t("maintenance.toastUpdateErrorDescription"),
+        variant: "destructive" 
+      });
     },
   });
 
@@ -130,12 +149,16 @@ export default function Maintenance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance"] });
-      toast({ title: "Maintenance marked as completed" });
+      toast({ title: t("maintenance.toastCompleteSuccess") });
       setIsCompleteOpen(false);
       setSelectedSchedule(null);
     },
-    onError: () => {
-      toast({ title: "Failed to complete maintenance", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ 
+        title: t("maintenance.toastCompleteError"),
+        description: error?.message || t("maintenance.toastCompleteErrorDescription"),
+        variant: "destructive" 
+      });
     },
   });
 
@@ -179,7 +202,7 @@ export default function Maintenance() {
     const notes = (document.getElementById("completion-notes") as HTMLTextAreaElement)?.value;
     
     if (!completionDate) {
-      toast({ title: "Completion date is required", variant: "destructive" });
+      toast({ title: t("maintenance.toastDateRequired"), variant: "destructive" });
       return;
     }
     
@@ -198,9 +221,9 @@ export default function Maintenance() {
       completed: "secondary",
     };
     const labels = {
-      scheduled: "Scheduled",
-      urgent: "Urgent",
-      completed: "Completed",
+      scheduled: t("maintenance.statusScheduled"),
+      urgent: t("maintenance.statusUrgent"),
+      completed: t("maintenance.statusCompleted"),
     };
     const testId = scheduleId ? `badge-status-${scheduleId}` : `badge-status-${status}`;
     return (
@@ -214,8 +237,8 @@ export default function Maintenance() {
 
   const getTypeLabel = (type: string) => {
     const labels = {
-      time_based: "Time-Based",
-      km_based: "KM-Based",
+      time_based: t("maintenance.typeTimeBased"),
+      km_based: t("maintenance.typeKmBased"),
     };
     return labels[type as keyof typeof labels] || type;
   };
@@ -225,21 +248,21 @@ export default function Maintenance() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">
-            Maintenance Schedules
+            {t("maintenance.title")}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage trailer maintenance schedules</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t("maintenance.subtitle")}</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-create-schedule">
               <Plus className="h-4 w-4 mr-2" />
-              New Schedule
+              {t("maintenance.newSchedule")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Maintenance Schedule</DialogTitle>
-              <DialogDescription>Set up automatic maintenance scheduling</DialogDescription>
+              <DialogTitle>{t("maintenance.createTitle")}</DialogTitle>
+              <DialogDescription>{t("maintenance.createDescription")}</DialogDescription>
             </DialogHeader>
             <Form {...createForm}>
               <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-4">
@@ -248,11 +271,11 @@ export default function Maintenance() {
                   name="trailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trailer</FormLabel>
+                      <FormLabel>{t("maintenance.formTrailer")}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-trailer">
-                            <SelectValue placeholder="Select trailer" />
+                            <SelectValue placeholder={t("maintenance.formTrailerPlaceholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -272,7 +295,7 @@ export default function Maintenance() {
                   name="scheduleType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Schedule Type</FormLabel>
+                      <FormLabel>{t("maintenance.formScheduleType")}</FormLabel>
                       <Select onValueChange={(value) => { field.onChange(value); setScheduleType(value as any); }} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-schedule-type">
@@ -280,12 +303,12 @@ export default function Maintenance() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="time_based">Time-Based (Days)</SelectItem>
-                          <SelectItem value="km_based">KM-Based</SelectItem>
+                          <SelectItem value="time_based">{t("maintenance.typeTimeBased")}</SelectItem>
+                          <SelectItem value="km_based">{t("maintenance.typeKmBased")}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Time-based: Maintenance every X days. KM-based: Maintenance every X kilometers
+                        {t("maintenance.formScheduleTypeDescription")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -298,11 +321,11 @@ export default function Maintenance() {
                       name="intervalDays"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Interval (Days)</FormLabel>
+                          <FormLabel>{t("maintenance.formIntervalDays")}</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} placeholder="90" data-testid="input-interval-days" />
                           </FormControl>
-                          <FormDescription>How often should maintenance be performed (in days)</FormDescription>
+                          <FormDescription>{t("maintenance.formIntervalDaysDescription")}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -312,7 +335,7 @@ export default function Maintenance() {
                       name="lastMaintenanceDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Last Maintenance Date</FormLabel>
+                          <FormLabel>{t("maintenance.formLastMaintenanceDate")}</FormLabel>
                           <FormControl>
                             <Input type="date" {...field} data-testid="input-last-date" />
                           </FormControl>
@@ -329,11 +352,11 @@ export default function Maintenance() {
                       name="intervalKm"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Interval (KM)</FormLabel>
+                          <FormLabel>{t("maintenance.formIntervalKm")}</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} placeholder="10000" data-testid="input-interval-km" />
                           </FormControl>
-                          <FormDescription>How often should maintenance be performed (in kilometers)</FormDescription>
+                          <FormDescription>{t("maintenance.formIntervalKmDescription")}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -343,7 +366,7 @@ export default function Maintenance() {
                       name="lastMaintenanceKm"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Last Maintenance KM</FormLabel>
+                          <FormLabel>{t("maintenance.formLastMaintenanceKm")}</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} placeholder="50000" data-testid="input-last-km" />
                           </FormControl>
@@ -358,9 +381,9 @@ export default function Maintenance() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>{t("maintenance.formNotes")}</FormLabel>
                       <FormControl>
-                        <Textarea {...field} placeholder="Maintenance notes..." rows={3} data-testid="textarea-notes" />
+                        <Textarea {...field} placeholder={t("maintenance.formNotesPlaceholder")} rows={3} data-testid="textarea-notes" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -368,10 +391,10 @@ export default function Maintenance() {
                 />
                 <div className="flex justify-end gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)} data-testid="button-cancel">
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending} data-testid="button-submit">
-                    {createMutation.isPending ? "Creating..." : "Create Schedule"}
+                    {createMutation.isPending ? t("maintenance.creating") : t("maintenance.createSchedule")}
                   </Button>
                 </div>
               </form>
@@ -383,7 +406,7 @@ export default function Maintenance() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Schedules</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("maintenance.statTotal")}</CardTitle>
             <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -396,7 +419,7 @@ export default function Maintenance() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("maintenance.statScheduled")}</CardTitle>
             <Wrench className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
@@ -409,7 +432,7 @@ export default function Maintenance() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Urgent</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("maintenance.statUrgent")}</CardTitle>
             <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
@@ -422,7 +445,7 @@ export default function Maintenance() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("maintenance.statCompleted")}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
@@ -437,19 +460,19 @@ export default function Maintenance() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Maintenance Schedules</CardTitle>
+          <CardTitle>{t("maintenance.tableTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Trailer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Last Maintenance</TableHead>
-                  <TableHead>Next Maintenance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("maintenance.tableTrailer")}</TableHead>
+                  <TableHead>{t("maintenance.tableType")}</TableHead>
+                  <TableHead>{t("maintenance.tableLastMaintenance")}</TableHead>
+                  <TableHead>{t("maintenance.tableNextMaintenance")}</TableHead>
+                  <TableHead>{t("maintenance.tableStatus")}</TableHead>
+                  <TableHead className="text-right">{t("maintenance.tableActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -467,7 +490,7 @@ export default function Maintenance() {
                 ) : schedules.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400" data-testid="text-empty-state">
-                      No maintenance schedules found
+                      {t("maintenance.emptyState")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -540,8 +563,8 @@ export default function Maintenance() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Maintenance Schedule</DialogTitle>
-            <DialogDescription>Update the maintenance schedule details</DialogDescription>
+            <DialogTitle>{t("maintenance.editTitle")}</DialogTitle>
+            <DialogDescription>{t("maintenance.editDescription")}</DialogDescription>
           </DialogHeader>
           <Form {...editForm}>
             <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
@@ -550,7 +573,7 @@ export default function Maintenance() {
                 name="trailerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trailer</FormLabel>
+                    <FormLabel>{t("maintenance.formTrailer")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="edit-select-trailer">
@@ -574,7 +597,7 @@ export default function Maintenance() {
                 name="scheduleType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Schedule Type</FormLabel>
+                    <FormLabel>{t("maintenance.formScheduleType")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="edit-select-type">
@@ -582,8 +605,8 @@ export default function Maintenance() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="time_based">Time-Based (Days)</SelectItem>
-                        <SelectItem value="km_based">KM-Based</SelectItem>
+                        <SelectItem value="time_based">{t("maintenance.typeTimeBased")}</SelectItem>
+                        <SelectItem value="km_based">{t("maintenance.typeKmBased")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -597,7 +620,7 @@ export default function Maintenance() {
                     name="intervalDays"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Interval (Days)</FormLabel>
+                        <FormLabel>{t("maintenance.formIntervalDays")}</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} data-testid="edit-input-interval-days" />
                         </FormControl>
@@ -610,7 +633,7 @@ export default function Maintenance() {
                     name="lastMaintenanceDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Maintenance Date</FormLabel>
+                        <FormLabel>{t("maintenance.formLastMaintenanceDate")}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} data-testid="edit-input-last-date" />
                         </FormControl>
@@ -627,7 +650,7 @@ export default function Maintenance() {
                     name="intervalKm"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Interval (KM)</FormLabel>
+                        <FormLabel>{t("maintenance.formIntervalKm")}</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} data-testid="edit-input-interval-km" />
                         </FormControl>
@@ -640,7 +663,7 @@ export default function Maintenance() {
                     name="lastMaintenanceKm"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Maintenance KM</FormLabel>
+                        <FormLabel>{t("maintenance.formLastMaintenanceKm")}</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} data-testid="edit-input-last-km" />
                         </FormControl>
@@ -655,7 +678,7 @@ export default function Maintenance() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>{t("maintenance.formNotes")}</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={3} data-testid="edit-textarea-notes" />
                     </FormControl>
@@ -665,10 +688,10 @@ export default function Maintenance() {
               />
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} data-testid="edit-button-cancel">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button type="submit" disabled={updateMutation.isPending} data-testid="edit-button-submit">
-                  {updateMutation.isPending ? "Updating..." : "Update Schedule"}
+                  {updateMutation.isPending ? t("maintenance.updating") : t("maintenance.updateSchedule")}
                 </Button>
               </div>
             </form>
@@ -679,29 +702,29 @@ export default function Maintenance() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Maintenance Schedule Details</DialogTitle>
+            <DialogTitle>{t("maintenance.detailsTitle")}</DialogTitle>
           </DialogHeader>
           {selectedSchedule && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Trailer</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formTrailer")}</p>
                   <p className="font-medium" data-testid="details-trailer">
                     {trailers.find((t) => t.id === selectedSchedule.trailerId)?.trailerId || selectedSchedule.trailerId}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Type</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formScheduleType")}</p>
                   <p className="font-medium" data-testid="details-type">{getTypeLabel(selectedSchedule.scheduleType)}</p>
                 </div>
                 {selectedSchedule.scheduleType === "time_based" && (
                   <>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Interval</p>
-                      <p className="font-medium" data-testid="details-interval">{selectedSchedule.intervalDays} days</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsInterval")}</p>
+                      <p className="font-medium" data-testid="details-interval">{selectedSchedule.intervalDays} {t("maintenance.days")}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Last Maintenance</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsLastMaintenance")}</p>
                       <p className="font-medium" data-testid="details-last-maintenance">
                         {selectedSchedule.lastMaintenanceDate
                           ? format(new Date(selectedSchedule.lastMaintenanceDate), "MMM dd, yyyy")
@@ -709,7 +732,7 @@ export default function Maintenance() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Next Maintenance</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsNextMaintenance")}</p>
                       <p className="font-medium" data-testid="details-next-maintenance">
                         {selectedSchedule.nextMaintenanceDate
                           ? format(new Date(selectedSchedule.nextMaintenanceDate), "MMM dd, yyyy")
@@ -721,27 +744,27 @@ export default function Maintenance() {
                 {selectedSchedule.scheduleType === "km_based" && (
                   <>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Interval</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsInterval")}</p>
                       <p className="font-medium" data-testid="details-interval">{selectedSchedule.intervalKm} km</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Last Maintenance</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsLastMaintenance")}</p>
                       <p className="font-medium" data-testid="details-last-maintenance">{selectedSchedule.lastMaintenanceKm} km</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Next Maintenance</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsNextMaintenance")}</p>
                       <p className="font-medium" data-testid="details-next-maintenance">{selectedSchedule.nextMaintenanceKm} km</p>
                     </div>
                   </>
                 )}
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.tableStatus")}</p>
                   <div className="mt-1" data-testid="details-status">{getStatusBadge(selectedSchedule.status, selectedSchedule.id)}</div>
                 </div>
               </div>
               {selectedSchedule.notes && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Notes</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formNotes")}</p>
                   <p className="mt-1" data-testid="details-notes">{selectedSchedule.notes}</p>
                 </div>
               )}
@@ -753,19 +776,19 @@ export default function Maintenance() {
       <Dialog open={isCompleteOpen} onOpenChange={setIsCompleteOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Complete Maintenance</DialogTitle>
-            <DialogDescription>Mark this maintenance as completed</DialogDescription>
+            <DialogTitle>{t("maintenance.completeTitle")}</DialogTitle>
+            <DialogDescription>{t("maintenance.completeDescription")}</DialogDescription>
           </DialogHeader>
           {selectedSchedule && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Trailer</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formTrailer")}</p>
                 <p className="font-medium" data-testid="text-complete-trailer">
                   {trailers.find((t) => t.id === selectedSchedule.trailerId)?.trailerId || selectedSchedule.trailerId}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium">Completion Date *</label>
+                <label className="text-sm font-medium">{t("maintenance.completionDate")}</label>
                 <Input
                   id="completion-date"
                   type="date"
@@ -775,7 +798,7 @@ export default function Maintenance() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Cost (Optional)</label>
+                <label className="text-sm font-medium">{t("maintenance.cost")}</label>
                 <Input
                   id="cost"
                   type="number"
@@ -785,10 +808,10 @@ export default function Maintenance() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Notes (Optional)</label>
+                <label className="text-sm font-medium">{t("maintenance.notesOptional")}</label>
                 <Textarea
                   id="completion-notes"
-                  placeholder="Maintenance details..."
+                  placeholder={t("maintenance.completionNotesPlaceholder")}
                   rows={3}
                   className="mt-1"
                   data-testid="textarea-completion-notes"
@@ -801,7 +824,7 @@ export default function Maintenance() {
                   onClick={() => setIsCompleteOpen(false)}
                   data-testid="button-cancel-complete"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
@@ -809,7 +832,7 @@ export default function Maintenance() {
                   disabled={completeMutation.isPending}
                   data-testid="button-confirm-complete"
                 >
-                  {completeMutation.isPending ? "Completing..." : "Mark as Completed"}
+                  {completeMutation.isPending ? t("maintenance.completing") : t("maintenance.markAsCompleted")}
                 </Button>
               </div>
             </div>

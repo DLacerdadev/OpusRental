@@ -169,9 +169,10 @@ export default function BrokerPage() {
       setIsCreateDialogOpen(false);
       createForm.reset();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: t("broker.messages.createError"),
+        description: error?.message || t("broker.messages.createErrorDescription"),
         variant: "destructive",
       });
     },
@@ -189,9 +190,10 @@ export default function BrokerPage() {
       setSelectedDispatch(null);
       editForm.reset();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: t("broker.messages.updateError"),
+        description: error?.message || t("broker.messages.updateErrorDescription"),
         variant: "destructive",
       });
     },
