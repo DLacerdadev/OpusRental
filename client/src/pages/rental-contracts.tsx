@@ -16,8 +16,10 @@ import { insertRentalContractSchema, type InsertRentalContract } from "@shared/s
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function RentalContracts() {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<any>(null);
@@ -58,16 +60,16 @@ export default function RentalContracts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-contracts"] });
       toast({
-        title: "Contract created",
-        description: "Rental contract has been successfully created",
+        title: t('rentalContracts.toastCreateTitle'),
+        description: t('rentalContracts.toastCreateDescription'),
       });
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating contract",
-        description: error.message || "Failed to create rental contract",
+        title: t('rentalContracts.toastCreateErrorTitle'),
+        description: error?.message || t('rentalContracts.toastCreateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -80,8 +82,8 @@ export default function RentalContracts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-contracts"] });
       toast({
-        title: "Contract updated",
-        description: "Rental contract has been successfully updated",
+        title: t('rentalContracts.toastUpdateTitle'),
+        description: t('rentalContracts.toastUpdateDescription'),
       });
       setDialogOpen(false);
       setEditingContract(null);
@@ -89,8 +91,8 @@ export default function RentalContracts() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating contract",
-        description: error.message || "Failed to update rental contract",
+        title: t('rentalContracts.toastUpdateErrorTitle'),
+        description: error?.message || t('rentalContracts.toastUpdateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -103,14 +105,14 @@ export default function RentalContracts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-contracts"] });
       toast({
-        title: "Contract terminated",
-        description: "Rental contract has been terminated",
+        title: t('rentalContracts.toastTerminateTitle'),
+        description: t('rentalContracts.toastTerminateDescription'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error terminating contract",
-        description: error.message || "Failed to terminate contract",
+        title: t('rentalContracts.toastTerminateErrorTitle'),
+        description: error?.message || t('rentalContracts.toastTerminateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -141,7 +143,7 @@ export default function RentalContracts() {
   };
 
   const handleTerminate = (id: string) => {
-    if (confirm("Are you sure you want to terminate this contract? This will change its status to cancelled.")) {
+    if (confirm(t('rentalContracts.confirmTerminate'))) {
       terminateContractMutation.mutate(id);
     }
   };
@@ -168,23 +170,29 @@ export default function RentalContracts() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { className: string; label: string }> = {
-      active: { className: "bg-green-600 dark:bg-green-400 text-white", label: "Active" },
-      expired: { className: "bg-orange-600 dark:bg-orange-400 text-white", label: "Expired" },
-      cancelled: { className: "bg-red-600 dark:bg-red-400 text-white", label: "Cancelled" },
+    const labels: Record<string, string> = {
+      active: t('rentalContracts.statusActive'),
+      expired: t('rentalContracts.statusExpired'),
+      cancelled: t('rentalContracts.statusCancelled'),
     };
+    const variants: Record<string, string> = {
+      active: "bg-green-600 dark:bg-green-400 text-white",
+      expired: "bg-orange-600 dark:bg-orange-400 text-white",
+      cancelled: "bg-red-600 dark:bg-red-400 text-white",
+    };
+    const label = labels[status] || labels.active;
     const variant = variants[status] || variants.active;
-    return <Badge className={variant.className}>{variant.label}</Badge>;
+    return <Badge className={variant}>{label}</Badge>;
   };
 
   const getClientName = (clientId: string) => {
     const client = clients.find((c: any) => c.id === clientId);
-    return client ? client.companyName : "Unknown Client";
+    return client ? client.companyName : t('rentalContracts.unknownClient');
   };
 
   const getTrailerName = (trailerId: string) => {
     const trailer = trailers.find((t: any) => t.id === trailerId);
-    return trailer ? `${trailer.trailerId} - ${trailer.model}` : "Unknown Trailer";
+    return trailer ? `${trailer.trailerId} - ${trailer.model}` : t('rentalContracts.unknownTrailer');
   };
 
   if (isLoading) {
@@ -208,10 +216,10 @@ export default function RentalContracts() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-rental-contracts">
-            Rental Contracts
+            {t('rentalContracts.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage trailer rental agreements with clients
+            {t('rentalContracts.subtitle')}
           </p>
         </div>
         <Button
@@ -220,8 +228,8 @@ export default function RentalContracts() {
           data-testid="button-new-contract"
         >
           <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">New Contract</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">{t('rentalContracts.newContract')}</span>
+          <span className="sm:hidden">{t('rentalContracts.newContractShort')}</span>
         </Button>
       </div>
 
@@ -234,7 +242,7 @@ export default function RentalContracts() {
                 <FileText className="h-6 w-6 text-accent" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">TOTAL CONTRACTS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.totalContracts')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-total-contracts">
               {stats.total}
             </p>
@@ -248,7 +256,7 @@ export default function RentalContracts() {
                 <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">ACTIVE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.active')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-active-contracts">
               {stats.active}
             </p>
@@ -262,7 +270,7 @@ export default function RentalContracts() {
                 <FileText className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">EXPIRED</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.expired')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-expired-contracts">
               {stats.expired}
             </p>
@@ -276,7 +284,7 @@ export default function RentalContracts() {
                 <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">CANCELLED</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.cancelled')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-cancelled-contracts">
               {stats.cancelled}
             </p>
@@ -287,7 +295,7 @@ export default function RentalContracts() {
       {/* Contracts Table */}
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">Contract List</CardTitle>
+          <CardTitle className="text-lg font-bold">{t('rentalContracts.contractList')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -295,25 +303,25 @@ export default function RentalContracts() {
               <thead className="bg-muted/50 border-b">
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Contract #
+                    {t('rentalContracts.tableContract')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
-                    Client
+                    {t('rentalContracts.tableClient')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
-                    Trailer
+                    {t('rentalContracts.tableTrailer')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
-                    Period
+                    {t('rentalContracts.tablePeriod')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Monthly Rate
+                    {t('rentalContracts.tableMonthlyRate')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Status
+                    {t('rentalContracts.tableStatus')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Actions
+                    {t('rentalContracts.tableActions')}
                   </th>
                 </tr>
               </thead>
@@ -401,8 +409,8 @@ export default function RentalContracts() {
                     <td colSpan={7} className="px-6 py-12 text-center">
                       <div className="text-center text-muted-foreground">
                         <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">No rental contracts registered</p>
-                        <p className="text-xs mt-1">Click "New Contract" to create your first contract</p>
+                        <p className="text-sm">{t('rentalContracts.noContracts')}</p>
+                        <p className="text-xs mt-1">{t('rentalContracts.noContractsHint')}</p>
                       </div>
                     </td>
                   </tr>
@@ -418,12 +426,12 @@ export default function RentalContracts() {
         <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingContract ? "Edit Contract" : "New Rental Contract"}
+              {editingContract ? t('rentalContracts.dialogEditTitle') : t('rentalContracts.dialogCreateTitle')}
             </DialogTitle>
             <DialogDescription>
               {editingContract 
-                ? "Update rental contract information" 
-                : "Create a new trailer rental agreement"}
+                ? t('rentalContracts.dialogEditDescription')
+                : t('rentalContracts.dialogCreateDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -435,10 +443,10 @@ export default function RentalContracts() {
                   name="contractNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contract Number *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formContractNumber')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="RC001"
+                          placeholder={t('rentalContracts.placeholderContractNumber')}
                           {...field}
                           data-testid="input-contract-number"
                         />
@@ -453,20 +461,20 @@ export default function RentalContracts() {
                   name="duration"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duration (months) *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formDuration')}</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(parseInt(value))}
                         defaultValue={field.value.toString()}
                       >
                         <FormControl>
                           <SelectTrigger data-testid="select-duration">
-                            <SelectValue placeholder="Select duration" />
+                            <SelectValue placeholder={t('rentalContracts.placeholderDuration')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="3">3 months</SelectItem>
-                          <SelectItem value="6">6 months</SelectItem>
-                          <SelectItem value="12">12 months</SelectItem>
+                          <SelectItem value="3">{t('rentalContracts.duration3Months')}</SelectItem>
+                          <SelectItem value="6">{t('rentalContracts.duration6Months')}</SelectItem>
+                          <SelectItem value="12">{t('rentalContracts.duration12Months')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -481,11 +489,11 @@ export default function RentalContracts() {
                   name="clientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formClient')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-client">
-                            <SelectValue placeholder="Select client" />
+                            <SelectValue placeholder={t('rentalContracts.placeholderClient')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -506,11 +514,11 @@ export default function RentalContracts() {
                   name="trailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trailer *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formTrailer')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-trailer">
-                            <SelectValue placeholder="Select trailer" />
+                            <SelectValue placeholder={t('rentalContracts.placeholderTrailer')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -533,7 +541,7 @@ export default function RentalContracts() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Date *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formStartDate')}</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -551,7 +559,7 @@ export default function RentalContracts() {
                   name="endDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Date *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formEndDate')}</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -571,12 +579,12 @@ export default function RentalContracts() {
                   name="monthlyRate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monthly Rate ($) *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formMonthlyRate')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
-                          placeholder="1500.00"
+                          placeholder={t('rentalContracts.placeholderMonthlyRate')}
                           {...field}
                           data-testid="input-monthly-rate"
                         />
@@ -591,17 +599,17 @@ export default function RentalContracts() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status *</FormLabel>
+                      <FormLabel>{t('rentalContracts.formStatus')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-status">
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder={t('rentalContracts.placeholderStatus')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="expired">Expired</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="active">{t('rentalContracts.statusActive')}</SelectItem>
+                          <SelectItem value="expired">{t('rentalContracts.statusExpired')}</SelectItem>
+                          <SelectItem value="cancelled">{t('rentalContracts.statusCancelled')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -615,10 +623,10 @@ export default function RentalContracts() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>{t('rentalContracts.formNotes')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Additional contract notes..."
+                        placeholder={t('rentalContracts.placeholderNotes')}
                         className="min-h-[100px]"
                         {...field}
                         value={field.value || ""}
@@ -641,7 +649,7 @@ export default function RentalContracts() {
                   }}
                   data-testid="button-cancel"
                 >
-                  Cancel
+                  {t('rentalContracts.buttonCancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -649,7 +657,9 @@ export default function RentalContracts() {
                   disabled={createContractMutation.isPending || updateContractMutation.isPending}
                   data-testid="button-submit"
                 >
-                  {editingContract ? "Update Contract" : "Create Contract"}
+                  {createContractMutation.isPending || updateContractMutation.isPending
+                    ? (editingContract ? t('rentalContracts.buttonUpdating') : t('rentalContracts.buttonCreating'))
+                    : (editingContract ? t('rentalContracts.buttonUpdate') : t('rentalContracts.buttonCreate'))}
                 </Button>
               </div>
             </form>
@@ -661,9 +671,9 @@ export default function RentalContracts() {
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="w-[95vw] max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Contract Details</DialogTitle>
+            <DialogTitle>{t('rentalContracts.dialogDetailsTitle')}</DialogTitle>
             <DialogDescription>
-              Complete information about contract {selectedContract?.contractNumber}
+              {t('rentalContracts.dialogDetailsDescription', { number: selectedContract?.contractNumber })}
             </DialogDescription>
           </DialogHeader>
 
@@ -671,40 +681,40 @@ export default function RentalContracts() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Contract Number</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailContractNumber')}</p>
                   <p className="text-base text-foreground font-semibold">{selectedContract.contractNumber}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Status</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailStatus')}</p>
                   {getStatusBadge(selectedContract.status)}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Client</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailClient')}</p>
                   <p className="text-base text-foreground">{getClientName(selectedContract.clientId)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Trailer</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailTrailer')}</p>
                   <p className="text-base text-foreground">{getTrailerName(selectedContract.trailerId)}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Start Date</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailStartDate')}</p>
                   <p className="text-base text-foreground">{selectedContract.startDate}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">End Date</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailEndDate')}</p>
                   <p className="text-base text-foreground">{selectedContract.endDate}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Monthly Rate</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailMonthlyRate')}</p>
                   <p className="text-base text-foreground font-bold">
                     ${parseFloat(selectedContract.monthlyRate).toLocaleString('en-US', {
                       minimumFractionDigits: 2,
@@ -713,14 +723,14 @@ export default function RentalContracts() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Duration</p>
-                  <p className="text-base text-foreground">{selectedContract.duration} months</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailDuration')}</p>
+                  <p className="text-base text-foreground">{selectedContract.duration} {t('rentalContracts.detailDurationMonths')}</p>
                 </div>
               </div>
 
               {selectedContract.notes && (
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Notes</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalContracts.detailNotes')}</p>
                   <p className="text-base text-foreground">{selectedContract.notes}</p>
                 </div>
               )}

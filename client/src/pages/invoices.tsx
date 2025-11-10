@@ -47,16 +47,10 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-
-const invoiceFormSchema = insertInvoiceSchema.extend({
-  amount: z.string().min(1, "Amount is required"),
-  dueDate: z.string().min(1, "Due date is required"),
-  referenceMonth: z.string().min(1, "Reference month is required"),
-});
-
-type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
+import { useTranslation } from "react-i18next";
 
 export default function Invoices() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -96,22 +90,22 @@ export default function Invoices() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error("Failed to create invoice");
+      if (!response.ok) throw new Error();
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
       toast({
-        title: "Success",
-        description: "Invoice created successfully",
+        title: t('invoices.toastCreateTitle'),
+        description: t('invoices.toastCreateDescription'),
       });
       setIsCreateOpen(false);
       form.reset();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to create invoice",
+        title: t('invoices.toastCreateErrorTitle'),
+        description: error?.message || t('invoices.toastCreateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -124,21 +118,21 @@ export default function Invoices() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paidDate }),
       });
-      if (!response.ok) throw new Error("Failed to update invoice");
+      if (!response.ok) throw new Error();
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
       toast({
-        title: "Success",
-        description: "Invoice updated successfully",
+        title: t('invoices.toastUpdateTitle'),
+        description: t('invoices.toastUpdateDescription'),
       });
       setIsEditOpen(false);
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to update invoice",
+        title: t('invoices.toastUpdateErrorTitle'),
+        description: error?.message || t('invoices.toastUpdateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -149,20 +143,20 @@ export default function Invoices() {
       const response = await fetch(`/api/invoices/${id}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to delete invoice");
+      if (!response.ok) throw new Error();
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
       toast({
-        title: "Success",
-        description: "Invoice deleted successfully",
+        title: t('invoices.toastDeleteTitle'),
+        description: t('invoices.toastDeleteDescription'),
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to delete invoice",
+        title: t('invoices.toastDeleteErrorTitle'),
+        description: error?.message || t('invoices.toastDeleteErrorDescription'),
         variant: "destructive",
       });
     },
@@ -181,7 +175,7 @@ export default function Invoices() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this invoice?")) {
+    if (confirm(t('invoices.confirmDelete'))) {
       deleteMutation.mutate(id);
     }
   };
@@ -201,20 +195,27 @@ export default function Invoices() {
     .reduce((sum: number, i: any) => sum + parseFloat(i.amount || "0"), 0);
 
   const getStatusBadge = (status: string) => {
+    const labels: Record<string, string> = {
+      pending: t('invoices.statusPending'),
+      paid: t('invoices.statusPaid'),
+      overdue: t('invoices.statusOverdue'),
+      cancelled: t('invoices.statusCancelled'),
+    };
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", className: string }> = {
       pending: { variant: "outline", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800" },
       paid: { variant: "default", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" },
       overdue: { variant: "destructive", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800" },
       cancelled: { variant: "secondary", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800" },
     };
+    const label = labels[status] || labels.pending;
     const config = variants[status] || variants.pending;
-    return <Badge variant={config.variant} className={config.className}>{status.toUpperCase()}</Badge>;
+    return <Badge variant={config.variant} className={config.className}>{label}</Badge>;
   };
 
   if (isLoading) {
     return (
       <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-        <p className="text-muted-foreground">Loading invoices...</p>
+        <p className="text-muted-foreground">{t('invoices.loading')}</p>
       </div>
     );
   }
@@ -224,10 +225,10 @@ export default function Invoices() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-invoices">
-            Invoices & Billing
+            {t('invoices.title')}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Manage rental invoices and track payments
+            {t('invoices.subtitle')}
           </p>
         </div>
         <Button
@@ -236,7 +237,7 @@ export default function Invoices() {
           data-testid="button-new-invoice"
         >
           <Plus className="h-4 w-4 mr-2" />
-          New Invoice
+          {t('invoices.newInvoice')}
         </Button>
       </div>
 
@@ -244,7 +245,7 @@ export default function Invoices() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card className="bg-card dark:bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Total Invoices</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.totalInvoices')}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -256,7 +257,7 @@ export default function Invoices() {
 
         <Card className="bg-card dark:bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.pending')}</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
           </CardHeader>
           <CardContent>
@@ -268,7 +269,7 @@ export default function Invoices() {
 
         <Card className="bg-card dark:bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Paid</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.paid')}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />
           </CardHeader>
           <CardContent>
@@ -280,7 +281,7 @@ export default function Invoices() {
 
         <Card className="bg-card dark:bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Overdue</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.overdue')}</CardTitle>
             <AlertCircle className="h-4 w-4 text-red-500 dark:text-red-400" />
           </CardHeader>
           <CardContent>
@@ -294,26 +295,26 @@ export default function Invoices() {
       {/* Invoices Table */}
       <Card className="bg-card dark:bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-card-foreground">All Invoices</CardTitle>
+          <CardTitle className="text-card-foreground">{t('invoices.allInvoices')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Invoice #</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Client</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Amount</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Due Date</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">Actions</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableInvoice')}</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableClient')}</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableAmount')}</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableDueDate')}</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableStatus')}</th>
+                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableActions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {invoices.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center p-8 text-muted-foreground">
-                      No invoices found. Create your first invoice to get started.
+                      {t('invoices.noInvoices')}
                     </td>
                   </tr>
                 ) : (
@@ -396,9 +397,9 @@ export default function Invoices() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-xl sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-background dark:bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Create New Invoice</DialogTitle>
+            <DialogTitle className="text-foreground">{t('invoices.dialogCreateTitle')}</DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Generate a new invoice for a rental contract
+              {t('invoices.dialogCreateDescription')}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -408,7 +409,7 @@ export default function Invoices() {
                 name="invoiceNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Invoice Number</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formInvoiceNumber')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="INV-001"
@@ -452,7 +453,7 @@ export default function Invoices() {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Amount</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formAmount')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -473,7 +474,7 @@ export default function Invoices() {
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Due Date</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formDueDate')}</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -492,7 +493,7 @@ export default function Invoices() {
                 name="referenceMonth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Reference Month</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formReferenceMonth')}</FormLabel>
                     <FormControl>
                       <Input
                         type="month"
@@ -535,7 +536,7 @@ export default function Invoices() {
                   className="border-input text-foreground hover:bg-muted dark:hover:bg-muted/20"
                   data-testid="button-cancel"
                 >
-                  Cancel
+                  {t('invoices.buttonCancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -543,7 +544,7 @@ export default function Invoices() {
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   data-testid="button-submit"
                 >
-                  {createMutation.isPending ? "Creating..." : "Create Invoice"}
+                  {createMutation.isPending ? t('invoices.buttonCreating') : t('invoices.buttonCreate')}
                 </Button>
               </DialogFooter>
             </form>
@@ -555,38 +556,38 @@ export default function Invoices() {
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-xl sm:max-w-2xl bg-background dark:bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Invoice Details</DialogTitle>
+            <DialogTitle className="text-foreground">{t('invoices.dialogDetailsTitle')}</DialogTitle>
           </DialogHeader>
           {selectedInvoice && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Invoice Number</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailInvoiceNumber')}</p>
                   <p className="font-medium text-foreground">{selectedInvoice.invoiceNumber}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailStatus')}</p>
                   {getStatusBadge(selectedInvoice.status)}
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailAmount')}</p>
                   <p className="font-medium text-foreground">
                     ${parseFloat(selectedInvoice.amount || "0").toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Due Date</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailDueDate')}</p>
                   <p className="font-medium text-foreground">
                     {selectedInvoice.dueDate ? format(new Date(selectedInvoice.dueDate), "MMM dd, yyyy") : "N/A"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Reference Month</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailReferenceMonth')}</p>
                   <p className="font-medium text-foreground">{selectedInvoice.referenceMonth}</p>
                 </div>
                 {selectedInvoice.paidDate && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Paid Date</p>
+                    <p className="text-sm text-muted-foreground">{t('invoices.detailPaidDate')}</p>
                     <p className="font-medium text-foreground">
                       {format(new Date(selectedInvoice.paidDate), "MMM dd, yyyy")}
                     </p>
@@ -595,7 +596,7 @@ export default function Invoices() {
               </div>
               {selectedInvoice.notes && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Notes</p>
+                  <p className="text-sm text-muted-foreground">{t('invoices.detailNotes')}</p>
                   <p className="font-medium text-foreground">{selectedInvoice.notes}</p>
                 </div>
               )}

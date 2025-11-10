@@ -52,16 +52,16 @@ export default function RentalClients() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-clients"] });
       toast({
-        title: "Client created",
-        description: "Rental client has been successfully registered",
+        title: t('rentalClients.toastCreateTitle'),
+        description: t('rentalClients.toastCreateDescription'),
       });
       setDialogOpen(false);
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating client",
-        description: error.message || "Failed to create rental client",
+        title: t('rentalClients.toastCreateErrorTitle'),
+        description: error?.message || t('rentalClients.toastCreateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -74,8 +74,8 @@ export default function RentalClients() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-clients"] });
       toast({
-        title: "Client updated",
-        description: "Rental client has been successfully updated",
+        title: t('rentalClients.toastUpdateTitle'),
+        description: t('rentalClients.toastUpdateDescription'),
       });
       setDialogOpen(false);
       setEditingClient(null);
@@ -83,8 +83,8 @@ export default function RentalClients() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating client",
-        description: error.message || "Failed to update rental client",
+        title: t('rentalClients.toastUpdateErrorTitle'),
+        description: error?.message || t('rentalClients.toastUpdateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -97,14 +97,14 @@ export default function RentalClients() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rental-clients"] });
       toast({
-        title: "Client deleted",
-        description: "Rental client has been successfully removed",
+        title: t('rentalClients.toastDeleteTitle'),
+        description: t('rentalClients.toastDeleteDescription'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error deleting client",
-        description: error.message || "Failed to delete rental client",
+        title: t('rentalClients.toastDeleteErrorTitle'),
+        description: error?.message || t('rentalClients.toastDeleteErrorDescription'),
         variant: "destructive",
       });
     },
@@ -137,7 +137,7 @@ export default function RentalClients() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this client? This action cannot be undone.")) {
+    if (confirm(t('rentalClients.confirmDelete'))) {
       deleteClientMutation.mutate(id);
     }
   };
@@ -166,13 +166,19 @@ export default function RentalClients() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { className: string; label: string }> = {
-      active: { className: "bg-green-600 dark:bg-green-400 text-white", label: "Active" },
-      inactive: { className: "bg-gray-500 dark:bg-gray-400 text-white", label: "Inactive" },
-      suspended: { className: "bg-red-600 dark:bg-red-400 text-white", label: "Suspended" },
+    const labels: Record<string, string> = {
+      active: t('rentalClients.statusActive'),
+      inactive: t('rentalClients.statusInactive'),
+      suspended: t('rentalClients.statusSuspended'),
     };
+    const variants: Record<string, string> = {
+      active: "bg-green-600 dark:bg-green-400 text-white",
+      inactive: "bg-gray-500 dark:bg-gray-400 text-white",
+      suspended: "bg-red-600 dark:bg-red-400 text-white",
+    };
+    const label = labels[status] || labels.active;
     const variant = variants[status] || variants.active;
-    return <Badge className={variant.className}>{variant.label}</Badge>;
+    return <Badge className={variant}>{label}</Badge>;
   };
 
   if (isLoading) {
@@ -196,10 +202,10 @@ export default function RentalClients() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-rental-clients">
-            Rental Clients
+            {t('rentalClients.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage transportation companies renting trailers
+            {t('rentalClients.subtitle')}
           </p>
         </div>
         <Button
@@ -208,8 +214,8 @@ export default function RentalClients() {
           data-testid="button-new-client"
         >
           <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">New Rental Client</span>
-          <span className="sm:hidden">New Client</span>
+          <span className="hidden sm:inline">{t('rentalClients.newClient')}</span>
+          <span className="sm:hidden">{t('rentalClients.newClientShort')}</span>
         </Button>
       </div>
 
@@ -222,7 +228,7 @@ export default function RentalClients() {
                 <Building2 className="h-6 w-6 text-accent" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">TOTAL CLIENTS</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.totalClients')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-total-clients">
               {stats.total}
             </p>
@@ -236,7 +242,7 @@ export default function RentalClients() {
                 <Building2 className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">ACTIVE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.active')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-active-clients">
               {stats.active}
             </p>
@@ -250,7 +256,7 @@ export default function RentalClients() {
                 <Building2 className="h-6 w-6 text-gray-600 dark:text-gray-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">INACTIVE</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.inactive')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-inactive-clients">
               {stats.inactive}
             </p>
@@ -264,7 +270,7 @@ export default function RentalClients() {
                 <Building2 className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">SUSPENDED</p>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.suspended')}</p>
             <p className="text-2xl font-bold text-foreground" data-testid="text-suspended-clients">
               {stats.suspended}
             </p>
@@ -275,7 +281,7 @@ export default function RentalClients() {
       {/* Clients Table */}
       <Card className="shadow-lg">
         <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">Client List</CardTitle>
+          <CardTitle className="text-lg font-bold">{t('rentalClients.clientList')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -283,22 +289,22 @@ export default function RentalClients() {
               <thead className="bg-muted/50 border-b">
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Company
+                    {t('rentalClients.tableCompany')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
-                    Tax ID
+                    {t('rentalClients.tableTaxId')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
-                    Contact
+                    {t('rentalClients.tableContact')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
-                    Location
+                    {t('rentalClients.tableLocation')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Status
+                    {t('rentalClients.tableStatus')}
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Actions
+                    {t('rentalClients.tableActions')}
                   </th>
                 </tr>
               </thead>
@@ -367,7 +373,7 @@ export default function RentalClients() {
                             onClick={() => handleViewDetails(client)}
                             data-testid={`button-view-${client.id}`}
                           >
-                            <span className="text-xs">View</span>
+                            <span className="text-xs">{t('rentalClients.buttonView')}</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -395,8 +401,8 @@ export default function RentalClients() {
                     <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="text-center text-muted-foreground">
                         <Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">No rental clients registered</p>
-                        <p className="text-xs mt-1">Click "New Rental Client" to add your first client</p>
+                        <p className="text-sm">{t('rentalClients.noClients')}</p>
+                        <p className="text-xs mt-1">{t('rentalClients.noClientsHint')}</p>
                       </div>
                     </td>
                   </tr>
@@ -412,12 +418,12 @@ export default function RentalClients() {
         <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingClient ? "Edit Rental Client" : "New Rental Client"}
+              {editingClient ? t('rentalClients.dialogEditTitle') : t('rentalClients.dialogCreateTitle')}
             </DialogTitle>
             <DialogDescription>
               {editingClient 
-                ? "Update client company information" 
-                : "Register a new transportation company as rental client"}
+                ? t('rentalClients.dialogEditDescription')
+                : t('rentalClients.dialogCreateDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -429,10 +435,10 @@ export default function RentalClients() {
                   name="companyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Name (Legal) *</FormLabel>
+                      <FormLabel>{t('rentalClients.formCompanyName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="ABC Transportation Inc."
+                          placeholder={t('rentalClients.placeholderCompanyName')}
                           {...field}
                           data-testid="input-company-name"
                         />
@@ -447,10 +453,10 @@ export default function RentalClients() {
                   name="tradeName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trade Name (DBA)</FormLabel>
+                      <FormLabel>{t('rentalClients.formTradeName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="ABC Transport"
+                          placeholder={t('rentalClients.placeholderTradeName')}
                           {...field}
                           data-testid="input-trade-name"
                         />
@@ -467,10 +473,10 @@ export default function RentalClients() {
                   name="taxId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tax ID / EIN *</FormLabel>
+                      <FormLabel>{t('rentalClients.formTaxId')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="12-3456789"
+                          placeholder={t('rentalClients.placeholderTaxId')}
                           {...field}
                           data-testid="input-tax-id"
                         />
@@ -485,17 +491,17 @@ export default function RentalClients() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country *</FormLabel>
+                      <FormLabel>{t('rentalClients.formCountry')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-country">
-                            <SelectValue placeholder="Select country" />
+                            <SelectValue placeholder={t('rentalClients.placeholderCountry')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="US">🇺🇸 United States</SelectItem>
-                          <SelectItem value="CA">🇨🇦 Canada</SelectItem>
-                          <SelectItem value="MX">🇲🇽 Mexico</SelectItem>
+                          <SelectItem value="US">{t('rentalClients.countryUS')}</SelectItem>
+                          <SelectItem value="CA">{t('rentalClients.countryCA')}</SelectItem>
+                          <SelectItem value="MX">{t('rentalClients.countryMX')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -510,11 +516,11 @@ export default function RentalClients() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                      <FormLabel>{t('rentalClients.formEmail')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="contact@abctransport.com"
+                          placeholder={t('rentalClients.placeholderEmail')}
                           {...field}
                           data-testid="input-email"
                         />
@@ -529,11 +535,11 @@ export default function RentalClients() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone *</FormLabel>
+                      <FormLabel>{t('rentalClients.formPhone')}</FormLabel>
                       <FormControl>
                         <Input
                           type="tel"
-                          placeholder="+1 (555) 123-4567"
+                          placeholder={t('rentalClients.placeholderPhone')}
                           {...field}
                           data-testid="input-phone"
                         />
@@ -549,10 +555,10 @@ export default function RentalClients() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Street Address</FormLabel>
+                    <FormLabel>{t('rentalClients.formAddress')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="123 Main Street"
+                        placeholder={t('rentalClients.placeholderAddress')}
                         {...field}
                         data-testid="input-address"
                       />
@@ -568,10 +574,10 @@ export default function RentalClients() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>{t('rentalClients.formCity')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Los Angeles"
+                          placeholder={t('rentalClients.placeholderCity')}
                           {...field}
                           data-testid="input-city"
                         />
@@ -586,10 +592,10 @@ export default function RentalClients() {
                   name="state"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State</FormLabel>
+                      <FormLabel>{t('rentalClients.formState')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="CA"
+                          placeholder={t('rentalClients.placeholderState')}
                           {...field}
                           data-testid="input-state"
                         />
@@ -604,10 +610,10 @@ export default function RentalClients() {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ZIP Code</FormLabel>
+                      <FormLabel>{t('rentalClients.formZipCode')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="90001"
+                          placeholder={t('rentalClients.placeholderZipCode')}
                           {...field}
                           data-testid="input-zip-code"
                         />
@@ -623,17 +629,17 @@ export default function RentalClients() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status *</FormLabel>
+                    <FormLabel>{t('rentalClients.formStatus')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-status">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t('rentalClients.placeholderStatus')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="suspended">Suspended</SelectItem>
+                        <SelectItem value="active">{t('rentalClients.statusActive')}</SelectItem>
+                        <SelectItem value="inactive">{t('rentalClients.statusInactive')}</SelectItem>
+                        <SelectItem value="suspended">{t('rentalClients.statusSuspended')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -652,7 +658,7 @@ export default function RentalClients() {
                   }}
                   data-testid="button-cancel"
                 >
-                  Cancel
+                  {t('rentalClients.buttonCancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -660,7 +666,9 @@ export default function RentalClients() {
                   disabled={createClientMutation.isPending || updateClientMutation.isPending}
                   data-testid="button-submit"
                 >
-                  {editingClient ? "Update Client" : "Create Client"}
+                  {createClientMutation.isPending || updateClientMutation.isPending
+                    ? (editingClient ? t('rentalClients.buttonUpdating') : t('rentalClients.buttonCreating'))
+                    : (editingClient ? t('rentalClients.buttonUpdate') : t('rentalClients.buttonCreate'))}
                 </Button>
               </div>
             </form>
@@ -672,9 +680,9 @@ export default function RentalClients() {
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="w-[95vw] max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Client Details</DialogTitle>
+            <DialogTitle>{t('rentalClients.dialogDetailsTitle')}</DialogTitle>
             <DialogDescription>
-              Complete information about {selectedClient?.companyName}
+              {t('rentalClients.dialogDetailsDescription', { name: selectedClient?.companyName })}
             </DialogDescription>
           </DialogHeader>
 
@@ -682,12 +690,12 @@ export default function RentalClients() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Company Name</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailCompanyName')}</p>
                   <p className="text-base text-foreground">{selectedClient.companyName}</p>
                 </div>
                 {selectedClient.tradeName && (
                   <div>
-                    <p className="text-sm font-semibold text-muted-foreground mb-1">Trade Name</p>
+                    <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailTradeName')}</p>
                     <p className="text-base text-foreground">{selectedClient.tradeName}</p>
                   </div>
                 )}
@@ -695,29 +703,29 @@ export default function RentalClients() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Tax ID</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailTaxId')}</p>
                   <p className="text-base text-foreground font-mono">{selectedClient.taxId}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Country</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailCountry')}</p>
                   <p className="text-base text-foreground">{selectedClient.country}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Email</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailEmail')}</p>
                   <p className="text-base text-foreground">{selectedClient.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Phone</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailPhone')}</p>
                   <p className="text-base text-foreground">{selectedClient.phone}</p>
                 </div>
               </div>
 
               {selectedClient.address && (
                 <div>
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">Address</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailAddress')}</p>
                   <p className="text-base text-foreground">
                     {selectedClient.address}
                     {selectedClient.city && `, ${selectedClient.city}`}
@@ -728,7 +736,7 @@ export default function RentalClients() {
               )}
 
               <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-1">Status</p>
+                <p className="text-sm font-semibold text-muted-foreground mb-1">{t('rentalClients.detailStatus')}</p>
                 {getStatusBadge(selectedClient.status)}
               </div>
             </div>

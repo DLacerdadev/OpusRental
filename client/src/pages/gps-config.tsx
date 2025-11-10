@@ -58,7 +58,7 @@ export default function GpsConfig() {
     onError: (error: any) => {
       toast({
         title: t('gpsConfig.toastCreateErrorTitle'),
-        description: error?.message ?? t('gpsConfig.toastCreateErrorDescription'),
+        description: error?.message || t('gpsConfig.toastCreateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -81,7 +81,7 @@ export default function GpsConfig() {
     onError: (error: any) => {
       toast({
         title: t('gpsConfig.toastUpdateErrorTitle'),
-        description: error?.message ?? t('gpsConfig.toastUpdateErrorDescription'),
+        description: error?.message || t('gpsConfig.toastUpdateErrorDescription'),
         variant: "destructive",
       });
     },
@@ -101,7 +101,7 @@ export default function GpsConfig() {
     onError: (error: any) => {
       toast({
         title: t('gpsConfig.toastDeleteErrorTitle'),
-        description: error?.message ?? t('gpsConfig.toastDeleteErrorDescription'),
+        description: error?.message || t('gpsConfig.toastDeleteErrorDescription'),
         variant: "destructive",
       });
     },
