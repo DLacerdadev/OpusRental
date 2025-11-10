@@ -50,8 +50,8 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
-        title: "Logout realizado",
-        description: "Você saiu com sucesso",
+        title: t('nav.logout'),
+        description: t('nav.logout'),
       });
       setLocation("/login");
     },
@@ -65,13 +65,13 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
     { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
     { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
     { path: "/tracking", icon: MapPin, label: t('nav.tracking'), roles: ["manager", "admin"] },
-    { path: "/gps-config", icon: Satellite, label: "GPS Config", roles: ["manager", "admin"] },
-    { path: "/rental-clients", icon: Building2, label: "Rental Clients", roles: ["manager", "admin"] },
-    { path: "/rental-contracts", icon: FileText, label: "Rental Contracts", roles: ["manager", "admin"] },
-    { path: "/invoices", icon: Receipt, label: "Invoices", roles: ["manager", "admin"] },
-    { path: "/inspections", icon: ClipboardCheck, label: "Inspections", roles: ["manager", "admin"] },
-    { path: "/maintenance", icon: Wrench, label: "Maintenance", roles: ["manager", "admin"] },
-    { path: "/broker", icon: Truck, label: "Broker Dispatch", roles: ["manager", "admin"] },
+    { path: "/gps-config", icon: Satellite, label: t('nav.gpsConfig'), roles: ["manager", "admin"] },
+    { path: "/rental-clients", icon: Building2, label: t('nav.rentalClients'), roles: ["manager", "admin"] },
+    { path: "/rental-contracts", icon: FileText, label: t('nav.rentalContracts'), roles: ["manager", "admin"] },
+    { path: "/invoices", icon: Receipt, label: t('nav.invoices'), roles: ["manager", "admin"] },
+    { path: "/inspections", icon: ClipboardCheck, label: t('nav.inspections'), roles: ["manager", "admin"] },
+    { path: "/maintenance", icon: Wrench, label: t('nav.maintenance'), roles: ["manager", "admin"] },
+    { path: "/broker", icon: Truck, label: t('nav.broker'), roles: ["manager", "admin"] },
     { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
     { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
     { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },
@@ -105,7 +105,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
             <img src={logoPath} alt="Opus" className="h-11 w-11 rounded-xl shadow-lg" />
             <div>
               <h1 className="text-base font-bold text-white">Opus Rental Capital</h1>
-              <p className="text-xs text-accent font-medium">Investment Platform</p>
+              <p className="text-xs text-accent font-medium">{t('nav.investmentPlatform')}</p>
             </div>
           </div>
         )}
@@ -161,7 +161,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
       <div className="p-4 border-t border-white/10 space-y-1.5 bg-black/20">
         {!effectiveCollapsed && (
           <div className="text-xs font-bold text-white/60 mb-2 px-4 uppercase tracking-wider">
-            {t('nav.logout').toUpperCase().includes('SAIR') ? 'Sistema' : 'System'}
+            {t('nav.system')}
           </div>
         )}
         

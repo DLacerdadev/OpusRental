@@ -5,17 +5,27 @@
     "investors": "Investidores",
     "assets": "Gestão de Ativos",
     "tracking": "Rastreamento",
+    "gpsConfig": "GPS Config",
+    "rentalClients": "Rental Clients",
+    "rentalContracts": "Rental Contracts",
+    "invoices": "Invoices",
+    "inspections": "Inspections",
+    "maintenance": "Maintenance",
+    "broker": "Broker Dispatch",
     "financial": "Financeiro",
     "reports": "Relatórios",
     "compliance": "Compliance",
     "approvals": "Aprovações",
     "settings": "Configurações",
-    "logout": "Sair"
+    "logout": "Sair",
+    "system": "Sistema",
+    "investmentPlatform": "Plataforma de Investimentos"
   },
   "header": {
     "profile": "PERFIL",
     "searchPlaceholder": "Buscar...",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "lastAccess": "Último acesso"
   },
   "dashboard": {
     "title": "Painel de Controle",

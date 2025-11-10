@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export function Header({ title, user, onMenuClick }: HeaderProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -90,7 +90,7 @@ export function Header({ title, user, onMenuClick }: HeaderProps) {
 
           <div className="text-right hidden md:block">
             <p className="text-xs text-muted-foreground">
-              {i18n.language === 'en-US' ? 'Last access' : 'Último acesso'}
+              {t('header.lastAccess')}
             </p>
             <p className="text-xs font-medium" data-testid="text-last-access">{formatLastAccess()}</p>
           </div>

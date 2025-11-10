@@ -5,17 +5,27 @@
     "investors": "Investors",
     "assets": "Asset Management",
     "tracking": "Tracking",
+    "gpsConfig": "GPS Config",
+    "rentalClients": "Rental Clients",
+    "rentalContracts": "Rental Contracts",
+    "invoices": "Invoices",
+    "inspections": "Inspections",
+    "maintenance": "Maintenance",
+    "broker": "Broker Dispatch",
     "financial": "Financial",
     "reports": "Reports",
     "compliance": "Compliance",
     "approvals": "Approvals",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "system": "System",
+    "investmentPlatform": "Investment Platform"
   },
   "header": {
     "profile": "PROFILE",
     "searchPlaceholder": "Search...",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "lastAccess": "Last access"
   },
   "dashboard": {
     "title": "Dashboard",
