@@ -580,6 +580,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export const insertTrailerSchema = createInsertSchema(trailers).omit({
   id: true,
+  tenantId: true,
   createdAt: true,
   updatedAt: true,
 });

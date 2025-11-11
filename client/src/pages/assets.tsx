@@ -22,9 +22,7 @@ import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 
-const assetFormSchema = insertTrailerSchema.omit({
-  tenantId: true,
-}).extend({
+const assetFormSchema = insertTrailerSchema.extend({
   allocationType: z.enum(["open", "specific"]).default("open"),
   investorId: z.string().optional(),
 }).superRefine((data, ctx) => {
