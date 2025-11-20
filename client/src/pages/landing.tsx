@@ -447,15 +447,15 @@ export default function Landing() {
       </section>
 
       {/* Features - Radial Orbital Platform */}
-      <section className="relative py-24 px-6 lg:px-12 bg-white/3">
-        <div className="max-w-[1600px] mx-auto">
-          <div className="text-center mb-16">
+      <section className="relative py-12 px-6 lg:px-12 bg-white/3">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center mb-8">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight"
+              className="text-3xl lg:text-4xl font-bold text-white mb-3 tracking-tight"
             >
               Plataforma completa de gestão
             </motion.h2>
@@ -464,7 +464,7 @@ export default function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-lg text-white/60 font-light max-w-2xl mx-auto"
+              className="text-base text-white/60 font-light max-w-2xl mx-auto"
             >
               Tecnologia de ponta para maximizar seus investimentos
             </motion.p>
@@ -475,51 +475,71 @@ export default function Landing() {
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-12"
+            className="mb-8"
           >
             <RadialOrbitalTimeline
               timelineData={[
                 {
                   id: 1,
                   title: "Investimento",
+                  date: "2024",
                   content: "Investimentos a partir de R$ 500 em cotas de trailers. Sistema completo de gestão de shares com alocação automática e controle de propriedade.",
+                  category: "finance",
                   icon: DollarSign,
+                  relatedIds: [2, 5],
                   status: "completed",
+                  energy: 95,
                 },
                 {
                   id: 2,
-                  title: "Rastreamento GPS",
+                  title: "GPS Tracking",
+                  date: "2024",
                   content: "Monitoramento 24/7 em tempo real de todos os trailers. Sistema de geolocalização com histórico completo e alertas de movimento.",
+                  category: "tracking",
                   icon: MapPin,
+                  relatedIds: [1, 3],
                   status: "completed",
+                  energy: 98,
                 },
                 {
                   id: 3,
                   title: "Analytics",
+                  date: "2024",
                   content: "Dashboard avançado com métricas de performance, ROI por trailer, comparação entre tipos de ativos e previsões de rentabilidade.",
+                  category: "analytics",
                   icon: BarChart3,
+                  relatedIds: [2, 4, 5],
                   status: "in-progress",
+                  energy: 87,
                 },
                 {
                   id: 4,
                   title: "Documentação",
+                  date: "2024",
                   content: "Contratos registrados, auditoria completa, conformidade com LGPD e geração automática de relatórios financeiros e comprovantes.",
+                  category: "legal",
                   icon: FileText,
+                  relatedIds: [3, 5],
                   status: "completed",
+                  energy: 100,
                 },
                 {
                   id: 5,
                   title: "Pagamentos",
+                  date: "2024",
                   content: "Sistema automático de pagamentos mensais de 2% ao mês. Processamento no dia 5 de cada mês com notificações instantâneas.",
+                  category: "payments",
                   icon: TrendingUp,
+                  relatedIds: [1, 3, 4],
                   status: "completed",
+                  energy: 92,
                 },
               ]}
             />
           </motion.div>
 
           {/* Stats cards abaixo */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             {[
               {
                 label: "Trailers Ativos",
@@ -548,11 +568,11 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-accent/30 transition-all"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:border-accent/30 transition-all"
               >
-                <stat.icon className="h-8 w-8 text-accent mb-3" />
-                <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
-                <div className="text-sm text-white/50 uppercase tracking-wider font-semibold">
+                <stat.icon className="h-6 w-6 text-accent mb-2" />
+                <div className="text-2xl font-black text-white mb-1">{stat.value}</div>
+                <div className="text-xs text-white/50 uppercase tracking-wider font-semibold">
                   {stat.label}
                 </div>
               </motion.div>
