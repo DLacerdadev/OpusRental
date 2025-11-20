@@ -20,37 +20,36 @@ export default function Landing() {
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(33,150,243,0.08),transparent_50%),radial-gradient(circle_at_80%_80%,_rgba(33,150,243,0.06),transparent_50%)] pointer-events-none" />
       
       {/* Ultra Modern Top Bar */}
-      <div className="bg-black/40 backdrop-blur-2xl border-b border-white/5">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-2 flex justify-between items-center">
-          <div className="flex items-center gap-6">
+      <div className="bg-black/30 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-[1800px] mx-auto px-8 lg:px-16 h-10 flex justify-between items-center">
+          <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white/60 text-xs font-medium tracking-wide">OPERACIONAL 24/7</span>
+              <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">Online 24/7</span>
             </div>
-            <div className="hidden md:block h-3 w-px bg-white/10" />
             <div className="hidden md:flex items-center gap-2">
-              <Shield className="h-3.5 w-3.5 text-accent/80" />
-              <span className="text-white/60 text-xs font-medium tracking-wide">REGULAMENTADO CVM</span>
+              <Shield className="h-3 w-3 text-accent" />
+              <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">CVM Regulado</span>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-white/50 hover:text-white text-xs font-medium transition-colors tracking-wide">SUPORTE</a>
-            <a href="#" className="text-white/50 hover:text-white text-xs font-medium transition-colors tracking-wide hidden md:inline">INSTITUCIONAL</a>
+          <div className="flex items-center gap-8">
+            <a href="#" className="text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">Suporte</a>
+            <a href="#" className="hidden md:inline text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">Institucional</a>
           </div>
         </div>
       </div>
 
       {/* Premium Navigation */}
-      <nav className="bg-gradient-to-b from-primary/98 to-primary/95 backdrop-blur-2xl sticky top-0 z-50 border-b border-white/5">
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+      <nav className="bg-gradient-to-b from-primary/98 to-primary/95 backdrop-blur-2xl sticky top-0 z-50 border-b border-white/10 shadow-2xl shadow-black/20">
+        <div className="max-w-[1600px] mx-auto px-8 lg:px-16">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center gap-16">
-              {/* Logo Section - MUCH BIGGER */}
-              <div className="flex items-center gap-4">
-                <img src={logoPath} alt="Opus Capital" className="h-16 w-16" />
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-white tracking-tight leading-none">Opus Capital</span>
-                  <span className="text-xs text-white/50 font-medium tracking-widest mt-1">INVESTMENT PLATFORM</span>
+              {/* Logo Section - MASSIVE */}
+              <div className="flex items-center gap-5">
+                <img src={logoPath} alt="Opus Capital" className="h-20 w-20" />
+                <div className="flex flex-col gap-1">
+                  <span className="text-3xl font-bold text-white tracking-tight">Opus Capital</span>
+                  <span className="text-[10px] text-white/40 font-semibold tracking-[0.2em] uppercase">Investment Platform</span>
                 </div>
               </div>
               
