@@ -106,7 +106,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section - Professional Banking Style */}
-      <section className="relative py-28 lg:py-36 px-6 lg:px-12 overflow-hidden">
+      <section className="relative py-12 lg:py-16 px-6 lg:px-12 overflow-hidden">
         {/* Subtle Lighting Effects */}
         <div className="absolute top-0 right-[15%] w-[600px] h-[600px] bg-accent/10 rounded-full blur-[140px]" />
         <div className="absolute bottom-0 left-[10%] w-[500px] h-[500px] bg-accent/8 rounded-full blur-[120px]" />
