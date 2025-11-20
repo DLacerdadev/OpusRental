@@ -31,6 +31,8 @@
   "dashboard": {
     "title": "Painel de Controle",
     "subtitle": "Visão geral da sua carteira de investimentos",
+    "welcome": "Bem-vindo",
+    "overview": "Visão geral do seu portfólio de investimentos",
     "companyTitle": "Painel de Controle - Visão Geral",
     "companySubtitle": "Estatísticas gerais do negócio",
     "lastAccess": "ÚLTIMO ACESSO",

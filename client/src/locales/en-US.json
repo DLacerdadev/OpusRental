@@ -31,6 +31,8 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Overview of your investment portfolio",
+    "welcome": "Welcome",
+    "overview": "Overview of your investment portfolio",
     "companyTitle": "Dashboard - Overview",
     "companySubtitle": "General business statistics",
     "lastAccess": "LAST ACCESS",
