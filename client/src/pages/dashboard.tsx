@@ -223,7 +223,6 @@ export default function Dashboard() {
                 {revenueChartData.length > 0 ? (
                   <PerformanceChart
                     data={revenueChartData}
-                    color="#2196F3"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">

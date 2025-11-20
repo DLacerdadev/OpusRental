@@ -9,14 +9,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Globe, ArrowLeft, Mail, Lock, User, Shield, CheckCircle2, UserPlus } from "lucide-react";
+import { Globe, ArrowLeft, Mail, Lock, User, Shield, CheckCircle2, UserPlus, Phone, MapPin } from "lucide-react";
 import logoPath from "@assets/image_1759264185138.png";
 import { Link } from "wouter";
+
+// Lista de países com códigos
+const COUNTRIES = [
+  { code: "US", name: "United States", namePT: "Estados Unidos", phoneCode: "+1", flag: "🇺🇸" },
+  { code: "BR", name: "Brazil", namePT: "Brasil", phoneCode: "+55", flag: "🇧🇷" },
+  { code: "MX", name: "Mexico", namePT: "México", phoneCode: "+52", flag: "🇲🇽" },
+  { code: "CA", name: "Canada", namePT: "Canadá", phoneCode: "+1", flag: "🇨🇦" },
+  { code: "AR", name: "Argentina", namePT: "Argentina", phoneCode: "+54", flag: "🇦🇷" },
+  { code: "CL", name: "Chile", namePT: "Chile", phoneCode: "+56", flag: "🇨🇱" },
+  { code: "CO", name: "Colombia", namePT: "Colômbia", phoneCode: "+57", flag: "🇨🇴" },
+  { code: "PE", name: "Peru", namePT: "Peru", phoneCode: "+51", flag: "🇵🇪" },
+  { code: "UY", name: "Uruguay", namePT: "Uruguai", phoneCode: "+598", flag: "🇺🇾" },
+  { code: "PY", name: "Paraguay", namePT: "Paraguai", phoneCode: "+595", flag: "🇵🇾" },
+];
 
 export default function Register() {
   const [, setLocation] = useLocation();
@@ -27,6 +48,8 @@ export default function Register() {
     lastName: "",
     email: "",
     username: "",
+    country: "US",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -40,6 +63,10 @@ export default function Register() {
     return i18n.language === 'en-US' ? '🇺🇸 EN' : '🇧🇷 PT';
   };
 
+  const getSelectedCountry = () => {
+    return COUNTRIES.find(c => c.code === formData.country) || COUNTRIES[0];
+  };
+
   const registerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (data.password !== data.confirmPassword) {
@@ -51,6 +78,8 @@ export default function Register() {
         lastName: data.lastName,
         email: data.email,
         username: data.username,
+        country: data.country,
+        phone: data.phone,
         password: data.password,
       });
       return response.json();
@@ -234,6 +263,60 @@ export default function Register() {
                 required
                 className="h-12 border-2 border-[#2196F3]/20 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3]/20 rounded-lg text-base bg-white"
               />
+            </div>
+
+            {/* País e Telefone */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="country" className="text-sm font-bold text-[#0D2847] flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-[#2196F3]" />
+                  {t('register.country')}
+                </Label>
+                <Select value={formData.country} onValueChange={(value) => handleChange('country', value)}>
+                  <SelectTrigger 
+                    className="h-12 border-2 border-[#2196F3]/20 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3]/20 rounded-lg bg-white"
+                    data-testid="select-country"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-2 border-[#2196F3]/20">
+                    {COUNTRIES.map((country) => (
+                      <SelectItem 
+                        key={country.code} 
+                        value={country.code}
+                        className="cursor-pointer hover:bg-[#2196F3]/10"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-lg">{country.flag}</span>
+                          <span>{i18n.language === 'pt-BR' ? country.namePT : country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm font-bold text-[#0D2847] flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-[#2196F3]" />
+                  {t('register.phone')}
+                </Label>
+                <div className="flex gap-2">
+                  <div className="w-24 h-12 border-2 border-[#2196F3]/20 rounded-lg bg-[#2196F3]/5 flex items-center justify-center font-bold text-[#0D2847]">
+                    {getSelectedCountry().phoneCode}
+                  </div>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    data-testid="input-phone"
+                    placeholder={t('register.phonePlaceholder')}
+                    value={formData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    required
+                    className="flex-1 h-12 border-2 border-[#2196F3]/20 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3]/20 rounded-lg text-base bg-white"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Senha e Confirmar Senha */}

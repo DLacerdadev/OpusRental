@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/register", authLimiter, async (req, res) => {
     try {
-      const { firstName, lastName, email, username, password } = req.body;
+      const { firstName, lastName, email, username, password, country, phone } = req.body;
 
       // Normalize email to lowercase for consistent storage and comparison
       const normalizedEmail = email.toLowerCase().trim();
@@ -193,7 +193,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         username,
         password,
         role: "investor",
-        country: "BR",
+        country: country || "US",
+        phone: phone || null,
       });
 
       // Log the registration
