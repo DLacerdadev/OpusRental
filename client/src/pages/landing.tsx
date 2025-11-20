@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { WorldMap } from "@/components/ui/world-map";
+import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { CookieConsent } from "@/components/cookie-consent";
 import { 
   Shield, TrendingUp, MapPin, DollarSign, CheckCircle, ArrowRight, 
@@ -318,9 +319,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works - Interactive Timeline */}
+      {/* How It Works - Interactive Cards */}
       <section className="relative py-24 px-6 lg:px-12">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-[1600px] mx-auto">
           <div className="text-center mb-20">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
@@ -342,84 +343,102 @@ export default function Landing() {
             </motion.p>
           </div>
 
-          <div className="relative">
-            {/* Linha de conexão vertical */}
-            <div className="absolute left-[42px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent/50 via-accent/30 to-transparent hidden md:block" />
-            
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 step: "01",
                 icon: Users,
                 title: "Cadastro",
                 desc: "Abertura de conta digital em minutos",
-                detail: "Validação instantânea de documentos"
+                stat: "<5min",
+                statLabel: "tempo médio",
+                color: "from-blue-500/20 to-cyan-500/20"
               },
               {
                 step: "02",
                 icon: DollarSign,
                 title: "Investimento",
                 desc: "A partir de R$ 500 em cotas",
-                detail: "Múltiplas formas de pagamento"
+                stat: "R$ 500",
+                statLabel: "investimento mínimo",
+                color: "from-accent/20 to-blue-500/20"
               },
               {
                 step: "03",
                 icon: MapPin,
                 title: "Acompanhamento",
                 desc: "Rastreamento GPS em tempo real",
-                detail: "Dashboard com métricas ao vivo"
+                stat: "24/7",
+                statLabel: "monitoramento",
+                color: "from-cyan-500/20 to-accent/20"
               },
               {
                 step: "04",
                 icon: TrendingUp,
                 title: "Rendimentos",
                 desc: "2% mensais direto na conta",
-                detail: "Pagamentos automáticos todo dia 5"
+                stat: "2%",
+                statLabel: "retorno mensal",
+                color: "from-blue-600/20 to-cyan-400/20"
               }
             ].map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="relative mb-12 last:mb-0 group"
+                whileHover={{ y: -8 }}
+                className="group relative"
               >
-                <div className="flex items-start gap-6 md:gap-8">
-                  {/* Número e linha */}
-                  <div className="flex flex-col items-center flex-shrink-0">
+                {/* Glow effect on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.color} rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500`} />
+                
+                <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 group-hover:bg-white/8 group-hover:border-accent/40 transition-all duration-300">
+                  {/* Icon com animação */}
+                  <motion.div 
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                    className="h-16 w-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-6 border border-accent/30 group-hover:border-accent group-hover:shadow-lg group-hover:shadow-accent/30"
+                  >
+                    <item.icon className="h-8 w-8 text-accent" />
+                  </motion.div>
+
+                  {/* Número do passo */}
+                  <div className="absolute top-6 right-6 text-6xl font-black text-white/5 leading-none">
+                    {item.step}
+                  </div>
+
+                  {/* Título */}
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
+                    {item.title}
+                  </h3>
+                  
+                  {/* Descrição */}
+                  <p className="text-sm text-white/60 leading-relaxed mb-6">
+                    {item.desc}
+                  </p>
+
+                  {/* Estatística */}
+                  <div className="pt-6 border-t border-white/10 group-hover:border-accent/30 transition-colors">
                     <motion.div 
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/30 flex items-center justify-center group-hover:border-accent group-hover:shadow-lg group-hover:shadow-accent/20 transition-all duration-300"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: i * 0.1 + 0.3 }}
+                      viewport={{ once: true }}
+                      className="space-y-1"
                     >
-                      <item.icon className="h-8 w-8 text-accent" />
+                      <div className="text-3xl font-black text-accent">
+                        {item.stat}
+                      </div>
+                      <div className="text-xs text-white/50 uppercase tracking-wider font-semibold">
+                        {item.statLabel}
+                      </div>
                     </motion.div>
                   </div>
 
-                  {/* Conteúdo */}
-                  <div className="flex-1 pt-2">
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 group-hover:bg-white/8 group-hover:border-accent/30 group-hover:shadow-xl group-hover:shadow-accent/10 transition-all duration-300">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="space-y-1">
-                          <div className="text-sm font-semibold text-accent tracking-widest">PASSO {item.step}</div>
-                          <h3 className="text-2xl md:text-3xl font-bold text-white">{item.title}</h3>
-                        </div>
-                        <motion.div 
-                          initial={{ scale: 0 }}
-                          whileInView={{ scale: 1 }}
-                          transition={{ duration: 0.4, delay: i * 0.15 + 0.3 }}
-                          viewport={{ once: true }}
-                          className="text-7xl font-black text-white/5 leading-none"
-                        >
-                          {item.step}
-                        </motion.div>
-                      </div>
-                      <p className="text-white/70 mb-3 text-base">{item.desc}</p>
-                      <div className="flex items-center gap-2 text-sm text-accent">
-                        <CheckCircle className="h-4 w-4" />
-                        <span>{item.detail}</span>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Brilho sutil no canto */}
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-accent/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </motion.div>
             ))}
@@ -427,10 +446,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features - Interactive 3D Cards */}
+      {/* Features - Radial Orbital Platform */}
       <section className="relative py-24 px-6 lg:px-12 bg-white/3">
         <div className="max-w-[1600px] mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-16">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -445,99 +464,96 @@ export default function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-lg text-white/60 font-light"
+              className="text-lg text-white/60 font-light max-w-2xl mx-auto"
             >
               Tecnologia de ponta para maximizar seus investimentos
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12"
+          >
+            <RadialOrbitalTimeline
+              timelineData={[
+                {
+                  id: 1,
+                  title: "Investimento",
+                  content: "Investimentos a partir de R$ 500 em cotas de trailers. Sistema completo de gestão de shares com alocação automática e controle de propriedade.",
+                  icon: DollarSign,
+                  status: "completed",
+                },
+                {
+                  id: 2,
+                  title: "Rastreamento GPS",
+                  content: "Monitoramento 24/7 em tempo real de todos os trailers. Sistema de geolocalização com histórico completo e alertas de movimento.",
+                  icon: MapPin,
+                  status: "completed",
+                },
+                {
+                  id: 3,
+                  title: "Analytics",
+                  content: "Dashboard avançado com métricas de performance, ROI por trailer, comparação entre tipos de ativos e previsões de rentabilidade.",
+                  icon: BarChart3,
+                  status: "in-progress",
+                },
+                {
+                  id: 4,
+                  title: "Documentação",
+                  content: "Contratos registrados, auditoria completa, conformidade com LGPD e geração automática de relatórios financeiros e comprovantes.",
+                  icon: FileText,
+                  status: "completed",
+                },
+                {
+                  id: 5,
+                  title: "Pagamentos",
+                  content: "Sistema automático de pagamentos mensais de 2% ao mês. Processamento no dia 5 de cada mês com notificações instantâneas.",
+                  icon: TrendingUp,
+                  status: "completed",
+                },
+              ]}
+            />
+          </motion.div>
+
+          {/* Stats cards abaixo */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
             {[
               {
+                label: "Trailers Ativos",
+                value: "2.847",
                 icon: MapPin,
-                title: "Rastreamento GPS",
-                desc: "Monitoramento 24/7 em tempo real",
-                stat: "2.847",
-                statLabel: "trailers ativos",
-                color: "from-blue-500/20 to-cyan-500/20"
               },
               {
+                label: "Precisão de Dados",
+                value: "99.8%",
                 icon: BarChart3,
-                title: "Analytics Avançado",
-                desc: "Relatórios e dashboards completos",
-                stat: "99.8%",
-                statLabel: "precisão de dados",
-                color: "from-accent/20 to-blue-500/20"
               },
               {
+                label: "Conformidade Legal",
+                value: "100%",
                 icon: FileText,
-                title: "Documentação",
-                desc: "Contratos registrados e auditados",
-                stat: "100%",
-                statLabel: "conformidade legal",
-                color: "from-cyan-500/20 to-accent/20"
               },
               {
+                label: "Tempo de Resposta",
+                value: "<2min",
                 icon: Bell,
-                title: "Notificações",
-                desc: "Alertas instantâneos e insights",
-                stat: "<2min",
-                statLabel: "tempo de resposta",
-                color: "from-blue-600/20 to-cyan-400/20"
-              }
-            ].map((feature, i) => (
+              },
+            ].map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -8 }}
-                className="group relative"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:border-accent/30 transition-all"
               >
-                {/* Glow effect on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500`} />
-                
-                <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 group-hover:bg-white/8 group-hover:border-accent/40 transition-all duration-300">
-                  {/* Icon com animação */}
-                  <motion.div 
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6 }}
-                    className="h-16 w-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-6 border border-accent/30 group-hover:border-accent group-hover:shadow-lg group-hover:shadow-accent/30"
-                  >
-                    <feature.icon className="h-8 w-8 text-accent" />
-                  </motion.div>
-
-                  {/* Título */}
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
-                    {feature.title}
-                  </h3>
-                  
-                  {/* Descrição */}
-                  <p className="text-sm text-white/60 leading-relaxed mb-6">
-                    {feature.desc}
-                  </p>
-
-                  {/* Estatística - revelada no hover */}
-                  <div className="pt-6 border-t border-white/10 group-hover:border-accent/30 transition-colors">
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.4, delay: i * 0.1 + 0.3 }}
-                      viewport={{ once: true }}
-                      className="space-y-1"
-                    >
-                      <div className="text-3xl font-black text-accent">
-                        {feature.stat}
-                      </div>
-                      <div className="text-xs text-white/50 uppercase tracking-wider font-semibold">
-                        {feature.statLabel}
-                      </div>
-                    </motion.div>
-                  </div>
-
-                  {/* Brilho sutil no canto */}
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-accent/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <stat.icon className="h-8 w-8 text-accent mb-3" />
+                <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                <div className="text-sm text-white/50 uppercase tracking-wider font-semibold">
+                  {stat.label}
                 </div>
               </motion.div>
             ))}
