@@ -34,13 +34,15 @@ import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
 
-// Initialize Stripe with secret key
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-10-29.clover",
-});
+// Initialize Stripe with secret key (optional for development)
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-10-29.clover",
+    })
+  : null;
+
+// Helper to check if Stripe is configured
+const isStripeConfigured = () => stripe !== null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
@@ -2435,6 +2437,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create payment intent for share purchase ($28,000 fixed)
   app.post("/api/stripe/create-share-payment", apiLimiter, isAuthenticated, async (req, res) => {
     try {
+      if (!isStripeConfigured()) {
+        return res.status(503).json({ message: "Payment processing is not configured. Please contact support." });
+      }
+
       const { shareId, investorUserId } = req.body;
 
       if (!shareId || !investorUserId) {
@@ -2452,7 +2458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create Stripe payment intent for $28,000
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await stripe!.paymentIntents.create({
         amount: 2800000, // $28,000 in cents
         currency: "usd",
         metadata: {
@@ -2492,6 +2498,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create payment intent for invoice payment (variable amount)
   app.post("/api/stripe/create-invoice-payment", apiLimiter, isAuthenticated, async (req, res) => {
     try {
+      if (!isStripeConfigured()) {
+        return res.status(503).json({ message: "Payment processing is not configured. Please contact support." });
+      }
+
       const { invoiceId } = req.body;
 
       if (!invoiceId) {
@@ -2512,7 +2522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
 
       // Create Stripe payment intent
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await stripe!.paymentIntents.create({
         amount: amountInCents,
         currency: "usd",
         metadata: {
@@ -2551,6 +2561,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Webhook to handle successful payments from Stripe
   app.post("/api/stripe/webhook", async (req, res) => {
+    if (!isStripeConfigured()) {
+      return res.status(503).send('Payment processing is not configured');
+    }
+
     const sig = req.headers['stripe-signature'];
 
     if (!sig) {
@@ -2563,7 +2577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verify webhook signature (requires STRIPE_WEBHOOK_SECRET in production)
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (webhookSecret) {
-        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+        event = stripe!.webhooks.constructEvent(req.body, sig, webhookSecret);
       } else {
         // In development, accept without verification (not recommended for production)
         event = req.body as Stripe.Event;
@@ -2632,9 +2646,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get payment status
   app.get("/api/stripe/payment-status/:paymentIntentId", apiLimiter, isAuthenticated, async (req, res) => {
     try {
+      if (!isStripeConfigured()) {
+        return res.status(503).json({ message: "Payment processing is not configured. Please contact support." });
+      }
+
       const { paymentIntentId } = req.params;
 
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await stripe!.paymentIntents.retrieve(paymentIntentId);
 
       res.json({
         status: paymentIntent.status,

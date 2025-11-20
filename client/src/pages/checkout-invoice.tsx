@@ -5,13 +5,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Receipt, Calendar, FileText } from "lucide-react";
+import { Receipt, Calendar, FileText, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
 interface InvoiceCheckoutData {
   invoiceId: string;
@@ -140,6 +138,29 @@ export default function CheckoutInvoice() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  if (!stripePromise) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-950">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <CardTitle className="text-yellow-600 dark:text-yellow-400">Payment Processing Unavailable</CardTitle>
+            </div>
+            <CardDescription>
+              Payment processing is currently being configured. Please contact support or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => setLocation('/invoices')} className="w-full" data-testid="button-back-invoices">
+              Back to Invoices
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

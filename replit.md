@@ -49,3 +49,7 @@ A comprehensive payment processing system integrates Stripe for share purchases 
 - **Form & Validation**: React Hook Form, Zod, @hookform/resolvers
 - **Backend Libraries**: Express.js, Drizzle ORM, bcrypt, express-session, node-cron, nodemailer, stripe
 - **Development Tools**: TypeScript, Vite, ESBuild
+
+## Pending Configuration
+
+⚠️ **Stripe Integration**: Currently disabled for development. Will be configured when implementing checkout functionality. The code is prepared to work with or without Stripe credentials.
