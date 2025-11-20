@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import logoPath from "@assets/image_1759264185138.png";
+import logoPath from "@assets/image_1763661455342.png";
 
 export default function Landing() {
   const { t, i18n } = useTranslation();
@@ -88,13 +88,9 @@ export default function Landing() {
         <div className="max-w-[1600px] mx-auto px-8 lg:px-16">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center gap-16">
-              {/* Logo Section - MASSIVE */}
-              <div className="flex items-center gap-5">
-                <img src={logoPath} alt="Opus Capital" className="h-20 w-20" />
-                <div className="flex flex-col gap-1">
-                  <span className="text-3xl font-bold text-white tracking-tight">Opus Capital</span>
-                  <span className="text-[10px] text-white/40 font-semibold tracking-[0.2em] uppercase">Investment Platform</span>
-                </div>
+              {/* Logo Section */}
+              <div className="flex items-center">
+                <img src={logoPath} alt="Opus Capital" className="h-16" />
               </div>
               
               {/* Navigation Links */}
