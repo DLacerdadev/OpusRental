@@ -65,11 +65,11 @@ export default function Dashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-500";
+        return "bg-[#2196F3]";
       case "maintenance":
-        return "bg-yellow-500";
+        return "bg-[#0D2847]/60";
       case "expired":
-        return "bg-red-500";
+        return "bg-[#0D2847]/30";
       default:
         return "bg-gray-500";
     }
@@ -77,10 +77,10 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="p-6 space-y-6 bg-gradient-to-br from-white via-[#2196F3]/5 to-white min-h-screen">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-40 rounded-2xl" />
           ))}
         </div>
       </div>
@@ -99,87 +99,139 @@ export default function Dashboard() {
     }));
 
     return (
-      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
-            <CardContent className="p-4 sm:p-5 lg:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="bg-accent/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-accent" />
+      <div className="p-6 lg:p-8 space-y-8 bg-gradient-to-br from-white via-[#2196F3]/5 to-white min-h-screen">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[#0D2847]">
+              {t('dashboard.welcome')}, {user?.firstName}
+            </h1>
+            <p className="text-[#0D2847]/60 mt-1 font-medium">
+              {t('dashboard.overview')}
+            </p>
+          </div>
+          <div className="hidden md:flex items-center gap-3">
+            <Badge className="bg-[#2196F3]/10 text-[#2196F3] border-[#2196F3]/30 px-4 py-2 text-sm font-semibold">
+              <Activity className="w-4 h-4 mr-2" />
+              Live
+            </Badge>
+          </div>
+        </div>
+
+        {/* Metrics Cards - Estilo Premium Banking */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Card 1 */}
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2196F3] to-[#0D2847]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <DollarSign className="h-7 w-7 text-[#2196F3]" />
                 </div>
+                <div className="w-2 h-2 rounded-full bg-[#2196F3] animate-pulse" />
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.totalFleetValue')}</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.totalFleetValue')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-total-fleet-value">
                 {formatCurrency(companyStats.totalFleetValue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
+              <div className="mt-3 flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4 text-[#2196F3]" />
+                <span className="text-xs text-[#2196F3] font-semibold">+12.5%</span>
+                <span className="text-xs text-[#0D2847]/40">{t('dashboard.thisMonth')}</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-            <CardContent className="p-4 sm:p-5 lg:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="bg-green-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <Truck className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600 dark:text-green-400" />
+          {/* Card 2 */}
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D2847] to-[#2196F3]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0D2847]/20 to-[#0D2847]/10 flex items-center justify-center">
+                  <Truck className="h-7 w-7 text-[#0D2847]" />
                 </div>
+                <div className="w-2 h-2 rounded-full bg-[#2196F3] animate-pulse" />
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.totalTrailers')}</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-total-trailers">
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.totalTrailers')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-total-trailers">
                 {companyStats.totalTrailers}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {companyStats.activeTrailers} {t('dashboard.active')}
-              </p>
+              <div className="mt-3">
+                <span className="text-sm text-[#2196F3] font-semibold">{companyStats.activeTrailers}</span>
+                <span className="text-xs text-[#0D2847]/40 ml-1">{t('dashboard.active')}</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-            <CardContent className="p-4 sm:p-5 lg:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="bg-blue-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-blue-600 dark:text-blue-400" />
+          {/* Card 3 */}
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2196F3] to-[#0D2847]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <Users className="h-7 w-7 text-[#2196F3]" />
                 </div>
+                <div className="w-2 h-2 rounded-full bg-[#2196F3] animate-pulse" />
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.sharesSold')}</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-shares-sold">
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.sharesSold')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-shares-sold">
                 {companyStats.totalSharesSold}
               </p>
+              <div className="mt-3 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#2196F3]" />
+                <span className="text-xs text-[#0D2847]/40">{t('dashboard.investors')}</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-            <CardContent className="p-4 sm:p-5 lg:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="bg-purple-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-purple-600 dark:text-purple-400" />
+          {/* Card 4 */}
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D2847] to-[#2196F3]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0D2847]/20 to-[#0D2847]/10 flex items-center justify-center">
+                  <TrendingUp className="h-7 w-7 text-[#0D2847]" />
                 </div>
+                <div className="w-2 h-2 rounded-full bg-[#2196F3] animate-pulse" />
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.totalMargin')}</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-total-margin">
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.totalMargin')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-total-margin">
                 {formatCurrency(companyStats.totalMargin, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
+              <div className="mt-3 flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4 text-[#2196F3]" />
+                <span className="text-xs text-[#2196F3] font-semibold">+8.2%</span>
+                <span className="text-xs text-[#0D2847]/40">{t('dashboard.thisMonth')}</span>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          <Card className="lg:col-span-2 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
-                <span>{t('dashboard.revenueOverview')}</span>
+        {/* Gráfico e Metas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5">
+            <CardHeader className="border-b-2 border-[#2196F3]/10 bg-gradient-to-r from-[#2196F3]/5 to-transparent">
+              <CardTitle className="text-xl font-bold text-[#0D2847] flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#2196F3]/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-[#2196F3]" />
+                </div>
+                {t('dashboard.revenueOverview')}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-64 sm:h-72 lg:h-80">
+            <CardContent className="pt-6">
+              <div className="h-80">
                 {revenueChartData.length > 0 ? (
                   <PerformanceChart
                     data={revenueChartData}
-                    color="#10b981"
+                    color="#2196F3"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                      <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                      <p className="text-sm">{t('dashboard.noDataAvailable')}</p>
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#2196F3]/10 flex items-center justify-center">
+                        <TrendingUp className="h-8 w-8 text-[#2196F3]/40" />
+                      </div>
+                      <p className="text-sm text-[#0D2847]/60 font-medium">{t('dashboard.noDataAvailable')}</p>
                     </div>
                   </div>
                 )}
@@ -187,38 +239,45 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">{t('dashboard.monthlyGoals')}</CardTitle>
+          <Card className="border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5">
+            <CardHeader className="border-b-2 border-[#2196F3]/10 bg-gradient-to-br from-[#0D2847]/5 to-transparent">
+              <CardTitle className="text-xl font-bold text-[#0D2847]">{t('dashboard.monthlyGoals')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">{t('dashboard.fleetUtilization')}</span>
-                    <span className="text-sm font-bold text-foreground">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-[#0D2847]">{t('dashboard.fleetUtilization')}</span>
+                    <span className="text-lg font-bold text-[#2196F3]">
                       {companyStats.totalTrailers > 0 ? Math.round((companyStats.activeTrailers / companyStats.totalTrailers) * 100) : 0}%
                     </span>
                   </div>
-                  <Progress value={companyStats.totalTrailers > 0 ? (companyStats.activeTrailers / companyStats.totalTrailers) * 100 : 0} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <Progress 
+                    value={companyStats.totalTrailers > 0 ? (companyStats.activeTrailers / companyStats.totalTrailers) * 100 : 0} 
+                    className="h-3 bg-[#2196F3]/10" 
+                  />
+                  <p className="text-xs text-[#0D2847]/50 mt-2 font-medium">
                     {companyStats.activeTrailers} / {companyStats.totalTrailers} {t('dashboard.active')}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Target className="h-4 w-4" />
+                <div className="pt-4 border-t-2 border-[#2196F3]/10">
+                  <div className="flex items-center gap-2 text-sm text-[#0D2847]/60 font-semibold mb-4">
+                    <Target className="h-4 w-4 text-[#2196F3]" />
                     <span>{t('dashboard.keyMetrics')}</span>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{t('dashboard.totalRevenue')}</span>
-                      <span className="text-sm font-semibold text-foreground">{formatCurrency(companyStats.totalRevenue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-[#2196F3]/5 to-transparent">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[#0D2847]/60 font-semibold">{t('dashboard.totalRevenue')}</span>
+                        <span className="text-sm font-bold text-[#0D2847]">{formatCurrency(companyStats.totalRevenue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{t('dashboard.totalMargin')}</span>
-                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">{formatCurrency(companyStats.totalMargin, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-[#0D2847]/5 to-transparent">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[#0D2847]/60 font-semibold">{t('dashboard.totalMargin')}</span>
+                        <span className="text-sm font-bold text-[#2196F3]">{formatCurrency(companyStats.totalMargin, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -227,467 +286,245 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <Card className="shadow-md border-l-4 border-l-blue-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.pendingApprovals')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-2 border-[#2196F3]/10 shadow-lg">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">0</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.requiresAction')}</p>
+                  <p className="text-sm text-[#0D2847]/60 font-semibold mb-1">{t('dashboard.pendingApprovals')}</p>
+                  <p className="text-4xl font-bold text-[#0D2847]">0</p>
+                  <p className="text-xs text-[#0D2847]/40 mt-1 font-medium">{t('dashboard.requiresAction')}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <AlertCircle className="h-8 w-8 text-[#2196F3]" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-md border-l-4 border-l-yellow-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.maintenance')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="border-2 border-[#2196F3]/10 shadow-lg">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">0</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.scheduled')}</p>
+                  <p className="text-sm text-[#0D2847]/60 font-semibold mb-1">{t('dashboard.maintenance')}</p>
+                  <p className="text-4xl font-bold text-[#0D2847]">0</p>
+                  <p className="text-xs text-[#0D2847]/40 mt-1 font-medium">{t('dashboard.scheduled')}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0D2847]/20 to-[#0D2847]/10 flex items-center justify-center">
+                  <Clock className="h-8 w-8 text-[#0D2847]" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-md border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.completedToday')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="border-2 border-[#2196F3]/10 shadow-lg">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">0</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('dashboard.transactions')}</p>
+                  <p className="text-sm text-[#0D2847]/60 font-semibold mb-1">{t('dashboard.completedToday')}</p>
+                  <p className="text-4xl font-bold text-[#0D2847]">0</p>
+                  <p className="text-xs text-[#0D2847]/40 mt-1 font-medium">{t('dashboard.transactions')}</p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-8 w-8 text-[#2196F3]" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentActivity')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 sm:space-y-4">
-                {companyStats.recentActivity && companyStats.recentActivity.length > 0 ? (
-                  companyStats.recentActivity.slice(0, 5).map((activity) => (
-                    <div key={activity.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`activity-${activity.id}`}>
-                      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                        <div className="bg-accent/10 p-2 rounded-lg flex-shrink-0">
-                          <Activity className="h-4 w-4 text-accent" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground">
-                            {t('dashboard.paymentProcessed')}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {t('dashboard.user')}: {activity.userId.slice(0, 8)}...
-                          </p>
-                        </div>
+        {/* Atividade Recente */}
+        <Card className="border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5">
+          <CardHeader className="border-b-2 border-[#2196F3]/10 bg-gradient-to-r from-[#2196F3]/5 to-transparent">
+            <CardTitle className="text-xl font-bold text-[#0D2847] flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#2196F3]/10 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-[#2196F3]" />
+              </div>
+              {t('dashboard.recentActivity')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              {companyStats.recentActivity && companyStats.recentActivity.length > 0 ? (
+                companyStats.recentActivity.slice(0, 5).map((activity, index) => (
+                  <div key={activity.id} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-[#2196F3]/5 to-transparent border-2 border-[#2196F3]/10 hover:border-[#2196F3]/20 transition-all" data-testid={`activity-${activity.id}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-[#2196F3]/10 flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="h-6 w-6 text-[#2196F3]" />
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 flex-shrink-0">
-                        <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400">
-                          {formatCurrency(parseFloat(activity.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                        </span>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <div>
+                        <p className="text-sm font-bold text-[#0D2847]">
+                          {t('dashboard.paymentProcessed')}
+                        </p>
+                        <p className="text-xs text-[#0D2847]/50 mt-0.5 font-medium">
                           {format(new Date(activity.paymentDate), 'dd/MM/yyyy')}
-                        </span>
+                        </p>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">{t('dashboard.noActivityYet')}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">{t('dashboard.quickStats')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <Truck className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('dashboard.activeTrailers')}</p>
-                      <p className="text-xl font-bold text-foreground">{companyStats.activeTrailers}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{t('dashboard.total')}</p>
-                    <p className="text-lg font-semibold text-foreground">{companyStats.totalTrailers}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('dashboard.totalRevenue')}</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {formatCurrency(companyStats.totalRevenue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-[#2196F3]">
+                        {formatCurrency(parseFloat(activity.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
                       </p>
+                      <p className="text-xs text-[#0D2847]/40 font-medium">{formatMonth(activity.referenceMonth)}</p>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('dashboard.profitMargin')}</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {((companyStats.totalMargin / companyStats.totalRevenue) * 100).toFixed(1)}%
-                      </p>
-                    </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#2196F3]/10 flex items-center justify-center">
+                    <Activity className="h-10 w-10 text-[#2196F3]/40" />
                   </div>
+                  <p className="text-sm text-[#0D2847]/60 font-medium">{t('dashboard.noActivity')}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Continue com Dashboard de Investidor na próxima parte...
   // Investor Dashboard
-  const investorStats = stats as InvestorStats;
-  
-  const paymentsByMonth = new Map();
-  investorStats?.recentPayments?.forEach((p: any) => {
-    const currentValue = paymentsByMonth.get(p.referenceMonth) || 0;
-    paymentsByMonth.set(p.referenceMonth, currentValue + parseFloat(p.amount));
-  });
-
-  const performanceData = Array.from(paymentsByMonth.entries())
-    .map(([month, value]) => ({
-      month: formatMonth(month),
-      value: value as number,
-    }))
-    .slice(-6);
-
-  return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="bg-accent/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                <Wallet className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-accent" />
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.totalInvested')}</p>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-total-value">
-              {formatCurrency(investorStats?.totalValue || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+  if (!isManager && stats && 'activeShares' in stats) {
+    const investorStats = stats as InvestorStats;
+    
+    return (
+      <div className="p-6 lg:p-8 space-y-8 bg-gradient-to-br from-white via-[#2196F3]/5 to-white min-h-screen">
+        {/* Header Investor */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[#0D2847]">
+              {t('dashboard.welcome')}, {user?.firstName}
+            </h1>
+            <p className="text-[#0D2847]/60 mt-1 font-medium">
+              {t('dashboard.yourPortfolio')}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="bg-green-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-green-600 dark:text-green-400" />
+        {/* Investor Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2196F3] to-[#0D2847]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <Wallet className="h-7 w-7 text-[#2196F3]" />
+                </div>
               </div>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.monthlyReturn')}</p>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-monthly-return">
-              {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="bg-blue-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                <Truck className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-blue-600 dark:text-blue-400" />
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.totalValue')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-total-value">
+                {formatCurrency(investorStats.totalValue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4 text-[#2196F3]" />
+                <span className="text-xs text-[#2196F3] font-semibold">+2.0%</span>
+                <span className="text-xs text-[#0D2847]/40">{t('dashboard.thisMonth')}</span>
               </div>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.activeShares')}</p>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-active-shares">
-              {investorStats?.activeShares || 0}
-            </p>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-all active:opacity-90">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="bg-purple-500/10 p-2 sm:p-2.5 lg:p-3 rounded-xl lg:rounded-2xl">
-                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-purple-600 dark:text-purple-400" />
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D2847] to-[#2196F3]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0D2847]/20 to-[#0D2847]/10 flex items-center justify-center">
+                  <Package className="h-7 w-7 text-[#0D2847]" />
+                </div>
               </div>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t('dashboard.totalReturns')}</p>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground" data-testid="text-total-returns">
-              {formatCurrency(investorStats?.totalReturns || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.activeShares')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-active-shares">
+                {investorStats.activeShares}
+              </p>
+              <p className="text-xs text-[#0D2847]/40 mt-2 font-medium">{t('dashboard.shares')}</p>
+            </CardContent>
+          </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="lg:col-span-2 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl flex items-center justify-between">
-              <span>{t('dashboard.performanceOverview')}</span>
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2196F3] to-[#0D2847]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2196F3]/20 to-[#2196F3]/10 flex items-center justify-center">
+                  <TrendingUp className="h-7 w-7 text-[#2196F3]" />
+                </div>
+              </div>
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.monthlyReturn')}</p>
+              <p className="text-3xl font-bold text-[#2196F3]" data-testid="text-monthly-return">
+                {formatCurrency(investorStats.monthlyReturn, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+              </p>
+              <p className="text-xs text-[#0D2847]/40 mt-2 font-medium">2.0% {t('dashboard.monthly')}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5 hover:shadow-2xl hover:shadow-[#2196F3]/10 transition-all">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#0D2847] to-[#2196F3]" />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0D2847]/20 to-[#0D2847]/10 flex items-center justify-center">
+                  <DollarSign className="h-7 w-7 text-[#0D2847]" />
+                </div>
+              </div>
+              <p className="text-sm text-[#0D2847]/60 font-semibold mb-2">{t('dashboard.totalReturns')}</p>
+              <p className="text-3xl font-bold text-[#0D2847]" data-testid="text-total-returns">
+                {formatCurrency(investorStats.totalReturns, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+              </p>
+              <p className="text-xs text-[#0D2847]/40 mt-2 font-medium">{t('dashboard.allTime')}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Payments Section */}
+        <Card className="border-2 border-[#2196F3]/10 shadow-xl shadow-[#2196F3]/5">
+          <CardHeader className="border-b-2 border-[#2196F3]/10 bg-gradient-to-r from-[#2196F3]/5 to-transparent">
+            <CardTitle className="text-xl font-bold text-[#0D2847] flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#2196F3]/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-[#2196F3]" />
+              </div>
+              {t('dashboard.recentPayments')}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64 sm:h-72 lg:h-80">
-              {performanceData.length > 0 ? (
-                <PerformanceChart
-                  data={performanceData}
-                  color="#10b981"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <div className="text-center">
-                    <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">{t('dashboard.noDataAvailable')}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{t('dashboard.investmentSummary')}</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="space-y-4">
-              <div className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-accent" />
-                  <span className="text-xs font-medium text-muted-foreground">{t('dashboard.totalInvested')}</span>
-                </div>
-                <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(investorStats?.totalValue || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('dashboard.monthlyReturn')}</p>
-                    <p className="text-lg font-bold text-foreground">
-                      {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                    </p>
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('dashboard.totalReturns')}</p>
-                    <p className="text-lg font-bold text-foreground">
-                      {formatCurrency(investorStats?.totalReturns || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                    </p>
-                  </div>
-                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('dashboard.roi')}</p>
-                    <p className="text-lg font-bold text-foreground">
-                      {investorStats?.totalValue ? '2.0%' : '0.0%'}
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                    {investorStats?.recentPayments?.length || 0} {t('dashboard.months')}
-                  </Badge>
-                </div>
-              </div>
-
-              {investorStats?.totalValue && investorStats.totalValue > 0 && (
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground">{t('dashboard.nextPayment')}</span>
-                    <span className="text-xs font-semibold text-foreground">{format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'dd/MM/yyyy')}</span>
-                  </div>
-                  <Progress value={65} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.ceil((new Date(new Date().setMonth(new Date().getMonth() + 1)).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} {t('dashboard.daysRemaining')}
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="shadow-md border-l-4 border-l-green-500">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.activeShares')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold text-foreground">{investorStats?.activeShares || 0}</p>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  {t('dashboard.allActive')}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Truck className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md border-l-4 border-l-blue-500">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.totalPayments')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold text-foreground">{investorStats?.recentPayments?.length || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t('dashboard.received')}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md border-l-4 border-l-purple-500">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('dashboard.avgMonthly')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-3xl font-bold text-foreground">
-                  {formatCurrency(investorStats?.monthlyReturn || 0, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                </p>
-                <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">2% {t('dashboard.fixed')}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{t('dashboard.recentPayments')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 sm:space-y-4">
-              {investorStats?.recentPayments && investorStats.recentPayments.length > 0 ? (
-                investorStats.recentPayments.slice(0, 5).map((payment) => (
-                  <div key={payment.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/30 dark:bg-muted/10 rounded-lg gap-2" data-testid={`payment-${payment.id}`}>
-                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                      <div className="bg-green-500/10 p-2 rounded-lg flex-shrink-0">
-                        <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+              {investorStats.recentPayments && investorStats.recentPayments.length > 0 ? (
+                investorStats.recentPayments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-[#2196F3]/5 to-transparent border-2 border-[#2196F3]/10 hover:border-[#2196F3]/20 transition-all" data-testid={`payment-${payment.id}`}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-[#2196F3]/10 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="h-6 w-6 text-[#2196F3]" />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground">
-                          {t('dashboard.payment')} - {formatMonth(payment.referenceMonth)}
+                      <div>
+                        <p className="text-sm font-bold text-[#0D2847]">
+                          {t('dashboard.paymentReceived')}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-[#0D2847]/50 mt-0.5 font-medium">
                           {format(new Date(payment.paymentDate), 'dd/MM/yyyy')}
                         </p>
                       </div>
                     </div>
-                    <span className="text-sm sm:text-base font-bold text-green-600 dark:text-green-400 flex-shrink-0">
-                      {formatCurrency(parseFloat(payment.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard.noPaymentsYet')}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">{t('dashboard.myShares')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {shares && shares.length > 0 ? (
-                shares.slice(0, 5).map((share: any) => (
-                  <div key={share.id} className="p-3 bg-muted/30 dark:bg-muted/10 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-accent" />
-                        <p className="text-sm font-semibold text-foreground">
-                          {share.trailerModel || 'Trailer'} #{share.trailerId?.slice(0, 8)}
-                        </p>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        share.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                        share.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
-                        'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400'
-                      }`}>
-                        {share.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{t('dashboard.purchased')}: {format(new Date(share.purchaseDate), 'dd/MM/yyyy')}</span>
-                      <span className="font-semibold text-foreground">
-                        {formatCurrency(parseFloat(share.purchasePrice), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
-                      </span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-[#2196F3]">
+                        {formatCurrency(parseFloat(payment.amount), i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
+                      </p>
+                      <p className="text-xs text-[#0D2847]/40 font-medium">{formatMonth(payment.referenceMonth)}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Truck className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard.noSharesYet')}</p>
-                  <p className="text-xs mt-1">{t('dashboard.startInvesting')}</p>
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#2196F3]/10 flex items-center justify-center">
+                    <Calendar className="h-10 w-10 text-[#2196F3]/40" />
+                  </div>
+                  <p className="text-sm text-[#0D2847]/60 font-medium">{t('dashboard.noPayments')}</p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }
