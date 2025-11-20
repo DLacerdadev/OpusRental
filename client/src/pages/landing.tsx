@@ -152,9 +152,9 @@ export default function Landing() {
             {/* Left: Hero Content */}
             <div className="space-y-8">
               <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 className="font-bold text-white leading-[1.08] tracking-tight"
                 style={{ 
                   fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)',
@@ -168,9 +168,9 @@ export default function Landing() {
               </motion.h1>
               
               <motion.p 
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="text-lg text-white/75 leading-relaxed font-light max-w-xl" 
                 data-testid="text-hero-description"
               >
@@ -179,9 +179,9 @@ export default function Landing() {
 
               {/* CTA Buttons */}
               <motion.div 
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="flex flex-wrap gap-4 pt-2"
               >
                 <Link href="/register">

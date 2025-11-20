@@ -1181,7 +1181,10 @@
   "cookies": {
     "title": "Cookies e Privacidade",
     "description": "Utilizamos cookies essenciais para melhorar sua experiência e analisar o uso da plataforma. Ao continuar navegando, você concorda com nossa política de privacidade.",
-    "accept": "Aceitar",
-    "reject": "Rejeitar"
+    "accept": "Aceitar Todos",
+    "reject": "Apenas Essenciais",
+    "feature1": "Cookies essenciais para funcionamento da plataforma",
+    "feature2": "Análise de desempenho e experiência do usuário",
+    "feature3": "Seus dados são protegidos conforme LGPD e GDPR"
   }
 }

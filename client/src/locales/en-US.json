@@ -1181,7 +1181,10 @@
   "cookies": {
     "title": "Cookies & Privacy",
     "description": "We use essential cookies to improve your experience and analyze platform usage. By continuing to browse, you agree to our privacy policy.",
-    "accept": "Accept",
-    "reject": "Reject"
+    "accept": "Accept All",
+    "reject": "Essential Only",
+    "feature1": "Essential cookies for platform functionality",
+    "feature2": "Performance analysis and user experience",
+    "feature3": "Your data is protected under LGPD and GDPR"
   }
 }
