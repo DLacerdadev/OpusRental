@@ -57,31 +57,60 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
 
   const isManager = user?.role === "manager" || user?.role === "admin";
 
-  const navItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: t('nav.dashboard'), roles: ["investor", "manager", "admin"] },
-    { path: "/portfolio", icon: Briefcase, label: t('nav.portfolio'), roles: ["investor"] },
-    { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
-    { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
-    { path: "/tracking", icon: MapPin, label: t('nav.tracking'), roles: ["manager", "admin"] },
-    { path: "/gps-config", icon: Satellite, label: t('nav.gpsConfig'), roles: ["manager", "admin"] },
-    { path: "/rental-clients", icon: Building2, label: t('nav.rentalClients'), roles: ["manager", "admin"] },
-    { path: "/rental-contracts", icon: FileText, label: t('nav.rentalContracts'), roles: ["manager", "admin"] },
-    { path: "/invoices", icon: Receipt, label: t('nav.invoices'), roles: ["manager", "admin"] },
-    { path: "/inspections", icon: ClipboardCheck, label: t('nav.inspections'), roles: ["manager", "admin"] },
-    { path: "/maintenance", icon: Wrench, label: t('nav.maintenance'), roles: ["manager", "admin"] },
-    { path: "/broker", icon: Truck, label: t('nav.broker'), roles: ["manager", "admin"] },
-    { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
-    { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
-    { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },
+  const navGroups = [
+    {
+      title: "",
+      items: [
+        { path: "/dashboard", icon: LayoutDashboard, label: t('nav.dashboard'), roles: ["investor", "manager", "admin"] },
+        { path: "/portfolio", icon: Briefcase, label: t('nav.portfolio'), roles: ["investor"] },
+      ]
+    },
+    {
+      title: t('nav.assets'),
+      items: [
+        { path: "/investor-shares", icon: Users, label: t('nav.investors'), roles: ["manager", "admin"] },
+        { path: "/assets", icon: Truck, label: t('nav.assets'), roles: ["manager", "admin"] },
+        { path: "/tracking", icon: MapPin, label: t('nav.tracking'), roles: ["manager", "admin"] },
+        { path: "/gps-config", icon: Satellite, label: t('nav.gpsConfig'), roles: ["manager", "admin"] },
+      ]
+    },
+    {
+      title: t('nav.rentalContracts'),
+      items: [
+        { path: "/rental-clients", icon: Building2, label: t('nav.rentalClients'), roles: ["manager", "admin"] },
+        { path: "/rental-contracts", icon: FileText, label: t('nav.rentalContracts'), roles: ["manager", "admin"] },
+        { path: "/invoices", icon: Receipt, label: t('nav.invoices'), roles: ["manager", "admin"] },
+      ]
+    },
+    {
+      title: t('nav.operations'),
+      items: [
+        { path: "/inspections", icon: ClipboardCheck, label: t('nav.inspections'), roles: ["manager", "admin"] },
+        { path: "/maintenance", icon: Wrench, label: t('nav.maintenance'), roles: ["manager", "admin"] },
+        { path: "/broker", icon: Truck, label: t('nav.broker'), roles: ["manager", "admin"] },
+      ]
+    },
+    {
+      title: t('nav.financial'),
+      items: [
+        { path: "/financial", icon: DollarSign, label: t('nav.financial'), roles: ["manager", "admin"] },
+        { path: "/reports", icon: FileText, label: t('nav.reports'), roles: ["manager", "admin"] },
+        { path: "/compliance", icon: Shield, label: t('nav.compliance'), roles: ["manager", "admin"] },
+      ]
+    },
+    {
+      title: t('nav.system'),
+      items: [
+        { path: "/approvals", icon: CheckCircle, label: t('nav.approvals'), roles: ["manager", "admin"] },
+        { path: "/settings", icon: Settings, label: t('nav.settings'), roles: ["investor", "manager", "admin"] },
+      ]
+    }
   ];
 
-  const settingsItems = [
-    { path: "/approvals", icon: CheckCircle, label: t('nav.approvals'), roles: ["manager", "admin"] },
-    { path: "/settings", icon: Settings, label: t('nav.settings'), roles: ["investor", "manager", "admin"] },
-  ];
-
-  const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role || "investor"));
-  const filteredSettingsItems = settingsItems.filter(item => item.roles.includes(user?.role || "investor"));
+  const filteredNavGroups = navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => item.roles.includes(user?.role || "investor"))
+  })).filter(group => group.items.length > 0);
 
   const getInitials = () => {
     if (!user?.firstName && !user?.lastName) return "U";
@@ -121,67 +150,50 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
         )}
       </div>
 
-      {/* Navigation - Clean & Minimal */}
-      <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
-        {filteredNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.path;
-          
-          return (
-            <Link key={item.path} href={item.path}>
-              <button
-                onClick={onNavigate}
-                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-4"} py-3 rounded-lg text-sm font-semibold transition-all ${
-                  isActive 
-                    ? "bg-slate-900 text-white" 
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-              >
-                <Icon className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
-                {!effectiveCollapsed && <span className="truncate">{item.label}</span>}
-              </button>
-            </Link>
-          );
-        })}
+      {/* Navigation - Grouped & Clean */}
+      <nav className="p-3 flex-1 overflow-y-auto">
+        {filteredNavGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className={groupIndex > 0 ? "mt-6" : ""}>
+            {!effectiveCollapsed && group.title && (
+              <div className="text-xs font-bold text-slate-400 mb-2 px-3 uppercase tracking-wider">
+                {group.title}
+              </div>
+            )}
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.path;
+                
+                return (
+                  <Link key={item.path} href={item.path}>
+                    <button
+                      onClick={onNavigate}
+                      className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-3"} py-2.5 rounded-lg text-sm font-medium transition-all ${
+                        isActive 
+                          ? "bg-[#0D2847] text-white" 
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                      data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      <Icon className={`h-4 w-4 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
+                      {!effectiveCollapsed && <span className="truncate">{item.label}</span>}
+                    </button>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Settings Section - Clean */}
-      <div className="p-4 border-t border-slate-200 space-y-1 bg-slate-50">
-        {!effectiveCollapsed && (
-          <div className="text-xs font-bold text-slate-400 mb-2 px-4 uppercase tracking-wider">
-            {t('nav.system')}
-          </div>
-        )}
-        
-        {filteredSettingsItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.path;
-          
-          return (
-            <Link key={item.path} href={item.path}>
-              <button
-                onClick={onNavigate}
-                className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-4"} py-3 rounded-lg text-sm font-semibold transition-all ${
-                  isActive 
-                    ? "bg-slate-900 text-white" 
-                    : "text-slate-600 hover:bg-white hover:text-slate-900"
-                }`}
-                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-              >
-                <Icon className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
-                {!effectiveCollapsed && <span className="truncate">{item.label}</span>}
-              </button>
-            </Link>
-          );
-        })}
-
+      {/* Logout */}
+      <div className="p-3 border-t border-slate-200">
         <button
-          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-4"} py-3 rounded-lg text-sm font-semibold text-slate-600 hover:bg-white hover:text-red-600 transition-all`}
+          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-3"} py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600 transition-all`}
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >
-          <LogOut className={`h-5 w-5 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
+          <LogOut className={`h-4 w-4 ${effectiveCollapsed ? "" : "mr-3"} flex-shrink-0`} />
           {!effectiveCollapsed && <span>{t('nav.logout')}</span>}
         </button>
       </div>

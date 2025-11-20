@@ -27,7 +27,6 @@ export default function Landing() {
       {/* Elegant Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#0D2847] via-[#0a1f38] to-black opacity-98 pointer-events-none" />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(33,150,243,0.08),transparent_50%),radial-gradient(circle_at_80%_80%,_rgba(33,150,243,0.06),transparent_50%)] pointer-events-none" />
-      
       {/* Ultra Modern Top Bar */}
       <div className="bg-black/30 backdrop-blur-xl border-b border-white/10 relative z-50">
         <div className="max-w-[1800px] mx-auto px-8 lg:px-16 h-10 flex justify-between items-center">
@@ -76,7 +75,6 @@ export default function Landing() {
           </div>
         </div>
       </div>
-
       {/* Premium Navigation */}
       <nav className="bg-gradient-to-b from-primary/98 to-primary/95 backdrop-blur-2xl sticky top-0 z-50 border-b border-white/10 shadow-2xl shadow-black/20">
         <div className="max-w-[1600px] mx-auto px-8 lg:px-16">
@@ -84,7 +82,7 @@ export default function Landing() {
             <div className="flex items-center gap-16">
               {/* Logo Section */}
               <div className="flex items-center">
-                <img src={logoPath} alt="Opus Capital" className="h-40" />
+                <img src={logoPath} alt="Opus Capital" className="h-40 mt-[-19px] mb-[-19px]" />
               </div>
               
               {/* Navigation Links */}
@@ -131,7 +129,6 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-
       {/* Hero Section - Professional Banking Style */}
       <section className="relative py-12 lg:py-16 px-6 lg:px-12 overflow-hidden">
         {/* Subtle Lighting Effects */}
@@ -288,7 +285,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Stats Bar - Minimal */}
       <section className="relative py-12 px-6 lg:px-12 bg-white/5 border-y border-white/10 backdrop-blur-sm">
         <div className="max-w-[1600px] mx-auto">
@@ -308,7 +304,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* How It Works - Interactive Cards */}
       <section className="relative py-24 px-6 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
@@ -435,7 +430,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Features - Radial Orbital Platform */}
       <section className="relative py-12 px-6 lg:px-12 bg-white/3">
         <div className="max-w-[1400px] mx-auto">
@@ -570,7 +564,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Global Network Map */}
       <section className="relative py-12 px-6 lg:px-12 overflow-hidden">
         <div className="max-w-7xl mx-auto">
@@ -637,7 +630,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-
       {/* Pricing - Professional */}
       <section id="pricing" className="relative py-24 px-6 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
@@ -750,7 +742,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Trust - Minimal */}
       <section className="relative py-24 px-6 lg:px-12 bg-white/3">
         <div className="max-w-[1600px] mx-auto">
@@ -794,7 +785,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* CTA - Professional */}
       <section className="relative py-28 px-6 lg:px-12">
         <div className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent/10 to-transparent" />
@@ -830,7 +820,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Footer - Clean */}
       <footer className="relative py-16 px-6 lg:px-12 border-t border-white/10 bg-white/3">
         <div className="max-w-[1600px] mx-auto">
@@ -893,7 +882,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-
       <CookieConsent />
     </div>
   );
