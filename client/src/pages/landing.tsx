@@ -318,77 +318,137 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works - Professional Cards */}
+      {/* How It Works - Interactive Timeline */}
       <section className="relative py-24 px-6 lg:px-12">
-        <div className="max-w-[1600px] mx-auto">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-20">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight"
+            >
               Como funciona
-            </h2>
-            <p className="text-lg text-white/60 font-light leading-relaxed">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-lg text-white/60 font-light leading-relaxed"
+            >
               Processo simples e transparente para começar a investir em ativos reais
-            </p>
+            </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="relative">
+            {/* Linha de conexão vertical */}
+            <div className="absolute left-[42px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent/50 via-accent/30 to-transparent hidden md:block" />
+            
             {[
               {
                 step: "01",
                 icon: Users,
                 title: "Cadastro",
-                desc: "Abertura de conta digital em minutos"
+                desc: "Abertura de conta digital em minutos",
+                detail: "Validação instantânea de documentos"
               },
               {
                 step: "02",
                 icon: DollarSign,
                 title: "Investimento",
-                desc: "A partir de R$ 500 em cotas"
+                desc: "A partir de R$ 500 em cotas",
+                detail: "Múltiplas formas de pagamento"
               },
               {
                 step: "03",
                 icon: MapPin,
                 title: "Acompanhamento",
-                desc: "Rastreamento GPS em tempo real"
+                desc: "Rastreamento GPS em tempo real",
+                detail: "Dashboard com métricas ao vivo"
               },
               {
                 step: "04",
                 icon: TrendingUp,
                 title: "Rendimentos",
-                desc: "2% mensais direto na conta"
+                desc: "2% mensais direto na conta",
+                detail: "Pagamentos automáticos todo dia 5"
               }
             ].map((item, i) => (
-              <div key={i} className="relative group">
-                {i < 3 && (
-                  <div className="hidden lg:block absolute top-12 left-full w-full h-px bg-gradient-to-r from-white/20 to-transparent z-0" />
-                )}
-                <Card className="relative bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl hover:bg-white/8 hover:border-white/20 transition-all z-10">
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
-                        <item.icon className="h-6 w-6 text-accent" />
-                      </div>
-                      <div className="text-5xl font-bold text-white/10">{item.step}</div>
-                    </div>
-                    <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                    <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                viewport={{ once: true }}
+                className="relative mb-12 last:mb-0 group"
+              >
+                <div className="flex items-start gap-6 md:gap-8">
+                  {/* Número e linha */}
+                  <div className="flex flex-col items-center flex-shrink-0">
+                    <motion.div 
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/30 flex items-center justify-center group-hover:border-accent group-hover:shadow-lg group-hover:shadow-accent/20 transition-all duration-300"
+                    >
+                      <item.icon className="h-8 w-8 text-accent" />
+                    </motion.div>
                   </div>
-                </Card>
-              </div>
+
+                  {/* Conteúdo */}
+                  <div className="flex-1 pt-2">
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 group-hover:bg-white/8 group-hover:border-accent/30 group-hover:shadow-xl group-hover:shadow-accent/10 transition-all duration-300">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="space-y-1">
+                          <div className="text-sm font-semibold text-accent tracking-widest">PASSO {item.step}</div>
+                          <h3 className="text-2xl md:text-3xl font-bold text-white">{item.title}</h3>
+                        </div>
+                        <motion.div 
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          transition={{ duration: 0.4, delay: i * 0.15 + 0.3 }}
+                          viewport={{ once: true }}
+                          className="text-7xl font-black text-white/5 leading-none"
+                        >
+                          {item.step}
+                        </motion.div>
+                      </div>
+                      <p className="text-white/70 mb-3 text-base">{item.desc}</p>
+                      <div className="flex items-center gap-2 text-sm text-accent">
+                        <CheckCircle className="h-4 w-4" />
+                        <span>{item.detail}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features - Clean Grid */}
+      {/* Features - Interactive 3D Cards */}
       <section className="relative py-24 px-6 lg:px-12 bg-white/3">
         <div className="max-w-[1600px] mx-auto">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-white mb-5 tracking-tight">
+          <div className="text-center mb-20">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight"
+            >
               Plataforma completa de gestão
-            </h2>
-            <p className="text-lg text-white/60 font-light">
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-lg text-white/60 font-light"
+            >
               Tecnologia de ponta para maximizar seus investimentos
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -396,31 +456,90 @@ export default function Landing() {
               {
                 icon: MapPin,
                 title: "Rastreamento GPS",
-                desc: "Monitoramento 24/7 em tempo real"
+                desc: "Monitoramento 24/7 em tempo real",
+                stat: "2.847",
+                statLabel: "trailers ativos",
+                color: "from-blue-500/20 to-cyan-500/20"
               },
               {
                 icon: BarChart3,
                 title: "Analytics Avançado",
-                desc: "Relatórios e dashboards completos"
+                desc: "Relatórios e dashboards completos",
+                stat: "99.8%",
+                statLabel: "precisão de dados",
+                color: "from-accent/20 to-blue-500/20"
               },
               {
                 icon: FileText,
                 title: "Documentação",
-                desc: "Contratos registrados e auditados"
+                desc: "Contratos registrados e auditados",
+                stat: "100%",
+                statLabel: "conformidade legal",
+                color: "from-cyan-500/20 to-accent/20"
               },
               {
                 icon: Bell,
                 title: "Notificações",
-                desc: "Alertas instantâneos e insights"
+                desc: "Alertas instantâneos e insights",
+                stat: "<2min",
+                statLabel: "tempo de resposta",
+                color: "from-blue-600/20 to-cyan-400/20"
               }
             ].map((feature, i) => (
-              <Card key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl hover:bg-white/8 hover:border-accent/30 transition-all group">
-                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-6 border border-accent/20 group-hover:bg-accent/20 transition-all">
-                  <feature.icon className="h-7 w-7 text-accent" />
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -8 }}
+                className="group relative"
+              >
+                {/* Glow effect on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500`} />
+                
+                <div className="relative h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 group-hover:bg-white/8 group-hover:border-accent/40 transition-all duration-300">
+                  {/* Icon com animação */}
+                  <motion.div 
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                    className="h-16 w-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-6 border border-accent/30 group-hover:border-accent group-hover:shadow-lg group-hover:shadow-accent/30"
+                  >
+                    <feature.icon className="h-8 w-8 text-accent" />
+                  </motion.div>
+
+                  {/* Título */}
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Descrição */}
+                  <p className="text-sm text-white/60 leading-relaxed mb-6">
+                    {feature.desc}
+                  </p>
+
+                  {/* Estatística - revelada no hover */}
+                  <div className="pt-6 border-t border-white/10 group-hover:border-accent/30 transition-colors">
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.4, delay: i * 0.1 + 0.3 }}
+                      viewport={{ once: true }}
+                      className="space-y-1"
+                    >
+                      <div className="text-3xl font-black text-accent">
+                        {feature.stat}
+                      </div>
+                      <div className="text-xs text-white/50 uppercase tracking-wider font-semibold">
+                        {feature.statLabel}
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Brilho sutil no canto */}
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-accent/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed">{feature.desc}</p>
-              </Card>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -459,37 +578,32 @@ export default function Landing() {
           >
             <WorldMap
               dots={[
+                // América do Norte
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York, EUA
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: 51.5074, lng: -0.1278 }, // Londres, Reino Unido
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: 25.7617, lng: -80.1918 }, // Miami
+                },
+                // Europa
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: 51.5074, lng: -0.1278 }, // Londres
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: 48.8566, lng: 2.3522 }, // Paris, França
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: 48.8566, lng: 2.3522 }, // Paris
+                },
+                // América Latina
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: -34.6037, lng: -58.3816 }, // Buenos Aires
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: 35.6762, lng: 139.6503 }, // Tóquio, Japão
-                },
-                {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: -33.8688, lng: 151.2093 }, // Sydney, Austrália
-                },
-                {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
-                  end: { lat: 1.3521, lng: 103.8198 }, // Singapura
-                },
-                {
-                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília, Brasil
-                  end: { lat: 19.4326, lng: -99.1332 }, // Cidade do México, México
-                },
-                {
-                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília, Brasil
-                  end: { lat: -34.6037, lng: -58.3816 }, // Buenos Aires, Argentina
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: 19.4326, lng: -99.1332 }, // Cidade do México
                 },
               ]}
               lineColor="#2196F3"
