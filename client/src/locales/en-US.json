@@ -995,6 +995,34 @@
       "notifications": {
         "title": "Notifications",
         "desc": "Instant alerts and insights"
+      },
+      "stats": {
+        "activeTrailers": "Active Trailers",
+        "dataAccuracy": "Data Accuracy",
+        "legalCompliance": "Legal Compliance",
+        "responseTime": "Response Time"
+      }
+    },
+    "orbital": {
+      "investment": {
+        "title": "Investment",
+        "content": "Investments starting from R$ 500 in trailer shares. Complete share management system with automatic allocation and ownership control."
+      },
+      "gps": {
+        "title": "GPS Tracking",
+        "content": "24/7 real-time monitoring of all trailers. Geolocation system with complete history and movement alerts."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "content": "Advanced dashboard with performance metrics, ROI per trailer, comparison between asset types and profitability forecasts."
+      },
+      "documentation": {
+        "title": "Documentation",
+        "content": "Registered contracts, complete audit, LGPD compliance and automatic generation of financial reports and receipts."
+      },
+      "payments": {
+        "title": "Payments",
+        "content": "Automatic monthly payment system of 2% per month. Processing on the 5th of each month with instant notifications."
       }
     },
     "pricing": {

@@ -995,6 +995,34 @@
       "notifications": {
         "title": "Notificações",
         "desc": "Alertas instantâneos e insights"
+      },
+      "stats": {
+        "activeTrailers": "Trailers Ativos",
+        "dataAccuracy": "Precisão de Dados",
+        "legalCompliance": "Conformidade Legal",
+        "responseTime": "Tempo de Resposta"
+      }
+    },
+    "orbital": {
+      "investment": {
+        "title": "Investimento",
+        "content": "Investimentos a partir de R$ 500 em cotas de trailers. Sistema completo de gestão de shares com alocação automática e controle de propriedade."
+      },
+      "gps": {
+        "title": "GPS Tracking",
+        "content": "Monitoramento 24/7 em tempo real de todos os trailers. Sistema de geolocalização com histórico completo e alertas de movimento."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "content": "Dashboard avançado com métricas de performance, ROI por trailer, comparação entre tipos de ativos e previsões de rentabilidade."
+      },
+      "documentation": {
+        "title": "Documentação",
+        "content": "Contratos registrados, auditoria completa, conformidade com LGPD e geração automática de relatórios financeiros e comprovantes."
+      },
+      "payments": {
+        "title": "Pagamentos",
+        "content": "Sistema automático de pagamentos mensais de 2% ao mês. Processamento no dia 5 de cada mês com notificações instantâneas."
       }
     },
     "pricing": {

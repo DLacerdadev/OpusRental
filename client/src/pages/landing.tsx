@@ -457,7 +457,7 @@ export default function Landing() {
               viewport={{ once: true }}
               className="text-3xl lg:text-4xl font-bold text-white mb-3 tracking-tight"
             >
-              Plataforma completa de gestão
+              {t('landing.features.title')}
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -466,7 +466,7 @@ export default function Landing() {
               viewport={{ once: true }}
               className="text-base text-white/60 font-light max-w-2xl mx-auto"
             >
-              Tecnologia de ponta para maximizar seus investimentos
+              {t('landing.features.subtitle')}
             </motion.p>
           </div>
 
@@ -481,9 +481,9 @@ export default function Landing() {
               timelineData={[
                 {
                   id: 1,
-                  title: "Investimento",
+                  title: t('landing.orbital.investment.title'),
                   date: "2024",
-                  content: "Investimentos a partir de R$ 500 em cotas de trailers. Sistema completo de gestão de shares com alocação automática e controle de propriedade.",
+                  content: t('landing.orbital.investment.content'),
                   category: "finance",
                   icon: DollarSign,
                   relatedIds: [2, 5],
@@ -492,9 +492,9 @@ export default function Landing() {
                 },
                 {
                   id: 2,
-                  title: "GPS Tracking",
+                  title: t('landing.orbital.gps.title'),
                   date: "2024",
-                  content: "Monitoramento 24/7 em tempo real de todos os trailers. Sistema de geolocalização com histórico completo e alertas de movimento.",
+                  content: t('landing.orbital.gps.content'),
                   category: "tracking",
                   icon: MapPin,
                   relatedIds: [1, 3],
@@ -503,9 +503,9 @@ export default function Landing() {
                 },
                 {
                   id: 3,
-                  title: "Analytics",
+                  title: t('landing.orbital.analytics.title'),
                   date: "2024",
-                  content: "Dashboard avançado com métricas de performance, ROI por trailer, comparação entre tipos de ativos e previsões de rentabilidade.",
+                  content: t('landing.orbital.analytics.content'),
                   category: "analytics",
                   icon: BarChart3,
                   relatedIds: [2, 4, 5],
@@ -514,9 +514,9 @@ export default function Landing() {
                 },
                 {
                   id: 4,
-                  title: "Documentação",
+                  title: t('landing.orbital.documentation.title'),
                   date: "2024",
-                  content: "Contratos registrados, auditoria completa, conformidade com LGPD e geração automática de relatórios financeiros e comprovantes.",
+                  content: t('landing.orbital.documentation.content'),
                   category: "legal",
                   icon: FileText,
                   relatedIds: [3, 5],
@@ -525,9 +525,9 @@ export default function Landing() {
                 },
                 {
                   id: 5,
-                  title: "Pagamentos",
+                  title: t('landing.orbital.payments.title'),
                   date: "2024",
-                  content: "Sistema automático de pagamentos mensais de 2% ao mês. Processamento no dia 5 de cada mês com notificações instantâneas.",
+                  content: t('landing.orbital.payments.content'),
                   category: "payments",
                   icon: TrendingUp,
                   relatedIds: [1, 3, 4],
@@ -542,22 +542,22 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             {[
               {
-                label: "Trailers Ativos",
+                label: t('landing.features.stats.activeTrailers'),
                 value: "2.847",
                 icon: MapPin,
               },
               {
-                label: "Precisão de Dados",
+                label: t('landing.features.stats.dataAccuracy'),
                 value: "99.8%",
                 icon: BarChart3,
               },
               {
-                label: "Conformidade Legal",
+                label: t('landing.features.stats.legalCompliance'),
                 value: "100%",
                 icon: FileText,
               },
               {
-                label: "Tempo de Resposta",
+                label: t('landing.features.stats.responseTime'),
                 value: "<2min",
                 icon: Bell,
               },
