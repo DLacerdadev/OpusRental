@@ -104,7 +104,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
       {/* Header with Logo */}
       <div className="p-6 border-b border-slate-200">
         {!effectiveCollapsed && (
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3">
             <div className="bg-slate-50 p-2 rounded-xl">
               <img src={logoPath} alt="Opus" className="h-10 w-10 rounded-lg" />
             </div>
@@ -115,37 +115,8 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
           </div>
         )}
         {effectiveCollapsed && (
-          <div className="bg-slate-50 p-2 rounded-xl mx-auto w-fit mb-4">
+          <div className="bg-slate-50 p-2 rounded-xl mx-auto w-fit">
             <img src={logoPath} alt="Opus" className="h-9 w-9 rounded-lg" />
-          </div>
-        )}
-        
-        {/* User Profile Card - Clean Banking Style */}
-        {!effectiveCollapsed && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-11 w-11 rounded-full bg-gradient-to-br from-[#2196F3] to-[#0D2847] flex items-center justify-center text-white font-bold text-sm">
-                {getInitials()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500 font-medium mb-0.5">
-                  {t('header.profile')}
-                </p>
-                <p className="text-sm text-slate-900 font-bold capitalize truncate">
-                  {t(`roles.${user?.role || 'investor'}`)}
-                </p>
-              </div>
-            </div>
-            {user?.email && (
-              <p className="text-xs text-slate-600 truncate bg-white px-3 py-2 rounded-lg border border-slate-200">
-                {user.email}
-              </p>
-            )}
-          </div>
-        )}
-        {effectiveCollapsed && (
-          <div className="h-11 w-11 rounded-full bg-gradient-to-br from-[#2196F3] to-[#0D2847] flex items-center justify-center text-white font-bold text-sm mx-auto">
-            {getInitials()}
           </div>
         )}
       </div>
