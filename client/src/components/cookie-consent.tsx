@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Check } from "lucide-react";
+import { Shield, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,7 +11,7 @@ export function CookieConsent() {
   useEffect(() => {
     const consent = localStorage.getItem("cookie-consent");
     if (!consent) {
-      setTimeout(() => setShowBanner(true), 1500);
+      setTimeout(() => setShowBanner(true), 1000);
     }
   }, []);
 
@@ -28,85 +28,52 @@ export function CookieConsent() {
   return (
     <AnimatePresence>
       {showBanner && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
-            onClick={rejectCookies}
-          />
-          
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg z-[101]"
-          >
-            <div className="bg-gradient-to-br from-[#0D2847] to-[#0a1f38] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-              {/* Header com gradiente */}
-              <div className="relative px-8 pt-8 pb-6">
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent opacity-50" />
-                <div className="relative flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-accent" />
-                    </div>
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+          className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-[100]"
+        >
+          <div className="bg-[#0D2847]/95 backdrop-blur-xl border border-[#2196F3]/30 rounded-xl shadow-2xl shadow-[#2196F3]/20 overflow-hidden">
+            {/* Barra superior com gradiente */}
+            <div className="h-1 bg-gradient-to-r from-[#2196F3] via-[#0D2847] to-[#2196F3]" />
+            
+            <div className="p-6">
+              {/* Header compacto */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#2196F3]/20 flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-[#2196F3]" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-2">
+                  <div>
+                    <h3 className="text-base font-bold text-white">
                       {t('cookies.title')}
                     </h3>
-                    <p className="text-sm text-white/70 leading-relaxed">
-                      {t('cookies.description')}
+                    <p className="text-xs text-white/50 mt-0.5">
+                      Conforme LGPD e GDPR
                     </p>
                   </div>
                 </div>
+                <button
+                  onClick={rejectCookies}
+                  className="text-white/40 hover:text-white/80 transition-colors"
+                  data-testid="button-close-cookies"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
 
-              {/* Features list */}
-              <div className="px-8 pb-6 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-accent" />
-                    </div>
-                  </div>
-                  <p className="text-sm text-white/60">
-                    {t('cookies.feature1')}
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-accent" />
-                    </div>
-                  </div>
-                  <p className="text-sm text-white/60">
-                    {t('cookies.feature2')}
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-accent" />
-                    </div>
-                  </div>
-                  <p className="text-sm text-white/60">
-                    {t('cookies.feature3')}
-                  </p>
-                </div>
-              </div>
+              {/* Descrição compacta */}
+              <p className="text-white/70 text-sm leading-relaxed mb-5">
+                {t('cookies.description')}
+              </p>
 
-              {/* Actions */}
-              <div className="px-8 pb-8 flex gap-3">
+              {/* Botões lado a lado */}
+              <div className="flex gap-3">
                 <Button
                   onClick={acceptCookies}
-                  className="flex-1 bg-accent hover:bg-accent/90 text-white font-semibold h-11 shadow-lg shadow-accent/25"
+                  className="flex-1 bg-[#2196F3] hover:bg-[#2196F3]/90 text-white font-semibold h-10 shadow-lg shadow-[#2196F3]/30"
                   data-testid="button-accept-cookies"
                 >
                   {t('cookies.accept')}
@@ -114,15 +81,15 @@ export function CookieConsent() {
                 <Button
                   onClick={rejectCookies}
                   variant="outline"
-                  className="flex-1 border-white/20 text-white hover:bg-white/10 font-medium h-11"
+                  className="flex-1 border-white/20 text-white/90 hover:bg-white/10 h-10"
                   data-testid="button-reject-cookies"
                 >
                   {t('cookies.reject')}
                 </Button>
               </div>
             </div>
-          </motion.div>
-        </>
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
