@@ -66,14 +66,18 @@ export function WorldMap({
                 strokeWidth="1"
                 initial={{
                   pathLength: 0,
+                  opacity: 0,
                 }}
                 animate={{
-                  pathLength: 1,
+                  pathLength: [0, 1, 1, 0],
+                  opacity: [0, 1, 1, 0],
                 }}
                 transition={{
-                  duration: 1,
+                  duration: 3,
                   delay: 0.5 * i,
-                  ease: "easeOut",
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatDelay: 1,
                 }}
                 key={`start-upper-${i}`}
               ></motion.path>
