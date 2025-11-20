@@ -62,8 +62,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/98 to-primary/95 p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0D2847] via-[#0a1f38] to-[#0D2847] p-4 relative overflow-hidden">
+      {/* Grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#2196F308_1px,transparent_1px),linear-gradient(to_bottom,#2196F308_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+      
+      {/* Gradient orbs */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#2196F3]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#2196F3]/10 rounded-full blur-3xl"></div>
       
       {/* Language Selector */}
       <div className="absolute top-6 right-6 z-20">
@@ -72,22 +77,24 @@ export default function Login() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20"
+              className="gap-2 bg-white/10 hover:bg-white/20 text-white border-[#2196F3]/30 backdrop-blur-sm"
               data-testid="button-language-login"
             >
               <Globe className="h-4 w-4" />
               <span>{getCurrentLanguageLabel()}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-[#0D2847] border-[#2196F3]/30">
             <DropdownMenuItem
               onClick={() => changeLanguage('pt-BR')}
+              className="text-white hover:bg-[#2196F3]/20"
               data-testid="menu-item-pt-BR-login"
             >
               🇧🇷 Português (BR)
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => changeLanguage('en-US')}
+              className="text-white hover:bg-[#2196F3]/20"
               data-testid="menu-item-en-US-login"
             >
               🇺🇸 English (US)
@@ -96,21 +103,24 @@ export default function Login() {
         </DropdownMenu>
       </div>
 
-      <Card className="w-full max-w-lg shadow-2xl relative z-10 border-0">
+      <Card className="w-full max-w-lg shadow-2xl shadow-[#2196F3]/20 relative z-10 border border-[#2196F3]/20 bg-white">
         <CardContent className="p-10">
+          {/* Borda superior azul */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#2196F3] to-transparent" />
+          
           <div className="text-center mb-10">
             <div className="flex justify-center mb-6">
-              <div className="bg-white p-3 rounded-2xl shadow-xl">
+              <div className="bg-gradient-to-br from-[#2196F3]/10 to-[#0D2847]/10 p-4 rounded-2xl shadow-xl border border-[#2196F3]/20">
                 <img src={logoPath} alt="Opus Rental Capital" className="h-20 w-20" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">{t('login.title')}</h1>
-            <p className="text-muted-foreground">{t('login.subtitle')}</p>
+            <h1 className="text-3xl font-bold text-[#0D2847] mb-2">{t('login.title')}</h1>
+            <p className="text-[#0D2847]/60">{t('login.subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-foreground">{t('login.email')}</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-[#0D2847]">{t('login.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -119,12 +129,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-12 border-2 focus:border-accent focus:ring-accent rounded-xl"
+                className="h-12 border-2 border-[#2196F3]/20 focus:border-[#2196F3] focus:ring-[#2196F3]/20 rounded-xl"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold text-foreground">{t('login.password')}</Label>
+              <Label htmlFor="password" className="text-sm font-semibold text-[#0D2847]">{t('login.password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -133,31 +143,31 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 border-2 focus:border-accent focus:ring-accent rounded-xl"
+                className="h-12 border-2 border-[#2196F3]/20 focus:border-[#2196F3] focus:ring-[#2196F3]/20 rounded-xl"
               />
             </div>
 
             <Button
               type="submit"
               data-testid="button-login"
-              className="w-full h-12 bg-accent hover:bg-accent/90 text-white font-bold text-base shadow-lg rounded-xl"
+              className="w-full h-12 bg-[#2196F3] hover:bg-[#2196F3]/90 text-white font-bold text-base shadow-lg shadow-[#2196F3]/30 rounded-xl border border-[#2196F3]/50"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? t('login.loggingIn') : t('login.loginButton')}
             </Button>
 
             <div className="flex justify-between items-center text-sm">
-              <a href="#" className="text-accent hover:underline font-medium">
+              <a href="#" className="text-[#2196F3] hover:underline font-medium">
                 {t('login.forgotPassword')}
               </a>
-              <Link href="/register" className="text-accent hover:underline font-medium" data-testid="link-register">
+              <Link href="/register" className="text-[#2196F3] hover:underline font-medium" data-testid="link-register">
                 {t('login.createAccount')}
               </Link>
             </div>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-border text-center">
-            <p className="text-xs text-muted-foreground">
+          <div className="mt-8 pt-6 border-t border-[#2196F3]/20 text-center">
+            <p className="text-xs text-[#0D2847]/50">
               {t('login.footer')}
             </p>
           </div>
