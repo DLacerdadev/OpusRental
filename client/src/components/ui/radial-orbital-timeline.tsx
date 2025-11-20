@@ -26,11 +26,10 @@ export default function RadialOrbitalTimeline({
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>(
     {}
   );
-  const [viewMode, setViewMode] = useState<"orbital">("orbital");
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
   const [pulseEffect, setPulseEffect] = useState<Record<number, boolean>>({});
-  const [centerOffset, setCenterOffset] = useState<{ x: number; y: number }>({
+  const [centerOffset] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
@@ -38,6 +37,7 @@ export default function RadialOrbitalTimeline({
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const animationFrameRef = useRef<number>();
 
   const memoizedTimelineData = useMemo(() => timelineData, [timelineData.length]);
 
@@ -84,26 +84,24 @@ export default function RadialOrbitalTimeline({
   };
 
   useEffect(() => {
-    let rotationTimer: NodeJS.Timeout;
+    const animate = () => {
+      if (autoRotate) {
+        setRotationAngle((prev) => (prev + 0.15) % 360);
+      }
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
 
-    if (autoRotate && viewMode === "orbital") {
-      rotationTimer = setInterval(() => {
-        setRotationAngle((prev) => {
-          const newAngle = (prev + 0.3) % 360;
-          return Number(newAngle.toFixed(3));
-        });
-      }, 50);
-    }
+    animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (rotationTimer) {
-        clearInterval(rotationTimer);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [autoRotate, viewMode]);
+  }, [autoRotate]);
 
   const centerViewOnNode = (nodeId: number) => {
-    if (viewMode !== "orbital" || !nodeRefs.current[nodeId]) return;
+    if (!nodeRefs.current[nodeId]) return;
 
     const nodeIndex = memoizedTimelineData.findIndex((item) => item.id === nodeId);
     const totalNodes = memoizedTimelineData.length;
@@ -160,7 +158,6 @@ export default function RadialOrbitalTimeline({
       ref={containerRef}
       onClick={handleContainerClick}
     >
-      {/* Gradiente de fundo sutil para profundidade */}
       <div className="absolute inset-0 bg-gradient-radial from-[#2196F3]/5 via-transparent to-transparent pointer-events-none" />
       
       <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
@@ -170,9 +167,9 @@ export default function RadialOrbitalTimeline({
           style={{
             perspective: "1000px",
             transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)`,
+            willChange: "transform",
           }}
         >
-          {/* Centro com mais brilho */}
           <div className="absolute w-20 h-20 rounded-full bg-gradient-to-br from-[#2196F3] via-[#0D2847] to-[#2196F3] flex items-center justify-center z-10 shadow-lg shadow-[#2196F3]/50">
             <div className="absolute w-32 h-32 rounded-full border-2 border-[#2196F3]/40 animate-ping opacity-60"></div>
             <div
@@ -182,7 +179,6 @@ export default function RadialOrbitalTimeline({
             <div className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md shadow-xl shadow-[#2196F3]/60"></div>
           </div>
 
-          {/* Círculos orbitais mais visíveis */}
           <div className="absolute rounded-full border-2 border-[#2196F3]/30 shadow-lg shadow-[#2196F3]/20" style={{ width: "560px", height: "560px" }}></div>
           <div className="absolute rounded-full border border-[#2196F3]/20" style={{ width: "640px", height: "640px" }}></div>
 
@@ -197,20 +193,20 @@ export default function RadialOrbitalTimeline({
               transform: `translate(${position.x}px, ${position.y}px)`,
               zIndex: isExpanded ? 200 : position.zIndex,
               opacity: isExpanded ? 1 : position.opacity,
+              willChange: "transform, opacity",
             };
 
             return (
               <div
                 key={item.id}
                 ref={(el) => (nodeRefs.current[item.id] = el)}
-                className="absolute transition-all duration-700 cursor-pointer"
+                className="absolute cursor-pointer transition-opacity duration-300"
                 style={nodeStyle}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleItem(item.id);
                 }}
               >
-                {/* Glow effect mais intenso */}
                 <div
                   className={`absolute rounded-full blur-2xl ${
                     isPulsing ? "animate-pulse duration-1000" : ""
@@ -224,7 +220,6 @@ export default function RadialOrbitalTimeline({
                   }}
                 ></div>
 
-                {/* Bolinha maior */}
                 <div
                   className={`
                   w-14 h-14 rounded-full flex items-center justify-center
