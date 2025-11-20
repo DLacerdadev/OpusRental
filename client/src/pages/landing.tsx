@@ -2,10 +2,15 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
   Shield, TrendingUp, MapPin, DollarSign, CheckCircle, ArrowRight, 
   Award, Lock, BarChart3, Globe2, Percent, Users, 
-  FileText, Bell, Star, PlayCircle, Activity, Sparkles, Building2
+  FileText, Bell, Star, PlayCircle, Activity, Sparkles, Building2, Check
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -28,19 +33,47 @@ export default function Landing() {
             <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">{t('landing.topbar.online')}</span>
           </div>
           <div className="flex items-center gap-8">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-7 w-7 text-white/50 hover:text-accent hover:bg-white/5 rounded"
-              onClick={() => {
-                const newLang = i18n.language.startsWith("en") ? "pt-BR" : "en-US";
-                i18n.changeLanguage(newLang);
-                localStorage.setItem('language', newLang);
-              }}
-              data-testid="button-language-toggle"
-            >
-              <Globe2 className="h-3.5 w-3.5" />
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-7 w-7 text-white/50 hover:text-accent hover:bg-white/5 rounded"
+                  data-testid="button-language-toggle"
+                >
+                  <Globe2 className="h-3.5 w-3.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                className="w-48 p-2 bg-[#0D2847]/98 backdrop-blur-xl border border-white/20 shadow-2xl" 
+                align="end"
+              >
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage('pt-BR');
+                      localStorage.setItem('language', 'pt-BR');
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm text-white/90 hover:bg-white/10 rounded transition-colors"
+                    data-testid="option-language-pt"
+                  >
+                    <span>Português (BR)</span>
+                    {i18n.language === 'pt-BR' && <Check className="h-4 w-4 text-accent" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage('en-US');
+                      localStorage.setItem('language', 'en-US');
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm text-white/90 hover:bg-white/10 rounded transition-colors"
+                    data-testid="option-language-en"
+                  >
+                    <span>English (US)</span>
+                    {i18n.language === 'en-US' && <Check className="h-4 w-4 text-accent" />}
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
             <a href="#" className="text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">{t('landing.topbar.support')}</a>
             <a href="#" className="hidden md:inline text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">{t('landing.topbar.institutional')}</a>
           </div>
