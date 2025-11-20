@@ -112,7 +112,7 @@ export default function RadialOrbitalTimeline({
 
   const calculateNodePosition = (index: number, total: number) => {
     const angle = ((index / total) * 360 + rotationAngle) % 360;
-    const radius = 200;
+    const radius = 280;
     const radian = (angle * Math.PI) / 180;
 
     const x = radius * Math.cos(radian) + centerOffset.x;
@@ -120,8 +120,8 @@ export default function RadialOrbitalTimeline({
 
     const zIndex = Math.round(100 + 50 * Math.cos(radian));
     const opacity = Math.max(
-      0.4,
-      Math.min(1, 0.4 + 0.6 * ((1 + Math.sin(radian)) / 2))
+      0.5,
+      Math.min(1, 0.5 + 0.5 * ((1 + Math.sin(radian)) / 2))
     );
 
     return { x, y, angle, zIndex, opacity };
@@ -153,12 +153,15 @@ export default function RadialOrbitalTimeline({
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-center overflow-hidden"
-      style={{ height: "600px" }}
+      className="w-full flex flex-col items-center justify-center overflow-hidden relative"
+      style={{ height: "700px" }}
       ref={containerRef}
       onClick={handleContainerClick}
     >
-      <div className="relative w-full max-w-4xl h-full flex items-center justify-center">
+      {/* Gradiente de fundo sutil para profundidade */}
+      <div className="absolute inset-0 bg-gradient-radial from-[#2196F3]/5 via-transparent to-transparent pointer-events-none" />
+      
+      <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
         <div
           className="absolute w-full h-full flex items-center justify-center"
           ref={orbitRef}
@@ -167,16 +170,19 @@ export default function RadialOrbitalTimeline({
             transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)`,
           }}
         >
-          <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-[#2196F3] via-[#0D2847] to-[#2196F3] animate-pulse flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-[#2196F3]/30 animate-ping opacity-70"></div>
+          {/* Centro com mais brilho */}
+          <div className="absolute w-20 h-20 rounded-full bg-gradient-to-br from-[#2196F3] via-[#0D2847] to-[#2196F3] flex items-center justify-center z-10 shadow-lg shadow-[#2196F3]/50">
+            <div className="absolute w-32 h-32 rounded-full border-2 border-[#2196F3]/40 animate-ping opacity-60"></div>
             <div
-              className="absolute w-24 h-24 rounded-full border border-[#2196F3]/20 animate-ping opacity-50"
+              className="absolute w-40 h-40 rounded-full border border-[#2196F3]/30 animate-ping opacity-40"
               style={{ animationDelay: "0.5s" }}
             ></div>
-            <div className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md"></div>
+            <div className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md shadow-xl shadow-[#2196F3]/60"></div>
           </div>
 
-          <div className="absolute w-96 h-96 rounded-full border border-[#2196F3]/20"></div>
+          {/* Círculos orbitais mais visíveis */}
+          <div className="absolute rounded-full border-2 border-[#2196F3]/30 shadow-lg shadow-[#2196F3]/20" style={{ width: "560px", height: "560px" }}></div>
+          <div className="absolute rounded-full border border-[#2196F3]/20" style={{ width: "640px", height: "640px" }}></div>
 
           {timelineData.map((item, index) => {
             const position = calculateNodePosition(index, timelineData.length);
@@ -202,50 +208,52 @@ export default function RadialOrbitalTimeline({
                   toggleItem(item.id);
                 }}
               >
+                {/* Glow effect mais intenso */}
                 <div
-                  className={`absolute rounded-full -inset-1 ${
+                  className={`absolute rounded-full blur-2xl ${
                     isPulsing ? "animate-pulse duration-1000" : ""
                   }`}
                   style={{
-                    background: `radial-gradient(circle, rgba(33, 150, 243, 0.3) 0%, rgba(33, 150, 243, 0) 70%)`,
-                    width: `${item.energy * 0.5 + 40}px`,
-                    height: `${item.energy * 0.5 + 40}px`,
-                    left: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
-                    top: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
+                    background: `radial-gradient(circle, rgba(33, 150, 243, 0.6) 0%, rgba(33, 150, 243, 0) 70%)`,
+                    width: `${item.energy * 0.7 + 70}px`,
+                    height: `${item.energy * 0.7 + 70}px`,
+                    left: `-${(item.energy * 0.7 + 70 - 56) / 2}px`,
+                    top: `-${(item.energy * 0.7 + 70 - 56) / 2}px`,
                   }}
                 ></div>
 
+                {/* Bolinha maior */}
                 <div
                   className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
+                  w-14 h-14 rounded-full flex items-center justify-center
                   ${
                     isExpanded
                       ? "bg-[#2196F3] text-white"
                       : isRelated
-                      ? "bg-[#2196F3]/60 text-white"
+                      ? "bg-[#2196F3]/70 text-white"
                       : "bg-[#0D2847] text-[#2196F3]"
                   }
                   border-2 
                   ${
                     isExpanded
-                      ? "border-[#2196F3] shadow-lg shadow-[#2196F3]/50"
+                      ? "border-[#2196F3] shadow-2xl shadow-[#2196F3]/60"
                       : isRelated
-                      ? "border-[#2196F3] animate-pulse"
-                      : "border-[#2196F3]/40"
+                      ? "border-[#2196F3] shadow-xl shadow-[#2196F3]/50 animate-pulse"
+                      : "border-[#2196F3]/50 shadow-lg shadow-[#2196F3]/30"
                   }
                   transition-all duration-300 transform
-                  ${isExpanded ? "scale-150" : ""}
+                  ${isExpanded ? "scale-150" : "hover:scale-110"}
                 `}
                 >
-                  <Icon size={16} />
+                  <Icon size={20} />
                 </div>
 
                 <div
                   className={`
-                  absolute top-12 left-1/2 -translate-x-1/2 whitespace-nowrap
-                  text-xs font-semibold tracking-wider
+                  absolute top-16 left-1/2 -translate-x-1/2 whitespace-nowrap
+                  text-sm font-bold tracking-wide
                   transition-all duration-300
-                  ${isExpanded ? "text-white scale-125" : "text-white/70"}
+                  ${isExpanded ? "text-white scale-125" : "text-white/80"}
                 `}
                 >
                   {item.title}
