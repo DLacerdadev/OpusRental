@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import logoPath from "@assets/image_1763661455342.png";
+import logoPath from "@assets/Design sem nome (18)_1763661820712.png";
 
 export default function Landing() {
   const { t, i18n } = useTranslation();
