@@ -80,7 +80,7 @@ export default function Landing() {
       {/* Premium Navigation */}
       <nav className="bg-gradient-to-b from-primary/98 to-primary/95 backdrop-blur-2xl sticky top-0 z-50 border-b border-white/10 shadow-2xl shadow-black/20">
         <div className="max-w-[1600px] mx-auto px-8 lg:px-16">
-          <div className="flex justify-between items-center py-3">
+          <div className="flex justify-between items-center py-2">
             <div className="flex items-center gap-16">
               {/* Logo Section */}
               <div className="flex items-center">
