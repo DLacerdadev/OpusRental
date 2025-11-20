@@ -22,15 +22,9 @@ export default function Landing() {
       {/* Ultra Modern Top Bar */}
       <div className="bg-black/30 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[1800px] mx-auto px-8 lg:px-16 h-10 flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">Online 24/7</span>
-            </div>
-            <div className="hidden md:flex items-center gap-2">
-              <Shield className="h-3 w-3 text-accent" />
-              <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">CVM Regulado</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">Online 24/7</span>
           </div>
           <div className="flex items-center gap-8">
             <a href="#" className="text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">Suporte</a>
@@ -121,14 +115,6 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             {/* Left: Hero Content */}
             <div className="space-y-8">
-              {/* Professional Trust Badges */}
-              <div className="flex flex-wrap gap-3">
-                <Badge className="px-4 py-2 text-xs font-semibold bg-white/10 text-white border border-white/20 backdrop-blur-sm">
-                  <Building2 className="h-3 w-3 mr-2" />
-                  Investimento Institucional
-                </Badge>
-              </div>
-
               <h1 
                 className="font-bold text-white leading-[1.08] tracking-tight"
                 style={{ 
