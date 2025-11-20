@@ -90,7 +90,7 @@ export default function Landing() {
             <div className="flex items-center gap-16">
               {/* Logo Section */}
               <div className="flex items-center">
-                <img src={logoPath} alt="Opus Capital" className="h-28" />
+                <img src={logoPath} alt="Opus Capital" className="h-40" />
               </div>
               
               {/* Navigation Links */}
