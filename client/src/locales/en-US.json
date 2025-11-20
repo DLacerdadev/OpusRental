@@ -156,95 +156,115 @@
   },
   "assets": {
     "title": "Asset Management",
-    "subtitle": "Manage the trailer fleet",
-    "createAsset": "Create New Asset",
-    "createAssetTitle": "Create New Asset",
-    "createAssetDescription": "Fill in the new trailer data",
+    "subtitle": "Control and monitor your trailers",
+    "newAsset": "New Asset",
+    "export": "Export",
+    "newAssetDialog": "New Asset",
+    "newAssetDescription": "Add a new trailer to the system",
+    "detailsDialog": "Asset Details",
+    "detailsDescription": "Complete information for the selected asset",
     "trailerId": "Trailer ID",
+    "trailerType": "Trailer Type",
+    "selectTrailerType": "Select type",
+    "trailerTypeSeco": "Dry Van",
+    "trailerTypeClimatizado": "Refrigerated",
+    "trailerTypeLonado": "Flatbed",
+    "autoIdHint": "ID will be auto-generated (e.g.: TRS001, TRC002, TRL003)",
+    "allocationType": "Allocation Type",
+    "selectAllocationType": "Select allocation type",
+    "allocationTypeOpen": "Open Quotation",
+    "allocationTypeSpecific": "Specific Investor",
+    "allocationOpenHint": "Asset available to all investors",
+    "allocationSpecificHint": "Asset will be allocated to a specific investor",
+    "selectInvestor": "Investor",
+    "selectInvestorPlaceholder": "Select an investor",
+    "searchInvestor": "Search investor...",
+    "noInvestorsFound": "No investors found",
     "model": "Model",
-    "purchaseValue": "Purchase Value",
-    "currentValue": "Current Value",
+    "status": "Status",
+    "selectStatus": "Select status",
+    "purchaseValue": "Purchase Value (USD)",
+    "currentValue": "Current Value (USD)",
     "purchaseDate": "Purchase Date",
     "depreciationRate": "Depreciation Rate",
-    "location": "Location",
-    "latitude": "Latitude",
-    "longitude": "Longitude",
-    "status": "Status",
     "totalShares": "Total Shares",
-    "stock": "Stock",
-    "active": "Active",
-    "maintenance": "Maintenance",
-    "expired": "Expired",
+    "location": "Location",
+    "latitude": "Latitude (Optional)",
+    "longitude": "Longitude (Optional)",
     "cancel": "Cancel",
-    "create": "Create Asset",
+    "createAsset": "Create Asset",
     "creating": "Creating...",
-    "exportCSV": "Export CSV",
-    "table": {
-      "id": "ID",
-      "model": "MODEL",
-      "status": "STATUS",
-      "shares": "SHARES",
-      "trafficLight": "AGE",
-      "value": "VALUE",
-      "acquisition": "ACQUISITION",
-      "location": "LOCATION",
-      "actions": "ACTIONS",
-      "noAssets": "No assets registered"
-    },
-    "details": {
-      "title": "Asset Details",
-      "description": "Complete information of the selected asset",
-      "basicInfo": "Basic Information",
-      "financialInfo": "Financial Information",
-      "sharesInfo": "Shares Information",
-      "locationInfo": "Location",
-      "trailerId": "Trailer ID",
-      "model": "Model",
-      "status": "Status",
-      "acquisitionDate": "Acquisition Date",
-      "purchaseValue": "Purchase Value",
-      "currentValue": "Current Value",
-      "depreciationRate": "Depreciation Rate",
-      "ageIndicator": "Age Indicator",
-      "lessThanYear": "< 1 year",
-      "oneToTwoYears": "1-2 years",
-      "moreThanTwoYears": "> 2 years",
-      "totalShares": "Total Shares",
-      "soldShares": "Sold Shares",
-      "availableShares": "Available Shares",
-      "city": "City/State",
-      "latitude": "Latitude",
-      "longitude": "Longitude",
-      "close": "Close"
-    }
+    "statusActive": "Active",
+    "statusStock": "Stock",
+    "statusMaintenance": "Maintenance",
+    "statusExpired": "Expired",
+    "tableType": "TYPE",
+    "tableModel": "MODEL",
+    "tableShares": "SHARES",
+    "tableTrafficLight": "BEACON",
+    "tablePurchaseValue": "PURCHASE VALUE",
+    "tableValue": "CURRENT VALUE",
+    "tableAcquisition": "ACQUISITION",
+    "tableLocation": "LOCATION",
+    "tableActions": "ACTIONS",
+    "basicInfo": "Basic Information",
+    "financialInfo": "Financial Information",
+    "sharesInfo": "Shares Information",
+    "purchaseValueLabel": "Purchase Value",
+    "currentValueLabel": "Current Value",
+    "ageIndicator": "Age Indicator",
+    "lessThan1Year": "< 1 year",
+    "between1And2Years": "1-2 years",
+    "moreThan2Years": "> 2 years",
+    "sharesSold": "Shares Sold",
+    "sharesAvailable": "Shares Available",
+    "cityState": "City/State",
+    "close": "Close",
+    "successTitle": "Success!",
+    "successDescription": "Asset created successfully.",
+    "errorTitle": "Error Creating Asset",
+    "errorDescription": "Failed to create asset.",
+    "duplicateTrailerId": "This Trailer ID is already in use. Please use a different ID.",
+    "validationError": "Please check the highlighted fields and try again.",
+    "noDataToExport": "No data to export",
+    "noAssetsRegistered": "There are no assets registered in the system.",
+    "exportSuccess": "Exported successfully!",
+    "exportDescription": "Asset spreadsheet downloaded with all details.",
+    "noAssets": "No assets registered"
   },
   "tracking": {
     "title": "GPS Tracking",
-    "subtitle": "Monitor trailer locations in real-time",
-    "map": "Tracking Map"
+    "subtitle": "Monitor your assets in real time",
+    "refresh": "Refresh",
+    "export": "Export",
+    "recentActivity": "Recent Activity",
+    "moving": "Moving",
+    "stopped": "Stopped",
+    "noTrackingData": "No tracking data",
+    "locationDetails": "Location Details",
+    "tableStatus": "STATUS",
+    "tableLocation": "LOCATION",
+    "tableUpdate": "UPDATE",
+    "tableSpeed": "SPEED"
   },
   "financial": {
-    "title": "Financial Management",
-    "subtitle": "Company finances overview",
-    "currentMonth": "Current Month",
-    "generatePayments": "Generate Payments",
-    "month": "Month",
-    "totalRevenue": "Total Revenue",
-    "investorPayouts": "Investor Payouts",
-    "companyMargin": "Company Margin",
-    "sharesPaid": "Shares Paid",
-    "financialHistory": "Financial History",
-    "noRecords": "No financial records found",
-    "monthlyRevenue": "Monthly Revenue",
-    "payouts": "Payouts",
-    "monthlyRate": "Monthly rate",
-    "managedCapital": "Managed Capital",
+    "title": "Financial",
+    "subtitle": "Complete revenue and payment management",
+    "monthlyRevenue": "MONTHLY REVENUE",
+    "payouts": "PAYOUTS",
+    "companyMargin": "COMPANY MARGIN",
+    "managedCapital": "MANAGED CAPITAL",
+    "monthlyRate": "2% p.m. per share",
     "activeShares": "active shares",
-    "revenueEvolution": "Revenue Evolution",
+    "revenueEvolution": "Revenue Evolution (12 months)",
     "noFinancialData": "No financial data available",
     "cashFlowThisMonth": "Cash Flow This Month",
     "trailerRevenue": "Trailer Revenue",
-    "netProfit": "Net Profit"
+    "investorPayouts": "Investor Payouts",
+    "netProfit": "Net Profit",
+    "chartRevenue": "Total Revenue",
+    "chartPayouts": "Payouts",
+    "chartMargin": "Margin"
   },
   "reports": {
     "title": "Reports",
@@ -450,99 +470,6 @@
     "mockDescriptionDocument": "KYC documents for review",
     "mockDescriptionWithdrawal": "Partial withdrawal request"
   },
-  "assets": {
-    "title": "Asset Management",
-    "subtitle": "Control and monitor your trailers",
-    "newAsset": "New Asset",
-    "export": "Export",
-    "newAssetDialog": "New Asset",
-    "newAssetDescription": "Add a new trailer to the system",
-    "detailsDialog": "Asset Details",
-    "detailsDescription": "Complete information for the selected asset",
-    "trailerId": "Trailer ID",
-    "trailerType": "Trailer Type",
-    "selectTrailerType": "Select type",
-    "trailerTypeSeco": "Dry Van",
-    "trailerTypeClimatizado": "Refrigerated",
-    "trailerTypeLonado": "Flatbed",
-    "autoIdHint": "ID will be auto-generated (e.g.: TRS001, TRC002, TRL003)",
-    "allocationType": "Allocation Type",
-    "selectAllocationType": "Select allocation type",
-    "allocationTypeOpen": "Open Quotation",
-    "allocationTypeSpecific": "Specific Investor",
-    "allocationOpenHint": "Asset available to all investors",
-    "allocationSpecificHint": "Asset will be allocated to a specific investor",
-    "selectInvestor": "Investor",
-    "selectInvestorPlaceholder": "Select an investor",
-    "searchInvestor": "Search investor...",
-    "noInvestorsFound": "No investors found",
-    "model": "Model",
-    "status": "Status",
-    "selectStatus": "Select status",
-    "purchaseValue": "Purchase Value (USD)",
-    "currentValue": "Current Value (USD)",
-    "purchaseDate": "Purchase Date",
-    "depreciationRate": "Depreciation Rate",
-    "totalShares": "Total Shares",
-    "location": "Location",
-    "latitude": "Latitude (Optional)",
-    "longitude": "Longitude (Optional)",
-    "cancel": "Cancel",
-    "createAsset": "Create Asset",
-    "creating": "Creating...",
-    "statusActive": "Active",
-    "statusStock": "Stock",
-    "statusMaintenance": "Maintenance",
-    "statusExpired": "Expired",
-    "tableType": "TYPE",
-    "tableModel": "MODEL",
-    "tableShares": "SHARES",
-    "tableTrafficLight": "BEACON",
-    "tablePurchaseValue": "PURCHASE VALUE",
-    "tableValue": "CURRENT VALUE",
-    "tableAcquisition": "ACQUISITION",
-    "tableLocation": "LOCATION",
-    "tableActions": "ACTIONS",
-    "basicInfo": "Basic Information",
-    "financialInfo": "Financial Information",
-    "sharesInfo": "Shares Information",
-    "purchaseValueLabel": "Purchase Value",
-    "currentValueLabel": "Current Value",
-    "ageIndicator": "Age Indicator",
-    "lessThan1Year": "< 1 year",
-    "between1And2Years": "1-2 years",
-    "moreThan2Years": "> 2 years",
-    "sharesSold": "Shares Sold",
-    "sharesAvailable": "Shares Available",
-    "cityState": "City/State",
-    "close": "Close",
-    "successTitle": "Success!",
-    "successDescription": "Asset created successfully.",
-    "errorTitle": "Error Creating Asset",
-    "errorDescription": "Failed to create asset.",
-    "duplicateTrailerId": "This Trailer ID is already in use. Please use a different ID.",
-    "validationError": "Please check the highlighted fields and try again.",
-    "noDataToExport": "No data to export",
-    "noAssetsRegistered": "There are no assets registered in the system.",
-    "exportSuccess": "Exported successfully!",
-    "exportDescription": "Asset spreadsheet downloaded with all details.",
-    "noAssets": "No assets registered"
-  },
-  "tracking": {
-    "title": "GPS Tracking",
-    "subtitle": "Monitor your assets in real time",
-    "refresh": "Refresh",
-    "export": "Export",
-    "recentActivity": "Recent Activity",
-    "moving": "Moving",
-    "stopped": "Stopped",
-    "noTrackingData": "No tracking data",
-    "locationDetails": "Location Details",
-    "tableStatus": "STATUS",
-    "tableLocation": "LOCATION",
-    "tableUpdate": "UPDATE",
-    "tableSpeed": "SPEED"
-  },
   "gpsConfig": {
     "title": "GPS Configuration",
     "subtitle": "Manage GPS devices and tracking systems",
@@ -679,25 +606,6 @@
     "itemAllItemsAccounted": "All items accounted",
     "validationTrailerRequired": "Trailer is required",
     "validationInspectorRequired": "Inspector name is required"
-  },
-  "financial": {
-    "title": "Financial",
-    "subtitle": "Complete revenue and payment management",
-    "monthlyRevenue": "MONTHLY REVENUE",
-    "payouts": "PAYOUTS",
-    "companyMargin": "COMPANY MARGIN",
-    "managedCapital": "MANAGED CAPITAL",
-    "monthlyRate": "2% p.m. per share",
-    "activeShares": "active shares",
-    "revenueEvolution": "Revenue Evolution (12 months)",
-    "noFinancialData": "No financial data available",
-    "cashFlowThisMonth": "Cash Flow This Month",
-    "trailerRevenue": "Trailer Revenue",
-    "investorPayouts": "Investor Payouts",
-    "netProfit": "Net Profit",
-    "chartRevenue": "Total Revenue",
-    "chartPayouts": "Payouts",
-    "chartMargin": "Margin"
   },
   "pageTitles": {
     "dashboard": "Dashboard",
@@ -999,99 +907,190 @@
     "usernameExists": "This username is already taken"
   },
   "landing": {
+    "topbar": {
+      "online": "Online 24/7",
+      "support": "Support",
+      "institutional": "Institutional"
+    },
     "nav": {
-      "tagline": "Investments Backed by Real Assets",
-      "clientPortal": "Client Area",
-      "openAccount": "Invest Now"
+      "portfolio": "Portfolio",
+      "tracking": "Tracking",
+      "reports": "Reports",
+      "plans": "Plans",
+      "access": "Access",
+      "openAccount": "Open Account"
     },
     "hero": {
-      "badge": "Each share = 1 commercial trailer",
-      "headline": "Invest in Commercial Trailers",
-      "headlineAccent": "with Real Collateral",
-      "headlineSubtitle": "Fixed 2% Monthly Return",
-      "description": "Each USD 28,000 share represents 1 commercial trailer. Guaranteed monthly return of USD 560 (2%).",
-      "descriptionExtended": "Assets tracked 24/7 via GPS. Rental contracts from 3 to 12 months. Total real-time transparency.",
-      "ctaRegister": "Start Investing",
-      "ctaLogin": "Access My Account"
-    },
-    "stats": {
-      "investmentLabel": "Value per Share",
-      "investmentSub": "1 share = 1 trailer",
-      "returnLabel": "Fixed Monthly Return",
-      "returnSub": "2% per month guaranteed",
-      "rentalLabel": "Rental Revenue",
-      "rentalSub": "Per trailer/month",
-      "trackingLabel": "GPS Tracking",
-      "trackingSub": "All assets 24/7"
-    },
-    "howItWorks": {
-      "title": "How It Works",
-      "description": "Simple and transparent process from start to monthly payments",
-      "step1": "You Invest",
-      "step1Desc": "Purchase 1 share of USD 28,000 = 1 specific commercial trailer",
-      "step2": "Trailer Works",
-      "step2Desc": "Rented to carriers for 3-12 months generating USD 1,500/month",
-      "step3": "You Receive",
-      "step3Desc": "USD 560 every month (fixed 2%) in your account",
-      "step4": "Track Everything",
-      "step4Desc": "See GPS location, status and reports in real-time"
-    },
-    "transparency": {
-      "title": "Total Transparency",
-      "description": "See everything about your investment in real-time",
-      "gps": "GPS Tracking",
-      "gps1": "Exact location of your trailer",
-      "gps2": "Route history and movement",
-      "gps3": "Suspicious movement alerts",
-      "status": "Asset Status",
-      "status1": "Traffic light system: Green/Yellow/Red",
-      "status2": "Trailer age and depreciation",
-      "status3": "Updated current value",
-      "financial": "Complete Financial",
-      "financial1": "Statement of all payments",
-      "financial2": "Active rental contracts",
-      "financial3": "Detailed monthly reports"
-    },
-    "cta": {
-      "title": "Ready to Start?",
-      "description": "Start investing in commercial trailers with real collateral and fixed 2% monthly return",
-      "buttonRegister": "Open My Account"
-    },
-    "ctaBanners": {
-      "portfolio": {
-        "title": "Diversify Your Portfolio",
-        "description": "Purchase new shares and increase your monthly returns. Each trailer generates USD 560/month (fixed 2%)",
-        "button": "Buy New Share"
-      },
-      "assets": {
-        "title": "Real-Time GPS Tracking",
-        "description": "All trailers have 24/7 GPS location. See exactly where your investment is working",
-        "button": "View Tracking"
-      },
-      "tracking": {
-        "title": "Your Assets Protected",
-        "description": "Continuous monitoring with automatic alerts. Green/Yellow/Red traffic light system",
-        "button": "View My Assets"
-      },
-      "financial": {
-        "title": "Fixed 2% Monthly Return",
-        "description": "USD 560 monthly per share. Punctual payments with total transparency and real contracts",
-        "button": "View History"
-      },
-      "reports": {
-        "title": "Total Transparency",
-        "description": "Detailed reports with all financial data, contracts and asset performance",
-        "button": "Generate Report"
-      },
-      "default": {
-        "title": "Start Investing Today",
-        "description": "Purchase your first USD 28,000 share and receive USD 560 monthly with real collateral",
-        "button": "Buy First Share"
+      "title": "Real asset investments with",
+      "titleHighlight": "guaranteed return",
+      "titleEnd": "of 24% per year",
+      "description": "Institutional platform for investing in commercial trailers. Track your assets in real-time, receive monthly returns on schedule, and build wealth with complete transparency.",
+      "startInvesting": "Start Investing",
+      "howItWorks": "How it works",
+      "stats": {
+        "annual": "Annual return",
+        "guaranteed": "guaranteed",
+        "tracking": "Tracking",
+        "realTime": "real-time",
+        "investors": "Investors",
+        "active": "active"
       }
     },
+    "dashboardCard": {
+      "title": "Real-Time Performance",
+      "subtitle": "Updated continuously",
+      "live": "Live",
+      "aum": "Assets Under Management",
+      "activeTrailers": "Active Trailers",
+      "investors": "Investors",
+      "returnRate": "Return Rate",
+      "guaranteed": "Guaranteed",
+      "recentActivity": "Recent Activity",
+      "paymentProcessed": "Payment processed",
+      "newInvestment": "New investment",
+      "gpsUpdated": "GPS updated",
+      "trailer": "Trailer"
+    },
+    "statsBar": {
+      "aum": "Assets under management",
+      "activeTrailers": "Active trailers",
+      "investors": "Investors",
+      "onTimePayments": "On-time payments"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Simple and transparent process to start investing in real assets",
+      "step1": {
+        "title": "Registration",
+        "desc": "Open digital account in minutes"
+      },
+      "step2": {
+        "title": "Investment",
+        "desc": "Starting from $500 in shares"
+      },
+      "step3": {
+        "title": "Tracking",
+        "desc": "Real-time GPS tracking"
+      },
+      "step4": {
+        "title": "Returns",
+        "desc": "2% monthly direct to account"
+      }
+    },
+    "features": {
+      "title": "Complete management platform",
+      "subtitle": "Cutting-edge technology to maximize your investments",
+      "gps": {
+        "title": "GPS Tracking",
+        "desc": "24/7 real-time monitoring"
+      },
+      "analytics": {
+        "title": "Advanced Analytics",
+        "desc": "Complete reports and dashboards"
+      },
+      "docs": {
+        "title": "Documentation",
+        "desc": "Registered and audited contracts"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "desc": "Instant alerts and insights"
+      }
+    },
+    "pricing": {
+      "title": "Investment plans",
+      "subtitle": "All plans with guaranteed profitability of 24% per year",
+      "starter": {
+        "name": "Starter",
+        "price": "$500",
+        "initial": "initial",
+        "features": [
+          "1-5 trailer shares",
+          "GPS tracking",
+          "Monthly reports",
+          "Email support",
+          "Web dashboard"
+        ]
+      },
+      "growth": {
+        "name": "Growth",
+        "price": "$5,000",
+        "popular": "Most Popular",
+        "features": [
+          "6-20 trailer shares",
+          "GPS with alerts",
+          "Advanced reports",
+          "Priority support",
+          "Mobile app",
+          "Personalized analytics"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "$50,000",
+        "features": [
+          "20+ trailer shares",
+          "Dedicated manager",
+          "Custom reports",
+          "24/7 support",
+          "Integration API",
+          "Exclusive consulting"
+        ]
+      },
+      "annualReturn": "Annual return",
+      "monthlyReturn": "Monthly return",
+      "startNow": "Start Now"
+    },
+    "trust": {
+      "title": "Trust and security",
+      "regulated": {
+        "title": "Regulated",
+        "desc": "Registered and audited contracts"
+      },
+      "protected": {
+        "title": "Protected Funds",
+        "desc": "Capital in segregated accounts"
+      },
+      "compliance": {
+        "title": "Compliance",
+        "desc": "Quarterly external audit"
+      },
+      "awarded": {
+        "title": "Awarded",
+        "desc": "Best platform 2024"
+      }
+    },
+    "cta": {
+      "title": "Start investing today",
+      "subtitle": "Join over 2,500 investors building wealth securely",
+      "openAccount": "Open Account Now",
+      "alreadyClient": "Already a Client"
+    },
     "footer": {
-      "tagline": "Investments Backed by Real Assets",
-      "copyright": "© 2025 Opus Rental Capital. All rights reserved."
+      "description": "Institutional platform for real asset investment. Transparency, technology, and security for your wealth.",
+      "reviews": "reviews",
+      "platform": {
+        "title": "Platform",
+        "portfolio": "Portfolio",
+        "tracking": "Tracking",
+        "reports": "Reports",
+        "plans": "Plans"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "careers": "Careers",
+        "press": "Press",
+        "contact": "Contact"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "compliance": "Compliance"
+      },
+      "rights": "All rights reserved.",
+      "cnpj": "Tax ID"
     }
   },
   "broker": {

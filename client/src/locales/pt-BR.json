@@ -156,95 +156,115 @@
   },
   "assets": {
     "title": "Gestão de Ativos",
-    "subtitle": "Gerencie a frota de trailers",
-    "createAsset": "Criar Novo Ativo",
-    "createAssetTitle": "Criar Novo Ativo",
-    "createAssetDescription": "Preencha os dados do novo trailer",
+    "subtitle": "Controle e monitore seus trailers",
+    "newAsset": "Novo Ativo",
+    "export": "Exportar",
+    "newAssetDialog": "Novo Ativo",
+    "newAssetDescription": "Adicione um novo trailer ao sistema",
+    "detailsDialog": "Detalhes do Ativo",
+    "detailsDescription": "Informações completas do ativo selecionado",
     "trailerId": "ID do Trailer",
+    "trailerType": "Tipo do Trailer",
+    "selectTrailerType": "Selecione o tipo",
+    "trailerTypeSeco": "Seco",
+    "trailerTypeClimatizado": "Climatizado",
+    "trailerTypeLonado": "Lonado",
+    "autoIdHint": "ID será gerado automaticamente (ex: TRS001, TRC002, TRL003)",
+    "allocationType": "Tipo de Lançamento",
+    "selectAllocationType": "Selecione o tipo de lançamento",
+    "allocationTypeOpen": "Cotação Aberta",
+    "allocationTypeSpecific": "Investidor Específico",
+    "allocationOpenHint": "Ativo disponível para todos os investidores",
+    "allocationSpecificHint": "Ativo será alocado para um investidor específico",
+    "selectInvestor": "Investidor",
+    "selectInvestorPlaceholder": "Selecione um investidor",
+    "searchInvestor": "Pesquisar investidor...",
+    "noInvestorsFound": "Nenhum investidor encontrado",
     "model": "Modelo",
-    "purchaseValue": "Valor de Compra",
-    "currentValue": "Valor Atual",
+    "status": "Status",
+    "selectStatus": "Selecione o status",
+    "purchaseValue": "Valor de Compra (USD)",
+    "currentValue": "Valor Atual (USD)",
     "purchaseDate": "Data de Aquisição",
     "depreciationRate": "Taxa de Depreciação",
-    "location": "Localização",
-    "latitude": "Latitude",
-    "longitude": "Longitude",
-    "status": "Status",
     "totalShares": "Total de Cotas",
-    "stock": "Estoque",
-    "active": "Ativo",
-    "maintenance": "Manutenção",
-    "expired": "Vencido",
+    "location": "Localização",
+    "latitude": "Latitude (Opcional)",
+    "longitude": "Longitude (Opcional)",
     "cancel": "Cancelar",
-    "create": "Criar Ativo",
+    "createAsset": "Criar Ativo",
     "creating": "Criando...",
-    "exportCSV": "Exportar CSV",
-    "table": {
-      "id": "ID",
-      "model": "MODELO",
-      "status": "STATUS",
-      "shares": "COTAS",
-      "trafficLight": "FAROL",
-      "value": "VALOR",
-      "acquisition": "AQUISIÇÃO",
-      "location": "LOCALIZAÇÃO",
-      "actions": "AÇÕES",
-      "noAssets": "Nenhum ativo cadastrado"
-    },
-    "details": {
-      "title": "Detalhes do Ativo",
-      "description": "Informações completas do ativo selecionado",
-      "basicInfo": "Informações Básicas",
-      "financialInfo": "Informações Financeiras",
-      "sharesInfo": "Informações de Cotas",
-      "locationInfo": "Localização",
-      "trailerId": "ID do Trailer",
-      "model": "Modelo",
-      "status": "Status",
-      "acquisitionDate": "Data de Aquisição",
-      "purchaseValue": "Valor de Compra",
-      "currentValue": "Valor Atual",
-      "depreciationRate": "Taxa de Depreciação",
-      "ageIndicator": "Indicador de Idade",
-      "lessThanYear": "< 1 ano",
-      "oneToTwoYears": "1-2 anos",
-      "moreThanTwoYears": "> 2 anos",
-      "totalShares": "Total de Cotas",
-      "soldShares": "Cotas Vendidas",
-      "availableShares": "Cotas Disponíveis",
-      "city": "Cidade/Estado",
-      "latitude": "Latitude",
-      "longitude": "Longitude",
-      "close": "Fechar"
-    }
+    "statusActive": "Ativo",
+    "statusStock": "Estoque",
+    "statusMaintenance": "Manutenção",
+    "statusExpired": "Vencido",
+    "tableType": "TIPO",
+    "tableModel": "MODELO",
+    "tableShares": "COTAS",
+    "tableTrafficLight": "FAROL",
+    "tablePurchaseValue": "VALOR COMPRA",
+    "tableValue": "VALOR ATUAL",
+    "tableAcquisition": "AQUISIÇÃO",
+    "tableLocation": "LOCALIZAÇÃO",
+    "tableActions": "AÇÕES",
+    "basicInfo": "Informações Básicas",
+    "financialInfo": "Informações Financeiras",
+    "sharesInfo": "Informações de Cotas",
+    "purchaseValueLabel": "Valor de Compra",
+    "currentValueLabel": "Valor Atual",
+    "ageIndicator": "Indicador de Idade",
+    "lessThan1Year": "< 1 ano",
+    "between1And2Years": "1-2 anos",
+    "moreThan2Years": "> 2 anos",
+    "sharesSold": "Cotas Vendidas",
+    "sharesAvailable": "Cotas Disponíveis",
+    "cityState": "Cidade/Estado",
+    "close": "Fechar",
+    "successTitle": "Sucesso!",
+    "successDescription": "Ativo criado com sucesso.",
+    "errorTitle": "Erro ao Criar Ativo",
+    "errorDescription": "Falha ao criar ativo.",
+    "duplicateTrailerId": "Este ID de Trailer já está em uso. Por favor, use um ID diferente.",
+    "validationError": "Verifique os campos destacados e tente novamente.",
+    "noDataToExport": "Nenhum dado para exportar",
+    "noAssetsRegistered": "Não há ativos cadastrados no sistema.",
+    "exportSuccess": "Exportado com sucesso!",
+    "exportDescription": "Planilha de ativos baixada com todos os detalhes.",
+    "noAssets": "Nenhum ativo cadastrado"
   },
   "tracking": {
     "title": "Rastreamento GPS",
-    "subtitle": "Monitore a localização dos trailers em tempo real",
-    "map": "Mapa de Rastreamento"
+    "subtitle": "Monitore seus ativos em tempo real",
+    "refresh": "Atualizar",
+    "export": "Exportar",
+    "recentActivity": "Atividade Recente",
+    "moving": "Em movimento",
+    "stopped": "Parado",
+    "noTrackingData": "Nenhum dado de rastreamento",
+    "locationDetails": "Detalhes de Localização",
+    "tableStatus": "STATUS",
+    "tableLocation": "LOCALIZAÇÃO",
+    "tableUpdate": "ATUALIZAÇÃO",
+    "tableSpeed": "VELOCIDADE"
   },
   "financial": {
-    "title": "Gestão Financeira",
-    "subtitle": "Visão geral das finanças da empresa",
-    "currentMonth": "Mês Atual",
-    "generatePayments": "Gerar Pagamentos",
-    "month": "Mês",
-    "totalRevenue": "Receita Total",
-    "investorPayouts": "Repasses aos Investidores",
-    "companyMargin": "Margem da Empresa",
-    "sharesPaid": "Cotas Pagas",
-    "financialHistory": "Histórico Financeiro",
-    "noRecords": "Nenhum registro financeiro encontrado",
-    "monthlyRevenue": "Receita Mensal",
-    "payouts": "Repasses",
-    "monthlyRate": "Taxa mensal",
-    "managedCapital": "Capital Gerido",
+    "title": "Financeiro",
+    "subtitle": "Gestão completa de receitas e pagamentos",
+    "monthlyRevenue": "RECEITA MENSAL",
+    "payouts": "REPASSES",
+    "companyMargin": "MARGEM EMPRESA",
+    "managedCapital": "CAPITAL GERIDO",
+    "monthlyRate": "2% a.m. por cota",
     "activeShares": "cotas ativas",
-    "revenueEvolution": "Evolução de Receita",
+    "revenueEvolution": "Evolução da Receita (12 meses)",
     "noFinancialData": "Nenhum dado financeiro disponível",
-    "cashFlowThisMonth": "Fluxo de Caixa do Mês",
+    "cashFlowThisMonth": "Fluxo Financeiro Este Mês",
     "trailerRevenue": "Receita dos Trailers",
-    "netProfit": "Lucro Líquido"
+    "investorPayouts": "Repasse Investidores",
+    "netProfit": "Lucro Líquido",
+    "chartRevenue": "Receita Total",
+    "chartPayouts": "Repasses",
+    "chartMargin": "Margem"
   },
   "reports": {
     "title": "Relatórios",
@@ -450,99 +470,6 @@
     "mockDescriptionDocument": "Documentos KYC para análise",
     "mockDescriptionWithdrawal": "Solicitação de resgate parcial"
   },
-  "assets": {
-    "title": "Gestão de Ativos",
-    "subtitle": "Controle e monitore seus trailers",
-    "newAsset": "Novo Ativo",
-    "export": "Exportar",
-    "newAssetDialog": "Novo Ativo",
-    "newAssetDescription": "Adicione um novo trailer ao sistema",
-    "detailsDialog": "Detalhes do Ativo",
-    "detailsDescription": "Informações completas do ativo selecionado",
-    "trailerId": "ID do Trailer",
-    "trailerType": "Tipo do Trailer",
-    "selectTrailerType": "Selecione o tipo",
-    "trailerTypeSeco": "Seco",
-    "trailerTypeClimatizado": "Climatizado",
-    "trailerTypeLonado": "Lonado",
-    "autoIdHint": "ID será gerado automaticamente (ex: TRS001, TRC002, TRL003)",
-    "allocationType": "Tipo de Lançamento",
-    "selectAllocationType": "Selecione o tipo de lançamento",
-    "allocationTypeOpen": "Cotação Aberta",
-    "allocationTypeSpecific": "Investidor Específico",
-    "allocationOpenHint": "Ativo disponível para todos os investidores",
-    "allocationSpecificHint": "Ativo será alocado para um investidor específico",
-    "selectInvestor": "Investidor",
-    "selectInvestorPlaceholder": "Selecione um investidor",
-    "searchInvestor": "Pesquisar investidor...",
-    "noInvestorsFound": "Nenhum investidor encontrado",
-    "model": "Modelo",
-    "status": "Status",
-    "selectStatus": "Selecione o status",
-    "purchaseValue": "Valor de Compra (USD)",
-    "currentValue": "Valor Atual (USD)",
-    "purchaseDate": "Data de Aquisição",
-    "depreciationRate": "Taxa de Depreciação",
-    "totalShares": "Total de Cotas",
-    "location": "Localização",
-    "latitude": "Latitude (Opcional)",
-    "longitude": "Longitude (Opcional)",
-    "cancel": "Cancelar",
-    "createAsset": "Criar Ativo",
-    "creating": "Criando...",
-    "statusActive": "Ativo",
-    "statusStock": "Estoque",
-    "statusMaintenance": "Manutenção",
-    "statusExpired": "Vencido",
-    "tableType": "TIPO",
-    "tableModel": "MODELO",
-    "tableShares": "COTAS",
-    "tableTrafficLight": "FAROL",
-    "tablePurchaseValue": "VALOR COMPRA",
-    "tableValue": "VALOR ATUAL",
-    "tableAcquisition": "AQUISIÇÃO",
-    "tableLocation": "LOCALIZAÇÃO",
-    "tableActions": "AÇÕES",
-    "basicInfo": "Informações Básicas",
-    "financialInfo": "Informações Financeiras",
-    "sharesInfo": "Informações de Cotas",
-    "purchaseValueLabel": "Valor de Compra",
-    "currentValueLabel": "Valor Atual",
-    "ageIndicator": "Indicador de Idade",
-    "lessThan1Year": "< 1 ano",
-    "between1And2Years": "1-2 anos",
-    "moreThan2Years": "> 2 anos",
-    "sharesSold": "Cotas Vendidas",
-    "sharesAvailable": "Cotas Disponíveis",
-    "cityState": "Cidade/Estado",
-    "close": "Fechar",
-    "successTitle": "Sucesso!",
-    "successDescription": "Ativo criado com sucesso.",
-    "errorTitle": "Erro ao Criar Ativo",
-    "errorDescription": "Falha ao criar ativo.",
-    "duplicateTrailerId": "Este ID de Trailer já está em uso. Por favor, use um ID diferente.",
-    "validationError": "Verifique os campos destacados e tente novamente.",
-    "noDataToExport": "Nenhum dado para exportar",
-    "noAssetsRegistered": "Não há ativos cadastrados no sistema.",
-    "exportSuccess": "Exportado com sucesso!",
-    "exportDescription": "Planilha de ativos baixada com todos os detalhes.",
-    "noAssets": "Nenhum ativo cadastrado"
-  },
-  "tracking": {
-    "title": "Rastreamento GPS",
-    "subtitle": "Monitore seus ativos em tempo real",
-    "refresh": "Atualizar",
-    "export": "Exportar",
-    "recentActivity": "Atividade Recente",
-    "moving": "Em movimento",
-    "stopped": "Parado",
-    "noTrackingData": "Nenhum dado de rastreamento",
-    "locationDetails": "Detalhes de Localização",
-    "tableStatus": "STATUS",
-    "tableLocation": "LOCALIZAÇÃO",
-    "tableUpdate": "ATUALIZAÇÃO",
-    "tableSpeed": "VELOCIDADE"
-  },
   "gpsConfig": {
     "title": "Configuração GPS",
     "subtitle": "Gerencie dispositivos GPS e sistemas de rastreamento",
@@ -679,25 +606,6 @@
     "itemAllItemsAccounted": "Todos os itens contabilizados",
     "validationTrailerRequired": "Trailer é obrigatório",
     "validationInspectorRequired": "Nome do inspetor é obrigatório"
-  },
-  "financial": {
-    "title": "Financeiro",
-    "subtitle": "Gestão completa de receitas e pagamentos",
-    "monthlyRevenue": "RECEITA MENSAL",
-    "payouts": "REPASSES",
-    "companyMargin": "MARGEM EMPRESA",
-    "managedCapital": "CAPITAL GERIDO",
-    "monthlyRate": "2% a.m. por cota",
-    "activeShares": "cotas ativas",
-    "revenueEvolution": "Evolução da Receita (12 meses)",
-    "noFinancialData": "Nenhum dado financeiro disponível",
-    "cashFlowThisMonth": "Fluxo Financeiro Este Mês",
-    "trailerRevenue": "Receita dos Trailers",
-    "investorPayouts": "Repasse Investidores",
-    "netProfit": "Lucro Líquido",
-    "chartRevenue": "Receita Total",
-    "chartPayouts": "Repasses",
-    "chartMargin": "Margem"
   },
   "pageTitles": {
     "dashboard": "Painel de Controle",
@@ -999,99 +907,190 @@
     "usernameExists": "Este nome de usuário já está em uso"
   },
   "landing": {
+    "topbar": {
+      "online": "Online 24/7",
+      "support": "Suporte",
+      "institutional": "Institucional"
+    },
     "nav": {
-      "tagline": "Investimentos Garantidos por Ativos Reais",
-      "clientPortal": "Área do Cliente",
-      "openAccount": "Investir Agora"
+      "portfolio": "Portfólio",
+      "tracking": "Rastreamento",
+      "reports": "Relatórios",
+      "plans": "Planos",
+      "access": "Acessar",
+      "openAccount": "Abrir Conta"
     },
     "hero": {
-      "badge": "Cada cota = 1 trailer comercial",
-      "headline": "Invista em Trailers Comerciais",
-      "headlineAccent": "com Garantia Real",
-      "headlineSubtitle": "Retorno Fixo de 2% ao Mês",
-      "description": "Cada cota de USD 28.000 representa 1 trailer comercial. Retorno mensal garantido de USD 560 (2%).",
-      "descriptionExtended": "Ativos rastreados 24/7 por GPS. Contratos de aluguel de 3 a 12 meses. Transparência total em tempo real.",
-      "ctaRegister": "Começar a Investir",
-      "ctaLogin": "Acessar Minha Conta"
-    },
-    "stats": {
-      "investmentLabel": "Valor por Cota",
-      "investmentSub": "1 cota = 1 trailer",
-      "returnLabel": "Retorno Mensal Fixo",
-      "returnSub": "2% ao mês garantido",
-      "rentalLabel": "Receita de Aluguel",
-      "rentalSub": "Por trailer/mês",
-      "trackingLabel": "Rastreamento GPS",
-      "trackingSub": "Todos os ativos 24/7"
-    },
-    "howItWorks": {
-      "title": "Como Funciona",
-      "description": "Processo simples e transparente do início ao recebimento mensal",
-      "step1": "Você Investe",
-      "step1Desc": "Adquire 1 cota de USD 28.000 = 1 trailer comercial específico",
-      "step2": "Trailer Trabalha",
-      "step2Desc": "Alugado para transportadoras por 3-12 meses gerando USD 1.500/mês",
-      "step3": "Você Recebe",
-      "step3Desc": "USD 560 todo mês (2% fixo) na sua conta",
-      "step4": "Acompanhe Tudo",
-      "step4Desc": "Veja localização GPS, status e relatórios em tempo real"
-    },
-    "transparency": {
-      "title": "Transparência Total",
-      "description": "Veja tudo sobre seu investimento em tempo real",
-      "gps": "Rastreamento GPS",
-      "gps1": "Localização exata do seu trailer",
-      "gps2": "Histórico de rotas e movimentação",
-      "gps3": "Alertas de movimento suspeito",
-      "status": "Status do Ativo",
-      "status1": "Sistema de farol: Verde/Amarelo/Vermelho",
-      "status2": "Idade do trailer e depreciação",
-      "status3": "Valor atual atualizado",
-      "financial": "Financeiro Completo",
-      "financial1": "Extrato de todos os pagamentos",
-      "financial2": "Contratos de aluguel vigentes",
-      "financial3": "Relatórios mensais detalhados"
-    },
-    "cta": {
-      "title": "Pronto para Começar?",
-      "description": "Comece a investir em trailers comerciais com garantia real e retorno fixo de 2% ao mês",
-      "buttonRegister": "Abrir Minha Conta"
-    },
-    "ctaBanners": {
-      "portfolio": {
-        "title": "Diversifique Seu Portfólio",
-        "description": "Adquira novas cotas e aumente seus retornos mensais. Cada trailer gera USD 560/mês (2% fixo)",
-        "button": "Comprar Nova Cota"
-      },
-      "assets": {
-        "title": "Rastreamento GPS em Tempo Real",
-        "description": "Todos os trailers têm localização GPS 24/7. Veja exatamente onde seu investimento está trabalhando",
-        "button": "Ver Rastreamento"
-      },
-      "tracking": {
-        "title": "Seu Patrimônio Protegido",
-        "description": "Monitoramento contínuo com alertas automáticos. Sistema de farol Verde/Amarelo/Vermelho",
-        "button": "Ver Meus Ativos"
-      },
-      "financial": {
-        "title": "Retorno Fixo de 2% ao Mês",
-        "description": "USD 560 mensais por cota. Pagamentos pontuais com total transparência e contratos reais",
-        "button": "Ver Histórico"
-      },
-      "reports": {
-        "title": "Transparência Total",
-        "description": "Relatórios detalhados com todos os dados financeiros, contratos e performance dos ativos",
-        "button": "Gerar Relatório"
-      },
-      "default": {
-        "title": "Comece a Investir Hoje",
-        "description": "Adquira sua primeira cota de USD 28.000 e receba USD 560 mensais com garantia real",
-        "button": "Comprar Primeira Cota"
+      "title": "Investimentos em ativos reais com",
+      "titleHighlight": "retorno garantido",
+      "titleEnd": "de 24% ao ano",
+      "description": "Plataforma institucional para investir em trailers comerciais. Acompanhe seus ativos em tempo real, receba rendimentos mensais pontuais e construa patrimônio com total transparência.",
+      "startInvesting": "Começar a Investir",
+      "howItWorks": "Como funciona",
+      "stats": {
+        "annual": "Retorno anual",
+        "guaranteed": "garantido",
+        "tracking": "Rastreamento",
+        "realTime": "tempo real",
+        "investors": "Investidores",
+        "active": "ativos"
       }
     },
+    "dashboardCard": {
+      "title": "Performance em Tempo Real",
+      "subtitle": "Atualizado continuamente",
+      "live": "Live",
+      "aum": "Ativos Sob Gestão",
+      "activeTrailers": "Trailers Ativos",
+      "investors": "Investidores",
+      "returnRate": "Taxa de Retorno",
+      "guaranteed": "Garantido",
+      "recentActivity": "Atividade Recente",
+      "paymentProcessed": "Pagamento processado",
+      "newInvestment": "Novo investimento",
+      "gpsUpdated": "GPS atualizado",
+      "trailer": "Trailer"
+    },
+    "statsBar": {
+      "aum": "Ativos sob gestão",
+      "activeTrailers": "Trailers ativos",
+      "investors": "Investidores",
+      "onTimePayments": "Pagamentos no prazo"
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Processo simples e transparente para começar a investir em ativos reais",
+      "step1": {
+        "title": "Cadastro",
+        "desc": "Abertura de conta digital em minutos"
+      },
+      "step2": {
+        "title": "Investimento",
+        "desc": "A partir de R$ 500 em cotas"
+      },
+      "step3": {
+        "title": "Acompanhamento",
+        "desc": "Rastreamento GPS em tempo real"
+      },
+      "step4": {
+        "title": "Rendimentos",
+        "desc": "2% mensais direto na conta"
+      }
+    },
+    "features": {
+      "title": "Plataforma completa de gestão",
+      "subtitle": "Tecnologia de ponta para maximizar seus investimentos",
+      "gps": {
+        "title": "Rastreamento GPS",
+        "desc": "Monitoramento 24/7 em tempo real"
+      },
+      "analytics": {
+        "title": "Analytics Avançado",
+        "desc": "Relatórios e dashboards completos"
+      },
+      "docs": {
+        "title": "Documentação",
+        "desc": "Contratos registrados e auditados"
+      },
+      "notifications": {
+        "title": "Notificações",
+        "desc": "Alertas instantâneos e insights"
+      }
+    },
+    "pricing": {
+      "title": "Planos de investimento",
+      "subtitle": "Todos os planos com rentabilidade garantida de 24% ao ano",
+      "starter": {
+        "name": "Starter",
+        "price": "R$ 500",
+        "initial": "inicial",
+        "features": [
+          "1-5 cotas de trailers",
+          "Rastreamento GPS",
+          "Relatórios mensais",
+          "Suporte por email",
+          "Dashboard web"
+        ]
+      },
+      "growth": {
+        "name": "Growth",
+        "price": "R$ 5.000",
+        "popular": "Mais Popular",
+        "features": [
+          "6-20 cotas de trailers",
+          "GPS com alertas",
+          "Relatórios avançados",
+          "Suporte prioritário",
+          "App mobile",
+          "Análises personalizadas"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "R$ 50.000",
+        "features": [
+          "20+ cotas de trailers",
+          "Gestor dedicado",
+          "Relatórios personalizados",
+          "Suporte 24/7",
+          "API de integração",
+          "Consultoria exclusiva"
+        ]
+      },
+      "annualReturn": "Retorno anual",
+      "monthlyReturn": "Retorno mensal",
+      "startNow": "Começar Agora"
+    },
+    "trust": {
+      "title": "Confiança e segurança",
+      "regulated": {
+        "title": "Regulamentado",
+        "desc": "Contratos registrados e auditados"
+      },
+      "protected": {
+        "title": "Fundos Protegidos",
+        "desc": "Capital em contas segregadas"
+      },
+      "compliance": {
+        "title": "Compliance",
+        "desc": "Auditoria trimestral externa"
+      },
+      "awarded": {
+        "title": "Premiado",
+        "desc": "Melhor plataforma 2024"
+      }
+    },
+    "cta": {
+      "title": "Comece a investir hoje",
+      "subtitle": "Junte-se a mais de 2.500 investidores construindo patrimônio com segurança",
+      "openAccount": "Abrir Conta Agora",
+      "alreadyClient": "Já sou Cliente"
+    },
     "footer": {
-      "tagline": "Investimentos Garantidos por Ativos Reais",
-      "copyright": "© 2025 Opus Rental Capital. Todos os direitos reservados."
+      "description": "Plataforma institucional de investimento em ativos reais. Transparência, tecnologia e segurança para o seu patrimônio.",
+      "reviews": "avaliações",
+      "platform": {
+        "title": "Plataforma",
+        "portfolio": "Portfólio",
+        "tracking": "Rastreamento",
+        "reports": "Relatórios",
+        "plans": "Planos"
+      },
+      "company": {
+        "title": "Empresa",
+        "about": "Sobre",
+        "careers": "Carreiras",
+        "press": "Imprensa",
+        "contact": "Contato"
+      },
+      "legal": {
+        "title": "Legal",
+        "privacy": "Privacidade",
+        "terms": "Termos",
+        "compliance": "Compliance"
+      },
+      "rights": "Todos os direitos reservados.",
+      "cnpj": "CNPJ"
     }
   },
   "broker": {
