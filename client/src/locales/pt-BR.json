@@ -1091,6 +1091,11 @@
       },
       "rights": "Todos os direitos reservados.",
       "cnpj": "CNPJ"
+    },
+    "globalNetwork": {
+      "title": "Operação",
+      "titleHighlight": "Global",
+      "description": "Nossa frota opera em rotas estratégicas pelo Brasil e América do Sul, garantindo máxima rentabilidade para seus investimentos."
     }
   },
   "broker": {

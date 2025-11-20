@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { WorldMap } from "@/components/ui/world-map";
 import { 
   Shield, TrendingUp, MapPin, DollarSign, CheckCircle, ArrowRight, 
   Award, Lock, BarChart3, Globe2, Percent, Users, 
@@ -421,6 +422,70 @@ export default function Landing() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Global Network Map */}
+      <section className="relative py-24 px-6 lg:px-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-4xl lg:text-5xl font-bold text-white mb-5 tracking-tight"
+            >
+              {t('landing.globalNetwork.title')}{' '}
+              <span className="text-accent">{t('landing.globalNetwork.titleHighlight')}</span>
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="text-lg text-white/60 font-light max-w-2xl mx-auto"
+            >
+              {t('landing.globalNetwork.description')}
+            </motion.p>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <WorldMap
+              dots={[
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: -22.9068, lng: -43.1729 }, // Rio de Janeiro
+                },
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: -15.7975, lng: -47.8919 }, // Brasília
+                },
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: -25.4284, lng: -49.2733 }, // Curitiba
+                },
+                {
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
+                  end: { lat: -30.0346, lng: -51.2177 }, // Porto Alegre
+                },
+                {
+                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília
+                  end: { lat: -3.7172, lng: -38.5433 }, // Fortaleza
+                },
+                {
+                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília
+                  end: { lat: -12.9714, lng: -38.5014 }, // Salvador
+                },
+              ]}
+              lineColor="#2196F3"
+            />
+          </motion.div>
         </div>
       </section>
 
