@@ -8,6 +8,7 @@ import {
   FileText, Bell, Star, PlayCircle, Activity, Sparkles, Building2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import logoPath from "@assets/image_1759264185138.png";
 
 export default function Landing() {
@@ -115,7 +116,10 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             {/* Left: Hero Content */}
             <div className="space-y-8">
-              <h1 
+              <motion.h1 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 className="font-bold text-white leading-[1.08] tracking-tight"
                 style={{ 
                   fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)',
@@ -126,14 +130,25 @@ export default function Landing() {
                 {t('landing.hero.title')}{' '}
                 <span className="text-accent">{t('landing.hero.titleHighlight')}</span>{' '}
                 {t('landing.hero.titleEnd')}
-              </h1>
+              </motion.h1>
               
-              <p className="text-lg text-white/75 leading-relaxed font-light max-w-xl" data-testid="text-hero-description">
+              <motion.p 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="text-lg text-white/75 leading-relaxed font-light max-w-xl" 
+                data-testid="text-hero-description"
+              >
                 {t('landing.hero.description')}
-              </p>
+              </motion.p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 pt-2">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="flex flex-wrap gap-4 pt-2"
+              >
                 <Link href="/register">
                   <Button 
                     size="lg"
@@ -153,10 +168,15 @@ export default function Landing() {
                   <PlayCircle className="mr-2 h-4 w-4" />
                   {t('landing.hero.howItWorks')}
                 </Button>
-              </div>
+              </motion.div>
 
               {/* Key Stats - Minimal Design */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10"
+              >
                 {[
                   { value: "24%", label: t('landing.hero.stats.annual'), sublabel: t('landing.hero.stats.guaranteed') },
                   { value: "GPS", label: t('landing.hero.stats.tracking'), sublabel: t('landing.hero.stats.realTime') },
@@ -168,11 +188,16 @@ export default function Landing() {
                     <div className="text-xs text-white/40">{item.sublabel}</div>
                   </div>
                 ))}
-              </div>
+              </motion.div>
             </div>
 
             {/* Right: Dashboard Preview - Clean Glassmorphism */}
-            <div className="relative">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="relative"
+            >
               <div className="absolute -inset-4 bg-accent/15 rounded-3xl blur-3xl" />
               <Card className="relative bg-white/8 backdrop-blur-2xl border border-white/10 p-8 rounded-2xl shadow-2xl">
                 <div className="space-y-6">
@@ -233,7 +258,7 @@ export default function Landing() {
                   </div>
                 </div>
               </Card>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
