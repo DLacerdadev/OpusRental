@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ArrowRight, Link as LinkIcon, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,8 @@ export default function RadialOrbitalTimeline({
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  const memoizedTimelineData = useMemo(() => timelineData, [timelineData.length]);
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === containerRef.current || e.target === orbitRef.current) {
@@ -103,8 +105,8 @@ export default function RadialOrbitalTimeline({
   const centerViewOnNode = (nodeId: number) => {
     if (viewMode !== "orbital" || !nodeRefs.current[nodeId]) return;
 
-    const nodeIndex = timelineData.findIndex((item) => item.id === nodeId);
-    const totalNodes = timelineData.length;
+    const nodeIndex = memoizedTimelineData.findIndex((item) => item.id === nodeId);
+    const totalNodes = memoizedTimelineData.length;
     const targetAngle = (nodeIndex / totalNodes) * 360;
 
     setRotationAngle(270 - targetAngle);
@@ -128,7 +130,7 @@ export default function RadialOrbitalTimeline({
   };
 
   const getRelatedItems = (itemId: number): number[] => {
-    const currentItem = timelineData.find((item) => item.id === itemId);
+    const currentItem = memoizedTimelineData.find((item) => item.id === itemId);
     return currentItem ? currentItem.relatedIds : [];
   };
 
@@ -184,8 +186,8 @@ export default function RadialOrbitalTimeline({
           <div className="absolute rounded-full border-2 border-[#2196F3]/30 shadow-lg shadow-[#2196F3]/20" style={{ width: "560px", height: "560px" }}></div>
           <div className="absolute rounded-full border border-[#2196F3]/20" style={{ width: "640px", height: "640px" }}></div>
 
-          {timelineData.map((item, index) => {
-            const position = calculateNodePosition(index, timelineData.length);
+          {memoizedTimelineData.map((item, index) => {
+            const position = calculateNodePosition(index, memoizedTimelineData.length);
             const isExpanded = expandedItems[item.id];
             const isRelated = isRelatedToActive(item.id);
             const isPulsing = pulseEffect[item.id];
@@ -312,7 +314,7 @@ export default function RadialOrbitalTimeline({
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {item.relatedIds.map((relatedId) => {
-                              const relatedItem = timelineData.find(
+                              const relatedItem = memoizedTimelineData.find(
                                 (i) => i.id === relatedId
                               );
                               return (
