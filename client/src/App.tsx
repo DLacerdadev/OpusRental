@@ -68,9 +68,9 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
@@ -81,13 +81,13 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
         </SheetContent>
       </Sheet>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header 
           title={t(titleKey)} 
           user={user} 
           onMenuClick={() => setIsMobileMenuOpen(true)}
         />
-        <main className="flex-1 overflow-auto bg-background">
+        <main className="flex-1 overflow-auto bg-background p-6">
           <Component />
         </main>
       </div>

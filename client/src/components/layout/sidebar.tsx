@@ -86,7 +86,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
   const filteredSettingsItems = settingsItems.filter(item => item.roles.includes(user?.role || "investor"));
 
   return (
-    <div className={`relative bg-gradient-to-b from-[hsl(210,70%,15%)] via-[hsl(210,65%,17%)] to-[hsl(210,70%,15%)] text-white border-r border-white/10 min-h-screen flex flex-col shadow-2xl transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
+    <div className={`relative bg-gradient-to-b from-[hsl(210,70%,15%)] via-[hsl(210,65%,17%)] to-[hsl(210,70%,15%)] text-white border-r border-white/10 h-screen flex flex-col shadow-2xl transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
       {/* Collapse Toggle Button - Hidden on mobile */}
       {!isMobile && (
         <button
