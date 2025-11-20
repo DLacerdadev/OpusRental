@@ -459,28 +459,36 @@ export default function Landing() {
             <WorldMap
               dots={[
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: -22.9068, lng: -43.1729 }, // Rio de Janeiro
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York, EUA
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: -15.7975, lng: -47.8919 }, // Brasília
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: 51.5074, lng: -0.1278 }, // Londres, Reino Unido
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: -25.4284, lng: -49.2733 }, // Curitiba
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: 48.8566, lng: 2.3522 }, // Paris, França
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: -30.0346, lng: -51.2177 }, // Porto Alegre
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: 35.6762, lng: 139.6503 }, // Tóquio, Japão
                 },
                 {
-                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília
-                  end: { lat: -3.7172, lng: -38.5433 }, // Fortaleza
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: -33.8688, lng: 151.2093 }, // Sydney, Austrália
                 },
                 {
-                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília
-                  end: { lat: -12.9714, lng: -38.5014 }, // Salvador
+                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo, Brasil
+                  end: { lat: 1.3521, lng: 103.8198 }, // Singapura
+                },
+                {
+                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília, Brasil
+                  end: { lat: 19.4326, lng: -99.1332 }, // Cidade do México, México
+                },
+                {
+                  start: { lat: -15.7975, lng: -47.8919 }, // Brasília, Brasil
+                  end: { lat: -34.6037, lng: -58.3816 }, // Buenos Aires, Argentina
                 },
               ]}
               lineColor="#2196F3"
