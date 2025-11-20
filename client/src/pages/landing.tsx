@@ -20,15 +20,28 @@ export default function Landing() {
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(33,150,243,0.08),transparent_50%),radial-gradient(circle_at_80%_80%,_rgba(33,150,243,0.06),transparent_50%)] pointer-events-none" />
       
       {/* Ultra Modern Top Bar */}
-      <div className="bg-black/30 backdrop-blur-xl border-b border-white/10">
+      <div className="bg-black/30 backdrop-blur-xl border-b border-white/10 relative z-50">
         <div className="max-w-[1800px] mx-auto px-8 lg:px-16 h-10 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">Online 24/7</span>
+            <span className="text-white/60 text-[11px] font-medium tracking-widest uppercase">{t('landing.topbar.online')}</span>
           </div>
           <div className="flex items-center gap-8">
-            <a href="#" className="text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">Suporte</a>
-            <a href="#" className="hidden md:inline text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">Institucional</a>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-7 w-7 text-white/50 hover:text-accent hover:bg-white/5 rounded"
+              onClick={() => {
+                const newLang = i18n.language.startsWith("en") ? "pt-BR" : "en-US";
+                i18n.changeLanguage(newLang);
+                localStorage.setItem('language', newLang);
+              }}
+              data-testid="button-language-toggle"
+            >
+              <Globe2 className="h-3.5 w-3.5" />
+            </Button>
+            <a href="#" className="text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">{t('landing.topbar.support')}</a>
+            <a href="#" className="hidden md:inline text-white/50 hover:text-accent text-[11px] font-medium tracking-widest uppercase transition-colors">{t('landing.topbar.institutional')}</a>
           </div>
         </div>
       </div>
@@ -50,46 +63,33 @@ export default function Landing() {
               {/* Navigation Links */}
               <div className="hidden lg:flex items-center gap-10">
                 <a href="#portfolio" className="text-white/70 hover:text-white text-sm font-medium transition-colors relative group">
-                  Portfólio
+                  {t('landing.nav.portfolio')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300" />
                 </a>
                 <a href="#tracking" className="text-white/70 hover:text-white text-sm font-medium transition-colors relative group">
-                  Rastreamento
+                  {t('landing.nav.tracking')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300" />
                 </a>
                 <a href="#reports" className="text-white/70 hover:text-white text-sm font-medium transition-colors relative group">
-                  Relatórios
+                  {t('landing.nav.reports')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300" />
                 </a>
                 <a href="#pricing" className="text-white/70 hover:text-white text-sm font-medium transition-colors relative group">
-                  Planos
+                  {t('landing.nav.plans')}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300" />
                 </a>
               </div>
             </div>
             
-            {/* CTA Buttons - LEGÍVEL */}
+            {/* CTA Buttons */}
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="text-white/70 hover:text-white hover:bg-white/5 rounded-lg"
-                onClick={() => {
-                  const newLang = i18n.language.startsWith("en") ? "pt-BR" : "en-US";
-                  i18n.changeLanguage(newLang);
-                  localStorage.setItem('language', newLang);
-                }}
-                data-testid="button-language-toggle"
-              >
-                <Globe2 className="h-4 w-4" />
-              </Button>
               <Link href="/login">
                 <Button 
                   variant="ghost"
                   className="text-white font-semibold hover:bg-white/10 rounded-lg px-5"
                   data-testid="button-client-portal"
                 >
-                  Acessar
+                  {t('landing.nav.access')}
                 </Button>
               </Link>
               <Link href="/register">
@@ -97,7 +97,7 @@ export default function Landing() {
                   className="bg-accent hover:bg-accent/90 text-white font-semibold shadow-lg shadow-accent/25 rounded-lg px-6"
                   data-testid="button-open-account"
                 >
-                  Abrir Conta
+                  {t('landing.nav.openAccount')}
                 </Button>
               </Link>
             </div>
@@ -123,14 +123,13 @@ export default function Landing() {
                 }}
                 data-testid="text-hero-title"
               >
-                Investimentos em ativos reais com{' '}
-                <span className="text-accent">retorno garantido</span>{' '}
-                de 24% ao ano
+                {t('landing.hero.title')}{' '}
+                <span className="text-accent">{t('landing.hero.titleHighlight')}</span>{' '}
+                {t('landing.hero.titleEnd')}
               </h1>
               
               <p className="text-lg text-white/75 leading-relaxed font-light max-w-xl" data-testid="text-hero-description">
-                Plataforma institucional para investir em trailers comerciais. Acompanhe seus ativos em tempo real, 
-                receba rendimentos mensais pontuais e construa patrimônio com total transparência.
+                {t('landing.hero.description')}
               </p>
 
               {/* CTA Buttons */}
@@ -141,7 +140,7 @@ export default function Landing() {
                     className="font-semibold text-base h-12 px-8 bg-accent hover:bg-accent/90 text-white border-0 shadow-lg shadow-accent/25"
                     data-testid="button-start-investing"
                   >
-                    Começar a Investir
+                    {t('landing.hero.startInvesting')}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -152,16 +151,16 @@ export default function Landing() {
                   data-testid="button-watch-video"
                 >
                   <PlayCircle className="mr-2 h-4 w-4" />
-                  Como funciona
+                  {t('landing.hero.howItWorks')}
                 </Button>
               </div>
 
               {/* Key Stats - Minimal Design */}
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
                 {[
-                  { value: "24%", label: "Retorno anual", sublabel: "garantido" },
-                  { value: "GPS", label: "Rastreamento", sublabel: "tempo real" },
-                  { value: "2.500+", label: "Investidores", sublabel: "ativos" }
+                  { value: "24%", label: t('landing.hero.stats.annual'), sublabel: t('landing.hero.stats.guaranteed') },
+                  { value: "GPS", label: t('landing.hero.stats.tracking'), sublabel: t('landing.hero.stats.realTime') },
+                  { value: "2.500+", label: t('landing.hero.stats.investors'), sublabel: t('landing.hero.stats.active') }
                 ].map((item, i) => (
                   <div key={i} className="space-y-1">
                     <div className="text-2xl font-bold text-white tracking-tight">{item.value}</div>
