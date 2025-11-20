@@ -36,7 +36,6 @@ export function Header({ title, user, onMenuClick }: HeaderProps) {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    localStorage.setItem('language', lng);
   };
 
   const getCurrentLanguageLabel = () => {

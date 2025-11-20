@@ -53,10 +53,7 @@ export default function Landing() {
               >
                 <div className="space-y-1">
                   <button
-                    onClick={() => {
-                      i18n.changeLanguage('pt-BR');
-                      localStorage.setItem('language', 'pt-BR');
-                    }}
+                    onClick={() => i18n.changeLanguage('pt-BR')}
                     className="w-full flex items-center justify-between px-3 py-2 text-sm text-white/90 hover:bg-white/10 rounded transition-colors"
                     data-testid="option-language-pt"
                   >
@@ -64,10 +61,7 @@ export default function Landing() {
                     {i18n.language === 'pt-BR' && <Check className="h-4 w-4 text-accent" />}
                   </button>
                   <button
-                    onClick={() => {
-                      i18n.changeLanguage('en-US');
-                      localStorage.setItem('language', 'en-US');
-                    }}
+                    onClick={() => i18n.changeLanguage('en-US')}
                     className="w-full flex items-center justify-between px-3 py-2 text-sm text-white/90 hover:bg-white/10 rounded transition-colors"
                     data-testid="option-language-en"
                   >

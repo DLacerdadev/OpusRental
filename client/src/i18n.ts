@@ -12,17 +12,34 @@ const resources = {
   }
 };
 
-const savedLanguage = localStorage.getItem('language') || 'pt-BR';
+const getSavedLanguage = () => {
+  try {
+    return localStorage.getItem('language') || 'pt-BR';
+  } catch {
+    return 'pt-BR';
+  }
+};
 
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: savedLanguage,
+    lng: getSavedLanguage(),
     fallbackLng: 'pt-BR',
     interpolation: {
       escapeValue: false
+    },
+    react: {
+      useSuspense: false,
     }
   });
+
+i18n.on('languageChanged', (lng) => {
+  try {
+    localStorage.setItem('language', lng);
+  } catch (e) {
+    console.error('Failed to save language preference:', e);
+  }
+});
 
 export default i18n;
