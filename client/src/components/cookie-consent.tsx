@@ -109,7 +109,7 @@ export function CookieConsent() {
                     ))}
                   </div>
 
-                  {/* Botões GRANDES */}
+                  {/* Botões GRANDES - CONSERTADO */}
                   <div className="flex gap-4">
                     <Button
                       onClick={acceptCookies}
@@ -120,8 +120,7 @@ export function CookieConsent() {
                     </Button>
                     <Button
                       onClick={rejectCookies}
-                      variant="outline"
-                      className="flex-1 border-2 border-white/30 text-white/90 hover:bg-white/10 h-14 text-base font-bold rounded-xl hover:border-white/50 transition-all"
+                      className="flex-1 bg-white/95 hover:bg-white text-[#0D2847] h-14 text-base font-bold rounded-xl transition-all border-2 border-white/50 shadow-lg"
                       data-testid="button-reject-cookies"
                     >
                       {t('cookies.reject')}
