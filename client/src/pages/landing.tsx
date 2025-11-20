@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { WorldMap } from "@/components/ui/world-map";
+import { CookieConsent } from "@/components/cookie-consent";
 import { 
   Shield, TrendingUp, MapPin, DollarSign, CheckCircle, ArrowRight, 
   Award, Lock, BarChart3, Globe2, Percent, Users, 
@@ -426,7 +427,7 @@ export default function Landing() {
       </section>
 
       {/* Global Network Map */}
-      <section className="relative py-24 px-6 lg:px-12 overflow-hidden">
+      <section className="relative py-12 px-6 lg:px-12 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <motion.h2 
@@ -752,6 +753,8 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      <CookieConsent />
     </div>
   );
 }

@@ -34,8 +34,16 @@ export function WorldMap({
     start: { x: number; y: number },
     end: { x: number; y: number }
   ) => {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Curvatura baseada na distância para rotas mais realistas
+    const curvature = distance * 0.25;
+    
     const midX = (start.x + end.x) / 2;
-    const midY = Math.min(start.y, end.y) - 50;
+    const midY = (start.y + end.y) / 2 - curvature;
+    
     return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
   };
 

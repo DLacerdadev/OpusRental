@@ -1177,5 +1177,11 @@
       "deliveryLocationRequired": "Delivery location is required",
       "loadTypeRequired": "Load type is required"
     }
+  },
+  "cookies": {
+    "title": "Cookies & Privacy",
+    "description": "We use essential cookies to improve your experience and analyze platform usage. By continuing to browse, you agree to our privacy policy.",
+    "accept": "Accept",
+    "reject": "Reject"
   }
 }

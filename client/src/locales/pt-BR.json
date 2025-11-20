@@ -1177,5 +1177,11 @@
       "deliveryLocationRequired": "Local de entrega é obrigatório",
       "loadTypeRequired": "Tipo de carga é obrigatório"
     }
+  },
+  "cookies": {
+    "title": "Cookies e Privacidade",
+    "description": "Utilizamos cookies essenciais para melhorar sua experiência e analisar o uso da plataforma. Ao continuar navegando, você concorda com nossa política de privacidade.",
+    "accept": "Aceitar",
+    "reject": "Rejeitar"
   }
 }
