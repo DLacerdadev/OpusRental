@@ -109,16 +109,16 @@ export default function Login() {
 
         <div className="p-10">
           {/* Logo section */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-5">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
               <div className="relative">
-                <div className="absolute inset-0 bg-[#2196F3]/20 rounded-2xl blur-xl"></div>
-                <div className="relative bg-gradient-to-br from-[#2196F3]/10 to-[#0D2847]/10 p-4 rounded-2xl border-2 border-[#2196F3]/20">
-                  <img src={logoPath} alt="Opus Rental Capital" className="h-16 w-16" />
+                <div className="absolute inset-0 bg-[#2196F3]/20 rounded-xl blur-lg"></div>
+                <div className="relative bg-gradient-to-br from-[#2196F3]/10 to-[#0D2847]/10 p-3 rounded-xl border-2 border-[#2196F3]/20">
+                  <img src={logoPath} alt="Opus Rental Capital" className="h-12 w-12" />
                 </div>
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-[#0D2847] mb-1.5">
+            <h1 className="text-2xl font-bold text-[#0D2847] mb-1">
               {t('login.title')}
             </h1>
             <p className="text-[#0D2847]/70 text-sm font-medium">
