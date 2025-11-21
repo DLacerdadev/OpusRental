@@ -57,13 +57,13 @@ export function WorldMap({
         width="1056"
         draggable={false}
         style={{
-          transform: 'scale(4) translate(-38%, -18%)',
+          transform: 'scale(3.5) translate(-62%, 5%)',
           transformOrigin: 'center center'
         }}
       />
       <svg
         ref={svgRef}
-        viewBox="120 90 135 80"
+        viewBox="122 89 133 55"
         className="w-full h-full absolute inset-0 pointer-events-none select-none"
       >
         {dots.map((dot, i) => {
