@@ -597,32 +597,38 @@ export default function Landing() {
           >
             <WorldMap
               dots={[
-                // América do Norte
+                // Rede de distribuição dentro dos EUA
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York
+                  start: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                  end: { lat: 34.0522, lng: -118.2437 }, // Los Angeles, CA
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: 25.7617, lng: -80.1918 }, // Miami
-                },
-                // Europa
-                {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: 51.5074, lng: -0.1278 }, // Londres
+                  start: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                  end: { lat: 41.8781, lng: -87.6298 }, // Chicago, IL
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: 48.8566, lng: 2.3522 }, // Paris
-                },
-                // América Latina
-                {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: -34.6037, lng: -58.3816 }, // Buenos Aires
+                  start: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                  end: { lat: 33.7490, lng: -84.3880 }, // Atlanta, GA
                 },
                 {
-                  start: { lat: -23.5505, lng: -46.6333 }, // São Paulo
-                  end: { lat: 19.4326, lng: -99.1332 }, // Cidade do México
+                  start: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                  end: { lat: 25.7617, lng: -80.1918 }, // Miami, FL
+                },
+                {
+                  start: { lat: 32.7767, lng: -96.7970 }, // Dallas, TX
+                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York, NY
+                },
+                {
+                  start: { lat: 41.8781, lng: -87.6298 }, // Chicago, IL
+                  end: { lat: 40.7128, lng: -74.0060 }, // Nova York, NY
+                },
+                {
+                  start: { lat: 33.7490, lng: -84.3880 }, // Atlanta, GA
+                  end: { lat: 25.7617, lng: -80.1918 }, // Miami, FL
+                },
+                {
+                  start: { lat: 34.0522, lng: -118.2437 }, // Los Angeles, CA
+                  end: { lat: 29.7604, lng: -95.3698 }, // Houston, TX
                 },
               ]}
               lineColor="#2196F3"
