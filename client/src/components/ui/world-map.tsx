@@ -48,18 +48,22 @@ export function WorldMap({
   };
 
   return (
-    <div className="w-full aspect-[2/1] bg-transparent rounded-lg relative font-sans">
+    <div className="w-full aspect-[2/1] bg-transparent rounded-lg relative font-sans overflow-hidden">
       <img
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
         className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-        alt="world map"
+        alt="USA map"
         height="495"
         width="1056"
         draggable={false}
+        style={{
+          transform: 'scale(4) translate(-38%, -18%)',
+          transformOrigin: 'center center'
+        }}
       />
       <svg
         ref={svgRef}
-        viewBox="0 0 800 400"
+        viewBox="120 90 135 80"
         className="w-full h-full absolute inset-0 pointer-events-none select-none"
       >
         {dots.map((dot, i) => {
