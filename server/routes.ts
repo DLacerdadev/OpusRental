@@ -51,10 +51,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        connectSrc: ["'self'", "https://api.stripe.com"],
-        fontSrc: ["'self'", "data:"],
+        connectSrc: ["'self'", "https://api.stripe.com", "wss:", "ws:"],
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["https://js.stripe.com"],
