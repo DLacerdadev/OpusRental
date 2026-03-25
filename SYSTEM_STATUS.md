@@ -2,7 +2,7 @@
 
 **Ambiente:** Replit (PostgreSQL + Express + React + Vite)  
 **Última atualização:** 2025-03-25  
-**Admin:** admin@opuscapital.com / Admin@2025!  
+**Credenciais de desenvolvimento:** ver `DEV_CREDENTIALS.md`  
 **Tenant padrão (dev):** slug `opus-rental`
 
 ---
@@ -226,4 +226,4 @@
 
 ---
 
-*Documento gerado automaticamente com base na análise do código-fonte e banco de dados.*
+*Documento produzido por análise manual do código-fonte (`server/`, `shared/schema.ts`) e do banco de dados em comparação ao checklist operacional.*
