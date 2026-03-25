@@ -6,6 +6,23 @@ These credentials are for local development and testing purposes only. **NEVER**
 
 ## Login Credentials
 
+### 🛡️ Admin Account (Acesso Máximo)
+```
+Email:    admin@opuscapital.com
+Password: Admin@2025!
+Role:     admin
+```
+**Access Level:** Acesso total ao sistema
+- Acesso completo ao financeiro (registros, receitas, margens)
+- Gerenciar todos os trailers, cotas e investidores
+- Visualizar e gerenciar todos os relatórios
+- Acesso aos logs de auditoria
+- Configurar dispositivos GPS
+- Criar e gerenciar dispatches de broker
+- Nível acima do manager
+
+---
+
 ### 👨‍💼 Manager Account
 ```
 Email:    manager@example.com
