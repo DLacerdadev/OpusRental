@@ -1,0 +1,36 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[1G[0K[Scheduler] Agendamentos configurados:
+  - Pagamentos mensais: 1º dia de cada mês às 06:00 UTC
+  - Pagamentos atrasados: A cada 6 horas
+  - Manutenção vencida: Diariamente às 08:00 UTC
+  - Geofencing GPS: A cada 2 horas
+🤖 Initializing Invoice Automation Service...
+✅ Invoice automation service started
+   - Monthly generation: 1st of month at 00:01
+   - Overdue checks: Daily at 09:00
+   - Due date reminders: Daily at 09:00
+[WebSocket] Notification server initialized on /ws/notifications
+12:08:58 PM [express] WebSocket server initialized for real-time notifications
+12:08:59 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-03-20T12:09:01.612Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"32ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:02.550Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:02.580Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":200,"duration":"25ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:02.593Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 17 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-03-20T12:09:03.249Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react_jsx-dev-runtime.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:04.820Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"1560ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:04.844Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:04.846Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-dom_client.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:04.909Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZMLY2J2T.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.212Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4B2QHNJT.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.246Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/i18next.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.446Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-i18next.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.447Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.524Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:05.610Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-276SZO74.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-03-20T12:09:22.976Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
