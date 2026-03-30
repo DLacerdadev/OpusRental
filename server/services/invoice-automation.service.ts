@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { EmailService } from "./email.service";
 import type { RentalContract, Invoice } from "@shared/schema";
 
-const log = (level: "info" | "warn" | "error", operation: string, detail: string) => {
+const log = (level: "info" | "error", operation: string, detail: string) => {
   const entry = { level, timestamp: new Date().toISOString(), service: "invoice-automation", operation, tenantId: null, detail };
   if (level === "error") {
     console.error(JSON.stringify(entry));

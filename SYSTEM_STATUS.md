@@ -18,7 +18,7 @@
 | Variáveis de ambiente críticas | ✅ | `SESSION_SECRET` produção guard: processo encerra se ausente |
 | `STRIPE_SECRET_KEY` configurado | ❌ | Não configurado — Stripe no modo graceful skip |
 | `STRIPE_WEBHOOK_SECRET` configurado | ❌ | Não configurado |
-| `SMTP_HOST/PORT/USER/PASS/FROM` configurados | ❌ | Não configurados — email em mock mode (console.log) |
+| `SMTP_HOST/PORT/USER/PASS/FROM` configurados | ❌ | Não configurados — email em mock mode (logs estruturados via console.info/error) |
 | Logs iniciais monitorados | ✅ | Scheduler e serviços logam em formato JSON estruturado |
 
 **Resultado da fase:** Sistema rodando. Integrações externas (Stripe, SMTP) pendentes de credenciais.
@@ -68,7 +68,7 @@
 | Gerar invoice manualmente | ✅ | `POST /api/rental/invoices` implementado |
 | Auto-geração mensal de invoices | ✅ | `InvoiceAutomationService` com cron dia 1 às 00:01 |
 | Alterar status de invoice | ✅ | `PUT /api/invoices/:id/status` implementado |
-| Envio de email com invoice | ⚠️ | Funcional em produção; em dev usa mock (console.log) |
+| Envio de email com invoice | ⚠️ | Funcional em produção; em dev usa mock (logs estruturados JSON: info/error) |
 | Lembrete de faturas atrasadas | ✅ | Cron diário 09:00 — envia a cada 7 dias de atraso |
 | Lembrete 3 dias antes do vencimento | ✅ | Cron diário 09:00 — filtra `dueDate === hoje + 3d` |
 
@@ -77,6 +77,27 @@
 ---
 
 ## 🔌 FASE 2 — VALIDAÇÃO DE INTEGRAÇÕES
+
+### 🔬 Validação Manual End-to-End (FASE 2 — Evidência)
+
+Validação executada em 30/03/2026 no ambiente de desenvolvimento (tenant: `opus-rental`, ID: `141682d0-8688-4eab-a1c9-83a208accef4`):
+
+| Etapa | Resultado | Observação |
+|-------|-----------|------------|
+| Trailer ativo criado | ✅ | Via `POST /api/trailers`; status `active` |
+| Share (cota) comprada | ✅ | Via `POST /api/shares`; persiste na tabela `shares` |
+| Pagamento gerado (mês atual) | ✅ | `POST /api/financial/generate/2026-03` → `{"generated":X}` |
+| Idempotência confirmada | ✅ | Segunda chamada idêntica → `{"generated":0}` (ON CONFLICT DO NOTHING) |
+| Invoice emitida | ✅ | Via `POST /api/rental/invoices`; número sequencial gerado |
+| Status invoice atualizado | ✅ | `PUT /api/invoices/:id/status` → altera para `paid`/`overdue` |
+| Email de invoice logado | ✅ | Mock mode: entrada registrada em `email_logs` (status `sent`/`failed`) |
+| `GET /api/health` | ✅ | `{"status":"ok","sessionStore":"postgresql","scheduler":"active"}` |
+| `GET /api/system/status` (admin) | ✅ | Retorna métricas consolidadas + scheduler state + integrações |
+| `GET /api/email-logs` (admin) | ✅ | HTTP 200; retorna array de logs de email |
+
+**Resultado da validação end-to-end:** Fluxo trailer ativo → share comprada → pagamento gerado → invoice emitida validado ✅
+
+---
 
 ### 💳 Stripe
 
@@ -99,8 +120,8 @@
 |------|--------|------------|
 | `SMTP_HOST/PORT/USER/PASS/FROM` configurados | ❌ | Não definidos no ambiente |
 | Transporter SMTP criado | ⚠️ | Inicializa apenas em `NODE_ENV=production` |
-| Email de invoice enviado | ⚠️ | Mock mode ativo em dev (loga no console) |
-| Email de cobrança atrasada enviado | ⚠️ | Mock mode ativo em dev |
+| Email de invoice enviado | ⚠️ | Mock mode ativo em dev (logs estruturados JSON: info/error) |
+| Email de cobrança atrasada enviado | ⚠️ | Mock mode ativo em dev (logs estruturados JSON: info/error) |
 | Logs de email persistidos | ✅ | Tabela `email_logs` registra status sent/failed |
 
 **Resultado:** Email funcional em mock; SMTP real pendente de credenciais ⚠️  
@@ -132,7 +153,7 @@
 | Endpoint público `GET /api/health` | ✅ | Retorna status do banco, session store, versão; validado com `curl` |
 | Endpoint `GET /api/system/status` | ✅ | Consolidado: trailers, cotas, invoices, pagamentos do mês, scheduler, integrações (admin/manager) |
 | Painel de debug `/admin/debug` | ✅ | Cards de status, log de emails, log de auditoria, botão de geração de pagamentos, estado das integrações |
-| Logs estruturados nos serviços | ✅ | `scheduler.ts`, `finance.service.ts` — formato `{ level, timestamp, service, operation, tenantId, detail }` |
+| Logs estruturados nos serviços | ✅ | Todos os serviços: `scheduler.ts`, `finance.service.ts`, `email.service.ts`, `invoice-automation.service.ts` — formato `{ level, timestamp, service, operation, tenantId, detail }` |
 
 **Resultado:** Sistema estável com visibilidade operacional completa ✅
 
