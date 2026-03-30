@@ -38,12 +38,14 @@ import CheckoutShare from "@/pages/checkout-share";
 import CheckoutInvoice from "@/pages/checkout-invoice";
 import AdminDebug from "@/pages/admin-debug";
 
-function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
+function ProtectedRoute({ component: Component, titleKey, allowedRoles }: { component: any; titleKey: string; allowedRoles?: string[] }) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const hasRole = !allowedRoles || (user && allowedRoles.includes(user.role));
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -53,8 +55,15 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
         variant: "destructive",
       });
       setLocation("/login");
+    } else if (!isLoading && isAuthenticated && !hasRole) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access this page.",
+        variant: "destructive",
+      });
+      setLocation("/");
     }
-  }, [isLoading, isAuthenticated, setLocation, toast]);
+  }, [isLoading, isAuthenticated, hasRole, setLocation, toast]);
 
   if (isLoading) {
     return (
@@ -64,7 +73,7 @@ function ProtectedRoute({ component: Component, titleKey }: { component: any; ti
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !hasRole) {
     return null;
   }
 
@@ -171,7 +180,7 @@ function Router() {
         {() => <ProtectedRoute component={Analytics} titleKey="pageTitles.analytics" />}
       </Route>
       <Route path="/admin/debug">
-        {() => <ProtectedRoute component={AdminDebug} titleKey="pageTitles.adminDebug" />}
+        {() => <ProtectedRoute component={AdminDebug} titleKey="pageTitles.adminDebug" allowedRoles={["manager", "admin"]} />}
       </Route>
       <Route path="/checkout/share" component={CheckoutShare} />
       <Route path="/checkout/invoice" component={CheckoutInvoice} />

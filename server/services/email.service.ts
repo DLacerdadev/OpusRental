@@ -41,7 +41,7 @@ export class EmailService {
     const from = process.env.SMTP_FROM;
 
     if (!host || !port || !user || !pass || !from) {
-      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", detail: "SMTP credentials not configured — set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM" }));
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", tenantId: null, detail: "SMTP credentials not configured — set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM" }));
       return null;
     }
 
@@ -59,11 +59,11 @@ export class EmailService {
 
       // Verify connection
       await this.transporter.verify();
-      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", detail: "SMTP connection verified successfully" }));
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", tenantId: null, detail: "SMTP connection verified successfully" }));
       
       return this.transporter;
     } catch (error) {
-      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", detail: error instanceof Error ? error.message : "Unknown error" }));
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "getTransporter", tenantId: null, detail: error instanceof Error ? error.message : "Unknown error" }));
       this.transporter = null;
       return null;
     }
@@ -75,7 +75,7 @@ export class EmailService {
   static async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
       if (this.isDevelopment) {
-        console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", detail: "mock", to: options.to, subject: options.subject }));
+        console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", tenantId: null, detail: `mock to=${options.to} subject=${options.subject}` }));
         return true;
       }
 
@@ -96,10 +96,10 @@ export class EmailService {
         html: options.html,
       });
 
-      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", detail: "sent", messageId: info.messageId, to: options.to }));
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", tenantId: null, detail: `sent messageId=${info.messageId} to=${options.to}` }));
       return true;
     } catch (error) {
-      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", detail: error instanceof Error ? error.message : "Unknown error", to: options.to }));
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", tenantId: null, detail: `${error instanceof Error ? error.message : "Unknown error"} to=${options.to}` }));
       throw error; // Propagate error for proper logging
     }
   }

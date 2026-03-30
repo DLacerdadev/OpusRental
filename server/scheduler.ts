@@ -28,6 +28,7 @@ const log = (level: "info" | "error", operation: string, detail?: unknown) => {
     timestamp: new Date().toISOString(),
     service: "scheduler",
     operation,
+    tenantId: null,
     ...(detail !== undefined ? { detail } : {}),
   };
   if (level === "error") {

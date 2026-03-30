@@ -17,7 +17,7 @@ const log = (level: "info" | "error", operation: string, tenantId?: string, deta
     timestamp: new Date().toISOString(),
     service: "finance",
     operation,
-    ...(tenantId ? { tenantId } : {}),
+    tenantId: tenantId ?? null,
     ...(detail !== undefined ? { detail } : {}),
   };
   if (level === "error") {
