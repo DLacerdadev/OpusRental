@@ -2,7 +2,7 @@
 
 **Estratégia:** EUA - STRAT IMEDIATO  
 **Módulo:** Gestão de Ativos + Financeiro + WhatsApp  
-**Duração total:** 35 dias corridos  
+**Duração total:** 35 dias úteis  
 **Responsável:** Daniel Lacerda  
 **Base de referência:** Cronograma de Implementação + Checklist Operacional (FASE 0–7)
 
@@ -29,7 +29,7 @@
 
 ## 🔹 FASE 1 — Infraestrutura Base (Dias 1–7)
 
-**Período:** Dias 1 a 7  
+**Período:** Dias 1 a 7  (dia 30/03 à 07/04)
 **Marco M2 — Base de infraestrutura pronta para produção**
 
 Objetivos alinhados com: FASE 7 do checklist + itens F-04, F-06 e F-07 do SYSTEM_STATUS.md
@@ -49,7 +49,7 @@ Objetivos alinhados com: FASE 7 do checklist + itens F-04, F-06 e F-07 do SYSTEM
 
 ## 🔹 FASE 2 — Fluxo Financeiro Completo (Dias 8–17)
 
-**Período:** Dias 8 a 17  
+**Período:** Dias 8 a 17  (dia 08/04 à 21/04)
 **Marco M3 — Fluxo funcional completo**
 
 Objetivos alinhados com: FASE 3 do cronograma + Estratégia Imediata (imagem de referência EUA)
@@ -79,7 +79,7 @@ Objetivos alinhados com: FASE 3 do cronograma + Estratégia Imediata (imagem de 
 
 ## 🔹 FASE 3 — Integração WhatsApp (Dias 18–26)
 
-**Período:** Dias 18 a 26  
+**Período:** Dias 18 a 26 (dia 22/04 à 04/05 )
 **Marco M4 — Integração WhatsApp ativa**
 
 Objetivos alinhados com: FASE 4 do cronograma + FASE 6 do checklist operacional
@@ -110,7 +110,7 @@ Objetivos alinhados com: FASE 4 do cronograma + FASE 6 do checklist operacional
 
 ## 🔹 FASE 4 — Estabilização e Entrega (Dias 27–35)
 
-**Período:** Dias 27 a 35  
+**Período:** Dias 27 a 35 (dia 05/05 à 14/05)
 **Marco M5 — Entrega final estabilizada**
 
 Objetivos alinhados com: FASE 5 do cronograma + FASE 7 do checklist operacional
@@ -184,4 +184,4 @@ Objetivos alinhados com: FASE 5 do cronograma + FASE 7 do checklist operacional
 
 ---
 
-*Cronograma baseado no documento "Módulo Financeiro com Integração WhatsApp" e no Checklist Operacional (FASE 0–7). Diagnóstico inicial concluído em 25/03/2025. Duração total: 35 dias corridos.*
+*Cronograma baseado no documento "Módulo Financeiro com Integração WhatsApp" e no Checklist Operacional (FASE 0–7). Diagnóstico inicial concluído em 25/03/2025. Iniciando a primeira fase do projeto dia 30/03/2025 Duração total: 35 dias úteis.*

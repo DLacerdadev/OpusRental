@@ -25,14 +25,23 @@ import { ImportService } from "./services/import.service";
 import { MonitoringService } from "./services/monitoring.service";
 import { z } from "zod";
 import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
 import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import { tenantMiddleware, requireTenant } from "./tenant-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { sql } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
+
+// Warn if SESSION_SECRET is not set in production
+if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
+  console.error("[SECURITY] SESSION_SECRET environment variable is not set. Sessions are insecure in production.");
+  process.exit(1);
+}
+
+const PgSession = ConnectPgSimple(session);
 
 // Initialize Stripe with secret key (optional for development)
 const stripe = process.env.STRIPE_SECRET_KEY 
@@ -86,10 +95,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     legacyHeaders: false,
   });
 
-  // Session middleware
+  // Session middleware — PostgreSQL store (sessions survive server restarts)
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "opus-rental-capital-secret-key",
+      store: new PgSession({
+        pool,
+        tableName: "session",
+        createTableIfMissing: true,
+      }),
+      secret: process.env.SESSION_SECRET || "opus-rental-capital-secret-key-dev",
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -106,6 +120,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Access logging
   app.use(logAccess());
+
+  // Public health check endpoint — no authentication required
+  app.get("/api/health", async (_req, res) => {
+    const startedAt = new Date().toISOString();
+    try {
+      // Ping the database
+      await pool.query("SELECT 1");
+      res.json({
+        status: "ok",
+        timestamp: startedAt,
+        services: {
+          database: "connected",
+          sessionStore: "postgresql",
+          scheduler: "active",
+        },
+        environment: process.env.NODE_ENV || "development",
+        version: "1.0.0",
+      });
+    } catch (err) {
+      res.status(503).json({
+        status: "degraded",
+        timestamp: startedAt,
+        services: {
+          database: "disconnected",
+          sessionStore: "postgresql",
+          scheduler: "unknown",
+        },
+        error: "Database connectivity issue",
+      });
+    }
+  });
 
   // Auth routes
   app.post("/api/auth/login", authLimiter, async (req, res) => {
@@ -1665,7 +1710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { generateMonth } = await import("./services/finance.service");
-      const result = await generateMonth(month);
+      const result = await generateMonth(month, req.tenantId);
       
       res.json({
         success: true,

@@ -1,0 +1,319 @@
+=======================================================
+BRIEFING DO AGENTE T4 — WHATSAPP SERVICE
+Opus Capital — Multi-Agent Execution
+=======================================================
+
+CONTEXTO DO PROJETO
+-------------------
+Você está trabalhando em um sistema de gestão de ativos e
+aluguel de trailers comerciais chamado Opus Capital.
+
+Stack: React + Express + TypeScript + PostgreSQL (Drizzle ORM)
+Ambiente: Replit (porta 5000)
+Estrutura:
+  server/           → Backend Express
+  client/src/       → Frontend React
+  shared/schema.ts  → Tipos e schema do banco
+
+O sistema já possui:
+  - Geração mensal de pagamentos (server/services/finance.service.ts)
+  - Automação de invoices com email (server/services/invoice-automation.service.ts)
+  - Notificações internas (server/services/notification.service.ts)
+  - Scheduler com cron jobs (server/scheduler.ts)
+  - Sistema de email com nodemailer (server/services/email.service.ts)
+
+PRÉ-REQUISITO CONFIRMADO
+-------------------------
+O Agente T1 (Infraestrutura) já foi mergeado. O sistema
+está rodando com sessões persistentes e endpoint /api/health
+funcional. Você pode assumir que o banco e o servidor estão
+estáveis.
+
+SUA MISSÃO
+----------
+Criar o serviço de integração com WhatsApp do zero.
+O arquivo server/services/whatsapp.service.ts NÃO existe ainda.
+Você vai criá-lo com arquitetura desacoplada do provedor.
+
+ARQUIVOS QUE VOCÊ PODE CRIAR (novos):
+  - server/services/whatsapp.service.ts   ← arquivo principal
+  - server/services/whatsapp/             ← subpasta opcional
+
+ARQUIVOS QUE VOCÊ PODE LER (para entender o contexto):
+  - server/services/finance.service.ts
+  - server/services/invoice-automation.service.ts
+  - server/services/notification.service.ts
+  - server/services/email.service.ts
+  - server/scheduler.ts
+  - shared/schema.ts
+  - server/routes.ts (apenas leitura — não edite)
+
+ARQUIVOS QUE VOCÊ NÃO DEVE TOCAR:
+  - server/scheduler.ts          ← responsabilidade do T5
+  - server/services/finance.service.ts    ← responsabilidade do T5
+  - server/services/invoice-automation.service.ts  ← T5
+  - server/routes.ts             ← apenas adicione 1 endpoint no final
+  - client/                      ← frontend é responsabilidade do T3
+  - shared/schema.ts             ← não altere o schema
+
+=======================================================
+TAREFA 1 — Criar whatsapp.service.ts com mock mode
+=======================================================
+
+Crie server/services/whatsapp.service.ts com a seguinte
+interface e comportamento:
+
+INTERFACE PÚBLICA (não mude — T5 vai consumir essa interface):
+
+  interface WhatsAppMessage {
+    to: string;           // número com código do país: "15551234567"
+    body: string;         // texto da mensagem
+    metadata?: {
+      eventType: string;  // "payment_generated", "invoice_issued", etc.
+      entityId?: string;
+      tenantId?: string;
+    };
+  }
+
+  interface WhatsAppResult {
+    success: boolean;
+    messageId?: string;
+    error?: string;
+    mode: "mock" | "live";
+  }
+
+  class WhatsAppService {
+    static async sendMessage(msg: WhatsAppMessage): Promise<WhatsAppResult>
+    static isConfigured(): boolean
+    static getProvider(): string
+  }
+
+COMPORTAMENTO:
+  - Se WHATSAPP_API_KEY não estiver definida no ambiente:
+    → mode = "mock"
+    → Loga no console com formato padronizado (veja abaixo)
+    → Retorna { success: true, mode: "mock" }
+  - Se WHATSAPP_API_KEY estiver definida:
+    → Usa WHATSAPP_PROVIDER para escolher o adaptador
+    → Chama a API real
+    → Retorna { success: true, messageId: "...", mode: "live" }
+
+LOG PADRÃO DO MOCK (use exatamente esse formato):
+  [WhatsApp MOCK] {timestamp UTC}
+    Provider : mock
+    To       : {número}
+    Event    : {eventType}
+    Message  : {primeiros 80 chars do body}...
+
+=======================================================
+TAREFA 2 — Implementar templates de mensagem
+=======================================================
+
+Dentro do mesmo arquivo (ou em whatsapp.service.ts),
+crie a classe WhatsAppTemplates com os métodos abaixo.
+Mensagens em português (Brasil):
+
+  static paymentGenerated(params: {
+    investorName: string;
+    amount: string;        // ex: "R$ 1.040,00"
+    referenceMonth: string; // ex: "2025-03"
+    trailerCode: string;   // ex: "TR001"
+  }): string
+
+  Texto:
+  "Olá {investorName}! 💰 Seu rendimento de {amount}
+  referente ao trailer {trailerCode} ({referenceMonth})
+  foi processado. Acesse o portal Opus Capital para
+  ver o extrato completo."
+
+  ---
+
+  static invoiceIssued(params: {
+    clientName: string;
+    invoiceNumber: string;
+    amount: string;
+    dueDate: string;       // ex: "15/04/2025"
+  }): string
+
+  Texto:
+  "Olá {clientName}! 📄 A fatura {invoiceNumber}
+  no valor de {amount} foi emitida com vencimento
+  em {dueDate}. Em caso de dúvidas, entre em
+  contato com nossa equipe."
+
+  ---
+
+  static invoiceOverdue(params: {
+    clientName: string;
+    invoiceNumber: string;
+    amount: string;
+    daysOverdue: number;
+  }): string
+
+  Texto:
+  "⚠️ Olá {clientName}! A fatura {invoiceNumber}
+  de {amount} está em atraso há {daysOverdue} dia(s).
+  Regularize o pagamento para evitar suspensão
+  do contrato. Opus Capital."
+
+  ---
+
+  static maintenanceDue(params: {
+    trailerCode: string;
+    scheduledDate: string;
+    maintenanceType: string;
+  }): string
+
+  Texto:
+  "🔧 Manutenção pendente: Trailer {trailerCode}
+  ({maintenanceType}) estava prevista para
+  {scheduledDate}. Acesse o sistema para
+  reagendar. Opus Capital."
+
+  ---
+
+  static geofenceAlert(params: {
+    trailerCode: string;
+    location: string;
+    alertTime: string;
+  }): string
+
+  Texto:
+  "📍 Alerta GPS: Trailer {trailerCode} foi
+  detectado fora da área autorizada em {location}
+  às {alertTime} UTC. Verifique imediatamente."
+
+=======================================================
+TAREFA 3 — Implementar adaptadores de provedor
+=======================================================
+
+Dentro de whatsapp.service.ts, implemente os adaptadores
+para os dois provedores suportados:
+
+PROVEDOR 1: Twilio (WHATSAPP_PROVIDER=twilio)
+  Requer variáveis:
+    TWILIO_ACCOUNT_SID
+    TWILIO_AUTH_TOKEN
+    TWILIO_WHATSAPP_FROM  (ex: "whatsapp:+14155238886")
+
+  Endpoint:
+    POST https://api.twilio.com/2010-04-01/Accounts/{SID}/Messages.json
+    Auth: Basic (AccountSid:AuthToken)
+    Body (form-urlencoded):
+      From: {TWILIO_WHATSAPP_FROM}
+      To:   whatsapp:+{msg.to}
+      Body: {msg.body}
+
+  Retorno esperado: { sid: "SM..." } → use como messageId
+
+PROVEDOR 2: Z-API (WHATSAPP_PROVIDER=zapi)
+  Requer variáveis:
+    ZAPI_INSTANCE_ID
+    ZAPI_TOKEN
+    ZAPI_CLIENT_TOKEN
+
+  Endpoint:
+    POST https://api.z-api.io/instances/{INSTANCE_ID}/token/{TOKEN}/send-text
+    Header: Client-Token: {ZAPI_CLIENT_TOKEN}
+    Body (JSON):
+      { "phone": "{msg.to}", "message": "{msg.body}" }
+
+  Retorno esperado: { zaapId: "..." } → use como messageId
+
+FALLBACK: Se WHATSAPP_PROVIDER não for reconhecido,
+  logar erro e retornar { success: false, error: "Provider not supported", mode: "live" }
+
+=======================================================
+TAREFA 4 — Criar endpoint de teste (admin only)
+=======================================================
+
+No arquivo server/routes.ts, adicione APENAS este endpoint
+no final do arquivo, antes da exportação/fechamento:
+
+  POST /api/whatsapp/test
+  Requer: autenticação + role admin
+  Body: { to: string, eventType: string }
+
+  Comportamento:
+    1. Validar que "to" é um número válido (mínimo 10 dígitos)
+    2. Gerar mensagem de teste com WhatsAppTemplates
+       baseada no eventType recebido
+    3. Chamar WhatsAppService.sendMessage()
+    4. Retornar { success, mode, messageId?, error? }
+
+  eventType aceitos: "payment_generated", "invoice_issued",
+    "invoice_overdue", "maintenance_due", "geofence_alert"
+
+  Use os middlewares existentes:
+    isAuthenticated (já importado)
+    isAdmin ou role check (verifique como está no arquivo)
+
+=======================================================
+TAREFA 5 — Instalar dependência se necessário
+=======================================================
+
+Se o provedor Twilio for usado, instale o SDK:
+  npm install twilio
+
+Para Z-API não há SDK — use fetch nativo (Node 18+).
+
+Se o ambiente não tiver fetch nativo, use:
+  npm install node-fetch
+
+Verifique se já está instalado antes de instalar.
+
+=======================================================
+VALIDAÇÃO — Como verificar que funcionou
+=======================================================
+
+1. O servidor deve iniciar sem erros após suas mudanças.
+
+2. Em modo MOCK (sem WHATSAPP_API_KEY), ao chamar
+   o endpoint de teste, o console deve exibir:
+   [WhatsApp MOCK] ...
+
+3. O endpoint POST /api/whatsapp/test deve:
+   - Retornar 401 se não autenticado
+   - Retornar 403 se não for admin
+   - Retornar 200 com { success: true, mode: "mock" }
+     quando autenticado como admin sem credenciais reais
+   - Retornar 400 se "to" for inválido
+
+4. WhatsAppService.isConfigured() deve retornar:
+   - false quando WHATSAPP_API_KEY não está definida
+   - true quando está definida
+
+5. Nenhum arquivo de servidor existente deve ter
+   sua lógica alterada — apenas adições.
+
+=======================================================
+ENTREGÁVEIS ESPERADOS
+=======================================================
+
+Arquivos criados:
+  ✅ server/services/whatsapp.service.ts
+
+Arquivos modificados (apenas):
+  ✅ server/routes.ts — apenas 1 endpoint adicionado
+     no final, sem alterar nada existente
+
+Arquivos NÃO modificados (garantia):
+  ✅ server/scheduler.ts
+  ✅ server/services/finance.service.ts
+  ✅ server/services/invoice-automation.service.ts
+  ✅ shared/schema.ts
+  ✅ client/ (qualquer arquivo)
+
+=======================================================
+OBSERVAÇÃO FINAL
+=======================================================
+
+Após seu merge, o Agente T5 vai:
+  - Importar WhatsAppService e WhatsAppTemplates
+  - Conectar os eventos existentes do scheduler e dos
+    serviços financeiros ao sendMessage()
+
+Por isso, NÃO conecte eventos — apenas entregue o serviço
+limpo e testável. O T5 faz a integração.
+
+=======================================================
