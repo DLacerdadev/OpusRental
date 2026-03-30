@@ -11,35 +11,32 @@ export class InvoiceAutomationService {
    */
   static initialize() {
     if (this.isRunning) {
-      console.log("⚠️  Invoice automation already running");
+      console.info(JSON.stringify({ level: "warn", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "initialize", detail: "already running — skipping" }));
       return;
     }
 
-    console.log("🤖 Initializing Invoice Automation Service...");
+    console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "initialize", detail: "starting" }));
 
     // Generate invoices on the 1st of every month at 00:01
     cron.schedule("1 0 1 * *", async () => {
-      console.log("📅 Running monthly invoice generation...");
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: "cron triggered" }));
       await this.generateMonthlyInvoices();
     });
 
     // Check for overdue invoices daily at 09:00
     cron.schedule("0 9 * * *", async () => {
-      console.log("⏰ Checking for overdue invoices...");
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: "cron triggered" }));
       await this.sendOverdueReminders();
     });
 
     // Send reminder 3 days before due date at 09:00
     cron.schedule("0 9 * * *", async () => {
-      console.log("📧 Sending upcoming due date reminders...");
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: "cron triggered" }));
       await this.sendUpcomingDueReminders();
     });
 
     this.isRunning = true;
-    console.log("✅ Invoice automation service started");
-    console.log("   - Monthly generation: 1st of month at 00:01");
-    console.log("   - Overdue checks: Daily at 09:00");
-    console.log("   - Due date reminders: Daily at 09:00");
+    console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "initialize", detail: "started — monthly:1st/00:01 overdue:daily/09:00 due-reminder:daily/09:00" }));
   }
 
   /**
@@ -55,7 +52,7 @@ export class InvoiceAutomationService {
       const today = new Date();
       const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
-      console.log(`📊 Found ${activeContracts.length} active contracts with auto-generation enabled`);
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: "active contracts found", count: activeContracts.length, month: currentMonth }));
 
       let generated = 0;
       let skipped = 0;
@@ -70,7 +67,7 @@ export class InvoiceAutomationService {
           );
 
           if (alreadyExists) {
-            console.log(`⏭️  Skipping ${contract.contractNumber} - invoice already exists for ${currentMonth}`);
+            console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: "skipped — already exists", contract: contract.contractNumber, month: currentMonth }));
             skipped++;
             continue;
           }
@@ -95,7 +92,7 @@ export class InvoiceAutomationService {
             notes: "Auto-generated monthly invoice",
           });
 
-          console.log(`✅ Generated ${invoiceNumber} for ${contract.contractNumber}`);
+          console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: "invoice created", invoiceNumber, contract: contract.contractNumber }));
           generated++;
 
           // Send invoice email to client
@@ -114,7 +111,7 @@ export class InvoiceAutomationService {
             } catch (error) {
               emailStatus = "failed";
               errorMessage = error instanceof Error ? error.message : "Unknown error sending email";
-              console.log(`   ❌ Failed to send email to ${client.email}: ${errorMessage}`);
+              console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendInvoiceEmail", detail: errorMessage, to: client.email }));
             }
 
             // Log email attempt
@@ -131,21 +128,18 @@ export class InvoiceAutomationService {
             await storage.createEmailLog(emailLog);
 
             if (emailStatus === "sent") {
-              console.log(`   📧 Email sent to ${client.email}`);
+              console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendInvoiceEmail", detail: "sent", to: client.email, invoiceNumber: invoice.invoiceNumber }));
             }
           }
         } catch (error) {
-          console.error(`❌ Error generating invoice for ${contract.contractNumber}:`, error);
+          console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: error instanceof Error ? error.message : "Unknown error", contract: contract.contractNumber }));
           errors++;
         }
       }
 
-      console.log(`\n📊 Invoice Generation Summary:`);
-      console.log(`   ✅ Generated: ${generated}`);
-      console.log(`   ⏭️  Skipped: ${skipped}`);
-      console.log(`   ❌ Errors: ${errors}`);
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: "summary", generated, skipped, errors }));
     } catch (error) {
-      console.error("❌ Error in generateMonthlyInvoices:", error);
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateMonthlyInvoices", detail: error instanceof Error ? error.message : "Unknown error" }));
     }
   }
 
@@ -167,7 +161,7 @@ export class InvoiceAutomationService {
         return dueDate < today;
       });
 
-      console.log(`📧 Found ${overdueInvoices.length} overdue invoices`);
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: "overdue invoices found", count: overdueInvoices.length }));
 
       let sent = 0;
       let errors = 0;
@@ -214,7 +208,7 @@ export class InvoiceAutomationService {
           const emailLog = EmailService.createEmailLog(
             client.email,
             client.tradeName || client.companyName,
-            `⚠️ Payment Reminder - Invoice ${invoice.invoiceNumber} (${daysOverdue} days overdue)`,
+            `Payment Reminder - Invoice ${invoice.invoiceNumber} (${daysOverdue} days overdue)`,
             "payment_reminder",
             "invoice",
             invoice.id,
@@ -224,23 +218,21 @@ export class InvoiceAutomationService {
           await storage.createEmailLog(emailLog);
 
           if (emailStatus === "sent") {
-            console.log(`   📧 Reminder sent for ${invoice.invoiceNumber} (${daysOverdue} days overdue)`);
+            console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: "reminder sent", invoiceNumber: invoice.invoiceNumber, daysOverdue }));
             sent++;
           } else {
-            console.log(`   ❌ Failed to send reminder for ${invoice.invoiceNumber}: ${errorMessage}`);
+            console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: errorMessage, invoiceNumber: invoice.invoiceNumber }));
             errors++;
           }
         } catch (error) {
-          console.error(`❌ Error sending reminder for ${invoice.invoiceNumber}:`, error);
+          console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: error instanceof Error ? error.message : "Unknown error", invoiceNumber: invoice.invoiceNumber }));
           errors++;
         }
       }
 
-      console.log(`\n📊 Overdue Reminders Summary:`);
-      console.log(`   ✅ Sent: ${sent}`);
-      console.log(`   ❌ Errors: ${errors}`);
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: "summary", sent, errors }));
     } catch (error) {
-      console.error("❌ Error in sendOverdueReminders:", error);
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendOverdueReminders", detail: error instanceof Error ? error.message : "Unknown error" }));
     }
   }
 
@@ -265,7 +257,7 @@ export class InvoiceAutomationService {
         return dueDate.getTime() === threeDaysFromNow.getTime();
       });
 
-      console.log(`📧 Found ${upcomingInvoices.length} invoices due in 3 days`);
+      console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: "invoices due in 3 days found", count: upcomingInvoices.length }));
 
       let sent = 0;
       let errors = 0;
@@ -308,24 +300,23 @@ export class InvoiceAutomationService {
           await storage.createEmailLog(emailLog);
 
           if (emailStatus === "sent") {
-            console.log(`   📧 Due date reminder sent for ${invoice.invoiceNumber}`);
+            console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: "due reminder sent", invoiceNumber: invoice.invoiceNumber }));
             sent++;
           } else {
+            console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: errorMessage, invoiceNumber: invoice.invoiceNumber }));
             errors++;
           }
         } catch (error) {
-          console.error(`❌ Error sending due reminder for ${invoice.invoiceNumber}:`, error);
+          console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: error instanceof Error ? error.message : "Unknown error", invoiceNumber: invoice.invoiceNumber }));
           errors++;
         }
       }
 
       if (sent > 0 || errors > 0) {
-        console.log(`\n📊 Due Date Reminders Summary:`);
-        console.log(`   ✅ Sent: ${sent}`);
-        console.log(`   ❌ Errors: ${errors}`);
+        console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: "summary", sent, errors }));
       }
     } catch (error) {
-      console.error("❌ Error in sendUpcomingDueReminders:", error);
+      console.error(JSON.stringify({ level: "error", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "sendUpcomingDueReminders", detail: error instanceof Error ? error.message : "Unknown error" }));
     }
   }
 
@@ -333,7 +324,7 @@ export class InvoiceAutomationService {
    * Manually trigger invoice generation (for testing)
    */
   static async generateInvoicesNow(): Promise<void> {
-    console.log("🔧 Manually triggering invoice generation...");
+    console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "generateInvoicesNow", detail: "manual trigger" }));
     await this.generateMonthlyInvoices();
   }
 
@@ -341,7 +332,7 @@ export class InvoiceAutomationService {
    * Manually trigger overdue check (for testing)
    */
   static async checkOverdueNow(): Promise<void> {
-    console.log("🔧 Manually triggering overdue check...");
+    console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "invoice-automation", operation: "checkOverdueNow", detail: "manual trigger" }));
     await this.sendOverdueReminders();
   }
 }

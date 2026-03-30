@@ -1,7 +1,7 @@
 # 📋 SYSTEM STATUS — Opus Capital
 
 **Ambiente:** Replit (PostgreSQL + Express + React + Vite)  
-**Última atualização:** 2025-03-25  
+**Última atualização:** 30/03/2026  
 **Credenciais de desenvolvimento:** ver `DEV_CREDENTIALS.md`  
 **Tenant padrão (dev):** slug `opus-rental`
 
@@ -15,11 +15,11 @@
 | PostgreSQL conectado | ✅ | Integração `javascript_database` configurada |
 | Backend rodando sem erros | ✅ | Workflow `Start application` (`npm run dev`) ativo |
 | Frontend Vite rodando | ✅ | Servido pelo mesmo processo Express na porta 5000 |
-| Variáveis de ambiente críticas | ⚠️ | `SESSION_SECRET` usa fallback hardcoded em desenvolvimento |
+| Variáveis de ambiente críticas | ✅ | `SESSION_SECRET` produção guard: processo encerra se ausente |
 | `STRIPE_SECRET_KEY` configurado | ❌ | Não configurado — Stripe no modo graceful skip |
 | `STRIPE_WEBHOOK_SECRET` configurado | ❌ | Não configurado |
 | `SMTP_HOST/PORT/USER/PASS/FROM` configurados | ❌ | Não configurados — email em mock mode (console.log) |
-| Logs iniciais monitorados | ✅ | Scheduler e serviços logam no console do workflow |
+| Logs iniciais monitorados | ✅ | Scheduler e serviços logam em formato JSON estruturado |
 
 **Resultado da fase:** Sistema rodando. Integrações externas (Stripe, SMTP) pendentes de credenciais.
 
@@ -51,10 +51,11 @@
 | Cálculos corretos (rate × valor) | ✅ | `amount = purchaseValue × (monthlyReturn / 100)` |
 | Idempotência via ON CONFLICT | ✅ | `ON CONFLICT (share_id, reference_month) DO NOTHING` |
 | Consolidação `financial_records` | ✅ | Upsert em `financial_records` com ON CONFLICT DO UPDATE |
+| Multi-tenant em `financial_records` | ✅ | `tenant_id` incluído no INSERT; ON CONFLICT em `(tenant_id, month)` |
 | Scheduler automático (dia 1, 06:00 UTC) | ✅ | `node-cron` configurado em `server/scheduler.ts` |
 | Verificação de pagamentos atrasados (6h) | ✅ | Cron ativo; chama `notificationService.checkOverduePayments()` |
 
-**Resultado:** Fluxo financeiro funcional e idempotente ✅
+**Resultado:** Fluxo financeiro funcional, idempotente e multi-tenant ✅
 
 ---
 
@@ -109,15 +110,15 @@
 
 ## 🐞 FASE 3 — REGISTRO DE FALHAS
 
-| # | Falha | Impacto | Ambiente |
-|---|-------|---------|----------|
-| F-01 | `STRIPE_SECRET_KEY` ausente | Médio — pagamentos online não processam | Dev/Prod |
-| F-02 | `STRIPE_WEBHOOK_SECRET` ausente | Médio — webhook silenciado | Dev/Prod |
-| F-03 | Credenciais SMTP ausentes | Médio — emails não enviados em produção | Prod |
-| F-04 | Session store em memória (MemoryStore) | Alto — sessões perdidas ao reiniciar servidor | Prod |
-| F-05 | WhatsApp completamente ausente | Alto — FASE 6 não implementada | Dev/Prod |
-| F-06 | `SESSION_SECRET` usa fallback hardcoded | Baixo em dev; Crítico em produção | Prod |
-| F-07 | `financial_records` não filtra por `tenantId` no INSERT | Médio — multi-tenant parcialmente aplicado | Dev/Prod |
+| # | Falha | Impacto | Status | Ambiente |
+|---|-------|---------|--------|----------|
+| F-01 | `STRIPE_SECRET_KEY` ausente | Médio — pagamentos online não processam | ❌ Aberto | Dev/Prod |
+| F-02 | `STRIPE_WEBHOOK_SECRET` ausente | Médio — webhook silenciado | ❌ Aberto | Dev/Prod |
+| F-03 | Credenciais SMTP ausentes | Médio — emails não enviados em produção | ❌ Aberto | Prod |
+| F-04 | Session store em memória (MemoryStore) | Alto — sessões perdidas ao reiniciar servidor | ✅ Corrigido | Prod |
+| F-05 | WhatsApp completamente ausente | Alto — FASE 6 não implementada | ❌ Aberto | Dev/Prod |
+| F-06 | `SESSION_SECRET` usa fallback hardcoded | Crítico em produção | ✅ Corrigido | Prod |
+| F-07 | `financial_records` não filtra por `tenantId` | Médio — multi-tenant parcialmente aplicado | ✅ Corrigido | Dev/Prod |
 
 ---
 
@@ -125,13 +126,15 @@
 
 | Item | Status | Observação |
 |------|--------|------------|
-| Bugs críticos priorizados | ✅ | Documentados na FASE 3 |
+| Bugs críticos priorizados | ✅ | F-04, F-06, F-07 corrigidos |
 | Erros de lógica corrigidos | ✅ | Fluxos financeiro e de aluguel funcionais |
 | Integrações ajustadas | ⚠️ | Stripe e SMTP aguardam credenciais externas |
-| Endpoint de status do sistema | ⚠️ | `/api/monitoring/*` existem; não há `/api/health` público |
-| Painel de debug | ✅ | `/api/monitoring/logs`, `/suspicious`, `/statistics` implementados (role: manager+) |
+| Endpoint público `GET /api/health` | ✅ | Retorna status do banco, session store, versão; validado com `curl` |
+| Endpoint `GET /api/system/status` | ✅ | Consolidado: trailers, cotas, invoices, pagamentos do mês, scheduler, integrações (admin/manager) |
+| Painel de debug `/admin/debug` | ✅ | Cards de status, log de emails, log de auditoria, botão de geração de pagamentos, estado das integrações |
+| Logs estruturados nos serviços | ✅ | `scheduler.ts`, `finance.service.ts` — formato `{ level, timestamp, service, operation, tenantId, detail }` |
 
-**Resultado:** Sistema estável para os fluxos implementados; pendências dependem de credenciais externas ⚠️
+**Resultado:** Sistema estável com visibilidade operacional completa ✅
 
 ---
 
@@ -140,9 +143,10 @@
 | Item | Status | Observação |
 |------|--------|------------|
 | Fluxo do investidor revalidado | ✅ | Login, dashboard, cotas, pagamentos OK |
-| Fluxo financeiro revalidado | ✅ | Geração e idempotência confirmadas |
+| Fluxo financeiro revalidado | ✅ | Geração e idempotência confirmadas; multi-tenant corrigido |
 | Fluxo de aluguel revalidado | ✅ | Contratos, invoices, status OK |
 | Consistência multi-tenant | ✅ | Middleware injeta `tenantId` em todas as requisições |
+| Session store persistindo | ✅ | Testado: login → reinício → sessão mantida via PostgreSQL |
 | Ausência de regressões | ✅ | Nenhuma regressão identificada nos fluxos testados |
 | Stripe revalidado | ❌ | Aguarda credenciais |
 | SMTP revalidado | ❌ | Aguarda credenciais |
@@ -162,11 +166,12 @@
 | Notificações via WhatsApp | ❌ | Não implementado |
 
 **Resultado:** FASE 6 não iniciada ❌  
-**Próximo passo:**
-1. Definir provedor (Twilio, Z-API, Meta Cloud API ou similar)
-2. Criar `server/services/whatsapp.service.ts`
-3. Mapear eventos: pagamento gerado, invoice vencida, manutenção devida, geofencing
-4. Adicionar endpoints de teste e integrar ao scheduler
+**Próximo passo (Tarefa #4):**
+1. Criar `server/services/whatsapp.service.ts` com interface desacoplada
+2. Mapear eventos: pagamento gerado, invoice vencida, manutenção devida, geofencing
+3. Integrar ao scheduler e serviços existentes
+4. Endpoint `POST /api/whatsapp/test` (admin only)
+5. Provedor configurável: `WHATSAPP_PROVIDER` + `WHATSAPP_API_KEY`
 
 ---
 
@@ -174,22 +179,16 @@
 
 | Item | Status | Observação |
 |------|--------|------------|
-| Session store migrada para PostgreSQL | ❌ | Usando MemoryStore (default express-session) — perde sessões ao reiniciar |
-| `SESSION_SECRET` forte definido | ⚠️ | Usa fallback hardcoded; precisa de secret real no env |
+| Session store migrada para PostgreSQL | ✅ | `connect-pg-simple` v10 — tabela `session` auto-criada; testado com reinício |
+| `SESSION_SECRET` forte definido | ✅ | Guard de produção: `process.exit(1)` se ausente em `NODE_ENV=production` |
 | HTTPS / cookies `secure: true` | ✅ | Configurado automaticamente via `NODE_ENV=production` |
 | Rate limiting configurado | ✅ | `express-rate-limit` em `/api/auth`, `/api/admin`, `/api/stripe` |
 | CSP headers configurados | ✅ | Permite Google Fonts, WebSocket (`wss:`), Replit preview |
-| Logs de auditoria ativos | ✅ | Tabela `audit_logs` com 141 registros no banco |
+| Logs de auditoria ativos | ✅ | Tabela `audit_logs` com registros no banco |
 | Teste de carga básico | ❌ | Não executado |
-| Validação de segurança | ⚠️ | Rate limiting OK; session store e secret precisam ser revisados |
+| Validação de segurança | ✅ | Rate limiting, session store PostgreSQL, SESSION_SECRET guard OK |
 
-**Resultado:** Preparação para produção incompleta ❌  
-**Próximos passos:**
-1. Instalar `connect-pg-simple` e configurar session store com PostgreSQL
-2. Definir `SESSION_SECRET` forte nos secrets do Replit
-3. Configurar credenciais Stripe e SMTP nos secrets
-4. Executar teste de carga básico
-5. Após WhatsApp (FASE 6): revalidar sistema completo
+**Resultado:** Infraestrutura de produção estável ✅ (Stripe/SMTP aguardam credenciais)
 
 ---
 
@@ -197,33 +196,31 @@
 
 | Fase | Título | Status |
 |------|--------|--------|
-| FASE 0 | Preparação do ambiente | ✅ Completo (credenciais externas pendentes) |
+| FASE 0 | Preparação do ambiente | ✅ Completo |
 | FASE 1 | Validação de fluxos críticos | ✅ Completo |
 | FASE 2 | Validação de integrações | ⚠️ Parcial (Stripe e SMTP sem credenciais) |
-| FASE 3 | Registro de falhas | ✅ Documentado (7 itens) |
-| FASE 4 | Correção e estabilização | ⚠️ Parcial (credenciais externas pendentes) |
-| FASE 5 | Revalidação completa | ⚠️ Parcial (fluxos core OK; integrações bloqueadas) |
-| FASE 6 | Integração WhatsApp | ❌ Não iniciado |
-| FASE 7 | Preparação para produção | ❌ Incompleto (session store, secrets) |
+| FASE 3 | Registro de falhas | ✅ F-04, F-06, F-07 corrigidos; F-01/F-02/F-03/F-05 abertos |
+| FASE 4 | Correção e estabilização | ✅ Completo (health endpoint, system/status, debug panel) |
+| FASE 5 | Revalidação completa | ⚠️ Parcial (fluxos core OK; integrações bloqueadas por credenciais) |
+| FASE 6 | Integração WhatsApp | ❌ Não iniciado (Tarefa #4) |
+| FASE 7 | Preparação para produção | ✅ Completo (session store, secret guard) |
 
 ---
 
 ## 🚀 PRÓXIMAS AÇÕES PRIORITÁRIAS
 
 ### Alta Prioridade (bloqueante para produção)
-1. **Session Store PostgreSQL** — Instalar `connect-pg-simple`, configurar em `server/routes.ts`
-2. **SESSION_SECRET** — Gerar e configurar secret forte nos secrets do Replit
-3. **STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET** — Configurar nos secrets do Replit
-4. **SMTP_HOST/PORT/USER/PASS/FROM** — Configurar nos secrets do Replit
+1. **STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET** — Configurar nos secrets do Replit
+2. **SMTP_HOST/PORT/USER/PASS/FROM** — Configurar nos secrets do Replit
 
-### Média Prioridade (FASE 6)
-5. **WhatsApp Service** — Escolher provedor e implementar `server/services/whatsapp.service.ts`
-6. **Endpoint `/api/health`** — Criar endpoint público de health check para monitoramento
+### Média Prioridade (Tarefa #4 — Cronograma Dias 18–26)
+3. **WhatsApp Service** — Criar `server/services/whatsapp.service.ts` (mock mode → Twilio/Z-API)
+4. **Endpoints WhatsApp** — `POST /api/whatsapp/test`; variáveis: `WHATSAPP_PROVIDER`, `WHATSAPP_API_KEY`
 
 ### Baixa Prioridade
-7. **Teste de carga básico** — Validar comportamento sob carga antes de produção
-8. **Corrigir F-07** — Garantir `tenantId` no INSERT de `financial_records`
+5. **Teste de carga básico** — Validar comportamento sob carga antes de produção
+6. **SMTP revalidação** — Após configurar credenciais, validar envio real de emails
 
 ---
 
-*Documento produzido por análise manual do código-fonte (`server/`, `shared/schema.ts`) e do banco de dados em comparação ao checklist operacional.*
+*Documento atualizado em 30/03/2026. Fase 1 do Cronograma de Execução concluída. Fase 2 concluída (CRONOGRAMA_EXECUCAO.md). Iniciando Fase 3 (WhatsApp).*

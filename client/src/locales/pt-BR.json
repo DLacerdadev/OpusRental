@@ -627,7 +627,10 @@
     "invoices": "Faturas",
     "inspections": "Inspeções",
     "maintenance": "Manutenção",
-    "broker": "Despacho de Corretores"
+    "broker": "Despacho de Corretores",
+    "adminDebug": "Painel de Debug",
+    "invoiceAutomation": "Automação de Faturas",
+    "analytics": "Análises"
   },
   "rentalClients": {
     "title": "Clientes de Locação",

@@ -12,6 +12,9 @@
     "inspections": "Inspections",
     "maintenance": "Maintenance",
     "broker": "Broker Dispatch",
+    "adminDebug": "Debug Panel",
+    "invoiceAutomation": "Invoice Automation",
+    "analytics": "Analytics",
     "financial": "Financial",
     "reports": "Reports",
     "compliance": "Compliance",
@@ -627,7 +630,10 @@
     "invoices": "Invoices",
     "inspections": "Inspections",
     "maintenance": "Maintenance",
-    "broker": "Broker Dispatch"
+    "broker": "Broker Dispatch",
+    "adminDebug": "Debug Panel",
+    "invoiceAutomation": "Invoice Automation",
+    "analytics": "Analytics"
   },
   "rentalClients": {
     "title": "Rental Clients",

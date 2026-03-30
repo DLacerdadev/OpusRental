@@ -11,6 +11,22 @@ export interface GenerateMonthResult {
   tenantsProcessed: number;
 }
 
+const log = (level: "info" | "error", operation: string, tenantId?: string, detail?: unknown) => {
+  const entry = {
+    level,
+    timestamp: new Date().toISOString(),
+    service: "finance",
+    operation,
+    ...(tenantId ? { tenantId } : {}),
+    ...(detail !== undefined ? { detail } : {}),
+  };
+  if (level === "error") {
+    console.error(JSON.stringify(entry));
+  } else {
+    console.info(JSON.stringify(entry));
+  }
+};
+
 /**
  * Gera pagamentos mensais para todas as shares ativas de forma idempotente.
  * Multi-tenant: processa todos os tenants ou um tenant específico.
@@ -22,15 +38,15 @@ export async function generateMonth(
   referenceMonth: string,
   tenantId?: string
 ): Promise<GenerateMonthResult> {
-  // Validar formato YYYY-MM
   if (!/^\d{4}-\d{2}$/.test(referenceMonth)) {
     throw new Error("Formato inválido. Use YYYY-MM (ex: 2025-10)");
   }
 
+  log("info", "generate_month_start", tenantId, { referenceMonth });
+
   const [year, month] = referenceMonth.split("-").map(Number);
   const today = new Date();
 
-  // Data de pagamento: até o dia 28 para evitar problemas em meses curtos
   const paymentDate = new Date(
     Date.UTC(year, month - 1, Math.min(28, today.getUTCDate()))
   );
@@ -49,7 +65,12 @@ export async function generateMonth(
     },
   });
 
-  // 2) Agrupar shares por tenantId para gerar financial_records separados
+  log("info", "generate_month_shares_found", tenantId, {
+    referenceMonth,
+    count: activeShares.length,
+  });
+
+  // 2) Agrupar shares por tenantId
   const byTenant = new Map<string, typeof activeShares>();
   for (const share of activeShares) {
     const group = byTenant.get(share.tenantId) ?? [];
@@ -68,29 +89,14 @@ export async function generateMonth(
       const rate = Number(share.monthlyReturn ?? 2) / 100;
       const amount = +(Number(share.purchaseValue) * rate).toFixed(2);
 
-      // INSERT idempotente por (share_id, reference_month)
       await db.execute(sql`
         INSERT INTO "payments" (
-          "id",
-          "tenant_id",
-          "share_id",
-          "user_id",
-          "amount",
-          "payment_date",
-          "status",
-          "reference_month",
-          "created_at"
+          "id", "tenant_id", "share_id", "user_id",
+          "amount", "payment_date", "status", "reference_month", "created_at"
         )
         VALUES (
-          gen_random_uuid(),
-          ${tid},
-          ${share.id},
-          ${share.userId},
-          ${amount},
-          ${paymentDate.toISOString()},
-          'paid',
-          ${referenceMonth},
-          now()
+          gen_random_uuid(), ${tid}, ${share.id}, ${share.userId},
+          ${amount}, ${paymentDate.toISOString()}, 'paid', ${referenceMonth}, now()
         )
         ON CONFLICT ("share_id", "reference_month") DO NOTHING
       `);
@@ -98,7 +104,6 @@ export async function generateMonth(
       payoutSum += amount;
     }
 
-    // 4) Consolidar financial_records por tenant com upsert
     const investorPayouts = +payoutSum.toFixed(2);
     const totalRevenue = investorPayouts;
     const operationalCosts = 0;
@@ -106,38 +111,32 @@ export async function generateMonth(
 
     await db.execute(sql`
       INSERT INTO "financial_records" (
-        "id",
-        "tenant_id",
-        "month",
-        "total_revenue",
-        "investor_payouts",
-        "operational_costs",
-        "company_margin",
-        "created_at"
+        "id", "tenant_id", "month", "total_revenue",
+        "investor_payouts", "operational_costs", "company_margin", "created_at"
       )
       VALUES (
-        gen_random_uuid(),
-        ${tid},
-        ${referenceMonth},
-        ${totalRevenue},
-        ${investorPayouts},
-        ${operationalCosts},
-        ${companyMargin},
-        now()
+        gen_random_uuid(), ${tid}, ${referenceMonth}, ${totalRevenue},
+        ${investorPayouts}, ${operationalCosts}, ${companyMargin}, now()
       )
       ON CONFLICT ("tenant_id", "month") DO UPDATE
       SET
-        "total_revenue"      = EXCLUDED."total_revenue",
-        "investor_payouts"   = EXCLUDED."investor_payouts",
-        "operational_costs"  = EXCLUDED."operational_costs",
-        "company_margin"     = EXCLUDED."company_margin"
+        "total_revenue"    = EXCLUDED."total_revenue",
+        "investor_payouts" = EXCLUDED."investor_payouts",
+        "operational_costs"= EXCLUDED."operational_costs",
+        "company_margin"   = EXCLUDED."company_margin"
     `);
+
+    log("info", "generate_month_tenant_complete", tid, {
+      referenceMonth,
+      sharesProcessed: tenantShares.length,
+      payoutSum: payoutSum.toFixed(2),
+    });
 
     totalPayoutSum += payoutSum;
     totalSharesProcessed += tenantShares.length;
   }
 
-  return {
+  const result = {
     referenceMonth,
     sharesProcessed: totalSharesProcessed,
     tenantsProcessed: byTenant.size,
@@ -145,4 +144,7 @@ export async function generateMonth(
     totalRevenue: totalPayoutSum.toFixed(2),
     companyMargin: "0.00",
   };
+
+  log("info", "generate_month_complete", tenantId, result);
+  return result;
 }

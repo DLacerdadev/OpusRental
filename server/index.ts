@@ -6,6 +6,7 @@ import { InvoiceAutomationService } from "./services/invoice-automation.service"
 import { initializeWebSocket } from "./websocket";
 
 const app = express();
+app.set("trust proxy", 1);
 
 declare module 'http' {
   interface IncomingMessage {

@@ -36,6 +36,7 @@ import InvoiceAutomation from "@/pages/invoice-automation";
 import Analytics from "@/pages/analytics";
 import CheckoutShare from "@/pages/checkout-share";
 import CheckoutInvoice from "@/pages/checkout-invoice";
+import AdminDebug from "@/pages/admin-debug";
 
 function ProtectedRoute({ component: Component, titleKey }: { component: any; titleKey: string }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -168,6 +169,9 @@ function Router() {
       </Route>
       <Route path="/analytics">
         {() => <ProtectedRoute component={Analytics} titleKey="pageTitles.analytics" />}
+      </Route>
+      <Route path="/admin/debug">
+        {() => <ProtectedRoute component={AdminDebug} titleKey="pageTitles.adminDebug" />}
       </Route>
       <Route path="/checkout/share" component={CheckoutShare} />
       <Route path="/checkout/invoice" component={CheckoutInvoice} />

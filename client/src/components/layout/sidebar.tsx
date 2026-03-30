@@ -25,6 +25,7 @@ import {
   Receipt,
   ClipboardCheck,
   Wrench,
+  Bug,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -102,6 +103,7 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
       title: t('nav.system'),
       items: [
         { path: "/approvals", icon: CheckCircle, label: t('nav.approvals'), roles: ["manager", "admin"] },
+        { path: "/admin/debug", icon: Bug, label: "Debug", roles: ["admin"] },
         { path: "/settings", icon: Settings, label: t('nav.settings'), roles: ["investor", "manager", "admin"] },
       ]
     }

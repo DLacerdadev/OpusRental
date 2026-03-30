@@ -2391,6 +2391,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===========================
+  // System Status Endpoint
+  // ===========================
+
+  app.get("/api/system/status", adminLimiter, isAuthenticated, isManager, async (req, res) => {
+    try {
+      const { getSchedulerState } = await import("./scheduler");
+      const schedulerState = getSchedulerState();
+
+      const now = new Date();
+      const currentMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+
+      const [
+        activeTrailersResult,
+        activeSharesResult,
+        openInvoicesResult,
+        paidThisMonthResult,
+        totalUsersResult,
+      ] = await Promise.all([
+        pool.query(
+          `SELECT COUNT(*) AS count FROM trailers WHERE tenant_id = $1 AND status = 'active'`,
+          [req.tenantId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS count FROM shares WHERE tenant_id = $1 AND status = 'active'`,
+          [req.tenantId]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS count FROM invoices WHERE tenant_id = $1 AND status IN ('pending', 'overdue')`,
+          [req.tenantId]
+        ),
+        pool.query(
+          `SELECT COALESCE(SUM(amount), 0) AS total FROM payments WHERE tenant_id = $1 AND reference_month = $2`,
+          [req.tenantId, currentMonth]
+        ),
+        pool.query(
+          `SELECT COUNT(*) AS count FROM users WHERE tenant_id = $1 AND role = 'investor'`,
+          [req.tenantId]
+        ),
+      ]);
+
+      res.json({
+        timestamp: now.toISOString(),
+        currentMonth,
+        assets: {
+          activeTrailers: parseInt(activeTrailersResult.rows[0].count, 10),
+          activeShares: parseInt(activeSharesResult.rows[0].count, 10),
+          totalInvestors: parseInt(totalUsersResult.rows[0].count, 10),
+        },
+        financial: {
+          openInvoices: parseInt(openInvoicesResult.rows[0].count, 10),
+          paidThisMonth: parseFloat(paidThisMonthResult.rows[0].total),
+          currentMonth,
+        },
+        scheduler: {
+          isRunning: schedulerState.isRunning,
+          lastPaymentRun: schedulerState.lastPaymentRun,
+          lastOverdueCheck: schedulerState.lastOverdueCheck,
+          lastMaintenanceCheck: schedulerState.lastMaintenanceCheck,
+          lastGeofenceCheck: schedulerState.lastGeofenceCheck,
+        },
+        integrations: {
+          stripe: !!process.env.STRIPE_SECRET_KEY,
+          smtp: !!(process.env.SMTP_HOST && process.env.SMTP_USER),
+          whatsapp: !!(process.env.WHATSAPP_API_KEY),
+          sessionStore: "postgresql",
+        },
+      });
+    } catch (error) {
+      console.error("System status error:", error);
+      res.status(500).json({ message: "Failed to fetch system status" });
+    }
+  });
+
+  // ===========================
   // Monitoring & Logs Endpoints
   // ===========================
 

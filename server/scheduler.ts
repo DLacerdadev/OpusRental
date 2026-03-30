@@ -2,68 +2,119 @@ import cron from "node-cron";
 import { generateMonth } from "./services/finance.service";
 import { notificationService } from "./services/notification.service";
 
+interface SchedulerState {
+  isRunning: boolean;
+  lastPaymentRun: string | null;
+  lastOverdueCheck: string | null;
+  lastMaintenanceCheck: string | null;
+  lastGeofenceCheck: string | null;
+}
+
+const state: SchedulerState = {
+  isRunning: false,
+  lastPaymentRun: null,
+  lastOverdueCheck: null,
+  lastMaintenanceCheck: null,
+  lastGeofenceCheck: null,
+};
+
+export function getSchedulerState(): SchedulerState {
+  return { ...state };
+}
+
+const log = (level: "info" | "error", operation: string, detail?: unknown) => {
+  const entry = {
+    level,
+    timestamp: new Date().toISOString(),
+    service: "scheduler",
+    operation,
+    ...(detail !== undefined ? { detail } : {}),
+  };
+  if (level === "error") {
+    console.error(JSON.stringify(entry));
+  } else {
+    console.info(JSON.stringify(entry));
+  }
+};
+
 export function startScheduler() {
   // Executar no 1º dia de cada mês às 06:00 UTC
-  // Formato: segundo minuto hora dia mês dia-da-semana
-  // "0 6 1 * *" = minuto 0, hora 6, dia 1, qualquer mês, qualquer dia da semana
   cron.schedule("0 6 1 * *", async () => {
-    try {
-      const now = new Date();
-      const year = now.getUTCFullYear();
-      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-      const referenceMonth = `${year}-${month}`;
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const referenceMonth = `${year}-${month}`;
 
-      console.log(`[Scheduler] Iniciando geração automática de pagamentos para ${referenceMonth}`);
-      
+    log("info", "payment_generation_start", { referenceMonth });
+
+    try {
       const result = await generateMonth(referenceMonth);
-      
-      console.log(`[Scheduler] Pagamentos gerados com sucesso:`, {
+      state.lastPaymentRun = now.toISOString();
+      log("info", "payment_generation_complete", {
         referenceMonth: result.referenceMonth,
         sharesProcessed: result.sharesProcessed,
         investorPayouts: result.investorPayouts,
         totalRevenue: result.totalRevenue,
+        tenantsProcessed: result.tenantsProcessed,
       });
     } catch (error) {
-      console.error("[Scheduler] Erro ao gerar pagamentos automáticos:", error);
+      log("error", "payment_generation_failed", {
+        referenceMonth,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
 
   // Verificar pagamentos atrasados a cada 6 horas
   cron.schedule("0 */6 * * *", async () => {
+    log("info", "overdue_check_start");
     try {
-      console.log("[Scheduler] Verificando pagamentos atrasados...");
       await notificationService.checkOverduePayments();
-      console.log("[Scheduler] Verificação de pagamentos atrasados concluída");
+      state.lastOverdueCheck = new Date().toISOString();
+      log("info", "overdue_check_complete");
     } catch (error) {
-      console.error("[Scheduler] Erro ao verificar pagamentos atrasados:", error);
+      log("error", "overdue_check_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
 
   // Verificar manutenção vencida diariamente às 08:00 UTC
   cron.schedule("0 8 * * *", async () => {
+    log("info", "maintenance_check_start");
     try {
-      console.log("[Scheduler] Verificando manutenção vencida...");
       await notificationService.checkMaintenanceDue();
-      console.log("[Scheduler] Verificação de manutenção concluída");
+      state.lastMaintenanceCheck = new Date().toISOString();
+      log("info", "maintenance_check_complete");
     } catch (error) {
-      console.error("[Scheduler] Erro ao verificar manutenção vencida:", error);
+      log("error", "maintenance_check_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
 
   // Verificar geofencing GPS a cada 2 horas
   cron.schedule("0 */2 * * *", async () => {
+    log("info", "geofence_check_start");
     try {
-      console.log("[Scheduler] Verificando alertas de geofencing...");
       await notificationService.checkGeofenceAlerts();
-      console.log("[Scheduler] Verificação de geofencing concluída");
+      state.lastGeofenceCheck = new Date().toISOString();
+      log("info", "geofence_check_complete");
     } catch (error) {
-      console.error("[Scheduler] Erro ao verificar geofencing:", error);
+      log("error", "geofence_check_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
 
-  console.log("[Scheduler] Agendamentos configurados:");
-  console.log("  - Pagamentos mensais: 1º dia de cada mês às 06:00 UTC");
-  console.log("  - Pagamentos atrasados: A cada 6 horas");
-  console.log("  - Manutenção vencida: Diariamente às 08:00 UTC");
-  console.log("  - Geofencing GPS: A cada 2 horas");
+  state.isRunning = true;
+
+  log("info", "scheduler_started", {
+    jobs: [
+      "Pagamentos mensais: 1º dia de cada mês às 06:00 UTC",
+      "Pagamentos atrasados: A cada 6 horas",
+      "Manutenção vencida: Diariamente às 08:00 UTC",
+      "Geofencing GPS: A cada 2 horas",
+    ],
+  });
 }
