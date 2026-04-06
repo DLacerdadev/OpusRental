@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -31,6 +33,7 @@ import {
   Calendar,
   PlayCircle,
   AlertTriangle,
+  Send,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -84,6 +87,19 @@ interface AuditLog {
   details: any;
 }
 
+interface WhatsappLog {
+  id: string;
+  event: string;
+  recipientPhone: string;
+  recipientName: string | null;
+  status: string;
+  provider: string;
+  messageId: string | null;
+  retries: number;
+  error: string | null;
+  createdAt: string;
+}
+
 function IntegrationBadge({ active, label }: { active: boolean; label: string }) {
   return (
     <div className="flex items-center justify-between py-2 border-b last:border-0">
@@ -115,6 +131,9 @@ function LastRunText({ ts }: { ts: string | null }) {
 export default function AdminDebug() {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [testPhone, setTestPhone] = useState("");
+  const [testEvent, setTestEvent] = useState("invoice_overdue");
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   const { data: status, isLoading: statusLoading, refetch: refetchStatus } = useQuery<SystemStatus>({
     queryKey: ["/api/system/status"],
@@ -128,6 +147,32 @@ export default function AdminDebug() {
   const { data: auditLogs = [], isLoading: auditLoading } = useQuery<AuditLog[]>({
     queryKey: ["/api/audit-logs"],
   });
+
+  const { data: whatsappLogs = [], isLoading: whatsappLoading, refetch: refetchWhatsapp } = useQuery<WhatsappLog[]>({
+    queryKey: ["/api/whatsapp/logs"],
+  });
+
+  const handleSendWhatsappTest = async () => {
+    if (!testPhone) {
+      toast({ title: "Erro", description: "Informe um número de telefone", variant: "destructive" });
+      return;
+    }
+    try {
+      setIsSendingTest(true);
+      const result = await apiRequest("POST", "/api/whatsapp/test", { phone: testPhone, event: testEvent });
+      const data = await result.json();
+      if (data.status === "sent") {
+        toast({ title: "Mensagem enviada", description: `Provider: ${data.provider} | ID: ${data.messageId}` });
+      } else {
+        toast({ title: "Falha no envio", description: data.error || "Erro desconhecido", variant: "destructive" });
+      }
+      refetchWhatsapp();
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message || "Falha ao enviar teste", variant: "destructive" });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
 
   const handleGeneratePayments = async () => {
     const now = new Date();
@@ -445,6 +490,127 @@ export default function AdminDebug() {
                       <TableCell className="text-xs text-muted-foreground">
                         {log.sentAt
                           ? formatDistanceToNow(new Date(log.sentAt), { addSuffix: true })
+                          : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* WhatsApp Logs */}
+      <Card className="shadow-md" data-testid="card-whatsapp-logs">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-green-600" />
+            WhatsApp
+            <Badge variant="outline" className="ml-auto">
+              {whatsappLogs.length} registros
+            </Badge>
+          </CardTitle>
+          <CardDescription>Notificações WhatsApp enviadas pelo sistema (Twilio / Meta / Mock)</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Test Form */}
+          <div className="flex flex-wrap gap-2 items-end border rounded-lg p-3 bg-muted/30">
+            <div className="flex-1 min-w-[160px]">
+              <label className="text-xs text-muted-foreground mb-1 block">Telefone (+55...)</label>
+              <Input
+                placeholder="+5511999999999"
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                data-testid="input-whatsapp-phone"
+              />
+            </div>
+            <div className="min-w-[180px]">
+              <label className="text-xs text-muted-foreground mb-1 block">Evento</label>
+              <Select value={testEvent} onValueChange={setTestEvent}>
+                <SelectTrigger data-testid="select-whatsapp-event">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="payment_generated">Pagamento gerado</SelectItem>
+                  <SelectItem value="invoice_issued">Invoice emitida</SelectItem>
+                  <SelectItem value="invoice_overdue">Invoice vencida</SelectItem>
+                  <SelectItem value="maintenance_due">Manutenção devida</SelectItem>
+                  <SelectItem value="geofence_alert">Alerta geofencing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSendWhatsappTest}
+              disabled={isSendingTest}
+              data-testid="button-whatsapp-test"
+            >
+              {isSendingTest ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Enviar Teste
+            </Button>
+          </div>
+
+          {/* Log Table */}
+          {whatsappLoading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : whatsappLogs.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground text-sm">
+              Nenhuma mensagem WhatsApp registrada ainda
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Evento</TableHead>
+                    <TableHead>Destinatário</TableHead>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Quando</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {whatsappLogs.slice(0, 15).map((log) => (
+                    <TableRow key={log.id} data-testid={`row-whatsapp-${log.id}`}>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {log.event}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        <div>
+                          <p className="font-medium">{log.recipientName || "—"}</p>
+                          <p className="text-xs text-muted-foreground font-mono">{log.recipientPhone}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs capitalize">
+                          {log.provider}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {log.status === "sent" ? (
+                          <Badge className="bg-green-500 text-white text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Enviado
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-xs">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Falhou
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {log.createdAt
+                          ? formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })
                           : "—"}
                       </TableCell>
                     </TableRow>

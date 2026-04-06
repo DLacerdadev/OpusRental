@@ -2,6 +2,7 @@ import { db } from "../db";
 import { notifications, trailers, invoices, maintenanceSchedules, trackingData, users, rentalContracts, rentalClients } from "../../shared/schema";
 import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { getWebSocketServer } from "../websocket";
+import { WhatsAppService } from "./whatsapp.service";
 
 export interface NotificationData {
   userId: string;
@@ -193,6 +194,19 @@ export class NotificationService {
                 daysUntil,
               },
             });
+
+            if (user.phone) {
+              await WhatsAppService.sendEvent(
+                "maintenance_due",
+                {
+                  recipientPhone: user.phone,
+                  recipientName: user.name,
+                  trailerId: trailer[0].trailerId,
+                  daysUntil: String(daysUntil),
+                },
+                user.tenantId
+              );
+            }
           }
         }
       }
@@ -274,6 +288,20 @@ export class NotificationService {
                   longitude: lastLon,
                 },
               });
+
+              if (manager.phone) {
+                await WhatsAppService.sendEvent(
+                  "geofence_alert",
+                  {
+                    recipientPhone: manager.phone,
+                    recipientName: manager.name,
+                    trailerId: trailer.trailerId,
+                    distance: distance.toFixed(1),
+                    location: lastLocation.location || "Desconhecida",
+                  },
+                  manager.tenantId
+                );
+              }
             }
           }
         }

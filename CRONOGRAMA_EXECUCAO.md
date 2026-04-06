@@ -77,34 +77,36 @@ Objetivos alinhados com: FASE 3 do cronograma + Estratégia Imediata (imagem de 
 
 ---
 
-## 🔹 FASE 3 — Integração WhatsApp (Dias 18–26)
+## 🔹 FASE 3 — Integração WhatsApp (Dias 18–26) ✅ CONCLUÍDO
 
-**Período:** Dias 18 a 26 (dia 22/04 à 04/05 )
+**Período:** Concluído antecipadamente em 06/04/2026 (Tarefa #6)
 **Marco M4 — Integração WhatsApp ativa**
 
 Objetivos alinhados com: FASE 4 do cronograma + FASE 6 do checklist operacional
 
-| # | Atividade | Período | Detalhe |
-|---|-----------|---------|---------|
-| 3.1 | Criar `whatsapp.service.ts` com interface desacoplada | Dias 18–19 | Mock mode (sem credenciais) → log completo no console |
-| 3.2 | Mapear eventos do sistema para mensagens | Dias 19–20 | Pagamento confirmado, invoice emitida, overdue, manutenção devida |
-| 3.3 | Integrar eventos ao scheduler e aos serviços existentes | Dias 21–22 | `finance.service`, `invoice-automation.service`, `scheduler` |
-| 3.4 | Validar envio simulado (mock) de todas as mensagens | Dias 22–23 | Testar cada gatilho manualmente com log no console |
-| 3.5 | Implementar adaptador de provedor real | Dias 23–24 | Twilio ou Z-API via `WHATSAPP_PROVIDER` + `WHATSAPP_API_KEY` |
-| 3.6 | Criar endpoint `POST /api/whatsapp/test` (admin only) | Dia 25 | Envio manual de mensagem de teste via painel |
-| 3.7 | Documentar variáveis de ambiente e validar integração real | Dia 26 | `WHATSAPP_PROVIDER`, `WHATSAPP_API_KEY` + teste com número real |
+| # | Atividade | Status | Detalhe |
+|---|-----------|--------|---------|
+| 3.1 | Criar `whatsapp.service.ts` com interface desacoplada | ✅ | MockAdapter, TwilioAdapter, MetaAdapter — seleção via `WHATSAPP_PROVIDER` |
+| 3.2 | Mapear eventos do sistema para mensagens | ✅ | 5 eventos mapeados com templates pt-BR |
+| 3.3 | Integrar eventos ao scheduler e aos serviços existentes | ✅ | `scheduler.ts`, `invoice-automation.service.ts`, `notification.service.ts` |
+| 3.4 | Validar envio simulado (mock) de todas as mensagens | ✅ | Testado via `POST /api/whatsapp/test` — mock retorna messageId |
+| 3.5 | Implementar adaptador Twilio e Meta | ✅ | TwilioAdapter (twilio SDK) + MetaAdapter (Graph API) com retry 3x |
+| 3.6 | Criar endpoint `POST /api/whatsapp/test` (admin only) | ✅ | Endpoint ativo com policy `admin` |
+| 3.7 | Endpoint `GET /api/whatsapp/logs` (manager+admin) | ✅ | Persiste logs na tabela `whatsapp_logs` (PostgreSQL) |
+| 3.8 | Painel de debug WhatsApp em `/admin/debug` | ✅ | Card com formulário de teste + tabela de logs |
 
 ### 📲 Mensagens Mapeadas
 
 | Evento | Destinatário | Gatilho |
 |--------|-------------|---------|
-| Pagamento mensal gerado | Investidor | Dia 1 de cada mês (06:00 UTC) |
-| Invoice emitida | Cliente de aluguel | Criação de invoice |
-| Invoice vencida (overdue) | Cliente de aluguel | Cron diário — a cada 7 dias de atraso |
-| Manutenção devida | Administrador | Cron diário às 08:00 UTC |
-| Alerta de geofencing | Administrador | Cron a cada 2 horas |
+| `payment_generated` | Investidor | Dia 1 de cada mês (06:00 UTC) — scheduler |
+| `invoice_issued` | Cliente de aluguel | Cron de invoice upcoming due |
+| `invoice_overdue` | Cliente de aluguel | Cron de invoice overdue |
+| `maintenance_due` | Usuário (manager/admin) | Cron diário às 08:00 UTC |
+| `geofence_alert` | Manager | Cron a cada 2 horas |
 
-**Entregável:** Notificações WhatsApp automáticas funcionando (mock validado + integração real ativa).
+**Entregável:** Notificações WhatsApp automáticas funcionando — mock validado, Twilio/Meta prontos para credenciais de produção.
+**Variáveis de produção:** `WHATSAPP_PROVIDER`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` (ou `META_WHATSAPP_TOKEN`, `META_PHONE_NUMBER_ID`)
 
 ---
 

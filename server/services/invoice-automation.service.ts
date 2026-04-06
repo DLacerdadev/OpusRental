@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { storage } from "../storage";
 import { EmailService } from "./email.service";
+import { WhatsAppService } from "./whatsapp.service";
 import type { RentalContract, Invoice } from "@shared/schema";
 
 const log = (level: "info" | "error", operation: string, detail: string) => {
@@ -233,6 +234,20 @@ export class InvoiceAutomationService {
             log("error", "sendOverdueReminders", `${errorMessage} invoiceNumber=${invoice.invoiceNumber}`);
             errors++;
           }
+
+          if (client.phone) {
+            await WhatsAppService.sendEvent(
+              "invoice_overdue",
+              {
+                recipientPhone: client.phone,
+                recipientName: client.tradeName || client.companyName,
+                invoiceNumber: invoice.invoiceNumber,
+                amount: `$${Number(invoice.amount).toFixed(2)}`,
+                daysOverdue: String(daysOverdue),
+              },
+              contract.tenantId
+            );
+          }
         } catch (error) {
           log("error", "sendOverdueReminders", `${error instanceof Error ? error.message : "Unknown error"} invoiceNumber=${invoice.invoiceNumber}`);
           errors++;
@@ -314,6 +329,21 @@ export class InvoiceAutomationService {
           } else {
             log("error", "sendUpcomingDueReminders", `${errorMessage} invoiceNumber=${invoice.invoiceNumber}`);
             errors++;
+          }
+
+          if (client.phone) {
+            const dueDateFormatted = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
+            await WhatsAppService.sendEvent(
+              "invoice_issued",
+              {
+                recipientPhone: client.phone,
+                recipientName: client.tradeName || client.companyName,
+                invoiceNumber: invoice.invoiceNumber,
+                amount: `$${Number(invoice.amount).toFixed(2)}`,
+                dueDate: dueDateFormatted,
+              },
+              contract.tenantId
+            );
           }
         } catch (error) {
           log("error", "sendUpcomingDueReminders", `${error instanceof Error ? error.message : "Unknown error"} invoiceNumber=${invoice.invoiceNumber}`);

@@ -36,6 +36,9 @@ export const Policy = {
   "GET /api/payments": ["investor", "manager", "admin"],
   "GET /api/payments/:shareId": ["investor", "manager", "admin"],
   "POST /api/payments": ["manager", "admin"],
+
+  "GET /api/whatsapp/logs": ["manager", "admin"],
+  "POST /api/whatsapp/test": ["admin"],
 } as const;
 
 export type PolicyKey = keyof typeof Policy;

@@ -2454,7 +2454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         integrations: {
           stripe: !!process.env.STRIPE_SECRET_KEY,
           smtp: !!(process.env.SMTP_HOST && process.env.SMTP_USER),
-          whatsapp: !!(process.env.WHATSAPP_API_KEY),
+          whatsapp: !!(process.env.TWILIO_ACCOUNT_SID || process.env.META_WHATSAPP_TOKEN),
           sessionStore: "postgresql",
         },
       });
@@ -2783,6 +2783,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Get payment status error:", error);
       res.status(500).json({ message: "Failed to retrieve payment status: " + error.message });
+    }
+  });
+
+  // ===========================
+  // WhatsApp Routes
+  // ===========================
+
+  app.get("/api/whatsapp/logs", authorize(), async (req, res) => {
+    try {
+      const { WhatsAppService } = await import("./services/whatsapp.service");
+      const logs = await WhatsAppService.getAllLogs(req.tenantId!, 50);
+      res.json(logs);
+    } catch (error) {
+      console.error("WhatsApp logs error:", error);
+      res.status(500).json({ message: "Failed to fetch WhatsApp logs" });
+    }
+  });
+
+  app.post("/api/whatsapp/test", authorize(), async (req, res) => {
+    try {
+      const { phone, event } = req.body as { phone?: string; event?: string };
+      const validEvents = ["payment_generated", "invoice_issued", "invoice_overdue", "maintenance_due", "geofence_alert"];
+
+      if (!phone) {
+        return res.status(400).json({ message: "phone is required" });
+      }
+      if (!event || !validEvents.includes(event)) {
+        return res.status(400).json({ message: `event must be one of: ${validEvents.join(", ")}` });
+      }
+
+      const { WhatsAppService } = await import("./services/whatsapp.service");
+      const result = await WhatsAppService.sendTestMessage(phone, event as any, req.tenantId!);
+
+      res.json({
+        status: result.status,
+        messageId: result.messageId,
+        provider: WhatsAppService.getProviderName(),
+        error: result.error,
+      });
+    } catch (error: any) {
+      console.error("WhatsApp test error:", error);
+      res.status(500).json({ message: "Failed to send test message: " + error.message });
     }
   });
 

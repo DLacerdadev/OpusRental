@@ -1,7 +1,7 @@
 # 📋 SYSTEM STATUS — Opus Capital
 
 **Ambiente:** Replit (PostgreSQL + Express + React + Vite)  
-**Última atualização:** 30/03/2026  
+**Última atualização:** 06/04/2026  
 **Credenciais de desenvolvimento:** ver `DEV_CREDENTIALS.md`  
 **Tenant padrão (dev):** slug `opus-rental`
 
@@ -137,7 +137,7 @@ Validação executada em 30/03/2026 no ambiente de desenvolvimento (tenant: `opu
 | F-02 | `STRIPE_WEBHOOK_SECRET` ausente | Médio — webhook silenciado | ❌ Aberto | Dev/Prod |
 | F-03 | Credenciais SMTP ausentes | Médio — emails não enviados em produção | ❌ Aberto | Prod |
 | F-04 | Session store em memória (MemoryStore) | Alto — sessões perdidas ao reiniciar servidor | ✅ Corrigido | Prod |
-| F-05 | WhatsApp completamente ausente | Alto — FASE 6 não implementada | ❌ Aberto | Dev/Prod |
+| F-05 | WhatsApp completamente ausente | Alto — FASE 6 não implementada | ✅ Corrigido | Dev/Prod |
 | F-06 | `SESSION_SECRET` usa fallback hardcoded | Crítico em produção | ✅ Corrigido | Prod |
 | F-07 | `financial_records` não filtra por `tenantId` | Médio — multi-tenant parcialmente aplicado | ✅ Corrigido | Dev/Prod |
 
@@ -180,19 +180,22 @@ Validação executada em 30/03/2026 no ambiente de desenvolvimento (tenant: `opu
 
 | Item | Status | Observação |
 |------|--------|------------|
-| Serviço WhatsApp criado | ❌ | Completamente ausente — sem arquivo, sem dependência, sem endpoint |
-| Mapeamento de eventos do sistema | ❌ | Não implementado |
-| Integração com API externa (ex: Twilio, Z-API, Meta) | ❌ | Não implementado |
-| Envio de mensagens de teste | ❌ | Não implementado |
-| Notificações via WhatsApp | ❌ | Não implementado |
+| Serviço WhatsApp criado | ✅ | `server/services/whatsapp.service.ts` — MockAdapter, TwilioAdapter, MetaAdapter |
+| Mapeamento de eventos do sistema | ✅ | 5 eventos: `payment_generated`, `invoice_issued`, `invoice_overdue`, `maintenance_due`, `geofence_alert` |
+| Tabela `whatsapp_logs` no banco | ✅ | Criada com índices; persiste status, provider, retries, error |
+| Retry logic (3 tentativas, backoff 1s/2s/4s) | ✅ | Implementado nos 3 adapters |
+| Integração com scheduler (pagamentos mensais) | ✅ | `notifyMonthlyPayments(referenceMonth)` chamado após `generateMonth` |
+| Integração com invoice-automation | ✅ | `sendOverdueReminders` → `invoice_overdue`; `sendUpcomingDueReminders` → `invoice_issued` |
+| Integração com notification service | ✅ | `maintenance_due` e `geofence_alert` integrados |
+| Endpoint `POST /api/whatsapp/test` | ✅ | Admin only; body: `{phone, event}` |
+| Endpoint `GET /api/whatsapp/logs` | ✅ | Manager+Admin; retorna últimos 50 registros por tenant |
+| Painel de debug WhatsApp | ✅ | Card em `/admin/debug` com formulário de teste e tabela de logs |
+| Provider configurável | ✅ | `WHATSAPP_PROVIDER` env var: `mock` (padrão), `twilio`, `meta` |
 
-**Resultado:** FASE 6 não iniciada ❌  
-**Próximo passo (Tarefa #4):**
-1. Criar `server/services/whatsapp.service.ts` com interface desacoplada
-2. Mapear eventos: pagamento gerado, invoice vencida, manutenção devida, geofencing
-3. Integrar ao scheduler e serviços existentes
-4. Endpoint `POST /api/whatsapp/test` (admin only)
-5. Provedor configurável: `WHATSAPP_PROVIDER` + `WHATSAPP_API_KEY`
+**Resultado:** FASE 6 concluída ✅  
+**Variáveis necessárias para produção:**
+- Twilio: `WHATSAPP_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
+- Meta: `WHATSAPP_PROVIDER=meta`, `META_WHATSAPP_TOKEN`, `META_PHONE_NUMBER_ID`
 
 ---
 
@@ -223,7 +226,7 @@ Validação executada em 30/03/2026 no ambiente de desenvolvimento (tenant: `opu
 | FASE 3 | Registro de falhas | ✅ F-04, F-06, F-07 corrigidos; F-01/F-02/F-03/F-05 abertos |
 | FASE 4 | Correção e estabilização | ✅ Completo (health endpoint, system/status, debug panel) |
 | FASE 5 | Revalidação completa | ⚠️ Parcial (fluxos core OK; integrações bloqueadas por credenciais) |
-| FASE 6 | Integração WhatsApp | ❌ Não iniciado (Tarefa #4) |
+| FASE 6 | Integração WhatsApp | ✅ Concluído (Tarefa #6) |
 | FASE 7 | Preparação para produção | ✅ Completo (session store, secret guard) |
 
 ---

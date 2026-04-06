@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { generateMonth } from "./services/finance.service";
 import { notificationService } from "./services/notification.service";
+import { WhatsAppService } from "./services/whatsapp.service";
 
 interface SchedulerState {
   isRunning: boolean;
@@ -58,6 +59,7 @@ export function startScheduler() {
         totalRevenue: result.totalRevenue,
         tenantsProcessed: result.tenantsProcessed,
       });
+      await WhatsAppService.notifyMonthlyPayments(referenceMonth);
     } catch (error) {
       log("error", "payment_generation_failed", {
         referenceMonth,

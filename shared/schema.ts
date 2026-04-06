@@ -297,6 +297,25 @@ export const emailLogs = pgTable("email_logs", {
   idxEntity: index("idx_email_logs_entity").on(t.entityType, t.entityId),
 }));
 
+// WhatsApp Logs table (Track all WhatsApp messages sent)
+export const whatsappLogs = pgTable("whatsapp_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  event: text("event").notNull(),
+  recipientPhone: text("recipient_phone").notNull(),
+  recipientName: text("recipient_name"),
+  status: text("status").notNull().default("sent"),
+  provider: text("provider").notNull().default("mock"),
+  messageId: text("message_id"),
+  retries: integer("retries").notNull().default(0),
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+  idxWhatsappTenant: index("idx_whatsapp_logs_tenant").on(t.tenantId),
+  idxWhatsappEvent: index("idx_whatsapp_logs_event").on(t.event),
+  idxWhatsappStatus: index("idx_whatsapp_logs_status").on(t.status),
+}));
+
 // Checklists table (Inspections)
 export const checklists = pgTable("checklists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -650,6 +669,11 @@ export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
   sentAt: true,
 });
 
+export const insertWhatsappLogSchema = createInsertSchema(whatsappLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertChecklistSchema = createInsertSchema(checklists).omit({
   id: true,
   createdAt: true,
@@ -729,6 +753,9 @@ export type InsertEmailSetting = z.infer<typeof insertEmailSettingSchema>;
 
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
+
+export type WhatsappLog = typeof whatsappLogs.$inferSelect;
+export type InsertWhatsappLog = z.infer<typeof insertWhatsappLogSchema>;
 
 export type Checklist = typeof checklists.$inferSelect;
 export type InsertChecklist = z.infer<typeof insertChecklistSchema>;
