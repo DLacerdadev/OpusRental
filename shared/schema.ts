@@ -1,6 +1,7 @@
 import { sql, relations } from "drizzle-orm";
 import {
   pgTable,
+  pgEnum,
   varchar,
   text,
   timestamp,
@@ -297,15 +298,36 @@ export const emailLogs = pgTable("email_logs", {
   idxEntity: index("idx_email_logs_entity").on(t.entityType, t.entityId),
 }));
 
+// WhatsApp enums
+export const whatsappEventEnum = pgEnum("whatsapp_event", [
+  "payment_generated",
+  "invoice_issued",
+  "invoice_overdue",
+  "maintenance_due",
+  "geofence_alert",
+]);
+
+export const whatsappStatusEnum = pgEnum("whatsapp_status", [
+  "sent",
+  "failed",
+  "retrying",
+]);
+
+export const whatsappProviderEnum = pgEnum("whatsapp_provider", [
+  "twilio",
+  "meta",
+  "mock",
+]);
+
 // WhatsApp Logs table (Track all WhatsApp messages sent)
 export const whatsappLogs = pgTable("whatsapp_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
-  event: text("event").notNull(),
+  event: whatsappEventEnum("event").notNull(),
   recipientPhone: text("recipient_phone").notNull(),
   recipientName: text("recipient_name"),
-  status: text("status").notNull().default("sent"),
-  provider: text("provider").notNull().default("mock"),
+  status: whatsappStatusEnum("status").notNull().default("sent"),
+  provider: whatsappProviderEnum("provider").notNull().default("mock"),
   messageId: text("message_id"),
   retries: integer("retries").notNull().default(0),
   error: text("error"),

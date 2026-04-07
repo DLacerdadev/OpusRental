@@ -2792,8 +2792,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/whatsapp/logs", authorize(), async (req, res) => {
     try {
+      const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10) || 50, 200);
+      const offset = Math.max(parseInt(String(req.query.offset ?? "0"), 10) || 0, 0);
+
       const { WhatsAppService } = await import("./services/whatsapp.service");
-      const logs = await WhatsAppService.getAllLogs(req.tenantId!, 50);
+      const logs = await WhatsAppService.getAllLogs(req.tenantId!, limit, offset);
       res.json(logs);
     } catch (error) {
       console.error("WhatsApp logs error:", error);
@@ -2804,17 +2807,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/whatsapp/test", authorize(), async (req, res) => {
     try {
       const { phone, event } = req.body as { phone?: string; event?: string };
-      const validEvents = ["payment_generated", "invoice_issued", "invoice_overdue", "maintenance_due", "geofence_alert"];
 
       if (!phone) {
         return res.status(400).json({ message: "phone is required" });
       }
-      if (!event || !validEvents.includes(event)) {
-        return res.status(400).json({ message: `event must be one of: ${validEvents.join(", ")}` });
+
+      const { WhatsAppService, isWhatsAppEvent } = await import("./services/whatsapp.service");
+
+      if (!event || !isWhatsAppEvent(event)) {
+        return res.status(400).json({
+          message: "event must be one of: payment_generated, invoice_issued, invoice_overdue, maintenance_due, geofence_alert",
+        });
       }
 
-      const { WhatsAppService } = await import("./services/whatsapp.service");
-      const result = await WhatsAppService.sendTestMessage(phone, event as any, req.tenantId!);
+      const result = await WhatsAppService.sendTestMessage(phone, event, req.tenantId!);
 
       res.json({
         status: result.status,
@@ -2822,9 +2828,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         provider: WhatsAppService.getProviderName(),
         error: result.error,
       });
-    } catch (error: any) {
-      console.error("WhatsApp test error:", error);
-      res.status(500).json({ message: "Failed to send test message: " + error.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("WhatsApp test error:", message);
+      res.status(500).json({ message: "Failed to send test message: " + message });
     }
   });
 

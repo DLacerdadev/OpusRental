@@ -1,19 +1,33 @@
 import { db } from "../db";
-import { whatsappLogs, payments, shares, users } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { whatsappLogs, payments, users } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
-type WhatsAppEvent =
+export type WhatsAppEvent =
   | "payment_generated"
   | "invoice_issued"
   | "invoice_overdue"
   | "maintenance_due"
   | "geofence_alert";
 
-type WhatsAppProvider = "twilio" | "meta" | "mock";
+export type WhatsAppStatus = "sent" | "failed" | "retrying";
+export type WhatsAppProvider = "twilio" | "meta" | "mock";
+
+const VALID_EVENTS: readonly WhatsAppEvent[] = [
+  "payment_generated",
+  "invoice_issued",
+  "invoice_overdue",
+  "maintenance_due",
+  "geofence_alert",
+];
+
+export function isWhatsAppEvent(value: string): value is WhatsAppEvent {
+  return (VALID_EVENTS as readonly string[]).includes(value);
+}
 
 interface SendResult {
   messageId: string | null;
   status: "sent" | "failed";
+  retriesUsed: number;
   error?: string;
 }
 
@@ -26,15 +40,21 @@ const log = (level: "info" | "error", operation: string, tenantId: string | null
   }
 };
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 interface IWhatsAppProvider {
   send(to: string, body: string): Promise<string>;
-  providerName: WhatsAppProvider;
+  readonly providerName: WhatsAppProvider;
+}
+
+interface TwilioMessageClient {
+  messages: {
+    create(opts: { body: string; from: string; to: string }): Promise<{ sid: string }>;
+  };
 }
 
 class MockAdapter implements IWhatsAppProvider {
-  providerName: WhatsAppProvider = "mock";
+  readonly providerName: WhatsAppProvider = "mock";
 
   async send(to: string, body: string): Promise<string> {
     const fakeId = `mock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -44,15 +64,16 @@ class MockAdapter implements IWhatsAppProvider {
 }
 
 class TwilioAdapter implements IWhatsAppProvider {
-  providerName: WhatsAppProvider = "twilio";
-  private client: any;
-  private from: string;
+  readonly providerName: WhatsAppProvider = "twilio";
+  private readonly client: TwilioMessageClient;
+  private readonly from: string;
 
   constructor() {
-    const twilio = require("twilio");
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const twilio = require("twilio") as (sid: string, token: string) => TwilioMessageClient;
     this.client = twilio(
       process.env.TWILIO_ACCOUNT_SID!,
-      process.env.TWILIO_AUTH_TOKEN!
+      process.env.TWILIO_AUTH_TOKEN!,
     );
     this.from = process.env.TWILIO_WHATSAPP_FROM || "whatsapp:+14155238886";
   }
@@ -68,10 +89,14 @@ class TwilioAdapter implements IWhatsAppProvider {
   }
 }
 
+interface MetaApiResponse {
+  messages?: Array<{ id: string }>;
+}
+
 class MetaAdapter implements IWhatsAppProvider {
-  providerName: WhatsAppProvider = "meta";
-  private token: string;
-  private phoneNumberId: string;
+  readonly providerName: WhatsAppProvider = "meta";
+  private readonly token: string;
+  private readonly phoneNumberId: string;
 
   constructor() {
     this.token = process.env.META_WHATSAPP_TOKEN!;
@@ -79,9 +104,8 @@ class MetaAdapter implements IWhatsAppProvider {
   }
 
   async send(to: string, body: string): Promise<string> {
-    const fetch = (await import("node-fetch")).default;
+    const { default: fetch } = await import("node-fetch");
     const url = `https://graph.facebook.com/v18.0/${this.phoneNumberId}/messages`;
-
     const cleanPhone = to.replace(/[^0-9+]/g, "");
 
     const resp = await fetch(url, {
@@ -103,7 +127,7 @@ class MetaAdapter implements IWhatsAppProvider {
       throw new Error(`Meta API error ${resp.status}: ${err}`);
     }
 
-    const data = (await resp.json()) as { messages?: Array<{ id: string }> };
+    const data = (await resp.json()) as MetaApiResponse;
     return data.messages?.[0]?.id ?? "meta_unknown";
   }
 }
@@ -150,33 +174,8 @@ const TEMPLATES: Record<WhatsAppEvent, (vars: Record<string, string>) => string>
 export class WhatsAppService {
   private static provider: IWhatsAppProvider = createProvider();
 
-  static isConfigured(): boolean {
-    return !(this.provider instanceof MockAdapter) ||
-      process.env.WHATSAPP_PROVIDER === "mock";
-  }
-
   static getProviderName(): WhatsAppProvider {
     return this.provider.providerName;
-  }
-
-  private static async sendWithRetry(
-    to: string,
-    body: string,
-    maxRetries = 3
-  ): Promise<SendResult> {
-    let lastError = "";
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const messageId = await this.provider.send(to, body);
-        return { messageId, status: "sent" };
-      } catch (err) {
-        lastError = err instanceof Error ? err.message : String(err);
-        if (attempt < maxRetries - 1) {
-          await sleep(1000 * Math.pow(2, attempt));
-        }
-      }
-    }
-    return { messageId: null, status: "failed", error: lastError };
   }
 
   private static async persistLog(
@@ -184,8 +183,10 @@ export class WhatsAppService {
     event: WhatsAppEvent,
     recipientPhone: string,
     recipientName: string | null,
-    result: SendResult,
-    retries: number
+    status: WhatsAppStatus,
+    retriesUsed: number,
+    messageId: string | null,
+    error: string | null,
   ): Promise<void> {
     try {
       await db.insert(whatsappLogs).values({
@@ -193,21 +194,51 @@ export class WhatsAppService {
         event,
         recipientPhone,
         recipientName,
-        status: result.status,
+        status,
         provider: this.provider.providerName,
-        messageId: result.messageId ?? undefined,
-        retries,
-        error: result.error ?? undefined,
+        messageId: messageId ?? undefined,
+        retries: retriesUsed,
+        error: error ?? undefined,
       });
     } catch (err) {
       log("error", "persist_log", tenantId, err instanceof Error ? err.message : String(err));
     }
   }
 
+  private static async sendWithRetry(
+    to: string,
+    body: string,
+    tenantId: string,
+    event: WhatsAppEvent,
+    recipientPhone: string,
+    recipientName: string | null,
+    maxAttempts = 4,
+  ): Promise<SendResult> {
+    const delays = [1000, 2000, 4000];
+    let lastError = "";
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const messageId = await this.provider.send(to, body);
+        return { messageId, status: "sent", retriesUsed: attempt };
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+
+        const delayMs = delays[attempt];
+        if (delayMs !== undefined) {
+          await this.persistLog(tenantId, event, recipientPhone, recipientName, "retrying", attempt + 1, null, lastError);
+          await sleep(delayMs);
+        }
+      }
+    }
+
+    return { messageId: null, status: "failed", retriesUsed: maxAttempts, error: lastError };
+  }
+
   static async sendEvent(
     event: WhatsAppEvent,
     vars: Record<string, string> & { recipientPhone: string; recipientName?: string },
-    tenantId: string
+    tenantId: string,
   ): Promise<void> {
     const { recipientPhone, recipientName, ...templateVars } = vars;
 
@@ -217,15 +248,23 @@ export class WhatsAppService {
     }
 
     const body = TEMPLATES[event]({ name: recipientName || "Cliente", ...templateVars });
-    const result = await this.sendWithRetry(recipientPhone, body);
-    const retries = result.status === "failed" ? 3 : 0;
+    const result = await this.sendWithRetry(recipientPhone, body, tenantId, event, recipientPhone, recipientName ?? null);
 
-    await this.persistLog(tenantId, event, recipientPhone, recipientName ?? null, result, retries);
+    await this.persistLog(
+      tenantId,
+      event,
+      recipientPhone,
+      recipientName ?? null,
+      result.status,
+      result.retriesUsed,
+      result.messageId,
+      result.error ?? null,
+    );
 
     if (result.status === "sent") {
       log("info", event, tenantId, `sent to=${recipientPhone} provider=${this.provider.providerName} messageId=${result.messageId}`);
     } else {
-      log("error", event, tenantId, `failed to=${recipientPhone} error=${result.error}`);
+      log("error", event, tenantId, `failed to=${recipientPhone} attempts=${result.retriesUsed} error=${result.error}`);
     }
   }
 
@@ -261,7 +300,7 @@ export class WhatsAppService {
             amount: `$${Number(p.amount).toFixed(2)}`,
             month: referenceMonth,
           },
-          p.tenantId
+          p.tenantId,
         );
       }
 
@@ -281,19 +320,24 @@ export class WhatsAppService {
     };
 
     const body = TEMPLATES[event]({ name: "Teste", ...testVars[event] });
-    const result = await this.sendWithRetry(phone, body);
-    const retries = result.status === "failed" ? 3 : 0;
-    await this.persistLog(tenantId, event, phone, "Teste Manual", result, retries);
+    const result = await this.sendWithRetry(phone, body, tenantId, event, phone, "Teste Manual");
+
+    await this.persistLog(tenantId, event, phone, "Teste Manual", result.status, result.retriesUsed, result.messageId, result.error ?? null);
     return result;
   }
 
-  static async getAllLogs(tenantId: string, limit = 50): Promise<typeof whatsappLogs.$inferSelect[]> {
+  static async getAllLogs(
+    tenantId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<(typeof whatsappLogs.$inferSelect)[]> {
     return db
       .select()
       .from(whatsappLogs)
       .where(eq(whatsappLogs.tenantId, tenantId))
-      .orderBy(whatsappLogs.createdAt)
-      .limit(limit) as any;
+      .orderBy(desc(whatsappLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   static async getLogStats(tenantId: string): Promise<{ sent: number; failed: number; total: number }> {

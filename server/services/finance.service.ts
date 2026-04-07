@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { payments, financialRecords, shares } from "@shared/schema";
 import { sql, eq, and } from "drizzle-orm";
+import { WhatsAppService } from "./whatsapp.service";
 
 export interface GenerateMonthResult {
   referenceMonth: string;
@@ -146,5 +147,10 @@ export async function generateMonth(
   };
 
   log("info", "generate_month_complete", tenantId, result);
+
+  WhatsAppService.notifyMonthlyPayments(referenceMonth).catch((err: unknown) => {
+    log("error", "whatsapp_notify_monthly_failed", tenantId, err instanceof Error ? err.message : String(err));
+  });
+
   return result;
 }
