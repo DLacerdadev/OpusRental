@@ -89,7 +89,9 @@ export class NotificationService {
 
         const severity: 'warning' | 'critical' = daysOverdue > 7 ? 'critical' : 'warning';
 
-        const managers = await db.select().from(users).where(eq(users.role, 'manager'));
+        const managers = await db.select().from(users).where(
+          and(eq(users.role, 'manager'), eq(users.tenantId, contract[0].tenantId))
+        );
 
         for (const manager of managers) {
           const existingNotification = await db
@@ -162,7 +164,9 @@ export class NotificationService {
         const nextDate = new Date(maintenance.nextMaintenanceDate);
         const daysUntil = Math.floor((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-        const allUsers = await db.select().from(users).where(eq(users.role, 'manager'));
+        const allUsers = await db.select().from(users).where(
+          and(eq(users.role, 'manager'), eq(users.tenantId, trailer[0].tenantId))
+        );
 
         for (const user of allUsers) {
           const existingNotification = await db
@@ -255,7 +259,9 @@ export class NotificationService {
         );
 
         if (distance > 100) {
-          const managers = await db.select().from(users).where(eq(users.role, 'manager'));
+          const managers = await db.select().from(users).where(
+            and(eq(users.role, 'manager'), eq(users.tenantId, trailer.tenantId))
+          );
 
           for (const manager of managers) {
             const existingNotification = await db

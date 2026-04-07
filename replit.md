@@ -50,6 +50,17 @@ A comprehensive payment processing system integrates Stripe for share purchases 
 - **Backend Libraries**: Express.js, Drizzle ORM, bcrypt, express-session, node-cron, nodemailer, stripe
 - **Development Tools**: TypeScript, Vite, ESBuild
 
+## WhatsApp Integration
+
+Multi-provider WhatsApp notification system for investor and manager alerts. Events: `payment_generated`, `invoice_issued`, `invoice_overdue`, `maintenance_due`, `geofence_alert`.
+
+Provider selection via `WHATSAPP_PROVIDER` environment variable:
+- `mock` (default) — logs messages to console, no external calls required
+- `twilio` — requires `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`
+- `meta` — requires `META_WHATSAPP_TOKEN`, `META_PHONE_NUMBER_ID`
+
+Retry policy: 3 retries after initial attempt (4 total), exponential backoff 1s / 2s / 4s. All sends are logged to the `whatsapp_logs` table with tenant isolation enforced. Test endpoint: `POST /api/whatsapp/test` (admin only). Logs endpoint: `GET /api/whatsapp/logs?limit=N&offset=M` (manager/admin).
+
 ## Pending Configuration
 
 ⚠️ **Stripe Integration**: Currently disabled for development. Will be configured when implementing checkout functionality. The code is prepared to work with or without Stripe credentials.
