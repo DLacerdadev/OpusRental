@@ -176,9 +176,9 @@ const TEMPLATES: Record<WhatsAppEvent, (vars: Record<string, string>) => string>
     `🚨 *Opus Capital* — Alerta de geofencing!\n\nTrailer *${v.trailerId}* se moveu *${v.distance} km* da localização esperada.\n\nLocalização atual: ${v.location || "Desconhecida"}. Verifique imediatamente.`,
 };
 
-// Delays between attempts for up to 3 total tries (attempt 0→1: 1s, attempt 1→2: 2s)
-const RETRY_DELAYS_MS = [1000, 2000];
-const MAX_ATTEMPTS = 3;
+// 3 retries after initial attempt = 4 total attempts, delays: 1s / 2s / 4s
+const RETRY_DELAYS_MS = [1000, 2000, 4000];
+const MAX_ATTEMPTS = 4;
 
 export class WhatsAppService {
   private static provider: IWhatsAppProvider = createProvider();

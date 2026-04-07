@@ -140,6 +140,20 @@ export class InvoiceAutomationService {
             if (emailStatus === "sent") {
               log("info", "sendInvoiceEmail", `sent to=${client.email} invoiceNumber=${invoice.invoiceNumber}`);
             }
+
+            if (client.phone) {
+              await WhatsAppService.sendEvent(
+                "invoice_issued",
+                {
+                  recipientPhone: client.phone,
+                  recipientName: client.tradeName || client.companyName,
+                  invoiceNumber: invoice.invoiceNumber,
+                  amount: `$${Number(invoice.amount).toFixed(2)}`,
+                  dueDate: invoice.dueDate,
+                },
+                contract.tenantId
+              );
+            }
           }
         } catch (error) {
           log("error", "generateMonthlyInvoices", `${error instanceof Error ? error.message : "Unknown error"} contract=${contract.contractNumber}`);
