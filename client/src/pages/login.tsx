@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Globe, Lock, Mail, Shield, CheckCircle2 } from "lucide-react";
+import { Globe, Lock, Mail, Shield, CheckCircle2, ArrowLeft } from "lucide-react";
 import logoPath from "@assets/image_1759264185138.png";
 import { Link } from "wouter";
 
@@ -70,6 +70,21 @@ export default function Login() {
       <div className="absolute top-0 left-0 w-[700px] h-[700px] bg-gradient-to-br from-[#2196F3]/15 to-transparent rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-[700px] h-[700px] bg-gradient-to-tl from-[#2196F3]/15 to-transparent rounded-full blur-3xl"></div>
       
+      {/* Back to Landing */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link href="/">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 bg-[#0D2847]/80 hover:bg-[#0D2847] text-white border-[#2196F3]/40 backdrop-blur-xl shadow-lg"
+            data-testid="button-back-to-landing"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="font-semibold">Início</span>
+          </Button>
+        </Link>
+      </div>
+
       {/* Language Selector */}
       <div className="absolute top-6 right-6 z-20">
         <DropdownMenu>
