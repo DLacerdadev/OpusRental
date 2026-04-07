@@ -601,6 +601,11 @@ export default function AdminDebug() {
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Enviado
                           </Badge>
+                        ) : log.status === "retrying" ? (
+                          <Badge className="bg-yellow-500 text-white text-xs">
+                            <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                            Repetindo
+                          </Badge>
                         ) : (
                           <Badge variant="destructive" className="text-xs">
                             <XCircle className="h-3 w-3 mr-1" />
