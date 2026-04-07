@@ -133,6 +133,11 @@ export async function generateMonth(
       payoutSum: payoutSum.toFixed(2),
     });
 
+    // Notify only this tenant's investors — fire-and-forget per tenant
+    WhatsAppService.notifyMonthlyPayments(tid, referenceMonth).catch((err: unknown) => {
+      log("error", "whatsapp_notify_monthly_failed", tid, err instanceof Error ? err.message : String(err));
+    });
+
     totalPayoutSum += payoutSum;
     totalSharesProcessed += tenantShares.length;
   }
@@ -147,10 +152,5 @@ export async function generateMonth(
   };
 
   log("info", "generate_month_complete", tenantId, result);
-
-  WhatsAppService.notifyMonthlyPayments(referenceMonth).catch((err: unknown) => {
-    log("error", "whatsapp_notify_monthly_failed", tenantId, err instanceof Error ? err.message : String(err));
-  });
-
   return result;
 }

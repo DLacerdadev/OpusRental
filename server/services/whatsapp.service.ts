@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { whatsappLogs, payments, users } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export type WhatsAppEvent =
   | "payment_generated"
@@ -53,6 +53,10 @@ interface TwilioMessageClient {
   };
 }
 
+interface MetaApiResponse {
+  messages?: Array<{ id: string }>;
+}
+
 class MockAdapter implements IWhatsAppProvider {
   readonly providerName: WhatsAppProvider = "mock";
 
@@ -65,32 +69,34 @@ class MockAdapter implements IWhatsAppProvider {
 
 class TwilioAdapter implements IWhatsAppProvider {
   readonly providerName: WhatsAppProvider = "twilio";
-  private readonly client: TwilioMessageClient;
+  private lazyClient: TwilioMessageClient | null = null;
   private readonly from: string;
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const twilio = require("twilio") as (sid: string, token: string) => TwilioMessageClient;
-    this.client = twilio(
-      process.env.TWILIO_ACCOUNT_SID!,
-      process.env.TWILIO_AUTH_TOKEN!,
-    );
     this.from = process.env.TWILIO_WHATSAPP_FROM || "whatsapp:+14155238886";
   }
 
+  private async getClient(): Promise<TwilioMessageClient> {
+    if (!this.lazyClient) {
+      const { default: twilio } = await import("twilio");
+      this.lazyClient = twilio(
+        process.env.TWILIO_ACCOUNT_SID!,
+        process.env.TWILIO_AUTH_TOKEN!,
+      ) as unknown as TwilioMessageClient;
+    }
+    return this.lazyClient;
+  }
+
   async send(to: string, body: string): Promise<string> {
+    const client = await this.getClient();
     const toFormatted = to.startsWith("whatsapp:") ? to : `whatsapp:${to}`;
-    const message = await this.client.messages.create({
+    const message = await client.messages.create({
       body,
       from: this.from,
       to: toFormatted,
     });
     return message.sid;
   }
-}
-
-interface MetaApiResponse {
-  messages?: Array<{ id: string }>;
 }
 
 class MetaAdapter implements IWhatsAppProvider {
@@ -104,7 +110,6 @@ class MetaAdapter implements IWhatsAppProvider {
   }
 
   async send(to: string, body: string): Promise<string> {
-    const { default: fetch } = await import("node-fetch");
     const url = `https://graph.facebook.com/v18.0/${this.phoneNumberId}/messages`;
     const cleanPhone = to.replace(/[^0-9+]/g, "");
 
@@ -171,6 +176,10 @@ const TEMPLATES: Record<WhatsAppEvent, (vars: Record<string, string>) => string>
     `🚨 *Opus Capital* — Alerta de geofencing!\n\nTrailer *${v.trailerId}* se moveu *${v.distance} km* da localização esperada.\n\nLocalização atual: ${v.location || "Desconhecida"}. Verifique imediatamente.`,
 };
 
+// Delays between attempts for up to 3 total tries (attempt 0→1: 1s, attempt 1→2: 2s)
+const RETRY_DELAYS_MS = [1000, 2000];
+const MAX_ATTEMPTS = 3;
+
 export class WhatsAppService {
   private static provider: IWhatsAppProvider = createProvider();
 
@@ -212,27 +221,25 @@ export class WhatsAppService {
     event: WhatsAppEvent,
     recipientPhone: string,
     recipientName: string | null,
-    maxAttempts = 4,
   ): Promise<SendResult> {
-    const delays = [1000, 2000, 4000];
     let lastError = "";
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       try {
         const messageId = await this.provider.send(to, body);
         return { messageId, status: "sent", retriesUsed: attempt };
       } catch (err) {
         lastError = err instanceof Error ? err.message : String(err);
 
-        const delayMs = delays[attempt];
-        if (delayMs !== undefined) {
+        const delay = RETRY_DELAYS_MS[attempt];
+        if (delay !== undefined) {
           await this.persistLog(tenantId, event, recipientPhone, recipientName, "retrying", attempt + 1, null, lastError);
-          await sleep(delayMs);
+          await sleep(delay);
         }
       }
     }
 
-    return { messageId: null, status: "failed", retriesUsed: maxAttempts, error: lastError };
+    return { messageId: null, status: "failed", retriesUsed: MAX_ATTEMPTS, error: lastError };
   }
 
   static async sendEvent(
@@ -268,26 +275,33 @@ export class WhatsAppService {
     }
   }
 
-  static async notifyMonthlyPayments(referenceMonth: string): Promise<void> {
+  /**
+   * Notifica investidores com pagamentos gerados no mês de referência.
+   * Escopo limitado ao tenantId fornecido — sem vazamento entre tenants.
+   */
+  static async notifyMonthlyPayments(tenantId: string, referenceMonth: string): Promise<void> {
     try {
-      const paidPayments = await db.query.payments.findMany({
-        where: eq(payments.referenceMonth, referenceMonth),
+      const tenantPayments = await db.query.payments.findMany({
+        where: and(
+          eq(payments.tenantId, tenantId),
+          eq(payments.referenceMonth, referenceMonth),
+        ),
         columns: { id: true, tenantId: true, userId: true, amount: true },
       });
 
-      const userMap = new Map<string, { phone: string | null; name: string; tenantId: string }>();
+      const userMap = new Map<string, { phone: string | null; name: string }>();
 
-      for (const p of paidPayments) {
+      for (const p of tenantPayments) {
         if (userMap.has(p.userId)) continue;
         const [user] = await db
-          .select({ phone: users.phone, name: users.name, tenantId: users.tenantId })
+          .select({ phone: users.phone, name: users.name })
           .from(users)
-          .where(eq(users.id, p.userId))
+          .where(and(eq(users.id, p.userId), eq(users.tenantId, tenantId)))
           .limit(1);
-        if (user) userMap.set(p.userId, { phone: user.phone, name: user.name, tenantId: user.tenantId });
+        if (user) userMap.set(p.userId, { phone: user.phone, name: user.name });
       }
 
-      for (const p of paidPayments) {
+      for (const p of tenantPayments) {
         const user = userMap.get(p.userId);
         if (!user?.phone) continue;
 
@@ -300,13 +314,13 @@ export class WhatsAppService {
             amount: `$${Number(p.amount).toFixed(2)}`,
             month: referenceMonth,
           },
-          p.tenantId,
+          tenantId,
         );
       }
 
-      log("info", "notifyMonthlyPayments", null, `processed month=${referenceMonth} payments=${paidPayments.length}`);
+      log("info", "notifyMonthlyPayments", tenantId, `processed month=${referenceMonth} payments=${tenantPayments.length}`);
     } catch (err) {
-      log("error", "notifyMonthlyPayments", null, err instanceof Error ? err.message : String(err));
+      log("error", "notifyMonthlyPayments", tenantId, err instanceof Error ? err.message : String(err));
     }
   }
 
