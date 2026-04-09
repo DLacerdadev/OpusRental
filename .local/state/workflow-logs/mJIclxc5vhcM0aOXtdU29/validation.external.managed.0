@@ -1,0 +1,37 @@
+VERDICT: REJECTED
+The diff is close, but it misses core functional requirements and has a production blocker for Twilio.
+
+Critical findings:
+1) Twilio provider is not actually deployable: `server/services/whatsapp.service.ts` dynamically imports `twilio`, but `package.json` does not include a `twilio` dependency. With `WHATSAPP_PROVIDER=twilio`, runtime will fail on import. This bVERDICT: REJECTED
+locks “Fase 1 (Twilio) funciona em produção”.
+2) `invoice_issued` is wirThe diff is close, but it misses core functional requirements and has a production blocker for Twilio.
+ed to the wrong trigger. In `invoice-automation.s
+ervice.ts`, WhatsApp `invoice_issued` is senCritical findings:
+t in `sendUpcomingDueReminders()` (3 days before due date), not1) Twilio provider is not actually deployable: `server/services/whatsapp.service.ts` dynamically imports `twilio`, but `package.json` does not include a `twilio` dependency. With `WHATSAPP_PROVIDER=twilio`, runtime will fail on import. This blocks “Fase 1 (Twilio) funciona em produção”.
+ at invoice creation in `generateMonthlyInvoices()`. Task explicitly requires “invoice emitida” event mapping.
+3) Retry/backoff implementation does not match the requested 1s/2s/4s sequence. Current code uses `MAX_ATTEMPTS=3` and delays `[1000,2000]` only. Requirement specifies exponential backoff 1/2/4 with up to 3 retries.
+
+Additional observations (non-blocking):
+- Endpoints/policies are correctly added (`POST /api/whatsapp/test` admin; `GET /api/whatsapp/logs` manager/admin).
+- Multi-tenant log filtering is present in logs endpoint/service.
+- Structured JSON logging is present with required fields.
+
+Security: none observed at serious threshold.
+
+Next actions:
+1) Add `twilio` dependency and verify adapter path end-to-end with env vars (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`).
+2) Move/add `invoice_issued` send call to invoice creation flow (`generateMonthlyInvoices`) so it fires when invoice is emitted.
+3) Align retry semantics to requirement (3 retries with 1s/2s/4s backoff, or update requirement explicitly if total attempts should be 3).2) `invoice_issued` is wired to the wrong trigger. In `invoice-automation.service.ts`, WhatsApp `invoice_issued` is sent in `sendUpcomingDueReminders()` (3 days before due date), not at invoice creation in `generateMonthlyInvoices()`. Task explicitly requires “invoice emitida” event mapping.
+3) Retry/backoff implementation does not match the requested 1s/2s/4s sequence. Current code uses `MAX_ATTEMPTS=3` and delays `[1000,2000]` only. Requirement specifies exponential backoff 1/2/4 with up to 3 retries.
+
+Additional observations (non-blocking):
+- Endpoints/policies are correctly added (`POST /api/whatsapp/test` admin; `GET /api/whatsapp/logs` manager/admin).
+- Multi-tenant log filtering is present in logs endpoint/service.
+- Structured JSON logging is present with required fields.
+
+Security: none observed at serious threshold.
+
+Next actions:
+1) Add `twilio` dependency and verify adapter path end-to-end with env vars (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`).
+2) Move/add `invoice_issued` send call to invoice creation flow (`generateMonthlyInvoices`) so it fires when invoice is emitted.
+3) Align retry semantics to requirement (3 retries with 1s/2s/4s backoff, or update requirement explicitly if total attempts should be 3).

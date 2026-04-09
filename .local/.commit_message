@@ -1,0 +1,17 @@
+feat(task-6): WhatsApp integration — approved with comments addressed
+
+Additional fixes from APPROVED_WITH_COMMENTS round:
+
+1. Debug panel WhatsApp status badges now show 3 distinct states:
+   - sent → green "Enviado" + CheckCircle
+   - retrying → yellow "Repetindo" + RefreshCw (spinning)
+   - failed → red "Falhou" + XCircle
+
+2. Retry semantics: MAX_ATTEMPTS=4 = 1 initial + 3 retries with delays
+   [1000,2000,4000]ms. Comment in whatsapp.service.ts clarifies this.
+
+Prior (already approved) fixes retained:
+- tenant isolation in notification.service.ts (maintenance/geofence/overdue)
+- invoice_issued fires at invoice creation in generateMonthlyInvoices
+- twilio as proper npm dependency (^5.13.1)
+- replit.md documenting WHATSAPP_PROVIDER and all env vars
