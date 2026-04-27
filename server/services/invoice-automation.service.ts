@@ -21,46 +21,52 @@ export type GenerateInvoiceResult =
   | { ok: false; skipped: false; reason: string };
 
 /**
- * Format a Date as YYYY-MM-DD using local calendar fields. Avoids the UTC
- * shift that `Date.prototype.toISOString` introduces near midnight, which
- * could otherwise emit the previous calendar day for negative timezones.
+ * All date math in this service is UTC-based to match the cron schedule
+ * (which is also pinned to UTC). This makes per-contract eligibility,
+ * referenceMonth, and dueDate deterministic regardless of the host's
+ * configured timezone.
+ */
+
+/**
+ * Format a Date as YYYY-MM-DD using UTC calendar fields.
  */
 function formatDateOnly(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
 /**
- * Format a Date as YYYY-MM (reference month) using local calendar fields.
+ * Format a Date as YYYY-MM (reference month) using UTC calendar fields.
  */
 function formatReferenceMonth(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
 /**
- * Returns the last calendar day (1-31) of the month containing `d`.
+ * Returns the last calendar day (1-31) of the UTC month containing `d`.
  */
 function lastDayOfMonth(d: Date): number {
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
 /**
- * Decide whether a contract should be billed today based on its configured
- * invoiceDayOfMonth. If the configured day does not exist in the current
- * month (e.g. day=31 in February), the contract is billed on the last day
- * of the month instead, so contracts never skip a billing cycle.
+ * Decide whether a contract should be billed today (UTC) based on its
+ * configured invoiceDayOfMonth. If the configured day does not exist in
+ * the current month (e.g. day=31 in February), the contract is billed on
+ * the last day of the month instead, so contracts never skip a billing
+ * cycle.
  */
 export function isContractDueToday(
   contract: Pick<RentalContract, "invoiceDayOfMonth">,
   today: Date,
 ): boolean {
-  const rawDay = contract.invoiceDayOfMonth || 1;
+  const rawDay = contract.invoiceDayOfMonth ?? 1;
   const dayOfMonth = Math.min(Math.max(1, rawDay), 31);
   const lastDay = lastDayOfMonth(today);
   const effectiveDay = Math.min(dayOfMonth, lastDay);
-  return today.getDate() === effectiveDay;
+  return today.getUTCDate() === effectiveDay;
 }
 
 export class InvoiceAutomationService {
@@ -77,27 +83,41 @@ export class InvoiceAutomationService {
 
     log("info", "initialize", "starting");
 
-    // Run every day at 00:01 UTC. Per-contract eligibility is computed by
-    // matching today's day-of-month against contract.invoiceDayOfMonth.
-    cron.schedule("1 0 * * *", async () => {
-      log("info", "generateMonthlyInvoices", "cron triggered");
-      await this.generateMonthlyInvoices();
-    });
+    // All schedules pinned to UTC so behavior is deterministic regardless
+    // of the host's timezone. Per-contract eligibility for the daily job
+    // is computed by matching today's UTC day-of-month against
+    // contract.invoiceDayOfMonth.
+    const cronOptions = { timezone: "UTC" } as const;
 
-    // Check for overdue invoices daily at 09:00
-    cron.schedule("0 9 * * *", async () => {
-      log("info", "sendOverdueReminders", "cron triggered");
-      await this.sendOverdueReminders();
-    });
+    cron.schedule(
+      "1 0 * * *",
+      async () => {
+        log("info", "generateMonthlyInvoices", "cron triggered");
+        await this.generateMonthlyInvoices();
+      },
+      cronOptions,
+    );
 
-    // Send reminder 3 days before due date at 09:00
-    cron.schedule("0 9 * * *", async () => {
-      log("info", "sendUpcomingDueReminders", "cron triggered");
-      await this.sendUpcomingDueReminders();
-    });
+    cron.schedule(
+      "0 9 * * *",
+      async () => {
+        log("info", "sendOverdueReminders", "cron triggered");
+        await this.sendOverdueReminders();
+      },
+      cronOptions,
+    );
+
+    cron.schedule(
+      "0 9 * * *",
+      async () => {
+        log("info", "sendUpcomingDueReminders", "cron triggered");
+        await this.sendUpcomingDueReminders();
+      },
+      cronOptions,
+    );
 
     this.isRunning = true;
-    log("info", "initialize", "started — monthly:daily/00:01 overdue:daily/09:00 due-reminder:daily/09:00");
+    log("info", "initialize", "started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC");
   }
 
   /**
@@ -134,11 +154,14 @@ export class InvoiceAutomationService {
       return { ok: false, skipped: true, reason: "duplicate" };
     }
 
-    // Calculate due date as today + paymentDueDays. paymentDueDays defaults
-    // to 15 when not configured. The Date arithmetic naturally handles
-    // month/year rollover, so no clamping is needed here.
-    const dueDays = contract.paymentDueDays || 15;
-    const dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dueDays);
+    // Calculate due date as today + paymentDueDays in UTC. Use nullish
+    // coalescing so a contract configured with 0 (due on the same day) is
+    // honored instead of falling back to the default. The Date arithmetic
+    // handles month/year rollover automatically.
+    const dueDays = contract.paymentDueDays ?? 15;
+    const dueDate = new Date(
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + dueDays),
+    );
 
     const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
 
