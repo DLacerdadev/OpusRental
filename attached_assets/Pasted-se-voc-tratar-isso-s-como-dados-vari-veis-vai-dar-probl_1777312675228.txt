@@ -1,0 +1,147 @@
+se você tratar isso só como “dados variáveis”, vai dar problema.
+👉 Isso precisa virar configuração de cobrança recorrente, não input manual.
+
+🧭 Como estruturar (mentalidade correta)
+
+Você não vai mais ter só:
+
+Ativo (carreta)
+Invoice
+
+Você passa a ter um terceiro elemento:
+
+🔁 Regra de cobrança (Billing Rule)
+
+Essa regra é quem gera as invoices automaticamente.
+
+🧩 Estrutura ideal do sistema
+1. 🚛 Ativo (Carreta)
+ID
+Dados técnicos
+Configuração base
+2. 🧾 Cliente
+Cadastro padrão
+3. 🔁 Regra de Cobrança (ESSENCIAL)
+
+Aqui está o segredo:
+
+{
+  "ativo_id": "CRT-001",
+  "cliente_id": "CLI-123",
+  "tipo_cobranca": "mensal",
+  "descricao": "Locação de carreta",
+  "valor": 3500.00,
+  "dia_vencimento": 5,
+  "data_inicio": "2026-05-01",
+  "data_fim": null,
+  "reajuste": false,
+  "status": "ativo"
+}
+🔄 Como funciona na prática
+🟢 Primeira vez (setup)
+
+Você preenche UMA vez:
+
+Cliente
+Valor
+Dia de vencimento
+Tipo (mensal)
+🔁 Automação mensal
+
+Todo mês o sistema:
+
+Lê as regras ativas
+Gera automaticamente a invoice
+Define:
+Data de emissão
+Vencimento (mesmo dia)
+Valor fixo
+🧾 TEMPLATE — Geração automática (recorrência)
+Você é um sistema de faturamento recorrente.
+
+Para cada regra de cobrança ativa:
+
+1. Gerar nova invoice com:
+- Número único
+- Data de emissão (hoje)
+- Data de vencimento (dia definido na regra)
+- Cliente vinculado
+- Ativo vinculado
+- Descrição padrão
+- Valor fixo
+
+2. Marcar como:
+- Status: "PENDENTE"
+
+3. Vincular ao histórico da regra
+
+Não solicitar input manual.
+🔁 2ª via de cobrança (muito importante)
+
+Aqui você NÃO gera uma nova cobrança do zero.
+
+Você deve:
+
+❌ ERRADO:
+Criar outra invoice independente
+✅ CERTO:
+Reemitir a mesma invoice
+🧩 TEMPLATE — 2ª via
+Você é um sistema financeiro.
+
+Ao solicitar 2ª via de uma invoice:
+
+1. Localize a invoice original
+2. Verifique status:
+   - Se PAGA → informar pagamento
+   - Se PENDENTE → continuar
+
+3. Gerar nova versão do documento com:
+- Mesmo número de invoice
+- Mesmo valor
+- Mesmo cliente
+
+4. Atualizar:
+- Nova data de vencimento (se aplicável)
+
+5. Marcar como:
+- "2ª VIA EMITIDA"
+
+Não duplicar cobrança.
+⚠️ Ponto crítico (isso quebra sistemas ruins)
+
+Você precisa controlar:
+
+🔑 Status da invoice
+PENDENTE
+PAGA
+VENCIDA
+REEMITIDA
+🔑 Identidade única
+Invoice nunca muda de ID
+2ª via NÃO cria nova ID
+💡 Melhoria avançada (nível profissional)
+
+Você pode adicionar:
+
+🔔 Automação de cobrança
+D-3: aviso
+D+1: atraso
+D+5: cobrança reforçada
+💳 Integração pagamento
+PIX automático
+Link de pagamento
+Código de barras
+📊 Controle financeiro
+Receita recorrente (MRR)
+Inadimplência
+Histórico por ativo
+🚀 Resumo direto
+
+Você não precisa mais perguntar dados todo mês.
+Você precisa:
+
+✅ Cadastrar uma vez
+✅ Criar regra de cobrança
+✅ Automatizar geração
+✅ Permitir reemissão (2ª via) sem duplicar
