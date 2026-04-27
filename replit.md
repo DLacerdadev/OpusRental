@@ -38,6 +38,10 @@ The platform includes a comprehensive broker dispatch management system for frei
 
 An advanced analytics system provides insights into revenue trends, trailer ROI, performance comparison by trailer type, and revenue forecasts. The backend utilizes bulk queries to optimize performance, and the frontend presents data with professional Recharts visualizations, offering configurable timeframes and full internationalization.
 
+### Admin User Management
+
+Admins can manage all platform users (within their tenant) without DB access via `/admin/users`. Backend exposes admin-only routes at `/api/admin/users` (list/create), `/api/admin/users/:id` (update/delete), and `/api/admin/users/:id/reset-password`, each protected by the `isAdmin` middleware with audit logging. Self-protections prevent admins from deleting themselves or changing their own role. Frontend page provides full CRUD with shadcn forms, react-hook-form + zod validation, and React Query cache invalidation.
+
 ### Stripe Payment Integration
 
 A comprehensive payment processing system integrates Stripe for share purchases and invoice payments. Backend endpoints handle payment intent creation, webhook processing (for `payment_intent.succeeded` and `payment_intent.failed` events), and payment status retrieval. Frontend checkout pages provide a premium user experience for share purchases ($28,000 per share) and invoice payments, with secure Stripe Elements integration, CSP configuration, and robust error handling. A System Integrations configuration UI allows managers to manage Stripe and SMTP settings.

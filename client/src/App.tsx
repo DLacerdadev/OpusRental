@@ -37,6 +37,7 @@ import Analytics from "@/pages/analytics";
 import CheckoutShare from "@/pages/checkout-share";
 import CheckoutInvoice from "@/pages/checkout-invoice";
 import AdminDebug from "@/pages/admin-debug";
+import AdminUsers from "@/pages/admin-users";
 
 function ProtectedRoute({ component: Component, titleKey, allowedRoles }: { component: any; titleKey: string; allowedRoles?: string[] }) {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -181,6 +182,9 @@ function Router() {
       </Route>
       <Route path="/admin/debug">
         {() => <ProtectedRoute component={AdminDebug} titleKey="pageTitles.adminDebug" allowedRoles={["manager", "admin"]} />}
+      </Route>
+      <Route path="/admin/users">
+        {() => <ProtectedRoute component={AdminUsers} titleKey="pageTitles.adminUsers" allowedRoles={["admin"]} />}
       </Route>
       <Route path="/checkout/share" component={CheckoutShare} />
       <Route path="/checkout/invoice" component={CheckoutInvoice} />

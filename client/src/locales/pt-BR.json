@@ -20,6 +20,7 @@
     "logout": "Sair",
     "system": "Sistema",
     "operations": "Operações",
+    "adminUsers": "Usuários",
     "investmentPlatform": "Plataforma de Investimentos"
   },
   "header": {
@@ -629,6 +630,7 @@
     "maintenance": "Manutenção",
     "broker": "Despacho de Corretores",
     "adminDebug": "Painel de Debug",
+    "adminUsers": "Gerenciamento de Usuários",
     "invoiceAutomation": "Automação de Faturas",
     "analytics": "Análises"
   },

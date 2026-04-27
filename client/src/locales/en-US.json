@@ -23,6 +23,7 @@
     "logout": "Logout",
     "system": "System",
     "operations": "Operations",
+    "adminUsers": "Users",
     "investmentPlatform": "Investment Platform"
   },
   "header": {
@@ -632,6 +633,7 @@
     "maintenance": "Maintenance",
     "broker": "Broker Dispatch",
     "adminDebug": "Debug Panel",
+    "adminUsers": "User Management",
     "invoiceAutomation": "Invoice Automation",
     "analytics": "Analytics"
   },

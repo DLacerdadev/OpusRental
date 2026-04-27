@@ -26,7 +26,7 @@ import { MonitoringService } from "./services/monitoring.service";
 import { z } from "zod";
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
-import { isAuthenticated, isManager, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
+import { isAuthenticated, isManager, isAdmin, requireRole, authorize, checkOwnership, logAccess } from "./middleware/auth";
 import { tenantMiddleware, requireTenant } from "./tenant-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -391,6 +391,218 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get investors error:", error);
       res.status(500).json({ message: "Failed to fetch investors" });
+    }
+  });
+
+  // ============ Admin User Management (Admin only) ============
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers(req.tenantId!);
+      const sanitized = allUsers.map(({ password, ...u }) => u);
+      res.json(sanitized);
+    } catch (error) {
+      console.error("Get all users error:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const createSchema = z.object({
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
+        email: z.string().email(),
+        username: z.string().min(3),
+        password: z.string().min(6),
+        role: z.enum(["investor", "manager", "admin"]),
+        country: z.string().optional(),
+        phone: z.string().optional().nullable(),
+      });
+
+      const data = createSchema.parse(req.body);
+      const normalizedEmail = data.email.toLowerCase().trim();
+
+      const existingEmail = await storage.getUserByEmail(normalizedEmail, req.tenantId!);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+      const existingUsername = await storage.getUserByUsername(data.username, req.tenantId!);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const newUser = await storage.createUser({
+        tenantId: req.tenantId!,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: normalizedEmail,
+        username: data.username,
+        password: data.password,
+        role: data.role,
+        country: data.country || "US",
+        phone: data.phone || null,
+      });
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "admin_create_user",
+        entityType: "user",
+        entityId: newUser.id,
+        details: { email: newUser.email, role: newUser.role, createdBy: req.session.user?.email },
+        ipAddress: req.ip,
+      });
+
+      const { password: _, ...sanitized } = newUser;
+      res.status(201).json(sanitized);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      console.error("Admin create user error:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const updateSchema = z.object({
+        firstName: z.string().min(1).optional(),
+        lastName: z.string().min(1).optional(),
+        email: z.string().email().optional(),
+        username: z.string().min(3).optional(),
+        role: z.enum(["investor", "manager", "admin"]).optional(),
+        country: z.string().optional(),
+        phone: z.string().optional().nullable(),
+      });
+
+      const data = updateSchema.parse(req.body);
+      const targetUser = await storage.getUser(req.params.id, req.tenantId!);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Prevent admin from changing their own role (avoid lockout / self-escalation)
+      if (targetUser.id === req.session.userId && data.role !== undefined && data.role !== targetUser.role) {
+        return res.status(400).json({ message: "You cannot change your own role" });
+      }
+
+      // Check email/username uniqueness if changing
+      if (data.email) {
+        const normalizedEmail = data.email.toLowerCase().trim();
+        if (normalizedEmail !== targetUser.email) {
+          const existing = await storage.getUserByEmail(normalizedEmail, req.tenantId!);
+          if (existing && existing.id !== targetUser.id) {
+            return res.status(400).json({ message: "Email already exists" });
+          }
+        }
+        data.email = normalizedEmail;
+      }
+      if (data.username && data.username !== targetUser.username) {
+        const existing = await storage.getUserByUsername(data.username, req.tenantId!);
+        if (existing && existing.id !== targetUser.id) {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+
+      const updated = await storage.updateUser(req.params.id, data, req.tenantId!);
+      if (!updated) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "admin_update_user",
+        entityType: "user",
+        entityId: updated.id,
+        details: { changes: data, updatedBy: req.session.user?.email },
+        ipAddress: req.ip,
+      });
+
+      const { password: _, ...sanitized } = updated;
+      res.json(sanitized);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      console.error("Admin update user error:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.post("/api/admin/users/:id/reset-password", isAdmin, async (req, res) => {
+    try {
+      const schema = z.object({ password: z.string().min(6) });
+      const { password } = schema.parse(req.body);
+
+      const targetUser = await storage.getUser(req.params.id, req.tenantId!);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const updated = await storage.resetUserPassword(req.params.id, password, req.tenantId!);
+      if (!updated) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "admin_reset_password",
+        entityType: "user",
+        entityId: updated.id,
+        details: { targetEmail: updated.email, resetBy: req.session.user?.email },
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid password", errors: error.errors });
+      }
+      console.error("Admin reset password error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      // Prevent admin from deleting themselves
+      if (req.params.id === req.session.userId) {
+        return res.status(400).json({ message: "You cannot delete your own account" });
+      }
+
+      const targetUser = await storage.getUser(req.params.id, req.tenantId!);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const deleted = await storage.deleteUser(req.params.id, req.tenantId!);
+      if (!deleted) {
+        return res.status(400).json({ message: "Cannot delete user (may have related records like shares, payments, etc.)" });
+      }
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "admin_delete_user",
+        entityType: "user",
+        entityId: req.params.id,
+        details: { deletedEmail: targetUser.email, deletedBy: req.session.user?.email },
+        ipAddress: req.ip,
+      });
+
+      res.json({ message: "User deleted successfully" });
+    } catch (error: any) {
+      console.error("Admin delete user error:", error);
+      // Foreign key constraint violation
+      if (error?.code === "23503") {
+        return res.status(400).json({
+          message: "Cannot delete user — they have related records (shares, payments, etc.). Please remove related records first.",
+        });
+      }
+      res.status(500).json({ message: "Failed to delete user" });
     }
   });
 

@@ -76,7 +76,11 @@ export interface IStorage {
   getUserByUsername(username: string, tenantId: string): Promise<User | undefined>;
   getUserByEmail(email: string, tenantId: string): Promise<User | undefined>;
   getAllInvestors(tenantId: string): Promise<User[]>;
+  getAllUsers(tenantId: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, data: Partial<InsertUser>, tenantId: string): Promise<User | undefined>;
+  resetUserPassword(id: string, newPassword: string, tenantId: string): Promise<User | undefined>;
+  deleteUser(id: string, tenantId: string): Promise<boolean>;
   
   // Trailer operations
   getTrailer(id: string, tenantId: string): Promise<Trailer | undefined>;
@@ -240,6 +244,15 @@ export class DatabaseStorage implements IStorage {
     return investors;
   }
 
+  async getAllUsers(tenantId: string): Promise<User[]> {
+    const allUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.tenantId, tenantId))
+      .orderBy(desc(users.createdAt));
+    return allUsers;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
     const [user] = await db
@@ -247,6 +260,38 @@ export class DatabaseStorage implements IStorage {
       .values({ ...insertUser, password: hashedPassword })
       .returning();
     return user;
+  }
+
+  async updateUser(id: string, data: Partial<InsertUser>, tenantId: string): Promise<User | undefined> {
+    const { password, ...rest } = data;
+    const updateData: any = { ...rest, updatedAt: new Date() };
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(and(eq(users.id, id), eq(users.tenantId, tenantId)))
+      .returning();
+    return user;
+  }
+
+  async resetUserPassword(id: string, newPassword: string, tenantId: string): Promise<User | undefined> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const [user] = await db
+      .update(users)
+      .set({ password: hashedPassword, updatedAt: new Date() })
+      .where(and(eq(users.id, id), eq(users.tenantId, tenantId)))
+      .returning();
+    return user;
+  }
+
+  async deleteUser(id: string, tenantId: string): Promise<boolean> {
+    const result = await db
+      .delete(users)
+      .where(and(eq(users.id, id), eq(users.tenantId, tenantId)))
+      .returning({ id: users.id });
+    return result.length > 0;
   }
 
   // Trailer operations
