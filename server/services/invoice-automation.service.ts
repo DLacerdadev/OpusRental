@@ -4,14 +4,64 @@ import { EmailService } from "./email.service";
 import { WhatsAppService } from "./whatsapp.service";
 import type { RentalContract, Invoice } from "@shared/schema";
 
-const log = (level: "info" | "error", operation: string, detail: string) => {
+const log = (level: "info" | "warn" | "error", operation: string, detail: string) => {
   const entry = { level, timestamp: new Date().toISOString(), service: "invoice-automation", operation, tenantId: null, detail };
   if (level === "error") {
     console.error(JSON.stringify(entry));
+  } else if (level === "warn") {
+    console.warn(JSON.stringify(entry));
   } else {
     console.info(JSON.stringify(entry));
   }
 };
+
+export type GenerateInvoiceResult =
+  | { ok: true; invoice: Invoice }
+  | { ok: false; skipped: true; reason: "duplicate" | "missing_rate" }
+  | { ok: false; skipped: false; reason: string };
+
+/**
+ * Format a Date as YYYY-MM-DD using local calendar fields. Avoids the UTC
+ * shift that `Date.prototype.toISOString` introduces near midnight, which
+ * could otherwise emit the previous calendar day for negative timezones.
+ */
+function formatDateOnly(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Format a Date as YYYY-MM (reference month) using local calendar fields.
+ */
+function formatReferenceMonth(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Returns the last calendar day (1-31) of the month containing `d`.
+ */
+function lastDayOfMonth(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
+
+/**
+ * Decide whether a contract should be billed today based on its configured
+ * invoiceDayOfMonth. If the configured day does not exist in the current
+ * month (e.g. day=31 in February), the contract is billed on the last day
+ * of the month instead, so contracts never skip a billing cycle.
+ */
+export function isContractDueToday(
+  contract: Pick<RentalContract, "invoiceDayOfMonth">,
+  today: Date,
+): boolean {
+  const rawDay = contract.invoiceDayOfMonth || 1;
+  const dayOfMonth = Math.min(Math.max(1, rawDay), 31);
+  const lastDay = lastDayOfMonth(today);
+  const effectiveDay = Math.min(dayOfMonth, lastDay);
+  return today.getDate() === effectiveDay;
+}
 
 export class InvoiceAutomationService {
   private static isRunning = false;
@@ -27,8 +77,9 @@ export class InvoiceAutomationService {
 
     log("info", "initialize", "starting");
 
-    // Generate invoices on the 1st of every month at 00:01
-    cron.schedule("1 0 1 * *", async () => {
+    // Run every day at 00:01 UTC. Per-contract eligibility is computed by
+    // matching today's day-of-month against contract.invoiceDayOfMonth.
+    cron.schedule("1 0 * * *", async () => {
       log("info", "generateMonthlyInvoices", "cron triggered");
       await this.generateMonthlyInvoices();
     });
@@ -46,138 +97,219 @@ export class InvoiceAutomationService {
     });
 
     this.isRunning = true;
-    log("info", "initialize", "started — monthly:1st/00:01 overdue:daily/09:00 due-reminder:daily/09:00");
+    log("info", "initialize", "started — monthly:daily/00:01 overdue:daily/09:00 due-reminder:daily/09:00");
   }
 
   /**
-   * Generate invoices for all active contracts
+   * Generate one invoice for one contract on a specific date. Reusable by
+   * the daily cron, the manual "trigger now" endpoint, and the per-contract
+   * "Generate invoice now" button.
+   *
+   * - referenceMonth: YYYY-MM derived from `today`
+   * - dueDate: today + (contract.paymentDueDays || 15)
+   * - amount: contract.monthlyRate
+   *
+   * Idempotent at the (contractId, referenceMonth) granularity thanks to
+   * the uniq_invoices_contract_month database constraint.
    */
-  static async generateMonthlyInvoices(): Promise<void> {
+  static async generateInvoiceForContract(
+    contract: RentalContract,
+    today: Date = new Date(),
+    options: { notes?: string } = {},
+  ): Promise<GenerateInvoiceResult> {
+    const referenceMonth = formatReferenceMonth(today);
+
+    if (!contract.monthlyRate) {
+      log("warn", "generateInvoiceForContract", `missing monthlyRate contract=${contract.contractNumber}`);
+      return { ok: false, skipped: true, reason: "missing_rate" };
+    }
+
+    // Tenant-scoped duplicate check. The DB also has a unique constraint as
+    // a backstop in case of races.
+    const existingInvoices = await storage.getInvoicesByContractId(
+      contract.id,
+      contract.tenantId,
+    );
+    if (existingInvoices.some((inv: Invoice) => inv.referenceMonth === referenceMonth)) {
+      return { ok: false, skipped: true, reason: "duplicate" };
+    }
+
+    // Calculate due date as today + paymentDueDays. paymentDueDays defaults
+    // to 15 when not configured. The Date arithmetic naturally handles
+    // month/year rollover, so no clamping is needed here.
+    const dueDays = contract.paymentDueDays || 15;
+    const dueDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + dueDays);
+
+    const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
+
+    let invoice: Invoice;
+    try {
+      invoice = await storage.createInvoice({
+        tenantId: contract.tenantId,
+        invoiceNumber,
+        contractId: contract.id,
+        amount: contract.monthlyRate,
+        dueDate: formatDateOnly(dueDate),
+        paidDate: null,
+        status: "pending",
+        referenceMonth,
+        notes: options.notes ?? "Auto-generated monthly invoice",
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error creating invoice";
+      // The DB constraint may fire if a parallel run created the same
+      // (contractId, referenceMonth) row between our check and our insert.
+      // Treat this as a graceful duplicate, not an error.
+      if (/uniq_invoices_contract_month|duplicate key/i.test(message)) {
+        return { ok: false, skipped: true, reason: "duplicate" };
+      }
+      throw error;
+    }
+
+    log(
+      "info",
+      "generateInvoiceForContract",
+      `invoice created invoiceNumber=${invoiceNumber} contract=${contract.contractNumber} dueDate=${invoice.dueDate} amount=${invoice.amount}`,
+    );
+
+    // Best-effort email + WhatsApp notification. Failures here do NOT
+    // invalidate the created invoice — they are logged and surfaced via the
+    // email log table for audit.
+    try {
+      const client = await storage.getRentalClient(contract.clientId);
+      if (client) {
+        let emailStatus: "sent" | "failed" = "failed";
+        let errorMessage: string | undefined;
+
+        try {
+          await EmailService.sendInvoiceEmail({ invoice, contract, client });
+          emailStatus = "sent";
+        } catch (error) {
+          errorMessage = error instanceof Error ? error.message : "Unknown error sending email";
+          log("error", "sendInvoiceEmail", `${errorMessage} to=${client.email}`);
+        }
+
+        const emailLog = EmailService.createEmailLog(
+          client.email,
+          client.tradeName || client.companyName,
+          `Invoice ${invoice.invoiceNumber} - ${referenceMonth}`,
+          "invoice",
+          "invoice",
+          invoice.id,
+          emailStatus,
+          errorMessage,
+        );
+        await storage.createEmailLog(emailLog);
+
+        if (emailStatus === "sent") {
+          log("info", "sendInvoiceEmail", `sent to=${client.email} invoiceNumber=${invoice.invoiceNumber}`);
+        }
+
+        if (client.phone) {
+          try {
+            await WhatsAppService.sendEvent(
+              "invoice_issued",
+              {
+                recipientPhone: client.phone,
+                recipientName: client.tradeName || client.companyName,
+                invoiceNumber: invoice.invoiceNumber,
+                amount: `$${Number(invoice.amount).toFixed(2)}`,
+                dueDate: invoice.dueDate,
+              },
+              contract.tenantId,
+            );
+          } catch (waError) {
+            log(
+              "error",
+              "whatsappInvoiceIssued",
+              `${waError instanceof Error ? waError.message : "Unknown error"} invoiceNumber=${invoice.invoiceNumber}`,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      log(
+        "error",
+        "generateInvoiceForContract",
+        `notification phase failed ${error instanceof Error ? error.message : "Unknown error"} invoiceNumber=${invoice.invoiceNumber}`,
+      );
+    }
+
+    return { ok: true, invoice };
+  }
+
+  /**
+   * Daily handler: process every active contract whose invoiceDayOfMonth
+   * matches today's day (with last-day-of-month fallback for short months).
+   *
+   * Optionally accepts an explicit list of contractIds to force generation
+   * for those specific contracts regardless of today's day — useful for
+   * manual back-fill or testing.
+   */
+  static async generateMonthlyInvoices(
+    options: { contractIds?: string[]; today?: Date } = {},
+  ): Promise<{ generated: number; skipped: number; errors: number; eligible: number }> {
+    const today = options.today ?? new Date();
+    const summary = { generated: 0, skipped: 0, errors: 0, eligible: 0 };
+
     try {
       const contracts = await storage.getAllRentalContracts();
       const activeContracts = contracts.filter(
-        (c) => c.status === "active" && c.autoGenerateInvoices
+        (c) => c.status === "active" && c.autoGenerateInvoices,
       );
 
-      const today = new Date();
-      const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+      const eligible = options.contractIds
+        ? activeContracts.filter((c) => options.contractIds!.includes(c.id))
+        : activeContracts.filter((c) => isContractDueToday(c, today));
 
-      log("info", "generateMonthlyInvoices", `active contracts found count=${activeContracts.length} month=${currentMonth}`);
+      summary.eligible = eligible.length;
 
-      let generated = 0;
-      let skipped = 0;
-      let errors = 0;
+      log(
+        "info",
+        "generateMonthlyInvoices",
+        `today=${formatDateOnly(today)} active=${activeContracts.length} eligible=${eligible.length} forced=${options.contractIds ? options.contractIds.length : 0}`,
+      );
 
-      for (const contract of activeContracts) {
+      for (const contract of eligible) {
         try {
-          // Check if invoice already exists for this month (tenant-scoped).
-          const existingInvoices = await storage.getInvoicesByContractId(
-            contract.id,
-            contract.tenantId,
-          );
-          const alreadyExists = existingInvoices.some(
-            (inv: Invoice) => inv.referenceMonth === currentMonth
-          );
-
-          if (alreadyExists) {
-            log("info", "generateMonthlyInvoices", `skipped — already exists contract=${contract.contractNumber} month=${currentMonth}`);
-            skipped++;
-            continue;
-          }
-
-          // Generate invoice number using the highest existing number for the
-          // tenant (deletion-safe), formatted as INV-000001 (6 digits).
-          const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
-
-          // Calculate due date using invoiceDayOfMonth from the contract.
-          // Compare at calendar-day granularity (midnight) so same-day does NOT roll.
-          // Rule: use configured day in current month if it has not yet passed;
-          //       otherwise roll forward to the same day in the next month.
-          // Clamp to 1-28 to avoid month-overflow on short months (e.g. Feb 30).
-          const rawDay = contract.invoiceDayOfMonth || 15;
-          const dayOfMonth = Math.min(Math.max(1, rawDay), 28);
-          const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-          const dueDate = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
-          if (dueDate.getTime() < todayMidnight.getTime()) {
-            dueDate.setMonth(dueDate.getMonth() + 1);
-          }
-
-          // Create invoice (tenant-scoped — invoices require a tenant owner).
-          const invoice = await storage.createInvoice({
-            tenantId: contract.tenantId,
-            invoiceNumber,
-            contractId: contract.id,
-            amount: contract.monthlyRate,
-            dueDate: dueDate.toISOString().split("T")[0],
-            paidDate: null,
-            status: "pending",
-            referenceMonth: currentMonth,
-            notes: "Auto-generated monthly invoice",
-          });
-
-          log("info", "generateMonthlyInvoices", `invoice created invoiceNumber=${invoiceNumber} contract=${contract.contractNumber}`);
-          generated++;
-
-          // Send invoice email to client
-          const client = await storage.getRentalClient(contract.clientId);
-          if (client) {
-            let emailStatus: "sent" | "failed" = "failed";
-            let errorMessage: string | undefined;
-
-            try {
-              await EmailService.sendInvoiceEmail({
-                invoice,
-                contract,
-                client,
-              });
-              emailStatus = "sent";
-            } catch (error) {
-              emailStatus = "failed";
-              errorMessage = error instanceof Error ? error.message : "Unknown error sending email";
-              log("error", "sendInvoiceEmail", `${errorMessage} to=${client.email}`);
-            }
-
-            // Log email attempt
-            const emailLog = EmailService.createEmailLog(
-              client.email,
-              client.tradeName || client.companyName,
-              `Invoice ${invoice.invoiceNumber} - ${currentMonth}`,
-              "invoice",
-              "invoice",
-              invoice.id,
-              emailStatus,
-              errorMessage
+          const result = await this.generateInvoiceForContract(contract, today);
+          if (result.ok) {
+            summary.generated++;
+          } else if (result.skipped) {
+            log(
+              "info",
+              "generateMonthlyInvoices",
+              `skipped reason=${result.reason} contract=${contract.contractNumber} month=${formatReferenceMonth(today)}`,
             );
-            await storage.createEmailLog(emailLog);
-
-            if (emailStatus === "sent") {
-              log("info", "sendInvoiceEmail", `sent to=${client.email} invoiceNumber=${invoice.invoiceNumber}`);
-            }
-
-            if (client.phone) {
-              await WhatsAppService.sendEvent(
-                "invoice_issued",
-                {
-                  recipientPhone: client.phone,
-                  recipientName: client.tradeName || client.companyName,
-                  invoiceNumber: invoice.invoiceNumber,
-                  amount: `$${Number(invoice.amount).toFixed(2)}`,
-                  dueDate: invoice.dueDate,
-                },
-                contract.tenantId
-              );
-            }
+            summary.skipped++;
+          } else {
+            log(
+              "error",
+              "generateMonthlyInvoices",
+              `failed reason=${result.reason} contract=${contract.contractNumber}`,
+            );
+            summary.errors++;
           }
         } catch (error) {
-          log("error", "generateMonthlyInvoices", `${error instanceof Error ? error.message : "Unknown error"} contract=${contract.contractNumber}`);
-          errors++;
+          log(
+            "error",
+            "generateMonthlyInvoices",
+            `${error instanceof Error ? error.message : "Unknown error"} contract=${contract.contractNumber}`,
+          );
+          summary.errors++;
         }
       }
 
-      log("info", "generateMonthlyInvoices", `summary generated=${generated} skipped=${skipped} errors=${errors}`);
+      log(
+        "info",
+        "generateMonthlyInvoices",
+        `summary today=${formatDateOnly(today)} eligible=${summary.eligible} generated=${summary.generated} skipped=${summary.skipped} errors=${summary.errors}`,
+      );
     } catch (error) {
       log("error", "generateMonthlyInvoices", error instanceof Error ? error.message : "Unknown error");
     }
+
+    return summary;
   }
 
   /**
@@ -387,11 +519,20 @@ export class InvoiceAutomationService {
   }
 
   /**
-   * Manually trigger invoice generation (for testing)
+   * Manually trigger invoice generation. Same logic as the daily cron, but
+   * callable on demand. Without arguments it processes only the contracts
+   * eligible today (matching their invoiceDayOfMonth). Pass `contractIds`
+   * to force generation for a specific set regardless of the day.
    */
-  static async generateInvoicesNow(): Promise<void> {
-    log("info", "generateInvoicesNow", "manual trigger");
-    await this.generateMonthlyInvoices();
+  static async generateInvoicesNow(
+    options: { contractIds?: string[]; today?: Date } = {},
+  ): Promise<{ generated: number; skipped: number; errors: number; eligible: number }> {
+    log(
+      "info",
+      "generateInvoicesNow",
+      `manual trigger contractIds=${options.contractIds ? options.contractIds.length : "auto"}`,
+    );
+    return this.generateMonthlyInvoices(options);
   }
 
   /**
