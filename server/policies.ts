@@ -39,23 +39,40 @@ export const Policy = {
 
   "GET /api/whatsapp/logs": ["manager", "admin"],
   "POST /api/whatsapp/test": ["admin"],
+
+  "POST /api/rental-contracts/:id/generate-invoice": ["manager", "admin"],
 } as const;
 
 export type PolicyKey = keyof typeof Policy;
 
+const STRICT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function matchPolicy(method: string, path: string): readonly UserRole[] | readonly ["*"] | undefined {
-  const normalizedPath = path.replace(/\/[^/]+$/, (match) => {
+  // First pass: normalize any strict UUID segment (8-4-4-4-12 hex) anywhere
+  // in the path to ":id". This handles routes like
+  // POST /api/rental-contracts/:id/generate-invoice where the param is not
+  // the final segment. The strict UUID regex avoids collisions with the
+  // looser :trailerId / :month / :shareId patterns handled below.
+  const uuidNormalized = path
+    .split("/")
+    .map((seg) => (STRICT_UUID.test(seg) ? ":id" : seg))
+    .join("/");
+
+  // Second pass: keep the original last-segment normalization for the
+  // legacy ":trailerId" / ":shareId" / ":month" patterns and for any
+  // non-strict id formats still in use.
+  const normalizedPath = uuidNormalized.replace(/\/[^/]+$/, (match) => {
     const uuidPattern = /^\/[0-9a-f-]+$/i;
     const trailerIdPattern = /^\/[A-Z0-9-]+$/;
     const monthPattern = /^\/\d{4}-\d{2}$/;
     
-    if (path.includes('/generate/') && monthPattern.test(match)) {
+    if (uuidNormalized.includes('/generate/') && monthPattern.test(match)) {
       return "/:month";
     }
-    if (path.includes('/payments/') && uuidPattern.test(match)) {
+    if (uuidNormalized.includes('/payments/') && uuidPattern.test(match)) {
       return "/:shareId";
     }
-    if (path.includes('/tracking/') && trailerIdPattern.test(match)) {
+    if (uuidNormalized.includes('/tracking/') && trailerIdPattern.test(match)) {
       return "/:trailerId";
     }
     if (uuidPattern.test(match)) {
