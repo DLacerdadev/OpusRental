@@ -465,9 +465,14 @@ export default function Invoices() {
     const contract = contracts.find((c) => c.id === watchedContractId);
     if (!contract) return;
 
-    if (contract.monthlyRate) {
-      form.setValue("amount", String(contract.monthlyRate), { shouldDirty: true });
-    }
+    // Always overwrite amount on contract switch — including clearing it
+    // when the new contract has no monthlyRate — so a stale value from a
+    // previously selected contract never silently persists.
+    form.setValue(
+      "amount",
+      contract.monthlyRate ? String(contract.monthlyRate) : "",
+      { shouldDirty: true },
+    );
 
     const now = new Date();
     const yyyy = now.getUTCFullYear();
