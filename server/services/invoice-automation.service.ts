@@ -277,13 +277,17 @@ export class InvoiceAutomationService {
 
     try {
       const contracts = await storage.getAllRentalContracts();
-      const activeContracts = contracts.filter(
-        (c) => c.status === "active" && c.autoGenerateInvoices,
-      );
+      const activeContracts = contracts.filter((c) => c.status === "active");
 
+      // When an explicit contractIds list is provided, treat it as a force
+      // and bypass the autoGenerateInvoices flag — the caller (e.g. the
+      // "Generate invoice now" button) has explicit intent to generate.
+      // The cron path (no contractIds) still respects autoGenerateInvoices.
       const eligible = options.contractIds
         ? activeContracts.filter((c) => options.contractIds!.includes(c.id))
-        : activeContracts.filter((c) => isContractDueToday(c, today));
+        : activeContracts
+            .filter((c) => c.autoGenerateInvoices)
+            .filter((c) => isContractDueToday(c, today));
 
       summary.eligible = eligible.length;
 
