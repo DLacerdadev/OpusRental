@@ -20,6 +20,7 @@ import {
   users
 } from "@shared/schema";
 import { PDFService } from "./services/pdf.service";
+import { EmailService } from "./services/email.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
 import { MonitoringService } from "./services/monitoring.service";
@@ -1300,6 +1301,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         ipAddress: req.ip,
       });
+
+      // Notify the rental client via email about the new due date
+      if (contract) {
+        const client = await storage.getRentalClient(contract.clientId, req.tenantId!);
+        if (client && client.email) {
+          let emailStatus: "sent" | "failed" = "failed";
+          let errorMessage: string | undefined;
+
+          try {
+            await EmailService.sendInvoiceReissuedEmail(
+              { invoice: reissued, contract, client },
+              invoice.dueDate,
+            );
+            emailStatus = "sent";
+          } catch (error) {
+            emailStatus = "failed";
+            errorMessage = error instanceof Error ? error.message : "Unknown error sending reissue email";
+            console.error(
+              JSON.stringify({
+                level: "error",
+                timestamp: new Date().toISOString(),
+                service: "email",
+                operation: "sendInvoiceReissuedEmail",
+                tenantId: req.tenantId,
+                detail: `${errorMessage} to=${client.email} invoiceNumber=${invoice.invoiceNumber}`,
+              }),
+            );
+          }
+
+          const newDueDateLocale = new Date(reissued.dueDate).toLocaleDateString();
+          const emailLog = EmailService.createEmailLog(
+            client.email,
+            client.tradeName || client.companyName,
+            `📄 Invoice Reissued (2ª Via) - ${invoice.invoiceNumber} - New Due Date ${newDueDateLocale}`,
+            "invoice_reissued",
+            "invoice",
+            invoice.id,
+            emailStatus,
+            errorMessage,
+          );
+          await storage.createEmailLog(emailLog);
+        }
+      }
 
       res.json(reissued);
     } catch (error) {

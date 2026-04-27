@@ -278,6 +278,103 @@ export class EmailService {
   }
 
   /**
+   * Generate invoice reissued (2ª via) email HTML
+   */
+  static generateInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): string {
+    const { invoice, contract, client } = data;
+    const newDueDate = new Date(invoice.dueDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+    const oldDueDate = new Date(previousDueDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+    const amount = parseFloat(invoice.amount).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD"
+    });
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #fef3c7; padding: 30px; border-radius: 0 0 8px 8px; }
+    .warning-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #f59e0b; }
+    .detail-row { display: flex; justify-content: space-between; margin: 10px 0; }
+    .label { font-weight: bold; color: #666; }
+    .value { color: #333; }
+    .amount { font-size: 24px; font-weight: bold; color: #dc2626; }
+    .new-date { color: #16a34a; font-weight: bold; }
+    .old-date { color: #dc2626; text-decoration: line-through; }
+    .button { display: inline-block; background: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📄 Invoice Reissued (2ª Via)</h1>
+      <p>Invoice ${invoice.invoiceNumber} — New Due Date</p>
+    </div>
+    <div class="content">
+      <h2>Hello ${client.tradeName || client.companyName},</h2>
+      <p>Your invoice <strong>${invoice.invoiceNumber}</strong> has been reissued with a new due date. Please find the updated details below and arrange payment by the new date to avoid further charges.</p>
+
+      <div class="warning-box">
+        <div class="detail-row">
+          <span class="label">Invoice Number:</span>
+          <span class="value">${invoice.invoiceNumber}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Contract:</span>
+          <span class="value">${contract.contractNumber}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Reference Month:</span>
+          <span class="value">${invoice.referenceMonth}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Previous Due Date:</span>
+          <span class="value old-date">${oldDueDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">New Due Date:</span>
+          <span class="value new-date">${newDueDate}</span>
+        </div>
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <div class="detail-row">
+          <span class="label">Amount Due:</span>
+          <span class="amount">${amount}</span>
+        </div>
+      </div>
+
+      <p><strong>If you have already sent payment, please disregard this notice.</strong></p>
+      <p>If you have any questions about this reissued invoice, please contact us.</p>
+
+      <center>
+        <a href="#" class="button">Pay Now</a>
+      </center>
+
+      <div class="footer">
+        <p><strong>Opus Rental Capital</strong></p>
+        <p>Commercial Trailer Rentals & Investments</p>
+        <p>Questions? Contact us at support@opusrentalcapital.com</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+  }
+
+  /**
    * Send invoice email to client
    */
   static async sendInvoiceEmail(data: InvoiceEmailData): Promise<boolean> {
@@ -335,6 +432,42 @@ Opus Rental Capital
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
       subject: `⚠️ Payment Reminder - Invoice ${data.invoice.invoiceNumber} (${daysOverdue} days overdue)`,
+      html,
+      text
+    });
+  }
+
+  /**
+   * Send invoice reissued (2ª via) email to client
+   */
+  static async sendInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): Promise<boolean> {
+    const html = this.generateInvoiceReissuedEmail(data, previousDueDate);
+    const newDueDateStr = new Date(data.invoice.dueDate).toLocaleDateString();
+    const oldDueDateStr = new Date(previousDueDate).toLocaleDateString();
+    const text = `
+Invoice Reissued (2ª Via) - ${data.invoice.invoiceNumber}
+
+Dear ${data.client.tradeName || data.client.companyName},
+
+Your invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
+
+Amount Due: $${data.invoice.amount}
+Previous Due Date: ${oldDueDateStr}
+New Due Date: ${newDueDateStr}
+Reference Month: ${data.invoice.referenceMonth}
+
+Please process payment by the new due date to avoid further charges.
+
+If you have already sent payment, please disregard this notice.
+
+Thank you,
+Opus Rental Capital
+    `.trim();
+
+    return this.sendEmail({
+      to: data.client.email,
+      toName: data.client.tradeName || data.client.companyName,
+      subject: `📄 Invoice Reissued (2ª Via) - ${data.invoice.invoiceNumber} - New Due Date ${newDueDateStr}`,
       html,
       text
     });
