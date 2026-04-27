@@ -48,19 +48,19 @@ export type PolicyKey = keyof typeof Policy;
 const STRICT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function matchPolicy(method: string, path: string): readonly UserRole[] | readonly ["*"] | undefined {
-  // First pass: normalize any strict UUID segment (8-4-4-4-12 hex) anywhere
-  // in the path to ":id". This handles routes like
-  // POST /api/rental-contracts/:id/generate-invoice where the param is not
-  // the final segment. The strict UUID regex avoids collisions with the
-  // looser :trailerId / :month / :shareId patterns handled below.
-  const uuidNormalized = path
-    .split("/")
-    .map((seg) => (STRICT_UUID.test(seg) ? ":id" : seg))
+  // First pass: normalize any strict UUID segment (8-4-4-4-12 hex) that is
+  // NOT the final segment to ":id". This handles routes like
+  // POST /api/rental-contracts/:id/generate-invoice where the param sits in
+  // the middle of the path. We deliberately skip the last segment so the
+  // existing special-case logic below can still map it to ":shareId" /
+  // ":trailerId" / ":month" / ":id" as appropriate.
+  const segments = path.split("/");
+  const uuidNormalized = segments
+    .map((seg, idx) => (idx < segments.length - 1 && STRICT_UUID.test(seg) ? ":id" : seg))
     .join("/");
 
-  // Second pass: keep the original last-segment normalization for the
-  // legacy ":trailerId" / ":shareId" / ":month" patterns and for any
-  // non-strict id formats still in use.
+  // Second pass: original last-segment normalization preserved verbatim for
+  // ":trailerId" / ":shareId" / ":month" / ":id" handling.
   const normalizedPath = uuidNormalized.replace(/\/[^/]+$/, (match) => {
     const uuidPattern = /^\/[0-9a-f-]+$/i;
     const trailerIdPattern = /^\/[A-Z0-9-]+$/;
