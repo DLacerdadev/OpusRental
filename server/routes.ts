@@ -25,6 +25,11 @@ import { EmailService } from "./services/email.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
 import { MonitoringService } from "./services/monitoring.service";
+import {
+  validateInvoicePayment,
+  invoiceAmountToCents,
+  ACCEPTABLE_INVOICE_STATUSES_FOR_PAYMENT,
+} from "./services/payment-validation.service";
 import { z } from "zod";
 import session from "express-session";
 import ConnectPgSimple from "connect-pg-simple";
@@ -1249,26 +1254,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/invoices/:id/status", authorize(), async (req, res) => {
     try {
+      const paidAmountSchema = z.union([
+        z.number().finite().nonnegative(),
+        z
+          .string()
+          .regex(/^\d+(\.\d{1,2})?$/, "paidAmount must be a non-negative number with up to 2 decimal places"),
+      ]);
+
       const statusUpdateSchema = z.object({
         status: z.enum(["pending", "paid", "overdue", "cancelled"]),
         paidDate: z.string().optional(),
+        paidAmount: paidAmountSchema.optional(),
+        confirmAmountMismatch: z.boolean().optional(),
       }).strict();
 
       const validation = statusUpdateSchema.safeParse(req.body);
-      
+
       if (!validation.success) {
-        return res.status(400).json({ 
-          message: "Invalid payload", 
-          errors: validation.error.errors 
+        return res.status(400).json({
+          message: "Invalid payload",
+          errors: validation.error.errors,
         });
       }
 
-      const paidDate = validation.data.paidDate ? new Date(validation.data.paidDate) : undefined;
-      
+      const { status, paidDate, paidAmount, confirmAmountMismatch } = validation.data;
+
+      // Strict validation only applies when transitioning to "paid".
+      if (status === "paid") {
+        const existing = await storage.getInvoice(req.params.id, req.tenantId!);
+        if (!existing) {
+          return res.status(404).json({ message: "Invoice not found" });
+        }
+
+        const receivedAmountCents =
+          paidAmount !== undefined
+            ? invoiceAmountToCents(paidAmount)
+            : invoiceAmountToCents(existing.amount);
+
+        // Refuse re-paying outright (covered by validator's invalid_status,
+        // but kept as a distinct fast-path with its own audit log so the
+        // finance/audit report can surface "double-pay attempts" cleanly).
+        if (existing.status === "paid") {
+          await storage.createAuditLog({
+            tenantId: req.tenantId!,
+            userId: req.session.userId!,
+            action: "payment_rejected_status",
+            entityType: "invoice",
+            entityId: existing.id,
+            details: {
+              expectedAmountCents: invoiceAmountToCents(existing.amount),
+              receivedAmountCents,
+              invoiceStatus: existing.status,
+              source: "manual",
+              reason: "already_paid",
+              invoiceNumber: existing.invoiceNumber,
+              acceptableStatuses: Array.from(
+                ACCEPTABLE_INVOICE_STATUSES_FOR_PAYMENT,
+              ),
+            },
+            ipAddress: req.ip,
+          });
+
+          return res.status(400).json({
+            message: "Invoice is already paid",
+            code: "already_paid",
+          });
+        }
+
+        const paymentValidation = validateInvoicePayment(
+          existing,
+          receivedAmountCents,
+          "manual",
+        );
+
+        if (!paymentValidation.valid) {
+          if (paymentValidation.reason === "invalid_status") {
+            await storage.createAuditLog({
+              tenantId: req.tenantId!,
+              userId: req.session.userId!,
+              action: "payment_rejected_status",
+              entityType: "invoice",
+              entityId: existing.id,
+              details: {
+                ...paymentValidation.details,
+                reason: paymentValidation.reason,
+                invoiceNumber: existing.invoiceNumber,
+                acceptableStatuses: Array.from(
+                  ACCEPTABLE_INVOICE_STATUSES_FOR_PAYMENT,
+                ),
+              },
+              ipAddress: req.ip,
+            });
+
+            return res.status(400).json({
+              message: `Invoice cannot be marked as paid from status "${existing.status}"`,
+              code: "invalid_status_for_payment",
+              details: paymentValidation.details,
+            });
+          }
+
+          // amount_mismatch
+          if (!confirmAmountMismatch) {
+            await storage.createAuditLog({
+              tenantId: req.tenantId!,
+              userId: req.session.userId!,
+              action: "payment_rejected_amount",
+              entityType: "invoice",
+              entityId: existing.id,
+              details: {
+                ...paymentValidation.details,
+                reason: paymentValidation.reason,
+                invoiceNumber: existing.invoiceNumber,
+              },
+              ipAddress: req.ip,
+            });
+
+            return res.status(400).json({
+              message: "Paid amount does not match invoice amount",
+              code: "amount_mismatch",
+              details: paymentValidation.details,
+            });
+          }
+        }
+
+        const resolvedPaidDate = paidDate
+          ? new Date(paidDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0];
+
+        const invoice = await storage.updateInvoice(
+          req.params.id,
+          { status: "paid", paidDate: resolvedPaidDate },
+          req.tenantId!,
+        );
+
+        const overrideUsed =
+          !paymentValidation.valid && confirmAmountMismatch === true;
+
+        await storage.createAuditLog({
+          tenantId: req.tenantId!,
+          userId: req.session.userId!,
+          action: "payment_validated",
+          entityType: "invoice",
+          entityId: invoice.id,
+          details: {
+            expectedAmountCents: invoiceAmountToCents(existing.amount),
+            receivedAmountCents,
+            invoiceStatus: existing.status,
+            source: "manual",
+            invoiceNumber: existing.invoiceNumber,
+            override: overrideUsed,
+          },
+          ipAddress: req.ip,
+        });
+
+        return res.json(invoice);
+      }
+
+      // Non-"paid" status updates retain the previous behavior.
+      const paidDateValue = paidDate ? new Date(paidDate) : undefined;
+
       const invoice = await storage.updateInvoiceStatus(
-        req.params.id, 
-        validation.data.status,
-        paidDate
+        req.params.id,
+        status,
+        req.tenantId!,
+        paidDateValue,
       );
 
       await storage.createAuditLog({
@@ -1277,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: "update",
         entityType: "invoice",
         entityId: invoice.id,
-        details: validation.data,
+        details: { status, paidDate },
         ipAddress: req.ip,
       });
 
@@ -3091,6 +3240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "invoice_payment",
           invoiceId: invoiceId,
           contractId: invoice.contractId,
+          tenantId: req.tenantId!,
         },
         description: `Payment for Invoice #${invoice.invoiceNumber} - Rental Fee`,
       });
@@ -3176,13 +3326,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Share ${metadata.shareId} purchased by user ${metadata.investorUserId}`);
 
           } else if (metadata.type === 'invoice_payment') {
-            // Update invoice status to paid
-            await storage.updateInvoice(metadata.invoiceId, {
-              status: "paid",
-              paidDate: new Date().toISOString(),
+            // Strict payment validation (Template 5)
+            const invoiceId = metadata.invoiceId;
+            const tenantId = metadata.tenantId;
+
+            if (!invoiceId || !tenantId) {
+              console.error(
+                `❌ invoice_payment webhook missing metadata: invoiceId=${invoiceId} tenantId=${tenantId} paymentIntent=${paymentIntent.id}`,
+              );
+              // Without tenantId we cannot scope an audit_log row.
+              // Console error above is the only trace possible.
+              break;
+            }
+
+            const invoice = await storage.getInvoice(invoiceId, tenantId);
+            if (!invoice) {
+              await storage.createAuditLog({
+                tenantId,
+                userId: null,
+                action: "payment_rejected_status",
+                entityType: "invoice",
+                entityId: invoiceId,
+                details: {
+                  source: "stripe",
+                  reason: "invoice_not_found",
+                  paymentIntentId: paymentIntent.id,
+                  receivedAmountCents: paymentIntent.amount,
+                },
+                ipAddress: req.ip,
+              });
+              console.error(
+                `❌ invoice_payment webhook: invoice ${invoiceId} not found for tenant ${tenantId} (paymentIntent=${paymentIntent.id})`,
+              );
+              break;
+            }
+
+            const validation = validateInvoicePayment(
+              invoice,
+              paymentIntent.amount,
+              "stripe",
+            );
+
+            if (!validation.valid) {
+              const auditAction =
+                validation.reason === "amount_mismatch"
+                  ? "payment_rejected_amount"
+                  : "payment_rejected_status";
+
+              await storage.createAuditLog({
+                tenantId,
+                userId: null,
+                action: auditAction,
+                entityType: "invoice",
+                entityId: invoice.id,
+                details: {
+                  ...validation.details,
+                  reason: validation.reason,
+                  paymentIntentId: paymentIntent.id,
+                  invoiceNumber: invoice.invoiceNumber,
+                },
+                ipAddress: req.ip,
+              });
+
+              console.error(
+                `❌ Stripe payment rejected for invoice ${invoice.invoiceNumber} (${invoice.id}): reason=${validation.reason} expected=${validation.details.expectedAmountCents}c received=${validation.details.receivedAmountCents}c status=${validation.details.invoiceStatus}`,
+              );
+              // Always 200 to Stripe so it does not retry indefinitely.
+              break;
+            }
+
+            await storage.updateInvoice(
+              invoice.id,
+              {
+                status: "paid",
+                paidDate: new Date().toISOString().split("T")[0],
+              },
+              tenantId,
+            );
+
+            await storage.createAuditLog({
+              tenantId,
+              userId: null,
+              action: "payment_validated",
+              entityType: "invoice",
+              entityId: invoice.id,
+              details: {
+                ...validation.details,
+                paymentIntentId: paymentIntent.id,
+                invoiceNumber: invoice.invoiceNumber,
+              },
+              ipAddress: req.ip,
             });
 
-            console.log(`✅ Invoice ${metadata.invoiceId} paid via Stripe`);
+            console.log(
+              `✅ Invoice ${invoice.invoiceNumber} (${invoice.id}) paid via Stripe (paymentIntent=${paymentIntent.id})`,
+            );
           }
 
           break;
