@@ -467,10 +467,11 @@ export default function Invoices() {
 
     // Always overwrite amount on contract switch — including clearing it
     // when the new contract has no monthlyRate — so a stale value from a
-    // previously selected contract never silently persists.
+    // previously selected contract never silently persists. Use a nullish
+    // check so a (theoretical) zero rate is preserved instead of cleared.
     form.setValue(
       "amount",
-      contract.monthlyRate ? String(contract.monthlyRate) : "",
+      contract.monthlyRate != null ? String(contract.monthlyRate) : "",
       { shouldDirty: true },
     );
 
