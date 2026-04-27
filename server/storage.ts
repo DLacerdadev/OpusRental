@@ -168,6 +168,7 @@ export interface IStorage {
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: string, updates: Partial<InsertInvoice>, tenantId: string): Promise<Invoice>;
   updateInvoiceStatus(id: string, status: string, tenantId: string, paidDate?: Date): Promise<Invoice>;
+  reissueInvoice(id: string, newDueDate: string, tenantId: string): Promise<Invoice>;
   deleteInvoice(id: string, tenantId: string): Promise<void>;
 
   // Email Log operations
@@ -1157,6 +1158,17 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(invoices)
       .set(updates)
+      .from(rentalContracts)
+      .where(and(eq(invoices.id, id), eq(invoices.contractId, rentalContracts.id), eq(rentalContracts.tenantId, tenantId)))
+      .returning();
+    if (!updated) throw new Error("Invoice not found or access denied");
+    return updated;
+  }
+
+  async reissueInvoice(id: string, newDueDate: string, tenantId: string): Promise<Invoice> {
+    const [updated] = await db
+      .update(invoices)
+      .set({ dueDate: newDueDate, status: "reissued" })
       .from(rentalContracts)
       .where(and(eq(invoices.id, id), eq(invoices.contractId, rentalContracts.id), eq(rentalContracts.tenantId, tenantId)))
       .returning();

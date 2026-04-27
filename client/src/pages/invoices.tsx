@@ -11,6 +11,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -44,6 +54,7 @@ import {
   Edit,
   Trash2,
   CreditCard,
+  RotateCcw,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
@@ -60,6 +71,7 @@ export default function Invoices() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [reissueInvoice, setReissueInvoice] = useState<any | null>(null);
 
   const { data: invoices = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/invoices"],
@@ -166,6 +178,33 @@ export default function Invoices() {
     },
   });
 
+  const reissueMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("POST", `/api/invoices/${id}/reissue`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to reissue invoice");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      setReissueInvoice(null);
+      toast({
+        title: t('invoices.toastReissueTitle'),
+        description: t('invoices.toastReissueDescription'),
+      });
+    },
+    onError: (error: any) => {
+      setReissueInvoice(null);
+      toast({
+        title: t('invoices.toastReissueErrorTitle'),
+        description: error?.message || t('invoices.toastReissueErrorDescription'),
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: InvoiceFormData) => {
     createMutation.mutate(data);
   };
@@ -204,12 +243,14 @@ export default function Invoices() {
       paid: t('invoices.statusPaid'),
       overdue: t('invoices.statusOverdue'),
       cancelled: t('invoices.statusCancelled'),
+      reissued: t('invoices.statusReissued'),
     };
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", className: string }> = {
       pending: { variant: "outline", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800" },
       paid: { variant: "default", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" },
       overdue: { variant: "destructive", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800" },
       cancelled: { variant: "secondary", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800" },
+      reissued: { variant: "outline", className: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800" },
     };
     const label = labels[status] || labels.pending;
     const config = variants[status] || variants.pending;
@@ -352,7 +393,7 @@ export default function Invoices() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {(invoice.status === "pending" || invoice.status === "overdue") && (
+                          {(invoice.status === "pending" || invoice.status === "overdue" || invoice.status === "reissued") && (
                             <>
                               <Button
                                 variant="ghost"
@@ -374,6 +415,16 @@ export default function Invoices() {
                                 data-testid={`button-mark-paid-${invoice.id}`}
                               >
                                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setReissueInvoice(invoice)}
+                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
+                                data-testid={`button-reissue-${invoice.id}`}
+                                title={t('invoices.buttonReissue')}
+                              >
+                                <RotateCcw className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                               </Button>
                             </>
                           )}
@@ -555,6 +606,34 @@ export default function Invoices() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Reissue Invoice Confirmation Dialog */}
+      <AlertDialog open={!!reissueInvoice} onOpenChange={(open) => { if (!open) setReissueInvoice(null); }}>
+        <AlertDialogContent className="bg-background dark:bg-background border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">{t('invoices.reissueConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {reissueInvoice && t('invoices.reissueConfirmDescription', { invoiceNumber: reissueInvoice.invoiceNumber })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="border-input text-foreground"
+              data-testid="button-reissue-cancel"
+            >
+              {t('invoices.buttonCancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => reissueInvoice && reissueMutation.mutate(reissueInvoice.id)}
+              disabled={reissueMutation.isPending}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              data-testid="button-reissue-confirm"
+            >
+              {reissueMutation.isPending ? t('invoices.buttonReissuing') : t('invoices.buttonReissue')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* View Invoice Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>

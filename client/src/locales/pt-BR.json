@@ -846,7 +846,16 @@
     "toastDeleteTitle": "Sucesso",
     "toastDeleteDescription": "Fatura excluída com sucesso",
     "toastDeleteErrorTitle": "Erro",
-    "toastDeleteErrorDescription": "Falha ao excluir fatura"
+    "toastDeleteErrorDescription": "Falha ao excluir fatura",
+    "statusReissued": "2ª VIA",
+    "buttonReissue": "2ª Via",
+    "buttonReissuing": "Emitindo...",
+    "reissueConfirmTitle": "Emitir 2ª Via da Fatura",
+    "reissueConfirmDescription": "Deseja emitir uma 2ª via da fatura {{invoiceNumber}}? O status será atualizado e um novo vencimento será calculado automaticamente com base nos dias de carência do contrato.",
+    "toastReissueTitle": "2ª Via emitida",
+    "toastReissueDescription": "A fatura foi reemitida com novo vencimento.",
+    "toastReissueErrorTitle": "Erro",
+    "toastReissueErrorDescription": "Falha ao emitir a 2ª via da fatura."
   },
   "common": {
     "loading": "Carregando...",

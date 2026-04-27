@@ -1260,6 +1260,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============ 2ª Via — invoice reissuance (same ID, new due date) ============
+  app.post("/api/invoices/:id/reissue", isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (invoice.status === "paid") {
+        return res.status(400).json({ message: "Invoice is already paid and cannot be reissued" });
+      }
+      if (invoice.status === "cancelled") {
+        return res.status(400).json({ message: "Cancelled invoices cannot be reissued" });
+      }
+
+      // Calculate new due date: today + paymentDueDays from the contract
+      const contract = await storage.getRentalContract(invoice.contractId, req.tenantId!);
+      const dueDays = contract?.paymentDueDays || 15;
+      const today = new Date();
+      const newDueDate = new Date(today);
+      newDueDate.setDate(newDueDate.getDate() + dueDays);
+      const newDueDateStr = newDueDate.toISOString().split("T")[0];
+
+      const reissued = await storage.reissueInvoice(req.params.id, newDueDateStr, req.tenantId!);
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "reissue_invoice",
+        entityType: "invoice",
+        entityId: invoice.id,
+        details: {
+          invoiceNumber: invoice.invoiceNumber,
+          previousDueDate: invoice.dueDate,
+          newDueDate: newDueDateStr,
+          previousStatus: invoice.status,
+          reissuedBy: req.session.user?.email,
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json(reissued);
+    } catch (error) {
+      console.error("Reissue invoice error:", error);
+      res.status(500).json({ message: "Failed to reissue invoice" });
+    }
+  });
+
   // Manual invoice generation
   app.post("/api/invoices/generate-monthly", authorize(), async (req, res) => {
     try {

@@ -849,7 +849,16 @@
     "toastDeleteTitle": "Success",
     "toastDeleteDescription": "Invoice deleted successfully",
     "toastDeleteErrorTitle": "Error",
-    "toastDeleteErrorDescription": "Failed to delete invoice"
+    "toastDeleteErrorDescription": "Failed to delete invoice",
+    "statusReissued": "REISSUED",
+    "buttonReissue": "Reissue",
+    "buttonReissuing": "Reissuing...",
+    "reissueConfirmTitle": "Reissue Invoice",
+    "reissueConfirmDescription": "Do you want to reissue invoice {{invoiceNumber}}? The status will be updated and a new due date will be calculated automatically based on the contract's payment terms.",
+    "toastReissueTitle": "Invoice reissued",
+    "toastReissueDescription": "The invoice has been reissued with a new due date.",
+    "toastReissueErrorTitle": "Error",
+    "toastReissueErrorDescription": "Failed to reissue the invoice."
   },
   "common": {
     "loading": "Loading...",

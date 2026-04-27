@@ -258,7 +258,7 @@ export const invoices = pgTable("invoices", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   dueDate: date("due_date").notNull(),
   paidDate: date("paid_date"),
-  status: text("status").notNull().default("pending"), // pending, paid, overdue, cancelled
+  status: text("status").notNull().default("pending"), // pending, paid, overdue, cancelled, reissued
   referenceMonth: varchar("reference_month", { length: 7 }).notNull(), // "2025-11" format YYYY-MM
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
