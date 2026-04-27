@@ -11,6 +11,7 @@ import {
   rentalClients,
   rentalContracts,
   invoices,
+  invoiceItems,
   emailSettings,
   emailLogs,
   whatsappLogs,
@@ -45,6 +46,8 @@ import {
   type InsertRentalContract,
   type Invoice,
   type InsertInvoice,
+  type InvoiceItem,
+  type InsertInvoiceItem,
   type EmailSetting,
   type InsertEmailSetting,
   type EmailLog,
@@ -171,6 +174,13 @@ export interface IStorage {
   updateInvoiceStatus(id: string, status: string, tenantId: string, paidDate?: Date): Promise<Invoice>;
   reissueInvoice(id: string, newDueDate: string, tenantId: string): Promise<Invoice>;
   deleteInvoice(id: string, tenantId: string): Promise<void>;
+
+  // Invoice Line Item operations
+  getInvoiceItems(invoiceId: string, tenantId: string): Promise<InvoiceItem[]>;
+  getInvoiceItem(id: string, tenantId: string): Promise<InvoiceItem | undefined>;
+  createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem>;
+  updateInvoiceItem(id: string, updates: Partial<InsertInvoiceItem>, tenantId: string): Promise<InvoiceItem>;
+  deleteInvoiceItem(id: string, tenantId: string): Promise<void>;
 
   // Email Log operations
   createEmailLog(emailLog: InsertEmailLog): Promise<EmailLog>;
@@ -1211,6 +1221,44 @@ export class DatabaseStorage implements IStorage {
         eq(invoices.id, id),
         sql`${invoices.contractId} IN (SELECT id FROM ${rentalContracts} WHERE ${rentalContracts.tenantId} = ${tenantId})`
       ));
+  }
+
+  // Invoice Line Item operations — tenant-scoped, ordered by sortOrder then created
+  async getInvoiceItems(invoiceId: string, tenantId: string): Promise<InvoiceItem[]> {
+    return db
+      .select()
+      .from(invoiceItems)
+      .where(and(eq(invoiceItems.invoiceId, invoiceId), eq(invoiceItems.tenantId, tenantId)))
+      .orderBy(invoiceItems.sortOrder, invoiceItems.createdAt);
+  }
+
+  async getInvoiceItem(id: string, tenantId: string): Promise<InvoiceItem | undefined> {
+    const [item] = await db
+      .select()
+      .from(invoiceItems)
+      .where(and(eq(invoiceItems.id, id), eq(invoiceItems.tenantId, tenantId)));
+    return item;
+  }
+
+  async createInvoiceItem(item: InsertInvoiceItem): Promise<InvoiceItem> {
+    const [created] = await db.insert(invoiceItems).values(item).returning();
+    return created;
+  }
+
+  async updateInvoiceItem(id: string, updates: Partial<InsertInvoiceItem>, tenantId: string): Promise<InvoiceItem> {
+    const [updated] = await db
+      .update(invoiceItems)
+      .set(updates)
+      .where(and(eq(invoiceItems.id, id), eq(invoiceItems.tenantId, tenantId)))
+      .returning();
+    if (!updated) throw new Error("Invoice item not found or access denied");
+    return updated;
+  }
+
+  async deleteInvoiceItem(id: string, tenantId: string): Promise<void> {
+    await db
+      .delete(invoiceItems)
+      .where(and(eq(invoiceItems.id, id), eq(invoiceItems.tenantId, tenantId)));
   }
 
   // Email Log operations

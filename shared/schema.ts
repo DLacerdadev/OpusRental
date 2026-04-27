@@ -284,6 +284,26 @@ export const invoices = pgTable("invoices", {
   statusCheck: check("invoices_status_check", sql`${t.status} IN ('pending', 'paid', 'overdue', 'cancelled', 'reissued')`),
 }));
 
+// Invoice Line Items (per-row breakdown of an invoice — one trailer, add-on,
+// insurance pass-through, etc.). When an invoice has rows here, the PDF and
+// the Preview dialog render those rows; otherwise the legacy single-row
+// "Locação Mensal" line is synthesized from the contract — this keeps every
+// existing invoice rendering identically.
+export const invoiceItems = pgTable("invoice_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  invoiceId: varchar("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  rate: decimal("rate", { precision: 10, scale: 2 }).notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull().default("1"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+  idxInvoiceId: index("idx_invoice_items_invoice").on(t.invoiceId),
+  idxTenant: index("idx_invoice_items_tenant").on(t.tenantId),
+}));
+
 // Email Settings table (Global email configuration)
 export const emailSettings = pgTable("email_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -572,10 +592,18 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
   invoices: many(invoices),
 }));
 
-export const invoicesRelations = relations(invoices, ({ one }) => ({
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
   contract: one(rentalContracts, {
     fields: [invoices.contractId],
     references: [rentalContracts.id],
+  }),
+  items: many(invoiceItems),
+}));
+
+export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceItems.invoiceId],
+    references: [invoices.id],
   }),
 }));
 
@@ -696,6 +724,11 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   createdAt: true,
 });
 
+export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertEmailSettingSchema = createInsertSchema(emailSettings).omit({
   id: true,
   updatedAt: true,
@@ -784,6 +817,9 @@ export type InsertRentalContract = z.infer<typeof insertRentalContractSchema>;
 
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+export type InvoiceItem = typeof invoiceItems.$inferSelect;
+export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 
 export type EmailSetting = typeof emailSettings.$inferSelect;
 export type InsertEmailSetting = z.infer<typeof insertEmailSettingSchema>;

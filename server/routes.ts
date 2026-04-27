@@ -13,6 +13,7 @@ import {
   insertRentalClientSchema,
   insertRentalContractSchema,
   insertInvoiceSchema,
+  insertInvoiceItemSchema,
   insertChecklistSchema,
   insertMaintenanceScheduleSchema,
   insertBrokerDispatchSchema,
@@ -2591,6 +2592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Trailer not found" });
       }
 
+      const lineItems = await storage.getInvoiceItems(invoice.id, req.tenantId!);
+
       const invoiceData = PDFService.buildInvoiceData({
         ...invoice,
         contract: {
@@ -2599,12 +2602,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trailer,
         },
         tenant: req.tenant ?? null,
+        lineItems,
       });
 
       res.json(invoiceData);
     } catch (error) {
       console.error("Get invoice data error:", error);
       res.status(500).json({ message: "Failed to fetch invoice data" });
+    }
+  });
+
+  // Invoice Line Items — managers can list, add, edit, delete the per-row
+  // breakdown of an invoice (one trailer, add-ons, insurance, etc.). When
+  // present these rows replace the legacy single "Locação Mensal" line in
+  // the PDF and the Preview dialog.
+  app.get("/api/invoices/:id/items", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      const items = await storage.getInvoiceItems(invoice.id, req.tenantId!);
+      res.json(items);
+    } catch (error) {
+      console.error("Get invoice items error:", error);
+      res.status(500).json({ message: "Failed to fetch invoice items" });
+    }
+  });
+
+  app.post("/api/invoices/:id/items", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      // Force tenantId + invoiceId from the URL/session so the client cannot
+      // smuggle a foreign-tenant or foreign-invoice value through the body.
+      const validated = insertInvoiceItemSchema.parse({
+        ...req.body,
+        tenantId: req.tenantId!,
+        invoiceId: invoice.id,
+      });
+
+      const created = await storage.createInvoiceItem(validated);
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "create_invoice_item",
+        entityType: "invoice_item",
+        entityId: created.id,
+        details: {
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          description: created.description,
+          amount: created.amount,
+        },
+        ipAddress: req.ip,
+      });
+
+      res.status(201).json(created);
+    } catch (error: any) {
+      if (error?.name === "ZodError") {
+        return res.status(400).json({ message: "Invalid invoice item", errors: error.errors });
+      }
+      console.error("Create invoice item error:", error);
+      res.status(500).json({ message: "Failed to create invoice item" });
+    }
+  });
+
+  app.put("/api/invoices/:id/items/:itemId", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const existing = await storage.getInvoiceItem(req.params.itemId, req.tenantId!);
+      if (!existing || existing.invoiceId !== invoice.id) {
+        return res.status(404).json({ message: "Invoice item not found" });
+      }
+
+      // Only allow mutable display fields to be updated; tenantId and
+      // invoiceId stay pinned to whatever the row was created with.
+      const updateSchema = insertInvoiceItemSchema
+        .pick({ description: true, rate: true, quantity: true, amount: true, sortOrder: true })
+        .partial();
+      const updates = updateSchema.parse(req.body);
+
+      const updated = await storage.updateInvoiceItem(req.params.itemId, updates, req.tenantId!);
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "update_invoice_item",
+        entityType: "invoice_item",
+        entityId: updated.id,
+        details: {
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          changes: updates,
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json(updated);
+    } catch (error: any) {
+      if (error?.name === "ZodError") {
+        return res.status(400).json({ message: "Invalid invoice item", errors: error.errors });
+      }
+      console.error("Update invoice item error:", error);
+      res.status(500).json({ message: "Failed to update invoice item" });
+    }
+  });
+
+  app.delete("/api/invoices/:id/items/:itemId", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const existing = await storage.getInvoiceItem(req.params.itemId, req.tenantId!);
+      if (!existing || existing.invoiceId !== invoice.id) {
+        return res.status(404).json({ message: "Invoice item not found" });
+      }
+
+      await storage.deleteInvoiceItem(req.params.itemId, req.tenantId!);
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "delete_invoice_item",
+        entityType: "invoice_item",
+        entityId: existing.id,
+        details: {
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          description: existing.description,
+        },
+        ipAddress: req.ip,
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete invoice item error:", error);
+      res.status(500).json({ message: "Failed to delete invoice item" });
     }
   });
 
@@ -2666,6 +2810,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Trailer not found" });
       }
 
+      const lineItems = await storage.getInvoiceItems(invoice.id, req.tenantId!);
+
       const pdfBuffer = PDFService.generateInvoicePDF({
         ...invoice,
         contract: {
@@ -2674,6 +2820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trailer
         },
         tenant: req.tenant ?? null,
+        lineItems,
       });
 
       await storage.createAuditLog({

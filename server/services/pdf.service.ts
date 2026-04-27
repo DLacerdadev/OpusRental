@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { BrokerDispatch, RentalContract, Invoice, Trailer, RentalClient, Tenant } from '@shared/schema';
+import type { BrokerDispatch, RentalContract, Invoice, InvoiceItem, Trailer, RentalClient, Tenant } from '@shared/schema';
 import {
   buildPaymentMethods,
   paymentMethodsToInstructionLines,
@@ -22,6 +22,15 @@ interface InvoicePDFData extends Invoice {
     trailer: Trailer;
   };
   tenant?: Tenant | null;
+  /**
+   * Optional per-row breakdown of the invoice. When this array is non-empty,
+   * the renderer uses it as the source of truth for the line-items table and
+   * recomputes totals from it. When undefined or empty, the renderer falls
+   * back to the legacy single-row "Locação Mensal — {trailer} — {month}"
+   * synthesized from `contract.monthlyRate`, so existing invoices without
+   * stored items keep producing identical output.
+   */
+  lineItems?: InvoiceItem[];
 }
 
 export interface InvoiceDataItem {
@@ -386,14 +395,36 @@ export class PDFService {
    * looks like — keeping PDF and JSON consistent.
    */
   static buildInvoiceData(data: InvoicePDFData): InvoiceData {
-    const rate = parseFloat(data.contract.monthlyRate.toString());
-    const qty = 1;
-    const amount = rate * qty;
     const tax = 0;
-    const subtotal = amount;
-    const total = subtotal + tax;
 
-    const description = `Locação Mensal — ${data.contract.trailer.trailerId} — ${data.referenceMonth}`;
+    // Items: prefer stored line-items when present (multi-trailer / add-ons);
+    // otherwise synthesize the legacy single "Locação Mensal" row from the
+    // contract so existing single-trailer invoices keep producing identical
+    // output. Totals are always recomputed from the rendered items so the
+    // table sum and the totals block can never disagree.
+    let items: InvoiceDataItem[];
+    if (data.lineItems && data.lineItems.length > 0) {
+      items = data.lineItems.map((item) => {
+        const rate = parseFloat(item.rate.toString());
+        const qty = parseFloat(item.quantity.toString());
+        const amount = parseFloat(item.amount.toString());
+        return {
+          description: item.description,
+          rate,
+          qty,
+          amount,
+        };
+      });
+    } else {
+      const rate = parseFloat(data.contract.monthlyRate.toString());
+      const qty = 1;
+      const amount = rate * qty;
+      const description = `Locação Mensal — ${data.contract.trailer.trailerId} — ${data.referenceMonth}`;
+      items = [{ description, rate, qty, amount }];
+    }
+
+    const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+    const total = subtotal + tax;
 
     const dueDate = this.toISO(data.dueDate);
     if (!dueDate) {
@@ -419,14 +450,7 @@ export class PDFService {
         address: data.contract.client.address ?? null,
         taxId: data.contract.client.taxId ?? null,
       },
-      items: [
-        {
-          description,
-          rate,
-          qty,
-          amount,
-        },
-      ],
+      items,
       totals: {
         subtotal,
         tax,

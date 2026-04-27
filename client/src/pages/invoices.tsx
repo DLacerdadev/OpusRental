@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,319 @@ import { useTranslation } from "react-i18next";
 
 const invoiceFormSchema = insertInvoiceSchema.omit({ tenantId: true });
 type InvoiceFormData = z.infer<typeof invoiceFormSchema>;
+
+interface InvoiceItemRow {
+  id: string;
+  invoiceId: string;
+  description: string;
+  rate: string;
+  quantity: string;
+  amount: string;
+  sortOrder: number;
+}
+
+/**
+ * Editor for an invoice's per-row line items. When rows exist here, the
+ * backend renders them as the invoice's items (multi-trailer / add-ons);
+ * when empty, the backend falls back to the legacy single-row synthesis,
+ * so existing single-trailer invoices remain regression-safe.
+ */
+function LineItemsManager({ invoiceId }: { invoiceId: string }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
+  const { data: items = [], isLoading } = useQuery<InvoiceItemRow[]>({
+    queryKey: ["/api/invoices", invoiceId, "items"],
+    enabled: !!invoiceId,
+  });
+
+  // Local draft state for the "add new row" form. Amount is computed.
+  const [draft, setDraft] = useState({ description: "", rate: "", quantity: "1" });
+
+  // Per-row edit drafts keyed by item id; seeded from the server data.
+  const [drafts, setDrafts] = useState<Record<string, { description: string; rate: string; quantity: string }>>({});
+
+  useEffect(() => {
+    setDrafts((prev) => {
+      const next: Record<string, { description: string; rate: string; quantity: string }> = {};
+      for (const row of items) {
+        // Preserve in-flight edits if the user is mid-typing on a row.
+        next[row.id] = prev[row.id] ?? {
+          description: row.description,
+          rate: row.rate,
+          quantity: row.quantity,
+        };
+      }
+      return next;
+    });
+  }, [items]);
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/invoices", invoiceId, "items"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/invoices", invoiceId, "data"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+  };
+
+  const computeAmount = (rate: string, quantity: string): string => {
+    const r = parseFloat(rate);
+    const q = parseFloat(quantity);
+    if (Number.isFinite(r) && Number.isFinite(q)) {
+      return (r * q).toFixed(2);
+    }
+    return "0.00";
+  };
+
+  const createMutation = useMutation({
+    mutationFn: async (payload: { description: string; rate: string; quantity: string }) => {
+      const amount = computeAmount(payload.rate, payload.quantity);
+      const sortOrder = items.length;
+      const res = await apiRequest("POST", `/api/invoices/${invoiceId}/items`, {
+        description: payload.description,
+        rate: payload.rate,
+        quantity: payload.quantity,
+        amount,
+        sortOrder,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      invalidateAll();
+      setDraft({ description: "", rate: "", quantity: "1" });
+      toast({
+        title: t('invoices.itemsToastAddTitle'),
+        description: t('invoices.itemsToastAddDescription'),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('invoices.itemsToastErrorTitle'),
+        description: error?.message || t('invoices.itemsToastErrorDescription'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: { description: string; rate: string; quantity: string } }) => {
+      const amount = computeAmount(payload.rate, payload.quantity);
+      const res = await apiRequest("PUT", `/api/invoices/${invoiceId}/items/${id}`, {
+        description: payload.description,
+        rate: payload.rate,
+        quantity: payload.quantity,
+        amount,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({
+        title: t('invoices.itemsToastSaveTitle'),
+        description: t('invoices.itemsToastSaveDescription'),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('invoices.itemsToastErrorTitle'),
+        description: error?.message || t('invoices.itemsToastErrorDescription'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/invoices/${invoiceId}/items/${id}`);
+    },
+    onSuccess: (_data, id) => {
+      invalidateAll();
+      // Drop the local edit-draft so a new row with the same id (unlikely but
+      // safe) won't inherit the stale values.
+      setDrafts((prev) => {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      });
+      toast({
+        title: t('invoices.itemsToastDeleteTitle'),
+        description: t('invoices.itemsToastDeleteDescription'),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t('invoices.itemsToastErrorTitle'),
+        description: error?.message || t('invoices.itemsToastErrorDescription'),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAdd = () => {
+    if (!draft.description.trim() || !draft.rate.trim() || !draft.quantity.trim()) {
+      toast({
+        title: t('invoices.itemsToastValidationTitle'),
+        description: t('invoices.itemsToastValidationDescription'),
+        variant: "destructive",
+      });
+      return;
+    }
+    createMutation.mutate(draft);
+  };
+
+  return (
+    <Card className="bg-muted/30 dark:bg-muted/10 border-border" data-testid="card-line-items-manager">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm uppercase text-muted-foreground">
+          {t('invoices.itemsManageTitle')}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">{t('invoices.itemsManageDescription')}</p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {isLoading && (
+          <p className="text-xs text-muted-foreground" data-testid="text-items-loading">
+            {t('invoices.itemsLoading')}
+          </p>
+        )}
+
+        {!isLoading && items.length === 0 && (
+          <p className="text-xs text-muted-foreground" data-testid="text-items-empty">
+            {t('invoices.itemsEmpty')}
+          </p>
+        )}
+
+        {items.map((row) => {
+          const d = drafts[row.id] ?? { description: row.description, rate: row.rate, quantity: row.quantity };
+          const computedAmount = computeAmount(d.rate, d.quantity);
+          return (
+            <div
+              key={row.id}
+              className="grid grid-cols-12 gap-2 items-end pb-2 border-b border-border last:border-b-0"
+              data-testid={`row-line-item-${row.id}`}
+            >
+              <div className="col-span-12 sm:col-span-5 space-y-1">
+                <label className="text-xs text-muted-foreground">{t('invoices.previewItemDescription')}</label>
+                <Input
+                  value={d.description}
+                  onChange={(e) => setDrafts((p) => ({ ...p, [row.id]: { ...d, description: e.target.value } }))}
+                  data-testid={`input-item-description-${row.id}`}
+                />
+              </div>
+              <div className="col-span-4 sm:col-span-2 space-y-1">
+                <label className="text-xs text-muted-foreground">{t('invoices.previewItemRate')}</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={d.rate}
+                  onChange={(e) => setDrafts((p) => ({ ...p, [row.id]: { ...d, rate: e.target.value } }))}
+                  data-testid={`input-item-rate-${row.id}`}
+                />
+              </div>
+              <div className="col-span-4 sm:col-span-1 space-y-1">
+                <label className="text-xs text-muted-foreground">{t('invoices.previewItemQty')}</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={d.quantity}
+                  onChange={(e) => setDrafts((p) => ({ ...p, [row.id]: { ...d, quantity: e.target.value } }))}
+                  data-testid={`input-item-qty-${row.id}`}
+                />
+              </div>
+              <div className="col-span-4 sm:col-span-2 space-y-1">
+                <label className="text-xs text-muted-foreground">{t('invoices.previewItemAmount')}</label>
+                <p
+                  className="h-9 px-3 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md"
+                  data-testid={`text-item-amount-${row.id}`}
+                >
+                  ${computedAmount}
+                </p>
+              </div>
+              <div className="col-span-12 sm:col-span-2 flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  disabled={updateMutation.isPending}
+                  onClick={() => updateMutation.mutate({ id: row.id, payload: d })}
+                  data-testid={`button-item-save-${row.id}`}
+                >
+                  {updateMutation.isPending ? t('invoices.itemsSaving') : t('invoices.itemsSave')}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => deleteMutation.mutate(row.id)}
+                  data-testid={`button-item-delete-${row.id}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Add new row */}
+        <div
+          className="grid grid-cols-12 gap-2 items-end pt-2 border-t border-border"
+          data-testid="row-line-item-new"
+        >
+          <div className="col-span-12 sm:col-span-5 space-y-1">
+            <label className="text-xs text-muted-foreground">{t('invoices.previewItemDescription')}</label>
+            <Input
+              value={draft.description}
+              placeholder={t('invoices.itemsAddPlaceholder')}
+              onChange={(e) => setDraft((p) => ({ ...p, description: e.target.value }))}
+              data-testid="input-item-description-new"
+            />
+          </div>
+          <div className="col-span-4 sm:col-span-2 space-y-1">
+            <label className="text-xs text-muted-foreground">{t('invoices.previewItemRate')}</label>
+            <Input
+              type="number"
+              step="0.01"
+              value={draft.rate}
+              onChange={(e) => setDraft((p) => ({ ...p, rate: e.target.value }))}
+              data-testid="input-item-rate-new"
+            />
+          </div>
+          <div className="col-span-4 sm:col-span-1 space-y-1">
+            <label className="text-xs text-muted-foreground">{t('invoices.previewItemQty')}</label>
+            <Input
+              type="number"
+              step="0.01"
+              value={draft.quantity}
+              onChange={(e) => setDraft((p) => ({ ...p, quantity: e.target.value }))}
+              data-testid="input-item-qty-new"
+            />
+          </div>
+          <div className="col-span-4 sm:col-span-2 space-y-1">
+            <label className="text-xs text-muted-foreground">{t('invoices.previewItemAmount')}</label>
+            <p
+              className="h-9 px-3 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md"
+              data-testid="text-item-amount-new"
+            >
+              ${computeAmount(draft.rate, draft.quantity)}
+            </p>
+          </div>
+          <div className="col-span-12 sm:col-span-2">
+            <Button
+              type="button"
+              size="sm"
+              className="w-full"
+              disabled={createMutation.isPending}
+              onClick={handleAdd}
+              data-testid="button-item-add"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              {createMutation.isPending ? t('invoices.itemsAdding') : t('invoices.itemsAdd')}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Invoices() {
   const { t } = useTranslation();
@@ -811,6 +1124,10 @@ export default function Invoices() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Manage line items (multi-trailer / add-ons). Editing here
+                  drives the items table above and the totals below. */}
+              {selectedInvoice?.id && <LineItemsManager invoiceId={selectedInvoice.id} />}
 
               {/* Totals */}
               <div className="flex justify-end" data-testid="container-preview-totals">
