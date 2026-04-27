@@ -974,6 +974,8 @@ export class DatabaseStorage implements IStorage {
         startDate: rentalContracts.startDate,
         endDate: rentalContracts.endDate,
         monthlyRate: rentalContracts.monthlyRate,
+        paymentDueDays: rentalContracts.paymentDueDays,
+        invoiceDayOfMonth: rentalContracts.invoiceDayOfMonth,
         duration: rentalContracts.duration,
         status: rentalContracts.status,
         notes: rentalContracts.notes,
