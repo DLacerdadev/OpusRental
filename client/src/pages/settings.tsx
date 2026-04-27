@@ -29,7 +29,7 @@ export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
 
-  const isManager = user?.role === "manager";
+  const isManager = user?.role === "manager" || user?.role === "admin";
 
   const { data: tenant } = useQuery<TenantBillingConfig & { id: string }>({
     queryKey: ["/api/tenant"],

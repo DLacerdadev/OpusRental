@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update tenant branding (Manager only)
-  app.put("/api/tenant", authorize(), async (req, res) => {
+  app.put("/api/tenant", authorize(), isManager, async (req, res) => {
     try {
       const optionalString = z.string().trim().max(200).optional().nullable()
         .transform((v) => (v === undefined ? undefined : v === null || v === "" ? null : v));
