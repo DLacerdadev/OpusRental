@@ -314,7 +314,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Tenant not found" });
       }
 
-      // Sanitize response - only return public branding + billing fields
+      // Sanitize response — public branding only. Billing data (PIX/bank)
+      // lives behind the authenticated /api/tenant/billing endpoint.
       const publicTenantData = {
         id: req.tenant.id,
         name: req.tenant.name,
@@ -323,13 +324,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primaryColor: req.tenant.primaryColor,
         secondaryColor: req.tenant.secondaryColor,
         status: req.tenant.status,
-        pixKey: req.tenant.pixKey ?? null,
-        pixBeneficiary: req.tenant.pixBeneficiary ?? null,
-        bankName: req.tenant.bankName ?? null,
-        bankAgency: req.tenant.bankAgency ?? null,
-        bankAccount: req.tenant.bankAccount ?? null,
-        bankAccountHolder: req.tenant.bankAccountHolder ?? null,
-        bankAccountType: req.tenant.bankAccountType ?? null,
       };
 
       res.json(publicTenantData);
@@ -339,7 +333,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update tenant branding (Manager only)
+  // Read tenant billing configuration (Manager / Admin only) — kept off the
+  // public /api/tenant payload to avoid leaking PIX / bank details.
+  app.get("/api/tenant/billing", authorize(), isManager, async (req, res) => {
+    try {
+      if (!req.tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      res.json({
+        pixKey: req.tenant.pixKey ?? null,
+        pixBeneficiary: req.tenant.pixBeneficiary ?? null,
+        bankName: req.tenant.bankName ?? null,
+        bankAgency: req.tenant.bankAgency ?? null,
+        bankAccount: req.tenant.bankAccount ?? null,
+        bankAccountHolder: req.tenant.bankAccountHolder ?? null,
+        bankAccountType: req.tenant.bankAccountType ?? null,
+      });
+    } catch (error) {
+      console.error("Get tenant billing error:", error);
+      res.status(500).json({ message: "Failed to fetch tenant billing config" });
+    }
+  });
+
+  // Update tenant branding + billing (Manager / Admin only)
   app.put("/api/tenant", authorize(), isManager, async (req, res) => {
     try {
       const optionalString = z.string().trim().max(200).optional().nullable()
@@ -382,9 +398,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ipAddress: req.ip,
       });
 
-      // Return sanitized response (includes payment fields so the settings UI
-      // can re-hydrate after saving)
-      const publicTenantData = {
+      // Return the full sanitized tenant payload. This response is only sent
+      // to authenticated managers/admins (route is guarded by isManager), so
+      // it is safe to include billing fields for the Settings UI to re-hydrate.
+      const tenantData = {
         id: updatedTenant.id,
         name: updatedTenant.name,
         slug: updatedTenant.slug,
@@ -401,7 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bankAccountType: updatedTenant.bankAccountType ?? null,
       };
 
-      res.json(publicTenantData);
+      res.json(tenantData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid tenant data", errors: error.errors });

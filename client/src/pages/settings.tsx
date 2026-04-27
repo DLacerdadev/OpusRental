@@ -31,8 +31,8 @@ export default function Settings() {
 
   const isManager = user?.role === "manager" || user?.role === "admin";
 
-  const { data: tenant } = useQuery<TenantBillingConfig & { id: string }>({
-    queryKey: ["/api/tenant"],
+  const { data: tenant } = useQuery<TenantBillingConfig>({
+    queryKey: ["/api/tenant/billing"],
     enabled: isManager,
   });
 
@@ -80,6 +80,7 @@ export default function Settings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tenant"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tenant/billing"] });
       toast({
         title: t("settings.billingSaveSuccessTitle"),
         description: t("settings.billingSaveSuccessDescription"),
