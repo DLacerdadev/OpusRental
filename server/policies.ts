@@ -45,6 +45,12 @@ export const Policy = {
   "GET /api/trailers/:id": ["manager", "admin"],
   "POST /api/trailers": ["manager", "admin"],
 
+  // ===== Trailer Documents =====
+  "GET /api/trailers/:id/documents": ["manager", "admin"],
+  "POST /api/trailers/:id/documents": ["manager", "admin"],
+  "DELETE /api/trailers/:id/documents/:id": ["manager", "admin"],
+  "POST /api/uploads/request-url": ["manager", "admin"],
+
   // ===== GPS =====
   "POST /api/gps/webhook": ["*"],
   "GET /api/gps/devices": ["manager", "admin"],

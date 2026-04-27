@@ -24,8 +24,11 @@ import {
   tenants,
   type User,
   type InsertUser,
+  trailerDocuments,
   type Trailer,
   type InsertTrailer,
+  type TrailerDocument,
+  type InsertTrailerDocument,
   type Share,
   type InsertShare,
   type Payment,
@@ -92,6 +95,12 @@ export interface IStorage {
   getAvailableTrailers(tenantId: string): Promise<Trailer[]>;
   createTrailer(trailer: InsertTrailer): Promise<Trailer>;
   updateTrailer(id: string, trailer: Partial<Trailer>, tenantId: string): Promise<Trailer>;
+
+  // Trailer document operations
+  getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]>;
+  getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined>;
+  createTrailerDocument(doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }): Promise<TrailerDocument>;
+  deleteTrailerDocument(id: string, tenantId: string): Promise<boolean>;
   
   // Share operations
   getShare(id: string, tenantId: string): Promise<Share | undefined>;
@@ -385,6 +394,38 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!updated) throw new Error("Trailer not found or access denied");
     return updated;
+  }
+
+  // Trailer document operations
+  async getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]> {
+    return await db
+      .select()
+      .from(trailerDocuments)
+      .where(and(eq(trailerDocuments.trailerId, trailerId), eq(trailerDocuments.tenantId, tenantId)))
+      .orderBy(desc(trailerDocuments.uploadedAt));
+  }
+
+  async getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined> {
+    const [doc] = await db
+      .select()
+      .from(trailerDocuments)
+      .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)));
+    return doc;
+  }
+
+  async createTrailerDocument(
+    doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }
+  ): Promise<TrailerDocument> {
+    const [created] = await db.insert(trailerDocuments).values(doc).returning();
+    return created;
+  }
+
+  async deleteTrailerDocument(id: string, tenantId: string): Promise<boolean> {
+    const result = await db
+      .delete(trailerDocuments)
+      .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)))
+      .returning();
+    return result.length > 0;
   }
 
   // Share operations

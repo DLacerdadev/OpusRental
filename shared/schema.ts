@@ -92,10 +92,35 @@ export const trailers = pgTable("trailers", {
   longitude: decimal("longitude", { precision: 10, scale: 7 }),
   lastActivity: timestamp("last_activity"),
   totalShares: integer("total_shares").notNull().default(1), // Total number of shares available for this trailer
+  // Vehicle identification (all optional — backfilled when known)
+  vin: text("vin"),
+  year: integer("year"),
+  make: text("make"),
+  body: text("body"),
+  weightLbs: integer("weight_lbs"),
+  titleNumber: text("title_number"),
+  vehicleUse: text("vehicle_use"), // PRIVATE, COMMERCIAL
+  titleDate: date("title_date"),
+  imageData: text("image_data"), // URL/object path to vehicle image (no base64)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => ({
   uniqTenantTrailerId: uniqueIndex("uniq_tenant_trailer_id").on(t.tenantId, t.trailerId),
+}));
+
+// Trailer Documents table — file attachments per trailer, by category
+export const trailerDocuments = pgTable("trailer_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  trailerId: varchar("trailer_id").notNull().references(() => trailers.id, { onDelete: "cascade" }),
+  documentCategory: text("document_category").notNull(), // title, registration, insurance, inspection, purchase_invoice, other
+  fileName: text("file_name").notNull(),
+  fileUrl: text("file_url").notNull(), // Object storage path (e.g. /objects/uploads/<uuid>)
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+}, (t) => ({
+  idxTenant: index("idx_trailer_documents_tenant").on(t.tenantId),
+  idxTrailerId: index("idx_trailer_documents_trailer").on(t.trailerId),
 }));
 
 // Shares (Cotas) table
@@ -525,6 +550,18 @@ export const trailersRelations = relations(trailers, ({ many }) => ({
   maintenanceSchedules: many(maintenanceSchedules),
   brokerEmails: many(brokerEmails),
   brokerDispatches: many(brokerDispatches),
+  trailerDocuments: many(trailerDocuments),
+}));
+
+export const trailerDocumentsRelations = relations(trailerDocuments, ({ one }) => ({
+  trailer: one(trailers, {
+    fields: [trailerDocuments.trailerId],
+    references: [trailers.id],
+  }),
+  uploader: one(users, {
+    fields: [trailerDocuments.uploadedBy],
+    references: [users.id],
+  }),
 }));
 
 export const sharesRelations = relations(shares, ({ one, many }) => ({
@@ -663,11 +700,23 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
-export const insertTrailerSchema = createInsertSchema(trailers).omit({
+export const insertTrailerSchema = createInsertSchema(trailers, {
+  // Coerce numeric inputs from form strings into numbers; allow null/empty.
+  year: z.coerce.number().int().min(1900).max(2100).optional().nullable(),
+  weightLbs: z.coerce.number().int().nonnegative().optional().nullable(),
+  vehicleUse: z.enum(["PRIVATE", "COMMERCIAL"]).optional().nullable(),
+}).omit({
   id: true,
   tenantId: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertTrailerDocumentSchema = createInsertSchema(trailerDocuments).omit({
+  id: true,
+  tenantId: true,
+  uploadedAt: true,
+  uploadedBy: true,
 });
 
 export const insertShareSchema = createInsertSchema(shares).omit({
@@ -787,6 +836,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Trailer = typeof trailers.$inferSelect;
 export type InsertTrailer = z.infer<typeof insertTrailerSchema>;
+
+export type TrailerDocument = typeof trailerDocuments.$inferSelect;
+export type InsertTrailerDocument = z.infer<typeof insertTrailerDocumentSchema>;
 
 export type Share = typeof shares.$inferSelect;
 export type InsertShare = z.infer<typeof insertShareSchema>;

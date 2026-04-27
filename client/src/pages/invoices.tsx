@@ -433,12 +433,22 @@ export default function Invoices() {
     queryKey: ["/api/trailers"],
   });
 
+  const trailerDisplay = (trailer?: Trailer) => {
+    if (!trailer) return "—";
+    const parts = [
+      trailer.trailerId,
+      [trailer.make, trailer.model, trailer.year]
+        .filter((v) => v != null && v !== "")
+        .join(" "),
+    ].filter((v) => v && v.length > 0);
+    return parts.length > 1 ? parts.join(" — ") : parts[0] || "—";
+  };
+
   const contractLabel = (contract: RentalContract) => {
     const client = rentalClients.find((c) => c.id === contract.clientId);
     const trailer = trailers.find((tr) => tr.id === contract.trailerId);
     const clientName = client?.tradeName || client?.companyName || "—";
-    const trailerName = trailer?.trailerId || trailer?.model || "—";
-    return `${contract.contractNumber} — ${clientName} — ${trailerName}`;
+    return `${contract.contractNumber} — ${clientName} — ${trailerDisplay(trailer)}`;
   };
 
   const form = useForm<InvoiceFormData>({
@@ -1146,6 +1156,39 @@ export default function Invoices() {
                   {previewData.billTo?.address && <p>{previewData.billTo.address}</p>}
                 </CardContent>
               </Card>
+
+              {/* Trailer being billed — shows the physical reboque the
+                  invoice covers, including VIN. Helps managers reconcile
+                  the invoice against the asset register without leaving
+                  the dialog. */}
+              {previewData.trailer && (
+                <Card className="bg-muted/30 dark:bg-muted/10 border-border">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm uppercase text-muted-foreground">
+                      {t('invoices.previewTrailer', 'Reboque')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1 text-sm text-foreground" data-testid="container-preview-trailer">
+                    <p className="font-semibold" data-testid="text-preview-trailer-id">
+                      {previewData.trailer.trailerId}
+                      {(previewData.trailer.make || previewData.trailer.model || previewData.trailer.year) && (
+                        <span className="text-muted-foreground font-normal">
+                          {" — "}
+                          {[previewData.trailer.make, previewData.trailer.model, previewData.trailer.year]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </span>
+                      )}
+                    </p>
+                    {previewData.trailer.vin && (
+                      <p data-testid="text-preview-trailer-vin">
+                        <span className="text-muted-foreground">VIN: </span>
+                        <span className="font-mono">{previewData.trailer.vin}</span>
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Items table */}
               <div className="overflow-x-auto">

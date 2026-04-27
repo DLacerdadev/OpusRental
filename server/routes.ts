@@ -39,9 +39,11 @@ import { tenantMiddleware, requireTenant } from "./tenant-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { db, pool } from "./db";
-import { sql } from "drizzle-orm";
+import { sql, eq, and } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
+import { ObjectStorageService, ObjectNotFoundError } from "./replit_integrations/object_storage/objectStorage";
+import { insertTrailerDocumentSchema, trailerDocuments } from "@shared/schema";
 
 // Warn if SESSION_SECRET is not set in production
 if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
@@ -2253,6 +2255,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: "errorDescription" });
+    }
+  });
+
+  // ----------------------------------------------------------------------
+  // Trailer documents — file attachments per trailer (Object Storage)
+  // ----------------------------------------------------------------------
+  const objectStorageService = new ObjectStorageService();
+
+  // Presigned upload URL for direct PUT to bucket
+  app.post("/api/uploads/request-url", authorize(), async (req, res) => {
+    try {
+      const { name } = req.body || {};
+      if (!name || typeof name !== "string") {
+        return res.status(400).json({ message: "Missing required field: name" });
+      }
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      res.json({ uploadURL, objectPath });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ message: "Failed to generate upload URL" });
+    }
+  });
+
+  // List documents for a trailer
+  app.get("/api/trailers/:id/documents", authorize(), async (req, res) => {
+    try {
+      const trailer = await storage.getTrailer(req.params.id, req.tenantId!);
+      if (!trailer) return res.status(404).json({ message: "Trailer not found" });
+      const docs = await storage.getTrailerDocuments(req.params.id, req.tenantId!);
+
+      // Enrich each document with the uploader's displayable name. We
+      // resolve user records once per unique uploader to keep this route
+      // O(unique users) instead of O(documents).
+      const uploaderIds = Array.from(
+        new Set(docs.map((d) => d.uploadedBy).filter((id): id is string => !!id))
+      );
+      const uploaderMap: Record<string, { id: string; name: string; email: string | null }> = {};
+      for (const uid of uploaderIds) {
+        const u = await storage.getUser(uid, req.tenantId!);
+        if (u) {
+          const name = [u.firstName, u.lastName].filter(Boolean).join(" ").trim() || u.username || u.email || "—";
+          uploaderMap[uid] = { id: u.id, name, email: u.email ?? null };
+        }
+      }
+
+      const enriched = docs.map((d) => ({
+        ...d,
+        uploader: d.uploadedBy ? (uploaderMap[d.uploadedBy] ?? null) : null,
+      }));
+
+      res.json(enriched);
+    } catch (error) {
+      console.error("Get trailer documents error:", error);
+      res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  // Persist a trailer document AFTER the client uploaded the file via presigned URL
+  app.post("/api/trailers/:id/documents", authorize(), async (req, res) => {
+    try {
+      const trailer = await storage.getTrailer(req.params.id, req.tenantId!);
+      if (!trailer) return res.status(404).json({ message: "Trailer not found" });
+
+      const validated = insertTrailerDocumentSchema.parse({
+        trailerId: req.params.id,
+        documentCategory: req.body.documentCategory,
+        fileName: req.body.fileName,
+        fileUrl: req.body.fileUrl,
+      });
+
+      // Validate the category is one of the supported values.
+      const allowed = ["title", "registration", "insurance", "inspection", "purchase_invoice", "other"];
+      if (!allowed.includes(validated.documentCategory)) {
+        return res.status(400).json({ message: "Invalid documentCategory" });
+      }
+
+      // Normalize raw bucket URLs (https://storage.googleapis.com/...) to
+      // the internal "/objects/<id>" path so we never store presigned URLs.
+      const normalizedUrl = objectStorageService.normalizeObjectEntityPath(validated.fileUrl);
+      if (!normalizedUrl.startsWith("/objects/")) {
+        return res.status(400).json({ message: "Invalid file URL" });
+      }
+
+      const created = await storage.createTrailerDocument({
+        ...validated,
+        fileUrl: normalizedUrl,
+        tenantId: req.tenantId!,
+        uploadedBy: req.session.userId ?? null,
+      });
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "create_trailer_document",
+        entityType: "trailer_document",
+        entityId: created.id,
+        details: { trailerId: req.params.id, category: validated.documentCategory, fileName: validated.fileName },
+        ipAddress: req.ip,
+      });
+
+      res.json(created);
+    } catch (error: any) {
+      console.error("Create trailer document error:", error);
+      if (error.name === "ZodError") {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to save document" });
+    }
+  });
+
+  // Delete a trailer document (and best-effort delete the underlying object)
+  app.delete("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
+    try {
+      const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
+      if (!doc || doc.trailerId !== req.params.id) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      // Best-effort: delete the underlying object — never block deletion of
+      // the metadata row if the underlying object is already gone.
+      try {
+        const file = await objectStorageService.getObjectEntityFile(doc.fileUrl);
+        await file.delete();
+      } catch (err) {
+        if (!(err instanceof ObjectNotFoundError)) {
+          console.warn("Object delete warning:", err);
+        }
+      }
+
+      const ok = await storage.deleteTrailerDocument(req.params.docId, req.tenantId!);
+      if (!ok) return res.status(404).json({ message: "Document not found" });
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "delete_trailer_document",
+        entityType: "trailer_document",
+        entityId: req.params.docId,
+        details: { trailerId: req.params.id },
+        ipAddress: req.ip,
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete trailer document error:", error);
+      res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
+  // Stream/download an object (private bucket). Restricted to manager/admin
+  // (same role set as Assets) AND tenant-scoped by ensuring some
+  // trailer_document row in the caller's tenant references the object path.
+  app.get("/objects/:objectPath(*)", isAuthenticated, isManager, async (req, res) => {
+    try {
+      const tenantId = req.tenantId;
+      if (!tenantId) return res.status(401).json({ message: "Unauthorized" });
+
+      // Look up the document row by file URL — this enforces tenant scoping.
+      const [doc] = await db
+        .select()
+        .from(trailerDocuments)
+        .where(
+          and(
+            eq(trailerDocuments.fileUrl, req.path),
+            eq(trailerDocuments.tenantId, tenantId),
+          ),
+        )
+        .limit(1);
+
+      if (!doc) {
+        return res.status(404).json({ message: "Object not found" });
+      }
+
+      const file = await objectStorageService.getObjectEntityFile(req.path);
+      await objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.status(404).json({ message: "Object not found" });
+      }
+      return res.status(500).json({ message: "Failed to serve object" });
     }
   });
 

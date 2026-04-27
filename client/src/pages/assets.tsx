@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Download, Eye, Plus, Check, ChevronsUpDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTrailerSchema, type InsertTrailer } from "@shared/schema";
+import { insertTrailerSchema, type InsertTrailer, type TrailerDocument } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useUpload } from "@/hooks/use-upload";
 
 const assetFormSchema = insertTrailerSchema.extend({
   allocationType: z.enum(["open", "specific"]).default("open"),
@@ -45,9 +48,14 @@ export default function Assets() {
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const [allocationType, setAllocationType] = useState<"open" | "specific">("open");
   const [investorComboOpen, setInvestorComboOpen] = useState(false);
+  // Trailer list filters (year/make/vehicleUse + free text against vin/titleNumber/trailerId)
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterYear, setFilterYear] = useState<string>("all");
+  const [filterMake, setFilterMake] = useState<string>("all");
+  const [filterVehicleUse, setFilterVehicleUse] = useState<string>("all");
   const { toast } = useToast();
   
-  const { data: trailers, isLoading } = useQuery({
+  const { data: trailers, isLoading } = useQuery<any[]>({
     queryKey: ["/api/trailers"],
   });
 
@@ -72,6 +80,15 @@ export default function Assets() {
       totalShares: 1,
       allocationType: "open",
       investorId: "",
+      vin: "",
+      year: undefined,
+      make: "",
+      body: "",
+      weightLbs: undefined,
+      titleNumber: "",
+      vehicleUse: undefined,
+      titleDate: "",
+      imageData: "",
     },
   });
 
@@ -123,16 +140,38 @@ export default function Assets() {
   const onSubmit = (data: AssetFormData) => {
     console.log("✅ Form submitted with data:", data);
     console.log("✅ Form errors:", form.formState.errors);
-    
-    // Remove latitude/longitude if they're empty strings
-    const cleanedData = {
-      ...data,
-      latitude: data.latitude === "" ? undefined : data.latitude,
-      longitude: data.longitude === "" ? undefined : data.longitude,
-      allocationType: data.allocationType || "open",
-      investorId: data.allocationType === "specific" ? data.investorId : undefined,
-    };
-    
+
+    // Normalize: convert "" → undefined for every optional vehicle/location
+    // field so the backend stores NULL rather than persisting empty strings
+    // (which would defeat indexes and downstream filters).
+    const optionalStringFields = [
+      "latitude",
+      "longitude",
+      "vin",
+      "make",
+      "body",
+      "titleNumber",
+      "vehicleUse",
+      "titleDate",
+      "imageData",
+    ] as const;
+
+    const cleanedData: Record<string, any> = { ...data };
+    for (const key of optionalStringFields) {
+      if (cleanedData[key] === "" || cleanedData[key] === null) {
+        cleanedData[key] = undefined;
+      }
+    }
+    // Numeric optionals: drop empty / NaN values so Zod treats them as missing.
+    for (const key of ["year", "weightLbs"] as const) {
+      if (cleanedData[key] === "" || cleanedData[key] === null || Number.isNaN(cleanedData[key])) {
+        cleanedData[key] = undefined;
+      }
+    }
+
+    cleanedData.allocationType = data.allocationType || "open";
+    cleanedData.investorId = data.allocationType === "specific" ? data.investorId : undefined;
+
     console.log("✅ Cleaned data:", cleanedData);
     createTrailerMutation.mutate(cleanedData as any);
   };
@@ -151,6 +190,30 @@ export default function Assets() {
       variant: "destructive",
     });
   };
+
+  // Distinct year/make/vehicleUse values for filter dropdowns
+  const filterOptions = useMemo(() => {
+    const list = trailers ?? [];
+    const years = Array.from(new Set(list.map((t: any) => t.year).filter((v: any) => v != null))).sort((a: any, b: any) => b - a);
+    const makes = Array.from(new Set(list.map((t: any) => t.make).filter(Boolean))).sort() as string[];
+    const uses = Array.from(new Set(list.map((t: any) => t.vehicleUse).filter(Boolean))).sort() as string[];
+    return { years, makes, uses };
+  }, [trailers]);
+
+  const filteredTrailers = useMemo(() => {
+    const list = trailers ?? [];
+    const term = filterSearch.trim().toLowerCase();
+    return list.filter((trailer: any) => {
+      if (filterYear !== "all" && String(trailer.year ?? "") !== filterYear) return false;
+      if (filterMake !== "all" && (trailer.make ?? "") !== filterMake) return false;
+      if (filterVehicleUse !== "all" && (trailer.vehicleUse ?? "") !== filterVehicleUse) return false;
+      if (term) {
+        const hay = `${trailer.trailerId ?? ""} ${trailer.vin ?? ""} ${trailer.titleNumber ?? ""}`.toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
+    });
+  }, [trailers, filterYear, filterMake, filterVehicleUse, filterSearch]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: any; label: string }> = {
@@ -608,6 +671,152 @@ export default function Assets() {
                 />
               </div>
 
+              {/* Vehicle identification fields — all optional, collapsible */}
+              <Collapsible className="border-t pt-2 mt-2">
+                <CollapsibleTrigger
+                  className="flex w-full items-center justify-between py-2 group"
+                  data-testid="button-toggle-vehicle-id"
+                >
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                    {t('assets.vehicleIdSection', 'Identificação do Veículo')}
+                  </h4>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="vin"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>{t('assets.vin', 'VIN')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="1HGBH41JXMN109186" {...field} value={field.value ?? ""} data-testid="input-vin" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.year', 'Ano')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="1900"
+                            max="2100"
+                            placeholder="2024"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                            data-testid="input-year"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="make"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.make', 'Marca')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Great Dane" {...field} value={field.value ?? ""} data-testid="input-make" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="body"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.body', 'Carroceria')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Dry Van" {...field} value={field.value ?? ""} data-testid="input-body" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="weightLbs"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.weightLbs', 'Peso (lbs)')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="14000"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                            data-testid="input-weight-lbs"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="titleNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.titleNumber', 'Nº do Título')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="TX1234567890" {...field} value={field.value ?? ""} data-testid="input-title-number" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="vehicleUse"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.vehicleUse', 'Uso do Veículo')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-vehicle-use">
+                              <SelectValue placeholder={t('assets.selectVehicleUse', 'Selecione o uso')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="PRIVATE">{t('assets.vehicleUsePrivate', 'Privado')}</SelectItem>
+                            <SelectItem value="COMMERCIAL">{t('assets.vehicleUseCommercial', 'Comercial')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="titleDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.titleDate', 'Data do Título')}</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value ?? ""} data-testid="input-title-date" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button 
                   type="button" 
@@ -644,119 +853,231 @@ export default function Assets() {
           </DialogHeader>
           
           {selectedTrailer && (
-            <div className="space-y-6 mt-4">
-              {/* Informações Básicas */}
-              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">{t('assets.basicInfo')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.trailerId')}</label>
-                    <p className="font-bold text-primary text-lg">{selectedTrailer.trailerId}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.model')}</label>
-                    <p className="font-semibold">{selectedTrailer.model || "—"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.status')}</label>
-                    <div className="mt-1">
-                      <Badge variant={getStatusBadge(selectedTrailer.status).variant} className="rounded-full">
-                        {getStatusBadge(selectedTrailer.status).label}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.purchaseDate')}</label>
-                    <p className="font-semibold">
-                      {format(new Date(selectedTrailer.purchaseDate), "dd/MM/yyyy")}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <Tabs defaultValue="overview" className="mt-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="overview" data-testid="tab-overview">
+                  {t('assets.tabOverview', 'Visão Geral')}
+                </TabsTrigger>
+                <TabsTrigger value="documents" data-testid="tab-documents">
+                  {t('assets.tabDocuments', 'Documentos')}
+                </TabsTrigger>
+              </TabsList>
 
-              {/* Informações Financeiras */}
-              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">{t('assets.financialInfo')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.purchaseValueLabel')}</label>
-                    <p className="font-bold text-lg">${parseFloat(selectedTrailer.purchaseValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.currentValueLabel')}</label>
-                    <p className="font-bold text-lg">${parseFloat(selectedTrailer.currentValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.depreciationRate')}</label>
-                    <p className="font-semibold">{(parseFloat(selectedTrailer.depreciationRate) * 100).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.ageIndicator')}</label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className={`w-5 h-5 ${getTrafficLight(selectedTrailer.purchaseDate)} rounded-full shadow-lg`}></div>
-                      <span className="text-sm text-muted-foreground">
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-green-500" && t('assets.lessThan1Year')}
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-yellow-500" && t('assets.between1And2Years')}
-                        {getTrafficLight(selectedTrailer.purchaseDate) === "bg-red-500" && t('assets.moreThan2Years')}
-                      </span>
+              <TabsContent value="overview" className="space-y-6 mt-4">
+                {/* Informações Básicas */}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h3 className="font-semibold text-lg mb-3">{t('assets.basicInfo')}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.trailerId')}</label>
+                      <p className="font-bold text-primary text-lg">{selectedTrailer.trailerId}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.model')}</label>
+                      <p className="font-semibold">{selectedTrailer.model || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.status')}</label>
+                      <div className="mt-1">
+                        <Badge variant={getStatusBadge(selectedTrailer.status).variant} className="rounded-full">
+                          {getStatusBadge(selectedTrailer.status).label}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.purchaseDate')}</label>
+                      <p className="font-semibold">
+                        {format(new Date(selectedTrailer.purchaseDate), "dd/MM/yyyy")}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Informações de Cotas */}
-              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">{t('assets.sharesInfo')}</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.totalShares')}</label>
-                    <p className="font-bold text-lg">{selectedTrailer.totalShares || 1}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.sharesSold')}</label>
-                    <p className="font-bold text-lg">{selectedTrailer.soldShares || 0}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.sharesAvailable')}</label>
-                    <p className="font-bold text-lg text-accent">
-                      {(selectedTrailer.totalShares || 1) - (selectedTrailer.soldShares || 0)}
-                    </p>
+                {/* Vehicle Identification */}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h3 className="font-semibold text-lg mb-3">{t('assets.vehicleIdSection', 'Identificação do Veículo')}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="text-sm text-muted-foreground">{t('assets.vin', 'VIN')}</label>
+                      <p className="font-mono text-sm" data-testid="text-detail-vin">{selectedTrailer.vin || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.year', 'Ano')}</label>
+                      <p className="font-semibold">{selectedTrailer.year ?? "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.make', 'Marca')}</label>
+                      <p className="font-semibold">{selectedTrailer.make || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.body', 'Carroceria')}</label>
+                      <p className="font-semibold">{selectedTrailer.body || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.weightLbs', 'Peso (lbs)')}</label>
+                      <p className="font-semibold">{selectedTrailer.weightLbs ?? "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.titleNumber', 'Nº do Título')}</label>
+                      <p className="font-mono text-sm">{selectedTrailer.titleNumber || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.vehicleUse', 'Uso do Veículo')}</label>
+                      <p className="font-semibold">
+                        {selectedTrailer.vehicleUse === "PRIVATE"
+                          ? t('assets.vehicleUsePrivate', 'Privado')
+                          : selectedTrailer.vehicleUse === "COMMERCIAL"
+                            ? t('assets.vehicleUseCommercial', 'Comercial')
+                            : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.titleDate', 'Data do Título')}</label>
+                      <p className="font-semibold">
+                        {selectedTrailer.titleDate
+                          ? format(new Date(selectedTrailer.titleDate), "dd/MM/yyyy")
+                          : "—"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Localização */}
-              <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold text-lg mb-3">{t('assets.location')}</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.cityState')}</label>
-                    <p className="font-semibold">{selectedTrailer.location || "—"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.latitude')}</label>
-                    <p className="font-mono text-sm">{selectedTrailer.latitude || "—"}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm text-muted-foreground">{t('assets.longitude')}</label>
-                    <p className="font-mono text-sm">{selectedTrailer.longitude || "—"}</p>
+                {/* Informações Financeiras */}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h3 className="font-semibold text-lg mb-3">{t('assets.financialInfo')}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.purchaseValueLabel')}</label>
+                      <p className="font-bold text-lg">${parseFloat(selectedTrailer.purchaseValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.currentValueLabel')}</label>
+                      <p className="font-bold text-lg">${parseFloat(selectedTrailer.currentValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.depreciationRate')}</label>
+                      <p className="font-semibold">{(parseFloat(selectedTrailer.depreciationRate) * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.ageIndicator')}</label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className={`w-5 h-5 ${getTrafficLight(selectedTrailer.purchaseDate)} rounded-full shadow-lg`}></div>
+                        <span className="text-sm text-muted-foreground">
+                          {getTrafficLight(selectedTrailer.purchaseDate) === "bg-green-500" && t('assets.lessThan1Year')}
+                          {getTrafficLight(selectedTrailer.purchaseDate) === "bg-yellow-500" && t('assets.between1And2Years')}
+                          {getTrafficLight(selectedTrailer.purchaseDate) === "bg-red-500" && t('assets.moreThan2Years')}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={() => setDetailsDialogOpen(false)}
-                  className="bg-accent hover:bg-accent/90"
-                  data-testid="button-close-details"
-                >
-                  {t('assets.close')}
-                </Button>
-              </div>
-            </div>
+                {/* Informações de Cotas */}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h3 className="font-semibold text-lg mb-3">{t('assets.sharesInfo')}</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.totalShares')}</label>
+                      <p className="font-bold text-lg">{selectedTrailer.totalShares || 1}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.sharesSold')}</label>
+                      <p className="font-bold text-lg">{selectedTrailer.soldShares || 0}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.sharesAvailable')}</label>
+                      <p className="font-bold text-lg text-accent">
+                        {(selectedTrailer.totalShares || 1) - (selectedTrailer.soldShares || 0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Localização */}
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h3 className="font-semibold text-lg mb-3">{t('assets.location')}</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.cityState')}</label>
+                      <p className="font-semibold">{selectedTrailer.location || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.latitude')}</label>
+                      <p className="font-mono text-sm">{selectedTrailer.latitude || "—"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">{t('assets.longitude')}</label>
+                      <p className="font-mono text-sm">{selectedTrailer.longitude || "—"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={() => setDetailsDialogOpen(false)}
+                    className="bg-accent hover:bg-accent/90"
+                    data-testid="button-close-details"
+                  >
+                    {t('assets.close')}
+                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="documents" className="mt-4">
+                <TrailerDocumentsTab trailerId={selectedTrailer.id} />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Filters */}
+      <Card className="shadow-sm">
+        <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
+              placeholder={t('assets.filterSearchPlaceholder', 'ID, VIN ou nº do título')}
+              className="pl-9"
+              data-testid="input-filter-search"
+            />
+          </div>
+          <Select value={filterYear} onValueChange={setFilterYear}>
+            <SelectTrigger data-testid="select-filter-year">
+              <SelectValue placeholder={t('assets.year', 'Ano')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('assets.filterAll', 'Todos os anos')}</SelectItem>
+              {filterOptions.years.map((y: any) => (
+                <SelectItem key={y} value={String(y)}>{String(y)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterMake} onValueChange={setFilterMake}>
+            <SelectTrigger data-testid="select-filter-make">
+              <SelectValue placeholder={t('assets.make', 'Marca')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('assets.filterAllMakes', 'Todas as marcas')}</SelectItem>
+              {filterOptions.makes.map((m: string) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterVehicleUse} onValueChange={setFilterVehicleUse}>
+            <SelectTrigger data-testid="select-filter-vehicle-use">
+              <SelectValue placeholder={t('assets.vehicleUse', 'Uso')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('assets.filterAllUses', 'Todos os usos')}</SelectItem>
+              <SelectItem value="PRIVATE">{t('assets.vehicleUsePrivate', 'Privado')}</SelectItem>
+              <SelectItem value="COMMERCIAL">{t('assets.vehicleUseCommercial', 'Comercial')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
       <Card className="shadow-lg">
         <CardContent className="p-0">
@@ -778,7 +1099,7 @@ export default function Assets() {
                 </tr>
               </thead>
               <tbody>
-                {trailers?.map((trailer: any) => {
+                {filteredTrailers.map((trailer: any) => {
                   const statusInfo = getStatusBadge(trailer.status);
                   return (
                     <tr
@@ -846,10 +1167,12 @@ export default function Assets() {
                     </tr>
                   );
                 })}
-                {(!trailers || trailers.length === 0) && (
+                {filteredTrailers.length === 0 && (
                   <tr>
                     <td colSpan={11} className="text-center py-12 text-muted-foreground">
-                      {t('assets.noAssets')}
+                      {(!trailers || trailers.length === 0)
+                        ? t('assets.noAssets')
+                        : t('assets.noFilterResults', 'Nenhum ativo corresponde aos filtros aplicados')}
                     </td>
                   </tr>
                 )}
@@ -858,6 +1181,196 @@ export default function Assets() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const DOCUMENT_CATEGORIES = [
+  "title",
+  "registration",
+  "insurance",
+  "inspection",
+  "purchase_invoice",
+  "other",
+] as const;
+
+function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [category, setCategory] = useState<string>("other");
+  const { uploadFile, isUploading } = useUpload();
+
+  type EnrichedDocument = TrailerDocument & {
+    uploader?: { id: string; name: string; email: string | null } | null;
+  };
+
+  const { data: documents, isLoading } = useQuery<EnrichedDocument[]>({
+    queryKey: ["/api/trailers", trailerId, "documents"],
+  });
+
+  const createDocMutation = useMutation({
+    mutationFn: async (payload: {
+      fileUrl: string;
+      fileName: string;
+      documentCategory: string;
+    }) => {
+      return apiRequest("POST", `/api/trailers/${trailerId}/documents`, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+      toast({
+        title: t('assets.docUploadSuccess', 'Documento enviado'),
+        description: t('assets.docUploadSuccessDesc', 'O documento foi salvo com sucesso.'),
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t('assets.docUploadError', 'Falha no upload'),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteDocMutation = useMutation({
+    mutationFn: async (docId: string) => {
+      return apiRequest("DELETE", `/api/trailers/${trailerId}/documents/${docId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+      toast({ title: t('assets.docDeleted', 'Documento excluído') });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t('assets.docDeleteError', 'Falha ao excluir'),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const result = await uploadFile(file);
+    if (!result) return;
+    await createDocMutation.mutateAsync({
+      fileUrl: result.objectPath,
+      fileName: file.name,
+      documentCategory: category,
+    });
+  };
+
+  const categoryLabel = (cat: string) =>
+    t(`assets.docCategory.${cat}`, cat);
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-muted/30 p-4 rounded-lg flex flex-col sm:flex-row gap-3 sm:items-end">
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-1 block">
+            {t('assets.docCategoryLabel', 'Categoria')}
+          </label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger data-testid="select-document-category">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DOCUMENT_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {categoryLabel(cat)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-1 block">
+            {t('assets.uploadDocument', 'Enviar documento')}
+          </label>
+          <div className="relative">
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              disabled={isUploading || createDocMutation.isPending}
+              data-testid="input-upload-document"
+              accept="image/*,application/pdf"
+            />
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      ) : !documents || documents.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          {t('assets.noDocuments', 'Nenhum documento anexado ainda.')}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {documents.map((doc) => (
+            <div
+              key={doc.id}
+              className="flex items-center justify-between gap-3 p-3 border rounded-lg hover-elevate"
+              data-testid={`row-document-${doc.id}`}
+            >
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate" data-testid={`text-document-name-${doc.id}`}>
+                    {doc.fileName}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                    <Badge variant="secondary" className="rounded-full">
+                      {categoryLabel(doc.documentCategory)}
+                    </Badge>
+                    {doc.uploadedAt && (
+                      <span data-testid={`text-document-date-${doc.id}`}>
+                        {format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm")}
+                      </span>
+                    )}
+                    {doc.uploader && (
+                      <>
+                        <span>•</span>
+                        <span data-testid={`text-document-uploader-${doc.id}`}>
+                          {t('assets.docUploadedBy', 'por')} {doc.uploader.name}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(doc.fileUrl, "_blank")}
+                  data-testid={`button-view-document-${doc.id}`}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (confirm(t('assets.confirmDeleteDoc', 'Excluir este documento?'))) {
+                      deleteDocMutation.mutate(doc.id);
+                    }
+                  }}
+                  disabled={deleteDocMutation.isPending}
+                  data-testid={`button-delete-document-${doc.id}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

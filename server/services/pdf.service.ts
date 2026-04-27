@@ -55,11 +55,20 @@ export interface InvoiceDataTotals {
   total: number;
 }
 
+export interface InvoiceDataTrailer {
+  trailerId: string;
+  model: string | null;
+  make: string | null;
+  year: number | null;
+  vin: string | null;
+}
+
 export interface InvoiceData {
   invoiceNumber: string;
   issueDate: string | null;
   dueDate: string;
   billTo: InvoiceDataBillTo;
+  trailer?: InvoiceDataTrailer;
   items: InvoiceDataItem[];
   totals: InvoiceDataTotals;
   paymentInstructions: string[];
@@ -449,6 +458,16 @@ export class PDFService {
         phone: data.contract.client.phone,
         address: data.contract.client.address ?? null,
         taxId: data.contract.client.taxId ?? null,
+      },
+      // Trailer summary surfaced for the invoice detail/preview view so
+      // managers can verify which physical reboque (and its VIN) is being
+      // billed without leaving the screen.
+      trailer: {
+        trailerId: data.contract.trailer.trailerId,
+        model: data.contract.trailer.model ?? null,
+        make: (data.contract.trailer as any).make ?? null,
+        year: (data.contract.trailer as any).year ?? null,
+        vin: (data.contract.trailer as any).vin ?? null,
       },
       items,
       totals: {
