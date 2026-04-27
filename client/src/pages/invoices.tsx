@@ -40,7 +40,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertInvoiceSchema, type Invoice, type RentalContract } from "@shared/schema";
+import { insertInvoiceSchema, type Invoice, type RentalContract, type RentalClient, type Trailer } from "@shared/schema";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -425,6 +425,22 @@ export default function Invoices() {
     queryKey: ["/api/rental-contracts"],
   });
 
+  const { data: rentalClients = [] } = useQuery<RentalClient[]>({
+    queryKey: ["/api/rental-clients"],
+  });
+
+  const { data: trailers = [] } = useQuery<Trailer[]>({
+    queryKey: ["/api/trailers"],
+  });
+
+  const contractLabel = (contract: RentalContract) => {
+    const client = rentalClients.find((c) => c.id === contract.clientId);
+    const trailer = trailers.find((tr) => tr.id === contract.trailerId);
+    const clientName = client?.tradeName || client?.companyName || "—";
+    const trailerName = trailer?.trailerId || trailer?.model || "—";
+    return `${contract.contractNumber} — ${clientName} — ${trailerName}`;
+  };
+
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
@@ -438,6 +454,33 @@ export default function Invoices() {
       notes: "",
     },
   });
+
+  // Auto-fill amount / referenceMonth / dueDate when the manager picks a contract
+  // in the "New invoice" dialog. We always recompute on change so switching
+  // contracts produces consistent values; the manager can still override
+  // any field manually before submitting.
+  const watchedContractId = form.watch("contractId");
+  useEffect(() => {
+    if (!isCreateOpen || !watchedContractId) return;
+    const contract = contracts.find((c) => c.id === watchedContractId);
+    if (!contract) return;
+
+    if (contract.monthlyRate) {
+      form.setValue("amount", String(contract.monthlyRate), { shouldDirty: true });
+    }
+
+    const now = new Date();
+    const yyyy = now.getUTCFullYear();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+    form.setValue("referenceMonth", `${yyyy}-${mm}`, { shouldDirty: true });
+
+    const dueDays = contract.paymentDueDays ?? 15;
+    const due = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + dueDays));
+    const dyyyy = due.getUTCFullYear();
+    const dmm = String(due.getUTCMonth() + 1).padStart(2, "0");
+    const ddd = String(due.getUTCDate()).padStart(2, "0");
+    form.setValue("dueDate", `${dyyyy}-${dmm}-${ddd}`, { shouldDirty: true });
+  }, [watchedContractId, isCreateOpen, contracts, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InvoiceFormData) => {
@@ -861,21 +904,28 @@ export default function Invoices() {
                 name="contractId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Contract</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formContract')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-background dark:bg-background text-foreground border-input" data-testid="select-contract">
-                          <SelectValue placeholder="Select contract" />
+                          <SelectValue placeholder={t('invoices.formContractPlaceholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-popover dark:bg-popover border-border">
                         {contracts.map((contract) => (
-                          <SelectItem key={contract.id} value={contract.id}>
-                            {contract.contractNumber} - {contract.contractNumber}
+                          <SelectItem
+                            key={contract.id}
+                            value={contract.id}
+                            data-testid={`select-contract-option-${contract.id}`}
+                          >
+                            {contractLabel(contract)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground" data-testid="text-contract-autofill-hint">
+                      {t('invoices.formContractAutoFillHint')}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -945,10 +995,10 @@ export default function Invoices() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground">Notes</FormLabel>
+                    <FormLabel className="text-foreground">{t('invoices.formNotes')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Additional notes..."
+                        placeholder={t('invoices.formNotesPlaceholder')}
                         {...field}
                         value={field.value || ""}
                         className="bg-background dark:bg-background text-foreground border-input resize-none"
