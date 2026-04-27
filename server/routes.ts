@@ -1564,8 +1564,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Manual invoice generation
   app.post("/api/invoices/generate-monthly", authorize(), async (req, res) => {
     try {
+      const bodySchema = z.object({
+        contractIds: z.array(z.string().min(1)).min(1).max(500).optional(),
+      });
+      const parsed = bodySchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: "Invalid request body",
+          errors: parsed.error.flatten(),
+        });
+      }
+      const { contractIds } = parsed.data;
+
       const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
-      const summary = await InvoiceAutomationService.generateInvoicesNow();
+      const summary = await InvoiceAutomationService.generateInvoicesNow(
+        contractIds ? { contractIds } : undefined,
+      );
 
       await storage.createAuditLog({
         tenantId: req.tenantId!,
@@ -1573,7 +1587,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: "manual_invoice_generation",
         entityType: "invoice",
         entityId: null,
-        details: { triggeredBy: "manual", ...summary },
+        details: {
+          triggeredBy: "manual",
+          ...(contractIds ? { contractIds } : {}),
+          ...summary,
+        },
         ipAddress: req.ip,
       });
 
