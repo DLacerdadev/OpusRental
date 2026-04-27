@@ -100,6 +100,7 @@ export interface IStorage {
   getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]>;
   getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined>;
   createTrailerDocument(doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }): Promise<TrailerDocument>;
+  updateTrailerDocument(id: string, data: Partial<TrailerDocument>, tenantId: string): Promise<TrailerDocument | undefined>;
   deleteTrailerDocument(id: string, tenantId: string): Promise<boolean>;
   
   // Share operations
@@ -418,6 +419,25 @@ export class DatabaseStorage implements IStorage {
   ): Promise<TrailerDocument> {
     const [created] = await db.insert(trailerDocuments).values(doc).returning();
     return created;
+  }
+
+  async updateTrailerDocument(
+    id: string,
+    data: Partial<TrailerDocument>,
+    tenantId: string,
+  ): Promise<TrailerDocument | undefined> {
+    const {
+      id: _ignoreId,
+      tenantId: _ignoreTenant,
+      uploadedAt: _ignoreUploadedAt,
+      ...rest
+    } = data;
+    const [updated] = await db
+      .update(trailerDocuments)
+      .set(rest)
+      .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)))
+      .returning();
+    return updated;
   }
 
   async deleteTrailerDocument(id: string, tenantId: string): Promise<boolean> {

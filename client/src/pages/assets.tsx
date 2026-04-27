@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search } from "lucide-react";
+import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTrailerSchema, type InsertTrailer, type TrailerDocument } from "@shared/schema";
+import { insertTrailerSchema, type InsertTrailer, type Trailer, type TrailerDocument } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -44,10 +44,12 @@ export default function Assets() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTrailer, setEditingTrailer] = useState<any | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedTrailer, setSelectedTrailer] = useState<any>(null);
   const [allocationType, setAllocationType] = useState<"open" | "specific">("open");
   const [investorComboOpen, setInvestorComboOpen] = useState(false);
+  const isEditing = !!editingTrailer;
   // Trailer list filters (year/make/vehicleUse + free text against vin/titleNumber/trailerId)
   const [filterSearch, setFilterSearch] = useState("");
   const [filterYear, setFilterYear] = useState<string>("all");
@@ -92,6 +94,13 @@ export default function Assets() {
     },
   });
 
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingTrailer(null);
+    setAllocationType("open");
+    form.reset();
+  };
+
   const createTrailerMutation = useMutation({
     mutationFn: async (data: InsertTrailer) => {
       return await apiRequest("POST", "/api/trailers", data);
@@ -102,8 +111,7 @@ export default function Assets() {
         title: t('assets.successTitle'),
         description: t('assets.successDescription'),
       });
-      setDialogOpen(false);
-      form.reset();
+      closeDialog();
     },
     onError: (error: any) => {
       // Check if we have field-specific errors from the backend
@@ -133,6 +141,38 @@ export default function Assets() {
           description: translatedError,
           variant: "destructive",
         });
+      }
+    },
+  });
+
+  const updateTrailerMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<InsertTrailer> }) => {
+      const res = await apiRequest("PATCH", `/api/trailers/${id}`, data);
+      return (await res.json()) as Trailer;
+    },
+    onSuccess: (updated: Trailer) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers"] });
+      toast({
+        title: t('assets.editSuccessTitle', 'Ativo atualizado'),
+        description: t('assets.editSuccessDescription', 'As alterações foram salvas com sucesso.'),
+      });
+      // Keep the details dialog in sync if it is open for this trailer.
+      if (selectedTrailer && selectedTrailer.id === updated.id) {
+        setSelectedTrailer({ ...selectedTrailer, ...updated });
+      }
+      closeDialog();
+    },
+    onError: (error: any) => {
+      if (error.errors && typeof error.errors === 'object') {
+        Object.entries(error.errors).forEach(([field, message]) => {
+          const translatedMessage = t(`assets.${message}`, { defaultValue: message as string });
+          form.setError(field as any, { type: 'manual', message: translatedMessage });
+        });
+        const translatedError = t(`assets.${error.message}`, { defaultValue: t('assets.errorDescription') });
+        toast({ title: t('assets.errorTitle'), description: translatedError, variant: "destructive" });
+      } else {
+        const translatedError = error.message ? t(`assets.${error.message}`, { defaultValue: error.message }) : t('assets.errorDescription');
+        toast({ title: t('assets.errorTitle'), description: translatedError, variant: "destructive" });
       }
     },
   });
@@ -169,11 +209,58 @@ export default function Assets() {
       }
     }
 
+    if (isEditing && editingTrailer) {
+      // PATCH: drop allocation-only and server-managed fields that don't
+      // belong to a partial trailer update.
+      const { allocationType: _a, investorId: _i, trailerId: _tid, ...patchData } = cleanedData;
+      console.log("✅ Update payload:", patchData);
+      updateTrailerMutation.mutate({ id: editingTrailer.id, data: patchData as Partial<InsertTrailer> });
+      return;
+    }
+
     cleanedData.allocationType = data.allocationType || "open";
     cleanedData.investorId = data.allocationType === "specific" ? data.investorId : undefined;
 
     console.log("✅ Cleaned data:", cleanedData);
     createTrailerMutation.mutate(cleanedData as any);
+  };
+
+  const openEditDialog = (trailer: any) => {
+    setEditingTrailer(trailer);
+    setAllocationType("open"); // hidden in edit mode anyway
+    form.reset({
+      trailerId: trailer.trailerId ?? "",
+      trailerType: trailer.trailerType ?? "Seco",
+      model: trailer.model ?? "",
+      purchaseValue: trailer.purchaseValue ?? "",
+      purchaseDate: trailer.purchaseDate
+        ? new Date(trailer.purchaseDate).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      currentValue: trailer.currentValue ?? "",
+      status: trailer.status ?? "stock",
+      depreciationRate: trailer.depreciationRate ?? "0.05",
+      location: trailer.location ?? "",
+      latitude: trailer.latitude ?? "",
+      longitude: trailer.longitude ?? "",
+      totalShares: trailer.totalShares ?? 1,
+      allocationType: "open",
+      investorId: "",
+      vin: trailer.vin ?? "",
+      year: trailer.year ?? undefined,
+      make: trailer.make ?? "",
+      body: trailer.body ?? "",
+      weightLbs: trailer.weightLbs ?? undefined,
+      titleNumber: trailer.titleNumber ?? "",
+      vehicleUse:
+        trailer.vehicleUse === "PRIVATE" || trailer.vehicleUse === "COMMERCIAL"
+          ? trailer.vehicleUse
+          : undefined,
+      titleDate: trailer.titleDate
+        ? new Date(trailer.titleDate).toISOString().split('T')[0]
+        : "",
+      imageData: trailer.imageData ?? "",
+    } as AssetFormData);
+    setDialogOpen(true);
   };
 
   const onFormError = (errors: any) => {
@@ -342,10 +429,15 @@ export default function Assets() {
           <p className="text-sm text-muted-foreground mt-1">{t('assets.subtitle')}</p>
         </div>
         <div className="flex gap-3">
-          <Button 
-            className="bg-accent hover:bg-accent/90 shadow-lg" 
+          <Button
+            className="bg-accent hover:bg-accent/90 shadow-lg"
             data-testid="button-new-asset"
-            onClick={() => setDialogOpen(true)}
+            onClick={() => {
+              setEditingTrailer(null);
+              setAllocationType("open");
+              form.reset();
+              setDialogOpen(true);
+            }}
           >
             <Plus className="mr-2 h-4 w-4" />
             {t('assets.newAsset')}
@@ -362,12 +454,24 @@ export default function Assets() {
         </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) closeDialog();
+          else setDialogOpen(true);
+        }}
+      >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('assets.newAssetDialog')}</DialogTitle>
+            <DialogTitle data-testid="text-asset-dialog-title">
+              {isEditing
+                ? t('assets.editAssetDialog', 'Editar Ativo')
+                : t('assets.newAssetDialog')}
+            </DialogTitle>
             <DialogDescription>
-              {t('assets.newAssetDescription')}
+              {isEditing
+                ? t('assets.editAssetDescription', 'Atualize as informações do veículo. Apenas os campos modificados serão salvos.')
+                : t('assets.newAssetDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -380,7 +484,7 @@ export default function Assets() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('assets.trailerType')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-trailer-type">
                             <SelectValue placeholder={t('assets.selectTrailerType')} />
@@ -393,46 +497,55 @@ export default function Assets() {
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('assets.autoIdHint', 'ID será gerado automaticamente (ex: TRS001, TRC002, TRL003)')}
-                      </p>
+                      {!isEditing && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {t('assets.autoIdHint', 'ID será gerado automaticamente (ex: TRS001, TRC002, TRL003)')}
+                        </p>
+                      )}
+                      {isEditing && editingTrailer?.trailerId && (
+                        <p className="text-xs text-muted-foreground mt-1" data-testid="text-edit-trailer-id">
+                          {t('assets.trailerId')}: <span className="font-mono">{editingTrailer.trailerId}</span>
+                        </p>
+                      )}
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="allocationType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('assets.allocationType')}</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setAllocationType(value as "open" | "specific");
-                        }} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger data-testid="select-allocation-type">
-                            <SelectValue placeholder={t('assets.selectAllocationType')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="open">{t('assets.allocationTypeOpen')}</SelectItem>
-                          <SelectItem value="specific">{t('assets.allocationTypeSpecific')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {allocationType === "open" ? t('assets.allocationOpenHint') : t('assets.allocationSpecificHint')}
-                      </p>
-                    </FormItem>
-                  )}
-                />
+                {!isEditing && (
+                  <FormField
+                    control={form.control}
+                    name="allocationType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('assets.allocationType')}</FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setAllocationType(value as "open" | "specific");
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger data-testid="select-allocation-type">
+                              <SelectValue placeholder={t('assets.selectAllocationType')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="open">{t('assets.allocationTypeOpen')}</SelectItem>
+                            <SelectItem value="specific">{t('assets.allocationTypeSpecific')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {allocationType === "open" ? t('assets.allocationOpenHint') : t('assets.allocationSpecificHint')}
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
-              {allocationType === "specific" && (
+              {!isEditing && allocationType === "specific" && (
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
                     control={form.control}
@@ -818,21 +931,27 @@ export default function Assets() {
               </Collapsible>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setDialogOpen(false)}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeDialog}
                   data-testid="button-cancel"
                 >
                   {t('assets.cancel')}
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-accent hover:bg-accent/90"
-                  disabled={createTrailerMutation.isPending}
+                  disabled={createTrailerMutation.isPending || updateTrailerMutation.isPending}
                   data-testid="button-submit-asset"
                 >
-                  {createTrailerMutation.isPending ? t('assets.creating') : t('assets.createAsset')}
+                  {isEditing
+                    ? updateTrailerMutation.isPending
+                      ? t('assets.saving', 'Salvando...')
+                      : t('assets.saveChanges', 'Salvar alterações')
+                    : createTrailerMutation.isPending
+                      ? t('assets.creating')
+                      : t('assets.createAsset')}
                 </Button>
               </div>
             </form>
@@ -1012,8 +1131,19 @@ export default function Assets() {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-4">
-                  <Button 
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setDetailsDialogOpen(false);
+                      openEditDialog(selectedTrailer);
+                    }}
+                    data-testid="button-edit-from-details"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    {t('assets.editAsset', 'Editar Ativo')}
+                  </Button>
+                  <Button
                     onClick={() => setDetailsDialogOpen(false)}
                     className="bg-accent hover:bg-accent/90"
                     data-testid="button-close-details"
@@ -1151,18 +1281,30 @@ export default function Assets() {
                       </td>
                       <td className="py-4 px-6 text-muted-foreground">{trailer.location || "—"}</td>
                       <td className="py-4 px-6">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="hover:bg-accent/20 hover:text-accent" 
-                          onClick={() => {
-                            setSelectedTrailer(trailer);
-                            setDetailsDialogOpen(true);
-                          }}
-                          data-testid={`button-view-${trailer.id}`}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-accent/20 hover:text-accent"
+                            onClick={() => {
+                              setSelectedTrailer(trailer);
+                              setDetailsDialogOpen(true);
+                            }}
+                            data-testid={`button-view-${trailer.id}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-accent/20 hover:text-accent"
+                            onClick={() => openEditDialog(trailer)}
+                            data-testid={`button-edit-${trailer.id}`}
+                            title={t('assets.editAsset', 'Editar Ativo')}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1199,6 +1341,11 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
   const { toast } = useToast();
   const [category, setCategory] = useState<string>("other");
   const { uploadFile, isUploading } = useUpload();
+  // Hidden <input type="file"> used by the per-document "Replace" button.
+  // We reuse a single input and stash the target document id on the element
+  // so we don't have to render N inputs.
+  const replaceInputRef = useRef<HTMLInputElement | null>(null);
+  const [replacingDocId, setReplacingDocId] = useState<string | null>(null);
 
   type EnrichedDocument = TrailerDocument & {
     uploader?: { id: string; name: string; email: string | null } | null;
@@ -1207,6 +1354,22 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
   const { data: documents, isLoading } = useQuery<EnrichedDocument[]>({
     queryKey: ["/api/trailers", trailerId, "documents"],
   });
+
+  // Group documents by category so the visual order is stable and
+  // categorization changes immediately reflect in the list.
+  const sortedDocuments = useMemo(() => {
+    if (!documents) return [];
+    const idx: Record<string, number> = Object.fromEntries(
+      DOCUMENT_CATEGORIES.map((c, i) => [c, i]),
+    );
+    return [...documents].sort((a, b) => {
+      const catCmp = (idx[a.documentCategory] ?? 99) - (idx[b.documentCategory] ?? 99);
+      if (catCmp !== 0) return catCmp;
+      const ad = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const bd = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      return bd - ad;
+    });
+  }, [documents]);
 
   const createDocMutation = useMutation({
     mutationFn: async (payload: {
@@ -1249,6 +1412,25 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
     },
   });
 
+  const updateDocMutation = useMutation({
+    mutationFn: async ({ docId, documentCategory }: { docId: string; documentCategory: string }) => {
+      return apiRequest("PATCH", `/api/trailers/${trailerId}/documents/${docId}`, {
+        documentCategory,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+      toast({ title: t('assets.docUpdated', 'Documento atualizado') });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t('assets.docUpdateError', 'Falha ao atualizar'),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -1260,6 +1442,59 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
       fileName: file.name,
       documentCategory: category,
     });
+  };
+
+  const startReplace = (docId: string) => {
+    setReplacingDocId(docId);
+    replaceInputRef.current?.click();
+  };
+
+  const handleReplaceFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const docId = replacingDocId;
+    if (!file || !docId) {
+      setReplacingDocId(null);
+      return;
+    }
+    const target = documents?.find((d) => d.id === docId);
+    if (!target) {
+      setReplacingDocId(null);
+      return;
+    }
+
+    // Use apiRequest directly (instead of the per-document mutations) so
+    // the replace flow surfaces a single consolidated toast and triggers
+    // exactly one cache invalidation at the end. `replacingDocId` is kept
+    // set throughout so the replace buttons stay disabled while the
+    // upload + create + delete chain is in flight.
+    try {
+      const result = await uploadFile(file);
+      if (!result) return;
+      // Create the replacement first; only delete the previous record after
+      // the new one is persisted, so a failure mid-flight never leaves the
+      // category empty.
+      await apiRequest("POST", `/api/trailers/${trailerId}/documents`, {
+        fileUrl: result.objectPath,
+        fileName: file.name,
+        documentCategory: target.documentCategory,
+      });
+      await apiRequest("DELETE", `/api/trailers/${trailerId}/documents/${docId}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+      toast({
+        title: t('assets.docReplaceSuccess', 'Documento substituído'),
+        description: t('assets.docReplaceSuccessDesc', 'O arquivo foi atualizado mantendo a mesma categoria.'),
+      });
+    } catch (err: any) {
+      console.error("Replace document failed:", err);
+      toast({
+        title: t('assets.docReplaceError', 'Falha ao substituir'),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setReplacingDocId(null);
+    }
   };
 
   const categoryLabel = (cat: string) =>
@@ -1301,6 +1536,17 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
         </div>
       </div>
 
+      {/* Hidden replace input — shared across all rows; the active doc id is
+          tracked in `replacingDocId`. */}
+      <input
+        ref={replaceInputRef}
+        type="file"
+        className="hidden"
+        accept="image/*,application/pdf"
+        onChange={handleReplaceFileChange}
+        data-testid="input-replace-document"
+      />
+
       {isLoading ? (
         <div className="space-y-2">
           <Skeleton className="h-16 w-full" />
@@ -1312,10 +1558,10 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
         </div>
       ) : (
         <div className="space-y-2">
-          {documents.map((doc) => (
+          {sortedDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center justify-between gap-3 p-3 border rounded-lg hover-elevate"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg hover-elevate"
               data-testid={`row-document-${doc.id}`}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -1325,9 +1571,6 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
                     {doc.fileName}
                   </p>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                    <Badge variant="secondary" className="rounded-full">
-                      {categoryLabel(doc.documentCategory)}
-                    </Badge>
                     {doc.uploadedAt && (
                       <span data-testid={`text-document-date-${doc.id}`}>
                         {format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm")}
@@ -1345,13 +1588,51 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <Select
+                  value={doc.documentCategory}
+                  onValueChange={(value) => {
+                    if (value === doc.documentCategory) return;
+                    updateDocMutation.mutate({ docId: doc.id, documentCategory: value });
+                  }}
+                  disabled={updateDocMutation.isPending}
+                >
+                  <SelectTrigger
+                    className="h-8 min-w-[140px] text-xs"
+                    data-testid={`select-document-category-${doc.id}`}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOCUMENT_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {categoryLabel(cat)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => window.open(doc.fileUrl, "_blank")}
                   data-testid={`button-view-document-${doc.id}`}
+                  title={t('assets.viewDocument', 'Visualizar')}
                 >
                   <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => startReplace(doc.id)}
+                  disabled={
+                    isUploading ||
+                    createDocMutation.isPending ||
+                    deleteDocMutation.isPending ||
+                    replacingDocId !== null
+                  }
+                  data-testid={`button-replace-document-${doc.id}`}
+                  title={t('assets.replaceDocument', 'Substituir arquivo')}
+                >
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"

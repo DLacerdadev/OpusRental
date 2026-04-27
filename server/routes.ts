@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { 
   insertUserSchema, 
   insertTrailerSchema, 
+  type InsertTrailer,
   insertShareSchema, 
   financialRecords,
   payments, 
@@ -2258,6 +2259,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH /api/trailers/:id — partial update of a trailer. Same role policy as
+  // POST. Accepts the same Zod schema in `.partial()` form so the new vehicle
+  // identification fields (vin, year, make, body, weightLbs, titleNumber,
+  // vehicleUse, titleDate, imageData) and any other allowed column can be
+  // edited without recreating the asset.
+  app.patch("/api/trailers/:id", authorize(), async (req, res) => {
+    try {
+      const existing = await storage.getTrailer(req.params.id, req.tenantId!);
+      if (!existing) return res.status(404).json({ message: "Trailer not found" });
+
+      // Strip server-managed/allocation-only fields before validating.
+      const {
+        id: _ignoreId,
+        tenantId: _ignoreTenant,
+        createdAt: _ignoreCreated,
+        updatedAt: _ignoreUpdated,
+        allocationType: _ignoreAlloc,
+        investorId: _ignoreInv,
+        ...incoming
+      } = req.body || {};
+
+      // Normalize empty strings → null/undefined for nullable columns so we
+      // never persist "" where the database expects NULL.
+      const cleaned: Record<string, any> = { ...incoming };
+      for (const key of [
+        "latitude",
+        "longitude",
+        "vin",
+        "make",
+        "body",
+        "titleNumber",
+        "vehicleUse",
+        "titleDate",
+        "imageData",
+        "location",
+        "expirationDate",
+      ]) {
+        if (cleaned[key] === "") cleaned[key] = null;
+      }
+
+      const validated: Partial<InsertTrailer> = insertTrailerSchema.partial().parse(cleaned);
+      const updated = await storage.updateTrailer(req.params.id, validated, req.tenantId!);
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "update_trailer",
+        entityType: "trailer",
+        entityId: updated.id,
+        details: { changedFields: Object.keys(validated) },
+        ipAddress: req.ip,
+      });
+
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Update trailer error:", error);
+
+      if (error.name === "ZodError") {
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err: any) => {
+          const field = err.path[0];
+          fieldErrors[field] = err.message;
+        });
+        return res.status(400).json({ message: "validationError", errors: fieldErrors });
+      }
+
+      if (error.code === "23505" || error.message?.includes("duplicate key") || error.message?.includes("unique constraint")) {
+        return res.status(400).json({
+          message: "duplicateTrailerId",
+          errors: { trailerId: "duplicateTrailerId" },
+        });
+      }
+
+      res.status(500).json({ message: "errorDescription" });
+    }
+  });
+
   // ----------------------------------------------------------------------
   // Trailer documents — file attachments per trailer (Object Storage)
   // ----------------------------------------------------------------------
@@ -2363,6 +2441,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Validation error", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to save document" });
+    }
+  });
+
+  // PATCH a trailer document — currently used to recategorize a document
+  // without re-uploading the file. Same role policy as POST.
+  app.patch("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
+    try {
+      const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
+      if (!doc || doc.trailerId !== req.params.id) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const allowed = ["title", "registration", "insurance", "inspection", "purchase_invoice", "other"];
+      const updates: Record<string, any> = {};
+
+      if (typeof req.body?.documentCategory === "string") {
+        if (!allowed.includes(req.body.documentCategory)) {
+          return res.status(400).json({ message: "Invalid documentCategory" });
+        }
+        updates.documentCategory = req.body.documentCategory;
+      }
+
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: "No supported fields to update" });
+      }
+
+      const updated = await storage.updateTrailerDocument(req.params.docId, updates, req.tenantId!);
+      if (!updated) return res.status(404).json({ message: "Document not found" });
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "update_trailer_document",
+        entityType: "trailer_document",
+        entityId: updated.id,
+        details: { trailerId: req.params.id, changedFields: Object.keys(updates) },
+        ipAddress: req.ip,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Update trailer document error:", error);
+      res.status(500).json({ message: "Failed to update document" });
     }
   });
 

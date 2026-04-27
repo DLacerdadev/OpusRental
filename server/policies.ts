@@ -44,10 +44,12 @@ export const Policy = {
   "GET /api/trailers/available": ["investor", "manager", "admin"],
   "GET /api/trailers/:id": ["manager", "admin"],
   "POST /api/trailers": ["manager", "admin"],
+  "PATCH /api/trailers/:id": ["manager", "admin"],
 
   // ===== Trailer Documents =====
   "GET /api/trailers/:id/documents": ["manager", "admin"],
   "POST /api/trailers/:id/documents": ["manager", "admin"],
+  "PATCH /api/trailers/:id/documents/:id": ["manager", "admin"],
   "DELETE /api/trailers/:id/documents/:id": ["manager", "admin"],
   "POST /api/uploads/request-url": ["manager", "admin"],
 
