@@ -1159,17 +1159,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/invoices", authorize(), async (req, res) => {
     try {
-      const validation = insertInvoiceSchema.safeParse(req.body);
-      
+      // Invoice number is auto-generated server-side and tenantId comes from
+      // the authenticated session, so we omit both from the client payload
+      // schema. Any value sent by the client for these fields is ignored.
+      const createInvoiceSchema = insertInvoiceSchema
+        .omit({ tenantId: true, invoiceNumber: true });
+      const validation = createInvoiceSchema.safeParse(req.body);
+
       if (!validation.success) {
-        return res.status(400).json({ 
-          message: "Invalid payload", 
-          errors: validation.error.errors 
+        return res.status(400).json({
+          message: "Invalid payload",
+          errors: validation.error.errors,
         });
       }
 
-      
-      const invoice = await storage.createInvoice({ ...validation.data, tenantId: req.tenantId! });
+      // Always generate the invoice number server-side using the
+      // deletion-safe sequencer (INV-000001 format), ignoring any value the
+      // client sent. This keeps numbering consistent across both manual and
+      // automated invoice creation.
+      const invoiceNumber = await storage.getNextInvoiceNumber(req.tenantId!);
+
+      const invoice = await storage.createInvoice({
+        ...validation.data,
+        invoiceNumber,
+        tenantId: req.tenantId!,
+      });
 
       await storage.createAuditLog({
         tenantId: req.tenantId!,
@@ -1177,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: "create",
         entityType: "invoice",
         entityId: invoice.id,
-        details: validation.data,
+        details: { ...validation.data, invoiceNumber },
         ipAddress: req.ip,
       });
 
@@ -2355,6 +2369,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Generate contract PDF error:", error);
       res.status(500).json({ message: "Failed to generate contract PDF" });
+    }
+  });
+
+  // Returns the structured invoice payload used by the preview UI. We mirror
+  // the same authorization model as the PDF generation route below
+  // (authorize() + isManager) since this exposes the same business data.
+  app.get("/api/invoices/:id/data", authorize(), isManager, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const contract = await storage.getRentalContract(invoice.contractId, req.tenantId!);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      const client = await storage.getRentalClient(contract.clientId, req.tenantId!);
+      if (!client) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+
+      const trailer = await storage.getTrailer(contract.trailerId, req.tenantId!);
+      if (!trailer) {
+        return res.status(404).json({ message: "Trailer not found" });
+      }
+
+      const invoiceData = PDFService.buildInvoiceData({
+        ...invoice,
+        contract: {
+          ...contract,
+          client,
+          trailer,
+        },
+      });
+
+      res.json(invoiceData);
+    } catch (error) {
+      console.error("Get invoice data error:", error);
+      res.status(500).json({ message: "Failed to fetch invoice data" });
     }
   });
 

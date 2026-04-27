@@ -73,6 +73,11 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [reissueInvoice, setReissueInvoice] = useState<any | null>(null);
 
+  const { data: previewData, isLoading: isPreviewLoading } = useQuery<any>({
+    queryKey: ["/api/invoices", selectedInvoice?.id, "data"],
+    enabled: isViewOpen && !!selectedInvoice?.id,
+  });
+
   const { data: invoices = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/invoices"],
   });
@@ -499,12 +504,16 @@ export default function Invoices() {
                     <FormLabel className="text-foreground">{t('invoices.formInvoiceNumber')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="INV-001"
+                        placeholder={t('invoices.formInvoiceNumberPlaceholder')}
                         {...field}
+                        value={field.value || ""}
                         className="bg-background dark:bg-background text-foreground border-input"
                         data-testid="input-invoice-number"
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground" data-testid="text-invoice-number-hint">
+                      {t('invoices.formInvoiceNumberHint')}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -667,55 +676,166 @@ export default function Invoices() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* View Invoice Dialog */}
+      {/* Preview Invoice Dialog (structured data from /api/invoices/:id/data) */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-xl sm:max-w-2xl bg-background dark:bg-background border-border">
+        <DialogContent className="max-w-xl sm:max-w-3xl max-h-[90vh] overflow-y-auto bg-background dark:bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground">{t('invoices.dialogDetailsTitle')}</DialogTitle>
+            <DialogTitle className="text-foreground">{t('invoices.previewTitle')}</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {t('invoices.previewDescription')}
+            </DialogDescription>
           </DialogHeader>
-          {selectedInvoice && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+          {isPreviewLoading && (
+            <p className="text-muted-foreground" data-testid="text-preview-loading">
+              {t('invoices.previewLoading')}
+            </p>
+          )}
+          {!isPreviewLoading && previewData && (
+            <div className="space-y-6" data-testid="container-invoice-preview">
+              {/* Header with number, dates, status */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-b border-border pb-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailInvoiceNumber')}</p>
-                  <p className="font-medium text-foreground">{selectedInvoice.invoiceNumber}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailStatus')}</p>
-                  {getStatusBadge(selectedInvoice.status)}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailAmount')}</p>
-                  <p className="font-medium text-foreground">
-                    ${parseFloat(selectedInvoice.amount || "0").toFixed(2)}
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.previewInvoiceNumber')}</p>
+                  <p className="font-semibold text-foreground" data-testid="text-preview-invoice-number">
+                    {previewData.invoiceNumber}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailDueDate')}</p>
-                  <p className="font-medium text-foreground">
-                    {selectedInvoice.dueDate ? format(new Date(selectedInvoice.dueDate), "MMM dd, yyyy") : "N/A"}
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.previewIssueDate')}</p>
+                  <p className="font-medium text-foreground" data-testid="text-preview-issue-date">
+                    {previewData.issueDate ? format(new Date(previewData.issueDate), "MMM dd, yyyy") : "N/A"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailReferenceMonth')}</p>
-                  <p className="font-medium text-foreground">{selectedInvoice.referenceMonth}</p>
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.previewDueDate')}</p>
+                  <p className="font-medium text-foreground" data-testid="text-preview-due-date">
+                    {previewData.dueDate ? format(new Date(previewData.dueDate), "MMM dd, yyyy") : "N/A"}
+                  </p>
                 </div>
-                {selectedInvoice.paidDate && (
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.previewReferenceMonth')}</p>
+                  <p className="font-medium text-foreground">{previewData.referenceMonth}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.previewStatus')}</p>
+                  <div>{getStatusBadge(previewData.status)}</div>
+                </div>
+                {previewData.paidDate && (
                   <div>
-                    <p className="text-sm text-muted-foreground">{t('invoices.detailPaidDate')}</p>
+                    <p className="text-xs uppercase text-muted-foreground">{t('invoices.detailPaidDate')}</p>
                     <p className="font-medium text-foreground">
-                      {format(new Date(selectedInvoice.paidDate), "MMM dd, yyyy")}
+                      {format(new Date(previewData.paidDate), "MMM dd, yyyy")}
                     </p>
                   </div>
                 )}
               </div>
-              {selectedInvoice.notes && (
+
+              {/* Bill To */}
+              <Card className="bg-muted/30 dark:bg-muted/10 border-border">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase text-muted-foreground">
+                    {t('invoices.previewBillTo')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1 text-sm text-foreground" data-testid="container-preview-bill-to">
+                  <p className="font-semibold">{previewData.billTo?.companyName}</p>
+                  {previewData.billTo?.tradeName && (
+                    <p className="text-muted-foreground">{previewData.billTo.tradeName}</p>
+                  )}
+                  {previewData.billTo?.taxId && (
+                    <p>
+                      <span className="text-muted-foreground">{t('invoices.previewTaxId')}: </span>
+                      {previewData.billTo.taxId}
+                    </p>
+                  )}
+                  <p>{previewData.billTo?.email}</p>
+                  <p>{previewData.billTo?.phone}</p>
+                  {previewData.billTo?.address && <p>{previewData.billTo.address}</p>}
+                </CardContent>
+              </Card>
+
+              {/* Items table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" data-testid="table-preview-items">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-2 font-medium text-muted-foreground">
+                        {t('invoices.previewItemDescription')}
+                      </th>
+                      <th className="text-right p-2 font-medium text-muted-foreground">
+                        {t('invoices.previewItemRate')}
+                      </th>
+                      <th className="text-right p-2 font-medium text-muted-foreground">
+                        {t('invoices.previewItemQty')}
+                      </th>
+                      <th className="text-right p-2 font-medium text-muted-foreground">
+                        {t('invoices.previewItemAmount')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(previewData.items || []).map((item: any, index: number) => (
+                      <tr key={index} className="border-b border-border" data-testid={`row-preview-item-${index}`}>
+                        <td className="p-2 text-foreground">{item.description}</td>
+                        <td className="p-2 text-right text-foreground">${Number(item.rate).toFixed(2)}</td>
+                        <td className="p-2 text-right text-foreground">{item.qty}</td>
+                        <td className="p-2 text-right text-foreground font-medium">
+                          ${Number(item.amount).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div className="flex justify-end" data-testid="container-preview-totals">
+                <div className="w-full sm:w-72 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('invoices.previewSubtotal')}</span>
+                    <span className="text-foreground">
+                      ${Number(previewData.totals?.subtotal || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('invoices.previewTax')}</span>
+                    <span className="text-foreground">
+                      ${Number(previewData.totals?.tax || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t border-border pt-1 font-semibold text-base">
+                    <span className="text-foreground">{t('invoices.previewTotal')}</span>
+                    <span className="text-foreground" data-testid="text-preview-total">
+                      ${Number(previewData.totals?.total || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment instructions */}
+              <Card className="bg-muted/30 dark:bg-muted/10 border-border">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm uppercase text-muted-foreground">
+                    {t('invoices.previewPaymentInstructions')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1 text-sm text-foreground" data-testid="container-preview-payment-instructions">
+                  {(previewData.paymentInstructions || []).map((line: string, index: number) => (
+                    <p key={index}>{line}</p>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {previewData.notes && (
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('invoices.detailNotes')}</p>
-                  <p className="font-medium text-foreground">{selectedInvoice.notes}</p>
+                  <p className="text-xs uppercase text-muted-foreground">{t('invoices.detailNotes')}</p>
+                  <p className="text-sm text-foreground">{previewData.notes}</p>
                 </div>
               )}
             </div>
+          )}
+          {!isPreviewLoading && !previewData && selectedInvoice && (
+            <p className="text-muted-foreground">{t('invoices.previewError')}</p>
           )}
         </DialogContent>
       </Dialog>

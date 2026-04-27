@@ -254,7 +254,10 @@ export const rentalContracts = pgTable("rental_contracts", {
 export const invoices = pgTable("invoices", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
-  invoiceNumber: text("invoice_number").notNull().unique(), // INV-001, INV-002, etc.
+  // Per-tenant invoice number (e.g. INV-000001). Uniqueness is enforced at
+  // the (tenant_id, invoice_number) level so each tenant can have its own
+  // independent sequence without colliding with other tenants.
+  invoiceNumber: text("invoice_number").notNull(),
   contractId: varchar("contract_id").notNull().references(() => rentalContracts.id),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   dueDate: date("due_date").notNull(),
@@ -265,6 +268,7 @@ export const invoices = pgTable("invoices", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (t) => ({
   uniqContractMonth: uniqueIndex("uniq_invoices_contract_month").on(t.contractId, t.referenceMonth),
+  uniqTenantInvoiceNumber: uniqueIndex("uniq_invoices_tenant_invoice_number").on(t.tenantId, t.invoiceNumber),
   idxTenant: index("idx_invoices_tenant").on(t.tenantId),
   idxStatus: index("idx_invoices_status").on(t.status),
   idxDueDate: index("idx_invoices_due_date").on(t.dueDate),

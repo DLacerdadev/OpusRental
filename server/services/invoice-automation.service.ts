@@ -70,8 +70,11 @@ export class InvoiceAutomationService {
 
       for (const contract of activeContracts) {
         try {
-          // Check if invoice already exists for this month
-          const existingInvoices = await storage.getInvoicesByContractId(contract.id);
+          // Check if invoice already exists for this month (tenant-scoped).
+          const existingInvoices = await storage.getInvoicesByContractId(
+            contract.id,
+            contract.tenantId,
+          );
           const alreadyExists = existingInvoices.some(
             (inv: Invoice) => inv.referenceMonth === currentMonth
           );
@@ -82,9 +85,9 @@ export class InvoiceAutomationService {
             continue;
           }
 
-          // Generate invoice number
-          const allInvoices = await storage.getAllInvoices();
-          const invoiceNumber = `INV-${String(allInvoices.length + 1).padStart(4, "0")}`;
+          // Generate invoice number using the highest existing number for the
+          // tenant (deletion-safe), formatted as INV-000001 (6 digits).
+          const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
 
           // Calculate due date using invoiceDayOfMonth from the contract.
           // Compare at calendar-day granularity (midnight) so same-day does NOT roll.
@@ -99,8 +102,9 @@ export class InvoiceAutomationService {
             dueDate.setMonth(dueDate.getMonth() + 1);
           }
 
-          // Create invoice
+          // Create invoice (tenant-scoped — invoices require a tenant owner).
           const invoice = await storage.createInvoice({
+            tenantId: contract.tenantId,
             invoiceNumber,
             contractId: contract.id,
             amount: contract.monthlyRate,

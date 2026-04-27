@@ -153,7 +153,7 @@ export interface IStorage {
   
   // Rental Contract operations
   getRentalContract(id: string, tenantId: string): Promise<RentalContract | undefined>;
-  getAllRentalContracts(tenantId: string): Promise<any[]>;
+  getAllRentalContracts(tenantId?: string): Promise<any[]>;
   getContractsByClientId(clientId: string, tenantId: string): Promise<RentalContract[]>;
   getContractsByTrailerId(trailerId: string, tenantId: string): Promise<RentalContract[]>;
   createRentalContract(contract: InsertRentalContract): Promise<RentalContract>;
@@ -165,6 +165,7 @@ export interface IStorage {
   getAllInvoices(tenantId: string): Promise<any[]>;
   getInvoicesByContractId(contractId: string, tenantId: string): Promise<Invoice[]>;
   getOverdueInvoices(tenantId: string): Promise<any[]>;
+  getNextInvoiceNumber(tenantId: string): Promise<string>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: string, updates: Partial<InsertInvoice>, tenantId: string): Promise<Invoice>;
   updateInvoiceStatus(id: string, status: string, tenantId: string, paidDate?: Date): Promise<Invoice>;
@@ -964,10 +965,11 @@ export class DatabaseStorage implements IStorage {
     return contract;
   }
 
-  async getAllRentalContracts(tenantId: string): Promise<any[]> {
-    const contracts = await db
+  async getAllRentalContracts(tenantId?: string): Promise<any[]> {
+    const baseQuery = db
       .select({
         id: rentalContracts.id,
+        tenantId: rentalContracts.tenantId,
         contractNumber: rentalContracts.contractNumber,
         clientId: rentalContracts.clientId,
         trailerId: rentalContracts.trailerId,
@@ -976,6 +978,7 @@ export class DatabaseStorage implements IStorage {
         monthlyRate: rentalContracts.monthlyRate,
         paymentDueDays: rentalContracts.paymentDueDays,
         invoiceDayOfMonth: rentalContracts.invoiceDayOfMonth,
+        autoGenerateInvoices: rentalContracts.autoGenerateInvoices,
         duration: rentalContracts.duration,
         status: rentalContracts.status,
         notes: rentalContracts.notes,
@@ -988,10 +991,12 @@ export class DatabaseStorage implements IStorage {
       })
       .from(rentalContracts)
       .leftJoin(rentalClients, eq(rentalContracts.clientId, rentalClients.id))
-      .leftJoin(trailers, eq(rentalContracts.trailerId, trailers.id))
-      .where(eq(rentalContracts.tenantId, tenantId))
-      .orderBy(desc(rentalContracts.createdAt));
-    
+      .leftJoin(trailers, eq(rentalContracts.trailerId, trailers.id));
+
+    const contracts = tenantId
+      ? await baseQuery.where(eq(rentalContracts.tenantId, tenantId)).orderBy(desc(rentalContracts.createdAt))
+      : await baseQuery.orderBy(desc(rentalContracts.createdAt));
+
     return contracts;
   }
 
@@ -1134,6 +1139,27 @@ export class DatabaseStorage implements IStorage {
       .orderBy(invoices.dueDate);
     
     return overdueInvoices;
+  }
+
+  async getNextInvoiceNumber(tenantId: string): Promise<string> {
+    const tenantInvoices = await db
+      .select({ invoiceNumber: invoices.invoiceNumber })
+      .from(invoices)
+      .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
+      .where(eq(rentalContracts.tenantId, tenantId));
+
+    let maxNumber = 0;
+    for (const row of tenantInvoices) {
+      const match = /^INV-(\d+)$/.exec(row.invoiceNumber || "");
+      if (match) {
+        const parsed = parseInt(match[1], 10);
+        if (!Number.isNaN(parsed) && parsed > maxNumber) {
+          maxNumber = parsed;
+        }
+      }
+    }
+
+    return `INV-${String(maxNumber + 1).padStart(6, "0")}`;
   }
 
   async createInvoice(invoice: InsertInvoice): Promise<Invoice> {

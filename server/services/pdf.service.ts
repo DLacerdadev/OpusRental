@@ -18,6 +18,42 @@ interface InvoicePDFData extends Invoice {
   };
 }
 
+export interface InvoiceDataItem {
+  description: string;
+  rate: number;
+  qty: number;
+  amount: number;
+}
+
+export interface InvoiceDataBillTo {
+  companyName: string;
+  tradeName: string | null;
+  email: string;
+  phone: string;
+  address: string | null;
+  taxId: string | null;
+}
+
+export interface InvoiceDataTotals {
+  subtotal: number;
+  tax: number;
+  total: number;
+}
+
+export interface InvoiceData {
+  invoiceNumber: string;
+  issueDate: string | null;
+  dueDate: string;
+  billTo: InvoiceDataBillTo;
+  items: InvoiceDataItem[];
+  totals: InvoiceDataTotals;
+  paymentInstructions: string[];
+  status: string;
+  referenceMonth: string;
+  notes: string | null;
+  paidDate: string | null;
+}
+
 export class PDFService {
   private static addHeader(doc: jsPDF, title: string) {
     doc.setFillColor(33, 51, 82);
@@ -326,147 +362,206 @@ export class PDFService {
     return Buffer.from(doc.output('arraybuffer'));
   }
 
+  /**
+   * Normalize a date-like value coming from drizzle (`date` columns are
+   * returned as ISO strings, `timestamp` columns as Date objects) into an
+   * ISO 8601 string. Returns null when the input is null/undefined.
+   */
+  private static toISO(value: Date | string | null | undefined): string | null {
+    if (value === null || value === undefined) return null;
+    if (value instanceof Date) return value.toISOString();
+    return value;
+  }
+
+  /**
+   * Build the structured invoice data used by both the PDF renderer and the
+   * JSON API endpoint. This is the single source of truth for what an invoice
+   * looks like — keeping PDF and JSON consistent.
+   */
+  static buildInvoiceData(data: InvoicePDFData): InvoiceData {
+    const rate = parseFloat(data.contract.monthlyRate.toString());
+    const qty = 1;
+    const amount = rate * qty;
+    const tax = 0;
+    const subtotal = amount;
+    const total = subtotal + tax;
+
+    const description = `Locação Mensal — ${data.contract.trailer.trailerId} — ${data.referenceMonth}`;
+
+    const dueDate = this.toISO(data.dueDate);
+    if (!dueDate) {
+      throw new Error('Invoice is missing a due date');
+    }
+
+    return {
+      invoiceNumber: data.invoiceNumber,
+      issueDate: this.toISO(data.createdAt),
+      dueDate,
+      billTo: {
+        companyName: data.contract.client.companyName,
+        tradeName: data.contract.client.tradeName ?? null,
+        email: data.contract.client.email,
+        phone: data.contract.client.phone,
+        address: data.contract.client.address ?? null,
+        taxId: data.contract.client.taxId ?? null,
+      },
+      items: [
+        {
+          description,
+          rate,
+          qty,
+          amount,
+        },
+      ],
+      totals: {
+        subtotal,
+        tax,
+        total,
+      },
+      paymentInstructions: [
+        'Bank: US Bank',
+        'Account Name: Opus Rental Capital LLC',
+        'Account Number: 1234567890',
+        'Routing Number: 987654321',
+        `Reference: ${data.invoiceNumber}`,
+      ],
+      status: data.status,
+      referenceMonth: data.referenceMonth,
+      notes: data.notes ?? null,
+      paidDate: this.toISO(data.paidDate),
+    };
+  }
+
   static generateInvoicePDF(data: InvoicePDFData): Buffer {
+    const invoiceData = this.buildInvoiceData(data);
     const doc = new jsPDF();
-    
+
     this.addHeader(doc, 'Invoice');
-    
+
     let yPos = 50;
-    
+
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.text('INVOICE', 20, yPos);
-    
+
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Invoice #${data.invoiceNumber}`, 150, yPos);
+    doc.text(`Invoice #${invoiceData.invoiceNumber}`, 150, yPos);
     yPos += 6;
-    doc.text(`Date: ${this.formatDate(data.createdAt)}`, 150, yPos);
+    doc.text(`Date: ${this.formatDate(invoiceData.issueDate)}`, 150, yPos);
     yPos += 6;
-    doc.text(`Due Date: ${this.formatDate(data.dueDate)}`, 150, yPos);
-    
+    doc.text(`Due Date: ${this.formatDate(invoiceData.dueDate)}`, 150, yPos);
+
     yPos += 15;
-    
+
     doc.setFillColor(245, 247, 250);
     doc.rect(20, yPos, 75, 8, 'F');
     doc.setFont('helvetica', 'bold');
     doc.text('BILL TO', 22, yPos + 5);
     yPos += 12;
-    
+
     doc.setFont('helvetica', 'normal');
-    doc.text(data.contract.client.companyName, 22, yPos);
+    doc.text(invoiceData.billTo.companyName, 22, yPos);
     yPos += 5;
-    if (data.contract.client.tradeName) {
-      doc.text(data.contract.client.tradeName, 22, yPos);
+    if (invoiceData.billTo.tradeName) {
+      doc.text(invoiceData.billTo.tradeName, 22, yPos);
       yPos += 5;
     }
-    doc.text(data.contract.client.email, 22, yPos);
+    doc.text(invoiceData.billTo.email, 22, yPos);
     yPos += 5;
-    doc.text(data.contract.client.phone, 22, yPos);
-    if (data.contract.client.address) {
+    doc.text(invoiceData.billTo.phone, 22, yPos);
+    if (invoiceData.billTo.address) {
       yPos += 5;
-      doc.text(data.contract.client.address, 22, yPos);
+      doc.text(invoiceData.billTo.address, 22, yPos);
     }
-    
+
     yPos += 15;
-    
+
     autoTable(doc, {
       startY: yPos,
-      head: [['Description', 'Period', 'Trailer', 'Amount']],
-      body: [
-        [
-          'Monthly Trailer Rental',
-          data.referenceMonth,
-          data.contract.trailer.trailerId,
-          this.formatCurrency(data.amount)
-        ]
-      ],
+      head: [['Description', 'Rate', 'Qty', 'Amount']],
+      body: invoiceData.items.map((item) => [
+        item.description,
+        this.formatCurrency(item.rate),
+        String(item.qty),
+        this.formatCurrency(item.amount),
+      ]),
       theme: 'striped',
-      headStyles: { 
+      headStyles: {
         fillColor: [33, 51, 82],
         textColor: [255, 255, 255],
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       },
       styles: { fontSize: 10 },
       columnStyles: {
-        3: { halign: 'right', fontStyle: 'bold' }
-      }
+        1: { halign: 'right' },
+        2: { halign: 'right' },
+        3: { halign: 'right', fontStyle: 'bold' },
+      },
     });
-    
+
     yPos = (doc as any).lastAutoTable.finalY + 10;
-    
-    const subtotal = parseFloat(data.amount.toString());
-    const tax = 0;
-    const total = subtotal + tax;
-    
+
     doc.setFillColor(245, 247, 250);
     doc.rect(120, yPos, 70, 30, 'F');
-    
+
     doc.setFont('helvetica', 'normal');
     doc.text('Subtotal:', 125, yPos + 8);
-    doc.text(this.formatCurrency(subtotal), 185, yPos + 8, { align: 'right' });
-    
+    doc.text(this.formatCurrency(invoiceData.totals.subtotal), 185, yPos + 8, { align: 'right' });
+
     doc.text('Tax:', 125, yPos + 16);
-    doc.text(this.formatCurrency(tax), 185, yPos + 16, { align: 'right' });
-    
+    doc.text(this.formatCurrency(invoiceData.totals.tax), 185, yPos + 16, { align: 'right' });
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text('Total:', 125, yPos + 26);
-    doc.text(this.formatCurrency(total), 185, yPos + 26, { align: 'right' });
-    
+    doc.text(this.formatCurrency(invoiceData.totals.total), 185, yPos + 26, { align: 'right' });
+
     yPos += 45;
-    
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    
-    const statusColor = data.status === 'paid' ? [34, 197, 94] : 
-                       data.status === 'overdue' ? [239, 68, 68] : 
+
+    const statusColor = invoiceData.status === 'paid' ? [34, 197, 94] :
+                       invoiceData.status === 'overdue' ? [239, 68, 68] :
                        [251, 191, 36];
     doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
     doc.rect(20, yPos, 40, 8, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.text(`STATUS: ${data.status.toUpperCase()}`, 22, yPos + 5);
+    doc.text(`STATUS: ${invoiceData.status.toUpperCase()}`, 22, yPos + 5);
     doc.setTextColor(0, 0, 0);
-    
-    if (data.status === 'paid' && data.paidDate) {
+
+    if (invoiceData.status === 'paid' && invoiceData.paidDate) {
       yPos += 10;
       doc.setFont('helvetica', 'normal');
-      doc.text(`Paid on: ${this.formatDate(data.paidDate)}`, 22, yPos);
+      doc.text(`Paid on: ${this.formatDate(invoiceData.paidDate)}`, 22, yPos);
     }
-    
+
     yPos += 20;
     doc.setFont('helvetica', 'bold');
     doc.text('PAYMENT INSTRUCTIONS', 22, yPos);
     yPos += 8;
-    
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    const paymentInstructions = [
-      'Bank: US Bank',
-      'Account Name: Opus Rental Capital LLC',
-      'Account Number: 1234567890',
-      'Routing Number: 987654321',
-      'Reference: ' + data.invoiceNumber
-    ];
-    
-    paymentInstructions.forEach(line => {
+    invoiceData.paymentInstructions.forEach((line) => {
       doc.text(line, 22, yPos);
       yPos += 5;
     });
-    
-    if (data.notes) {
+
+    if (invoiceData.notes) {
       yPos += 5;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.text('NOTES', 22, yPos);
       yPos += 6;
-      
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      const lines = doc.splitTextToSize(data.notes, 160);
+      const lines = doc.splitTextToSize(invoiceData.notes, 160);
       doc.text(lines, 22, yPos);
     }
-    
+
     this.addFooter(doc);
     
     return Buffer.from(doc.output('arraybuffer'));
