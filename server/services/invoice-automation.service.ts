@@ -271,19 +271,24 @@ export class InvoiceAutomationService {
    * manual back-fill or testing.
    */
   static async generateMonthlyInvoices(
-    options: { contractIds?: string[]; today?: Date } = {},
+    options: { contractIds?: string[]; today?: Date; tenantId?: string } = {},
   ): Promise<{ generated: number; skipped: number; errors: number; eligible: number }> {
     const today = options.today ?? new Date();
     const summary = { generated: 0, skipped: 0, errors: 0, eligible: 0 };
 
     try {
-      const contracts = await storage.getAllRentalContracts();
+      // Tenant scoping: when called from a manual route, the caller MUST
+      // pass tenantId so we never look at contracts outside their tenant.
+      // The cron path runs across all tenants by design (no tenantId).
+      const contracts = await storage.getAllRentalContracts(options.tenantId);
       const activeContracts = contracts.filter((c) => c.status === "active");
 
       // When an explicit contractIds list is provided, treat it as a force
       // and bypass the autoGenerateInvoices flag — the caller (e.g. the
       // "Generate invoice now" button) has explicit intent to generate.
       // The cron path (no contractIds) still respects autoGenerateInvoices.
+      // Because we already filtered contracts by tenantId above (when
+      // provided), unknown/cross-tenant IDs simply won't match anything.
       const eligible = options.contractIds
         ? activeContracts.filter((c) => options.contractIds!.includes(c.id))
         : activeContracts
@@ -553,12 +558,12 @@ export class InvoiceAutomationService {
    * to force generation for a specific set regardless of the day.
    */
   static async generateInvoicesNow(
-    options: { contractIds?: string[]; today?: Date } = {},
+    options: { contractIds?: string[]; today?: Date; tenantId?: string } = {},
   ): Promise<{ generated: number; skipped: number; errors: number; eligible: number }> {
     log(
       "info",
       "generateInvoicesNow",
-      `manual trigger contractIds=${options.contractIds ? options.contractIds.length : "auto"}`,
+      `manual trigger tenant=${options.tenantId ?? "ALL"} contractIds=${options.contractIds ? options.contractIds.length : "auto"}`,
     );
     return this.generateMonthlyInvoices(options);
   }

@@ -1576,10 +1576,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const { contractIds } = parsed.data;
 
+      // When the caller provides explicit contractIds, validate they all
+      // belong to the requester's tenant before queuing generation. Any
+      // unknown / cross-tenant ID is rejected with 403 and audited so a
+      // misuse attempt is surfaced.
+      if (contractIds && contractIds.length > 0) {
+        const tenantContracts = await storage.getAllRentalContracts(req.tenantId!);
+        const tenantContractIds = new Set(tenantContracts.map((c) => c.id));
+        const offenders = contractIds.filter((id) => !tenantContractIds.has(id));
+        if (offenders.length > 0) {
+          await storage.createAuditLog({
+            tenantId: req.tenantId!,
+            userId: req.session.userId!,
+            action: "manual_invoice_generation_denied",
+            entityType: "invoice",
+            entityId: null,
+            details: { reason: "cross_tenant_contract_ids", offenders },
+            ipAddress: req.ip,
+          });
+          return res.status(403).json({
+            message: "One or more contracts do not belong to your tenant",
+          });
+        }
+      }
+
       const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
-      const summary = await InvoiceAutomationService.generateInvoicesNow(
-        contractIds ? { contractIds } : undefined,
-      );
+      const summary = await InvoiceAutomationService.generateInvoicesNow({
+        tenantId: req.tenantId!,
+        ...(contractIds ? { contractIds } : {}),
+      });
 
       await storage.createAuditLog({
         tenantId: req.tenantId!,
