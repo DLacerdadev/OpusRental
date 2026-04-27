@@ -1565,19 +1565,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/invoices/generate-monthly", authorize(), async (req, res) => {
     try {
       const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
-      await InvoiceAutomationService.generateInvoicesNow();
-      
+      const summary = await InvoiceAutomationService.generateInvoicesNow();
+
       await storage.createAuditLog({
         tenantId: req.tenantId!,
         userId: req.session.userId!,
         action: "manual_invoice_generation",
         entityType: "invoice",
         entityId: null,
-        details: { triggeredBy: "manual" },
+        details: { triggeredBy: "manual", ...summary },
         ipAddress: req.ip,
       });
 
-      res.json({ message: "Monthly invoices generated successfully" });
+      res.json({
+        message: "Monthly invoices generated successfully",
+        summary,
+      });
     } catch (error) {
       console.error("Manual invoice generation error:", error);
       res.status(500).json({ message: "Failed to generate invoices" });
