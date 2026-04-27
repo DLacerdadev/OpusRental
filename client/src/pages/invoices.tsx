@@ -55,7 +55,11 @@ import {
   Trash2,
   CreditCard,
   RotateCcw,
+  Copy,
+  Wallet,
+  Banknote,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -72,11 +76,33 @@ export default function Invoices() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [reissueInvoice, setReissueInvoice] = useState<any | null>(null);
+  const [payInvoice, setPayInvoice] = useState<any | null>(null);
 
   const { data: previewData, isLoading: isPreviewLoading } = useQuery<any>({
     queryKey: ["/api/invoices", selectedInvoice?.id, "data"],
     enabled: isViewOpen && !!selectedInvoice?.id,
   });
+
+  const { data: payMethodsData, isLoading: isPayMethodsLoading } = useQuery<{ methods: any[] }>({
+    queryKey: ["/api/invoices", payInvoice?.id, "payment-methods"],
+    enabled: !!payInvoice?.id,
+  });
+
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({
+        title: t('invoices.payCopiedTitle'),
+        description: t('invoices.payCopiedDescription', { field: label }),
+      });
+    } catch {
+      toast({
+        title: t('invoices.payCopyErrorTitle'),
+        description: t('invoices.payCopyErrorDescription'),
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: invoices = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/invoices"],
@@ -435,14 +461,12 @@ export default function Invoices() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  setLocation(`/checkout/invoice?invoiceId=${invoice.id}&dueDate=${invoice.dueDate}&referenceMonth=${invoice.referenceMonth}`);
-                                }}
+                                onClick={() => setPayInvoice(invoice)}
                                 className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
                                 data-testid={`button-pay-${invoice.id}`}
-                                title="Pay Online with Stripe"
+                                title={t('invoices.payButtonTitle')}
                               >
-                                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -839,6 +863,197 @@ export default function Invoices() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Pay Invoice Dialog — tabs per available payment method (Template 3) */}
+      <Dialog open={!!payInvoice} onOpenChange={(open) => { if (!open) setPayInvoice(null); }}>
+        <DialogContent className="max-w-xl bg-background dark:bg-background border-border" data-testid="dialog-pay-invoice">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">
+              {t('invoices.payDialogTitle', { invoiceNumber: payInvoice?.invoiceNumber || '' })}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {t('invoices.payDialogDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          {isPayMethodsLoading && (
+            <p className="text-muted-foreground" data-testid="text-pay-loading">
+              {t('invoices.payLoading')}
+            </p>
+          )}
+
+          {!isPayMethodsLoading && payMethodsData && (() => {
+            const methods = payMethodsData.methods || [];
+            if (methods.length === 0) {
+              return (
+                <p className="text-muted-foreground" data-testid="text-pay-no-methods">
+                  {t('invoices.payNoMethods')}
+                </p>
+              );
+            }
+            const defaultTab = methods[0].type;
+            return (
+              <Tabs defaultValue={defaultTab} className="w-full" data-testid="tabs-pay-methods">
+                <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${methods.length}, minmax(0, 1fr))` }}>
+                  {methods.map((m: any) => (
+                    <TabsTrigger
+                      key={m.type}
+                      value={m.type}
+                      data-testid={`tab-pay-${m.type}`}
+                    >
+                      {m.type === 'pix' && t('invoices.payTabPix')}
+                      {m.type === 'bank_transfer' && t('invoices.payTabBank')}
+                      {m.type === 'stripe' && t('invoices.payTabCard')}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {methods.map((m: any) => (
+                  <TabsContent key={m.type} value={m.type} className="mt-4">
+                    {m.type === 'pix' && (
+                      <PayMethodPanel
+                        icon={<Wallet className="h-5 w-5 text-emerald-600" />}
+                        title={t('invoices.payTabPix')}
+                        rows={[
+                          { label: t('invoices.payPixKey'), value: m.pixKey, copy: true },
+                          ...(m.beneficiary ? [{ label: t('invoices.payPixBeneficiary'), value: m.beneficiary, copy: true }] : []),
+                          { label: t('invoices.payAmount'), value: `$${Number(m.amount).toFixed(2)}`, copy: true },
+                          { label: t('invoices.payReference'), value: m.reference, copy: true },
+                        ]}
+                        onCopy={copyToClipboard}
+                        testIdPrefix="pix"
+                      />
+                    )}
+                    {m.type === 'bank_transfer' && (
+                      <PayMethodPanel
+                        icon={<Banknote className="h-5 w-5 text-blue-600" />}
+                        title={t('invoices.payTabBank')}
+                        rows={[
+                          { label: t('invoices.payBankName'), value: m.bankName, copy: true },
+                          ...(m.agency ? [{ label: t('invoices.payBankAgency'), value: m.agency, copy: true }] : []),
+                          { label: t('invoices.payBankAccount'), value: m.account, copy: true },
+                          ...(m.accountHolder ? [{ label: t('invoices.payBankHolder'), value: m.accountHolder, copy: true }] : []),
+                          ...(m.accountType ? [{ label: t('invoices.payBankType'), value: t(`settings.billingBankType${m.accountType.charAt(0).toUpperCase()}${m.accountType.slice(1)}`), copy: false }] : []),
+                          { label: t('invoices.payAmount'), value: `$${Number(m.amount).toFixed(2)}`, copy: true },
+                          { label: t('invoices.payReference'), value: m.reference, copy: true },
+                        ]}
+                        onCopy={copyToClipboard}
+                        testIdPrefix="bank"
+                      />
+                    )}
+                    {m.type === 'stripe' && (
+                      <div className="space-y-4" data-testid="panel-pay-stripe">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-purple-50 dark:bg-purple-950 p-2 rounded-lg">
+                            <CreditCard className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground">{t('invoices.payTabCard')}</h3>
+                            <p className="text-xs text-muted-foreground">{t('invoices.payStripeDescription')}</p>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-muted/30 rounded-lg space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('invoices.payAmount')}</span>
+                            <span className="font-semibold text-foreground" data-testid="text-pay-stripe-amount">
+                              ${Number(m.amount).toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('invoices.payReference')}</span>
+                            <span className="font-mono text-foreground" data-testid="text-pay-stripe-reference">
+                              {m.reference}
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => {
+                            setPayInvoice(null);
+                            setLocation(
+                              `/checkout/invoice?invoiceId=${payInvoice.id}&dueDate=${payInvoice.dueDate}&referenceMonth=${payInvoice.referenceMonth}`
+                            );
+                          }}
+                          data-testid="button-pay-stripe-checkout"
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          {t('invoices.payStripeCheckout')}
+                        </Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            );
+          })()}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setPayInvoice(null)}
+              className="border-input text-foreground"
+              data-testid="button-pay-close"
+            >
+              {t('invoices.buttonCancel')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+type PayMethodRow = {
+  label: string;
+  value: string;
+  copy: boolean;
+};
+
+function PayMethodPanel({
+  icon,
+  title,
+  rows,
+  onCopy,
+  testIdPrefix,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  rows: PayMethodRow[];
+  onCopy: (value: string, label: string) => void;
+  testIdPrefix: string;
+}) {
+  return (
+    <div className="space-y-4" data-testid={`panel-pay-${testIdPrefix}`}>
+      <div className="flex items-center gap-3">
+        <div className="bg-muted/50 dark:bg-muted/20 p-2 rounded-lg">{icon}</div>
+        <h3 className="font-semibold text-foreground">{title}</h3>
+      </div>
+      <div className="space-y-2">
+        {rows.map((row, index) => (
+          <div
+            key={`${row.label}-${index}`}
+            className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded-md"
+            data-testid={`row-pay-${testIdPrefix}-${index}`}
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-muted-foreground">{row.label}</p>
+              <p className="text-sm font-mono text-foreground break-all" data-testid={`text-pay-${testIdPrefix}-${index}`}>
+                {row.value}
+              </p>
+            </div>
+            {row.copy && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onCopy(row.value, row.label)}
+                data-testid={`button-pay-copy-${testIdPrefix}-${index}`}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

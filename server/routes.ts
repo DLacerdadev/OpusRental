@@ -20,6 +20,7 @@ import {
   users
 } from "@shared/schema";
 import { PDFService } from "./services/pdf.service";
+import { buildPaymentMethods } from "./services/payment-methods.service";
 import { EmailService } from "./services/email.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
@@ -313,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Tenant not found" });
       }
 
-      // Sanitize response - only return public branding fields
+      // Sanitize response - only return public branding + billing fields
       const publicTenantData = {
         id: req.tenant.id,
         name: req.tenant.name,
@@ -322,6 +323,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primaryColor: req.tenant.primaryColor,
         secondaryColor: req.tenant.secondaryColor,
         status: req.tenant.status,
+        pixKey: req.tenant.pixKey ?? null,
+        pixBeneficiary: req.tenant.pixBeneficiary ?? null,
+        bankName: req.tenant.bankName ?? null,
+        bankAgency: req.tenant.bankAgency ?? null,
+        bankAccount: req.tenant.bankAccount ?? null,
+        bankAccountHolder: req.tenant.bankAccountHolder ?? null,
+        bankAccountType: req.tenant.bankAccountType ?? null,
       };
 
       res.json(publicTenantData);
@@ -334,11 +342,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update tenant branding (Manager only)
   app.put("/api/tenant", authorize(), async (req, res) => {
     try {
+      const optionalString = z.string().trim().max(200).optional().nullable()
+        .transform((v) => (v === undefined ? undefined : v === null || v === "" ? null : v));
+
       const updateSchema = z.object({
         name: z.string().min(1).optional(),
         primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
         secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
         logoUrl: z.string().url().optional().nullable(),
+        // Per-tenant payment configuration (Template 3)
+        pixKey: optionalString,
+        pixBeneficiary: optionalString,
+        bankName: optionalString,
+        bankAgency: optionalString,
+        bankAccount: optionalString,
+        bankAccountHolder: optionalString,
+        bankAccountType: z.enum(["checking", "savings"]).optional().nullable()
+          .transform((v) => (v === undefined ? undefined : v ?? null)),
       });
 
       const data = updateSchema.parse(req.body);
@@ -362,7 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ipAddress: req.ip,
       });
 
-      // Return sanitized response
+      // Return sanitized response (includes payment fields so the settings UI
+      // can re-hydrate after saving)
       const publicTenantData = {
         id: updatedTenant.id,
         name: updatedTenant.name,
@@ -371,6 +392,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primaryColor: updatedTenant.primaryColor,
         secondaryColor: updatedTenant.secondaryColor,
         status: updatedTenant.status,
+        pixKey: updatedTenant.pixKey ?? null,
+        pixBeneficiary: updatedTenant.pixBeneficiary ?? null,
+        bankName: updatedTenant.bankName ?? null,
+        bankAgency: updatedTenant.bankAgency ?? null,
+        bankAccount: updatedTenant.bankAccount ?? null,
+        bankAccountHolder: updatedTenant.bankAccountHolder ?? null,
+        bankAccountType: updatedTenant.bankAccountType ?? null,
       };
 
       res.json(publicTenantData);
@@ -2404,12 +2432,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client,
           trailer,
         },
+        tenant: req.tenant ?? null,
       });
 
       res.json(invoiceData);
     } catch (error) {
       console.error("Get invoice data error:", error);
       res.status(500).json({ message: "Failed to fetch invoice data" });
+    }
+  });
+
+  // Returns the per-tenant payment methods for a single invoice. Used by the
+  // "Pay" dialog on the invoices page to render PIX / bank / card tabs.
+  // Mirrors the same authorization model as the data + PDF routes.
+  app.get("/api/invoices/:id/payment-methods", authorize(), async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id, req.tenantId!);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const methods = buildPaymentMethods(req.tenant ?? null, {
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: invoice.amount,
+      });
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "payment_instructions_generated",
+        entityType: "invoice",
+        entityId: invoice.id,
+        details: {
+          invoiceNumber: invoice.invoiceNumber,
+          methods: methods.map((m) => m.type),
+        },
+        ipAddress: req.ip,
+      });
+
+      res.json({ methods });
+    } catch (error) {
+      console.error("Get invoice payment methods error:", error);
+      res.status(500).json({ message: "Failed to fetch payment methods" });
     }
   });
 
@@ -2441,7 +2506,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...contract,
           client,
           trailer
-        }
+        },
+        tenant: req.tenant ?? null,
       });
 
       await storage.createAuditLog({

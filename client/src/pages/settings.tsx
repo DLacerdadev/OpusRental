@@ -1,21 +1,105 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Bell, Shield, Palette, Globe, CreditCard, Mail, Settings as SettingsIcon } from "lucide-react";
+import { User, Bell, Shield, Palette, Globe, CreditCard, Mail, Settings as SettingsIcon, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+type TenantBillingConfig = {
+  pixKey: string | null;
+  pixBeneficiary: string | null;
+  bankName: string | null;
+  bankAgency: string | null;
+  bankAccount: string | null;
+  bankAccountHolder: string | null;
+  bankAccountType: string | null;
+};
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  
+  const { toast } = useToast();
+
+  const isManager = user?.role === "manager";
+
+  const { data: tenant } = useQuery<TenantBillingConfig & { id: string }>({
+    queryKey: ["/api/tenant"],
+    enabled: isManager,
+  });
+
+  const [billing, setBilling] = useState<TenantBillingConfig>({
+    pixKey: "",
+    pixBeneficiary: "",
+    bankName: "",
+    bankAgency: "",
+    bankAccount: "",
+    bankAccountHolder: "",
+    bankAccountType: "",
+  });
+
+  useEffect(() => {
+    if (tenant) {
+      setBilling({
+        pixKey: tenant.pixKey ?? "",
+        pixBeneficiary: tenant.pixBeneficiary ?? "",
+        bankName: tenant.bankName ?? "",
+        bankAgency: tenant.bankAgency ?? "",
+        bankAccount: tenant.bankAccount ?? "",
+        bankAccountHolder: tenant.bankAccountHolder ?? "",
+        bankAccountType: tenant.bankAccountType ?? "",
+      });
+    }
+  }, [tenant]);
+
+  const saveBillingMutation = useMutation({
+    mutationFn: async (data: TenantBillingConfig) => {
+      const payload: Record<string, string | null> = {};
+      (Object.keys(data) as Array<keyof TenantBillingConfig>).forEach((key) => {
+        const value = data[key];
+        if (key === "bankAccountType") {
+          payload[key] = value && value !== "" ? value : null;
+        } else {
+          payload[key] = value && value.trim() !== "" ? value.trim() : null;
+        }
+      });
+      const res = await apiRequest("PUT", "/api/tenant", payload);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to save billing configuration");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tenant"] });
+      toast({
+        title: t("settings.billingSaveSuccessTitle"),
+        description: t("settings.billingSaveSuccessDescription"),
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: t("settings.billingSaveErrorTitle"),
+        description: error?.message || t("settings.billingSaveErrorDescription"),
+        variant: "destructive",
+      });
+    },
+  });
+
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+  };
+
+  const updateBillingField = (key: keyof TenantBillingConfig, value: string) => {
+    setBilling((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -159,7 +243,131 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {user?.role === "manager" && (
+        {isManager && (
+          <Card
+            className="shadow-lg border-l-4 border-l-emerald-500 lg:col-span-2"
+            data-testid="card-billing-config"
+          >
+            <CardHeader className="border-b bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald-50 dark:bg-emerald-950 p-3 rounded-2xl">
+                  <Wallet className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">{t("settings.billingConfigTitle")}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">{t("settings.billingConfigDescription")}</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* PIX Section */}
+                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{t("settings.billingPixTitle")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("settings.billingPixDescription")}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="billing-pix-key" className="text-xs">{t("settings.billingPixKey")}</Label>
+                    <Input
+                      id="billing-pix-key"
+                      value={billing.pixKey ?? ""}
+                      onChange={(e) => updateBillingField("pixKey", e.target.value)}
+                      placeholder={t("settings.billingPixKeyPlaceholder")}
+                      data-testid="input-billing-pix-key"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="billing-pix-beneficiary" className="text-xs">{t("settings.billingPixBeneficiary")}</Label>
+                    <Input
+                      id="billing-pix-beneficiary"
+                      value={billing.pixBeneficiary ?? ""}
+                      onChange={(e) => updateBillingField("pixBeneficiary", e.target.value)}
+                      placeholder={t("settings.billingPixBeneficiaryPlaceholder")}
+                      data-testid="input-billing-pix-beneficiary"
+                    />
+                  </div>
+                </div>
+
+                {/* Bank Transfer Section */}
+                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{t("settings.billingBankTitle")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("settings.billingBankDescription")}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="billing-bank-name" className="text-xs">{t("settings.billingBankName")}</Label>
+                    <Input
+                      id="billing-bank-name"
+                      value={billing.bankName ?? ""}
+                      onChange={(e) => updateBillingField("bankName", e.target.value)}
+                      data-testid="input-billing-bank-name"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="billing-bank-agency" className="text-xs">{t("settings.billingBankAgency")}</Label>
+                      <Input
+                        id="billing-bank-agency"
+                        value={billing.bankAgency ?? ""}
+                        onChange={(e) => updateBillingField("bankAgency", e.target.value)}
+                        data-testid="input-billing-bank-agency"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="billing-bank-account" className="text-xs">{t("settings.billingBankAccount")}</Label>
+                      <Input
+                        id="billing-bank-account"
+                        value={billing.bankAccount ?? ""}
+                        onChange={(e) => updateBillingField("bankAccount", e.target.value)}
+                        data-testid="input-billing-bank-account"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="billing-bank-holder" className="text-xs">{t("settings.billingBankHolder")}</Label>
+                    <Input
+                      id="billing-bank-holder"
+                      value={billing.bankAccountHolder ?? ""}
+                      onChange={(e) => updateBillingField("bankAccountHolder", e.target.value)}
+                      data-testid="input-billing-bank-holder"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">{t("settings.billingBankType")}</Label>
+                    <Select
+                      value={billing.bankAccountType ?? ""}
+                      onValueChange={(v) => updateBillingField("bankAccountType", v)}
+                    >
+                      <SelectTrigger data-testid="select-billing-bank-type">
+                        <SelectValue placeholder={t("settings.billingBankTypePlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="checking">{t("settings.billingBankTypeChecking")}</SelectItem>
+                        <SelectItem value="savings">{t("settings.billingBankTypeSavings")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => saveBillingMutation.mutate(billing)}
+                  disabled={saveBillingMutation.isPending}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  data-testid="button-save-billing"
+                >
+                  {saveBillingMutation.isPending
+                    ? t("settings.billingSaving")
+                    : t("settings.billingSave")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {isManager && (
           <Card className="shadow-lg border-l-4 border-l-blue-500 lg:col-span-2">
             <CardHeader className="border-b bg-muted/30">
               <div className="flex items-center gap-3">

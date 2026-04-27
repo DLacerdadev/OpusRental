@@ -1,6 +1,11 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { BrokerDispatch, RentalContract, Invoice, Trailer, RentalClient } from '@shared/schema';
+import type { BrokerDispatch, RentalContract, Invoice, Trailer, RentalClient, Tenant } from '@shared/schema';
+import {
+  buildPaymentMethods,
+  paymentMethodsToInstructionLines,
+  type PaymentMethod,
+} from './payment-methods.service';
 
 interface DispatchPDFData extends BrokerDispatch {
   trailer: Trailer;
@@ -16,6 +21,7 @@ interface InvoicePDFData extends Invoice {
     client: RentalClient;
     trailer: Trailer;
   };
+  tenant?: Tenant | null;
 }
 
 export interface InvoiceDataItem {
@@ -48,6 +54,7 @@ export interface InvoiceData {
   items: InvoiceDataItem[];
   totals: InvoiceDataTotals;
   paymentInstructions: string[];
+  paymentMethods: PaymentMethod[];
   status: string;
   referenceMonth: string;
   notes: string | null;
@@ -393,6 +400,13 @@ export class PDFService {
       throw new Error('Invoice is missing a due date');
     }
 
+    const paymentMethods = buildPaymentMethods(data.tenant ?? null, {
+      id: data.id,
+      invoiceNumber: data.invoiceNumber,
+      amount: data.amount,
+    });
+    const paymentInstructions = paymentMethodsToInstructionLines(paymentMethods);
+
     return {
       invoiceNumber: data.invoiceNumber,
       issueDate: this.toISO(data.createdAt),
@@ -418,13 +432,8 @@ export class PDFService {
         tax,
         total,
       },
-      paymentInstructions: [
-        'Bank: US Bank',
-        'Account Name: Opus Rental Capital LLC',
-        'Account Number: 1234567890',
-        'Routing Number: 987654321',
-        `Reference: ${data.invoiceNumber}`,
-      ],
+      paymentInstructions,
+      paymentMethods,
       status: data.status,
       referenceMonth: data.referenceMonth,
       notes: data.notes ?? null,

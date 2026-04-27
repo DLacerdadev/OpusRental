@@ -37,6 +37,15 @@ export const tenants = pgTable("tenants", {
   maxTrailers: integer("max_trailers").default(50),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+
+  // Per-tenant payment method configuration (Template 3)
+  pixKey: text("pix_key"),
+  pixBeneficiary: text("pix_beneficiary"),
+  bankName: text("bank_name"),
+  bankAgency: text("bank_agency"),
+  bankAccount: text("bank_account"),
+  bankAccountHolder: text("bank_account_holder"),
+  bankAccountType: text("bank_account_type"), // "checking" | "savings"
   
   // Status
   status: text("status").notNull().default("active"), // active, suspended, cancelled
