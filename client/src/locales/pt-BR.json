@@ -818,7 +818,19 @@
     "toastTerminateTitle": "Contrato encerrado",
     "toastTerminateDescription": "Contrato de locação foi encerrado",
     "toastTerminateErrorTitle": "Erro ao encerrar contrato",
-    "toastTerminateErrorDescription": "Falha ao encerrar contrato"
+    "toastTerminateErrorDescription": "Falha ao encerrar contrato",
+    "generateInvoiceNow": "Gerar fatura agora",
+    "generateInvoiceConfirmTitle": "Gerar fatura agora?",
+    "generateInvoiceConfirmDescription": "Será criada uma fatura para o contrato {{contract}} ({{client}}) referente ao mês corrente, usando o valor mensal e os dias de vencimento configurados no contrato.",
+    "generateInvoiceConfirmAction": "Gerar fatura",
+    "generateInvoiceGenerating": "Gerando...",
+    "toastGenerateInvoiceTitle": "Fatura gerada",
+    "toastGenerateInvoiceDescription": "A fatura foi criada e está disponível na página de Faturas.",
+    "toastGenerateInvoiceDuplicateTitle": "Já existe fatura para este mês",
+    "toastGenerateInvoiceDuplicateDescription": "Este contrato já possui uma fatura para o mês corrente. Verifique a página de Faturas.",
+    "toastGenerateInvoiceErrorTitle": "Erro ao gerar fatura",
+    "toastGenerateInvoiceErrorDescription": "Não foi possível gerar a fatura agora. Tente novamente.",
+    "toastGenerateInvoiceMissingRateDescription": "O contrato não possui um valor mensal configurado. Edite o contrato antes de gerar a fatura."
   },
   "invoices": {
     "title": "Faturas e Cobrança",

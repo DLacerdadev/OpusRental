@@ -5,11 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, Edit, XCircle, Eye, DollarSign, Calendar } from "lucide-react";
+import { FileText, Plus, Edit, XCircle, Eye, DollarSign, Calendar, Receipt } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRentalContractSchema, type InsertRentalContract } from "@shared/schema";
@@ -24,6 +34,7 @@ export default function RentalContracts() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<any>(null);
   const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [generateInvoiceContract, setGenerateInvoiceContract] = useState<any>(null);
   const { toast } = useToast();
 
   const { data: contracts = [], isLoading } = useQuery<any[]>({
@@ -95,6 +106,50 @@ export default function RentalContracts() {
         description: error?.message || t('rentalContracts.toastUpdateErrorDescription'),
         variant: "destructive",
       });
+    },
+  });
+
+  const generateInvoiceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("POST", `/api/rental-contracts/${id}/generate-invoice`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/rental-contracts"] });
+      toast({
+        title: t('rentalContracts.toastGenerateInvoiceTitle'),
+        description: t('rentalContracts.toastGenerateInvoiceDescription'),
+      });
+      setGenerateInvoiceContract(null);
+    },
+    onError: (error: any) => {
+      const message: string = error?.message || "";
+      // apiRequest throws with format "<status>: <body>". Detect 409 either
+      // by status prefix or by the structured "duplicate" reason that the
+      // backend returns so the user gets a precise, friendly message
+      // instead of the generic failure copy.
+      const isDuplicate = /^409/.test(message) || /duplicate/i.test(message);
+      const isMissingRate = /^422/.test(message) || /missing_rate/i.test(message);
+      if (isDuplicate) {
+        toast({
+          title: t('rentalContracts.toastGenerateInvoiceDuplicateTitle'),
+          description: t('rentalContracts.toastGenerateInvoiceDuplicateDescription'),
+          variant: "destructive",
+        });
+      } else if (isMissingRate) {
+        toast({
+          title: t('rentalContracts.toastGenerateInvoiceErrorTitle'),
+          description: t('rentalContracts.toastGenerateInvoiceMissingRateDescription'),
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: t('rentalContracts.toastGenerateInvoiceErrorTitle'),
+          description: message || t('rentalContracts.toastGenerateInvoiceErrorDescription'),
+          variant: "destructive",
+        });
+      }
+      setGenerateInvoiceContract(null);
     },
   });
 
@@ -389,6 +444,18 @@ export default function RentalContracts() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          {contract.status === "active" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setGenerateInvoiceContract(contract)}
+                              className="text-accent hover:text-accent"
+                              title={t('rentalContracts.generateInvoiceNow')}
+                              data-testid={`button-generate-invoice-${contract.id}`}
+                            >
+                              <Receipt className="h-4 w-4" />
+                            </Button>
+                          )}
                           {contract.status === "active" && (
                             <Button
                               variant="ghost"
@@ -738,6 +805,53 @@ export default function RentalContracts() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!generateInvoiceContract}
+        onOpenChange={(open) => {
+          if (!open && !generateInvoiceMutation.isPending) {
+            setGenerateInvoiceContract(null);
+          }
+        }}
+      >
+        <AlertDialogContent data-testid="dialog-generate-invoice-confirm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('rentalContracts.generateInvoiceConfirmTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {generateInvoiceContract
+                ? t('rentalContracts.generateInvoiceConfirmDescription', {
+                    contract: generateInvoiceContract.contractNumber,
+                    client: getClientName(generateInvoiceContract.clientId),
+                  })
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={generateInvoiceMutation.isPending}
+              data-testid="button-cancel-generate-invoice"
+            >
+              {t('rentalContracts.buttonCancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (generateInvoiceContract) {
+                  generateInvoiceMutation.mutate(generateInvoiceContract.id);
+                }
+              }}
+              disabled={generateInvoiceMutation.isPending}
+              data-testid="button-confirm-generate-invoice"
+            >
+              {generateInvoiceMutation.isPending
+                ? t('rentalContracts.generateInvoiceGenerating')
+                : t('rentalContracts.generateInvoiceConfirmAction')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

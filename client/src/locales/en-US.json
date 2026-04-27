@@ -821,7 +821,19 @@
     "toastTerminateTitle": "Contract terminated",
     "toastTerminateDescription": "Rental contract has been terminated",
     "toastTerminateErrorTitle": "Error terminating contract",
-    "toastTerminateErrorDescription": "Failed to terminate contract"
+    "toastTerminateErrorDescription": "Failed to terminate contract",
+    "generateInvoiceNow": "Generate invoice now",
+    "generateInvoiceConfirmTitle": "Generate invoice now?",
+    "generateInvoiceConfirmDescription": "This will create an invoice for contract {{contract}} ({{client}}) for the current month, using the monthly rate and payment due days configured on the contract.",
+    "generateInvoiceConfirmAction": "Generate invoice",
+    "generateInvoiceGenerating": "Generating...",
+    "toastGenerateInvoiceTitle": "Invoice generated",
+    "toastGenerateInvoiceDescription": "The invoice has been created and is available on the Invoices page.",
+    "toastGenerateInvoiceDuplicateTitle": "Invoice already exists for this month",
+    "toastGenerateInvoiceDuplicateDescription": "This contract already has an invoice for the current month. Check the Invoices page.",
+    "toastGenerateInvoiceErrorTitle": "Error generating invoice",
+    "toastGenerateInvoiceErrorDescription": "Could not generate the invoice right now. Please try again.",
+    "toastGenerateInvoiceMissingRateDescription": "The contract has no monthly rate configured. Edit the contract before generating the invoice."
   },
   "invoices": {
     "title": "Invoices & Billing",

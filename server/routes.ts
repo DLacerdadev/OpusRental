@@ -1132,6 +1132,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // On-demand single-contract invoice generation. Reuses the same routine
+  // that the daily cron uses (InvoiceAutomationService.generateInvoiceForContract)
+  // so date math, dueDate calculation, and duplicate handling stay in sync.
+  // Returns 201 with the new invoice on success, 409 when the
+  // (contractId, referenceMonth) pair already exists, and 422 when the
+  // contract has no monthlyRate configured.
+  app.post("/api/rental-contracts/:id/generate-invoice", authorize(), isManager, async (req, res) => {
+    try {
+      const contract = await storage.getRentalContract(req.params.id, req.tenantId!);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+
+      if (contract.status !== "active") {
+        return res.status(400).json({
+          message: "Only active contracts can generate invoices",
+          reason: "contract_not_active",
+        });
+      }
+
+      const { InvoiceAutomationService } = await import("./services/invoice-automation.service");
+      const result = await InvoiceAutomationService.generateInvoiceForContract(
+        contract,
+        new Date(),
+      );
+
+      if (result.ok) {
+        await storage.createAuditLog({
+          tenantId: req.tenantId!,
+          userId: req.session.userId!,
+          action: "generate_invoice_now",
+          entityType: "rental_contract",
+          entityId: contract.id,
+          details: {
+            contractNumber: contract.contractNumber,
+            invoiceId: result.invoice.id,
+            invoiceNumber: result.invoice.invoiceNumber,
+            referenceMonth: result.invoice.referenceMonth,
+            amount: result.invoice.amount,
+          },
+          ipAddress: req.ip,
+        });
+        return res.status(201).json(result.invoice);
+      }
+
+      if (result.skipped && result.reason === "duplicate") {
+        return res.status(409).json({
+          message: "An invoice for this contract and reference month already exists",
+          reason: "duplicate",
+        });
+      }
+
+      if (result.skipped && result.reason === "missing_rate") {
+        return res.status(422).json({
+          message: "Contract is missing a monthly rate",
+          reason: "missing_rate",
+        });
+      }
+
+      return res.status(500).json({
+        message: "Failed to generate invoice",
+        reason: "reason" in result ? result.reason : "unknown",
+      });
+    } catch (error) {
+      console.error("Generate invoice now error:", error);
+      res.status(500).json({ message: "Failed to generate invoice" });
+    }
+  });
+
   app.post("/api/rental-contracts/:id/terminate", authorize(), async (req, res) => {
     try {
       // Validate empty body with strict Zod schema
