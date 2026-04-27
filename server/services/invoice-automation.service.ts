@@ -202,7 +202,7 @@ export class InvoiceAutomationService {
       for (const invoice of overdueInvoices) {
         try {
           // Update invoice status to overdue if not already
-          if (invoice.status === "pending") {
+          if (invoice.status === "pending" || invoice.status === "reissued") {
             await storage.updateInvoice(invoice.id, { status: "overdue" });
           }
 
