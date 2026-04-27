@@ -180,10 +180,11 @@ export class InvoiceAutomationService {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error creating invoice";
-      // The DB constraint may fire if a parallel run created the same
-      // (contractId, referenceMonth) row between our check and our insert.
-      // Treat this as a graceful duplicate, not an error.
-      if (/uniq_invoices_contract_month|duplicate key/i.test(message)) {
+      // Only the (contractId, referenceMonth) collision is a graceful
+      // duplicate. Any other unique violation (e.g. invoice-number race on
+      // uniq_invoices_tenant_invoice_number) is a real failure and must
+      // bubble up so the caller sees it instead of being silently skipped.
+      if (/uniq_invoices_contract_month/i.test(message)) {
         return { ok: false, skipped: true, reason: "duplicate" };
       }
       throw error;
