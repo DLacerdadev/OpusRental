@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRentalContractSchema, type InsertRentalContract } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -36,6 +37,12 @@ export default function RentalContracts() {
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [generateInvoiceContract, setGenerateInvoiceContract] = useState<any>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  // The "Generate invoice now" button calls a server endpoint guarded by
+  // isManager (manager/admin). Mirror that gate on the client so non-manager
+  // users (e.g. investors who happen to hit this page) never see the button
+  // — relying solely on a backend 403 would expose a control they cannot use.
+  const canGenerateInvoice = user?.role === "manager" || user?.role === "admin";
 
   const { data: contracts = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/rental-contracts"],
@@ -123,20 +130,20 @@ export default function RentalContracts() {
       setGenerateInvoiceContract(null);
     },
     onError: (error: any) => {
+      // apiRequest in this codebase attaches the HTTP status to the thrown
+      // Error as `error.status` (see client/src/lib/queryClient.ts). Use
+      // that as the deterministic source of truth — the response body is
+      // not preserved beyond `message`, so substring sniffing on the
+      // localized server message is unreliable.
+      const status: number | undefined = error?.status;
       const message: string = error?.message || "";
-      // apiRequest throws with format "<status>: <body>". Detect 409 either
-      // by status prefix or by the structured "duplicate" reason that the
-      // backend returns so the user gets a precise, friendly message
-      // instead of the generic failure copy.
-      const isDuplicate = /^409/.test(message) || /duplicate/i.test(message);
-      const isMissingRate = /^422/.test(message) || /missing_rate/i.test(message);
-      if (isDuplicate) {
+      if (status === 409) {
         toast({
           title: t('rentalContracts.toastGenerateInvoiceDuplicateTitle'),
           description: t('rentalContracts.toastGenerateInvoiceDuplicateDescription'),
           variant: "destructive",
         });
-      } else if (isMissingRate) {
+      } else if (status === 422) {
         toast({
           title: t('rentalContracts.toastGenerateInvoiceErrorTitle'),
           description: t('rentalContracts.toastGenerateInvoiceMissingRateDescription'),
@@ -444,7 +451,7 @@ export default function RentalContracts() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          {contract.status === "active" && (
+                          {contract.status === "active" && canGenerateInvoice && (
                             <Button
                               variant="ghost"
                               size="sm"
