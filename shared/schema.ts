@@ -12,6 +12,7 @@ import {
   jsonb,
   uniqueIndex,
   index,
+  check,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -267,6 +268,7 @@ export const invoices = pgTable("invoices", {
   idxTenant: index("idx_invoices_tenant").on(t.tenantId),
   idxStatus: index("idx_invoices_status").on(t.status),
   idxDueDate: index("idx_invoices_due_date").on(t.dueDate),
+  statusCheck: check("invoices_status_check", sql`${t.status} IN ('pending', 'paid', 'overdue', 'cancelled', 'reissued')`),
 }));
 
 // Email Settings table (Global email configuration)

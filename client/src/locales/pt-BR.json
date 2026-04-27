@@ -847,6 +847,7 @@
     "toastDeleteDescription": "Fatura excluída com sucesso",
     "toastDeleteErrorTitle": "Erro",
     "toastDeleteErrorDescription": "Falha ao excluir fatura",
+    "filterAll": "Todos os status",
     "statusReissued": "2ª VIA",
     "buttonReissue": "2ª Via",
     "buttonReissuing": "Emitindo...",

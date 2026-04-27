@@ -87,15 +87,12 @@ export class InvoiceAutomationService {
           const invoiceNumber = `INV-${String(allInvoices.length + 1).padStart(4, "0")}`;
 
           // Calculate due date using invoiceDayOfMonth from the contract.
-          // Use the configured day in the current month if it has not yet passed;
-          // otherwise advance to the same day in the next month.
-          // Clamp to a valid day (1-28) to avoid month-overflow (e.g. Feb 30).
+          // Always targets the configured day in the NEXT calendar month
+          // (e.g. invoice generated May 1 with day=5 → due June 5).
+          // Clamp to 1-28 to avoid month-overflow on short months (e.g. Feb 30).
           const rawDay = contract.invoiceDayOfMonth || 15;
           const dayOfMonth = Math.min(Math.max(1, rawDay), 28);
-          const dueDate = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
-          if (dueDate <= today) {
-            dueDate.setMonth(dueDate.getMonth() + 1);
-          }
+          const dueDate = new Date(today.getFullYear(), today.getMonth() + 1, dayOfMonth);
 
           // Create invoice
           const invoice = await storage.createInvoice({

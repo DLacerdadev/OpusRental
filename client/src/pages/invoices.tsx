@@ -228,10 +228,17 @@ export default function Invoices() {
     setIsViewOpen(true);
   };
 
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   const totalInvoices = invoices.length;
   const pendingInvoices = invoices.filter((i: any) => i.status === "pending").length;
   const paidInvoices = invoices.filter((i: any) => i.status === "paid").length;
   const overdueInvoices = invoices.filter((i: any) => i.status === "overdue").length;
+  const reissuedInvoices = invoices.filter((i: any) => i.status === "reissued").length;
+
+  const filteredInvoices = statusFilter === "all"
+    ? invoices
+    : invoices.filter((i: any) => i.status === statusFilter);
 
   const totalRevenue = invoices
     .filter((i: any) => i.status === "paid")
@@ -287,7 +294,7 @@ export default function Invoices() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
         <Card className="bg-card dark:bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.totalInvoices')}</CardTitle>
@@ -335,12 +342,37 @@ export default function Invoices() {
             </p>
           </CardContent>
         </Card>
+
+        <Card className="bg-card dark:bg-card border-border">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.statusReissued')}</CardTitle>
+            <RotateCcw className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-foreground" data-testid="text-reissued-invoices">
+              {reissuedInvoices}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Invoices Table */}
       <Card className="bg-card dark:bg-card border-border">
-        <CardHeader>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="text-card-foreground">{t('invoices.allInvoices')}</CardTitle>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-40 bg-background border-input text-foreground" data-testid="select-status-filter">
+              <SelectValue placeholder={t('invoices.filterAll')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('invoices.filterAll')}</SelectItem>
+              <SelectItem value="pending">{t('invoices.statusPending')}</SelectItem>
+              <SelectItem value="paid">{t('invoices.statusPaid')}</SelectItem>
+              <SelectItem value="overdue">{t('invoices.statusOverdue')}</SelectItem>
+              <SelectItem value="cancelled">{t('invoices.statusCancelled')}</SelectItem>
+              <SelectItem value="reissued">{t('invoices.statusReissued')}</SelectItem>
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -356,14 +388,14 @@ export default function Invoices() {
                 </tr>
               </thead>
               <tbody>
-                {invoices.length === 0 ? (
+                {filteredInvoices.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center p-8 text-muted-foreground">
                       {t('invoices.noInvoices')}
                     </td>
                   </tr>
                 ) : (
-                  invoices.map((invoice: any) => (
+                  filteredInvoices.map((invoice: any) => (
                     <tr
                       key={invoice.id}
                       className="border-b border-border hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors"

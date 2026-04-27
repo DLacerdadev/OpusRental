@@ -850,6 +850,7 @@
     "toastDeleteDescription": "Invoice deleted successfully",
     "toastDeleteErrorTitle": "Error",
     "toastDeleteErrorDescription": "Failed to delete invoice",
+    "filterAll": "All statuses",
     "statusReissued": "REISSUED",
     "buttonReissue": "Reissue",
     "buttonReissuing": "Reissuing...",
