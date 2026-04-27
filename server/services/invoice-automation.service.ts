@@ -86,15 +86,10 @@ export class InvoiceAutomationService {
           const allInvoices = await storage.getAllInvoices();
           const invoiceNumber = `INV-${String(allInvoices.length + 1).padStart(4, "0")}`;
 
-          // Calculate due date: use invoiceDayOfMonth configured on the contract.
-          // If that day is still in the future this month, use it this month;
-          // otherwise use the same day next month.
+          // Calculate due date: always use invoiceDayOfMonth in the NEXT month.
+          // e.g. invoice generated on May 1 with day=5 → due June 5.
           const dayOfMonth = contract.invoiceDayOfMonth || 15;
-          const dueDate = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
-          if (dueDate <= today) {
-            // Day has already passed — push to next month
-            dueDate.setMonth(dueDate.getMonth() + 1);
-          }
+          const dueDate = new Date(today.getFullYear(), today.getMonth() + 1, dayOfMonth);
 
           // Create invoice
           const invoice = await storage.createInvoice({

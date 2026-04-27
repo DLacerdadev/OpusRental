@@ -393,7 +393,7 @@ export default function Invoices() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {(invoice.status === "pending" || invoice.status === "overdue" || invoice.status === "reissued") && (
+                          {(invoice.status === "pending" || invoice.status === "overdue") && (
                             <>
                               <Button
                                 variant="ghost"
