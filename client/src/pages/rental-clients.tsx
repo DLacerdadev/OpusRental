@@ -54,6 +54,16 @@ export default function RentalClients() {
     queryKey: ["/api/rental-clients"],
   });
 
+  // US state list (with state-table sales-tax rates) used to power the
+  // billing-state dropdown in the create / edit dialog. Choosing from the
+  // dropdown guarantees the value matches the server-side tax engine, so
+  // the resolved sales-tax rate on each invoice for this client is correct.
+  const { data: usStates = [] } = useQuery<
+    Array<{ code: string; name: string; rate: number }>
+  >({
+    queryKey: ["/api/sales-tax/states"],
+  });
+
   const form = useForm<InsertRentalClient>({
     resolver: zodResolver(insertRentalClientSchema),
     defaultValues: {
@@ -144,6 +154,19 @@ export default function RentalClients() {
     }
   };
 
+  // Map a legacy free-text state value (e.g. "California", "tx") to the
+  // 2-letter code our dropdown expects, so editing an existing client
+  // shows the correct selection instead of a blank trigger.
+  const normalizeState = (raw: string | null | undefined): string => {
+    if (!raw) return "";
+    const trimmed = String(raw).trim();
+    if (!trimmed) return "";
+    const upper = trimmed.toUpperCase();
+    if (upper.length === 2 && usStates.some((s) => s.code === upper)) return upper;
+    const byName = usStates.find((s) => s.name.toLowerCase() === trimmed.toLowerCase());
+    return byName ? byName.code : "";
+  };
+
   const handleEdit = (client: any) => {
     setEditingClient(client);
     form.reset({
@@ -154,7 +177,7 @@ export default function RentalClients() {
       phone: client.phone,
       address: client.address || "",
       city: client.city || "",
-      state: client.state || "",
+      state: normalizeState(client.state),
       zipCode: client.zipCode || "",
       country: client.country,
       status: client.status,
@@ -820,13 +843,24 @@ export default function RentalClients() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('rentalClients.formState')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t('rentalClients.placeholderState')}
-                          {...field}
-                          data-testid="input-state"
-                        />
-                      </FormControl>
+                      <Select
+                        onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                        value={field.value && field.value !== "" ? field.value : "__none__"}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-state">
+                            <SelectValue placeholder={t('rentalClients.placeholderState')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="__none__">—</SelectItem>
+                          {usStates.map((s) => (
+                            <SelectItem key={s.code} value={s.code}>
+                              {s.name} ({s.code}) — {s.rate.toFixed(2)}%
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

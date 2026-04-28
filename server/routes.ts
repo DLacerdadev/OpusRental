@@ -27,6 +27,11 @@ import { EmailService } from "./services/email.service";
 import { verifyInvoiceToken, buildPublicPaymentUrl } from "./services/invoice-token.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
+import {
+  resolveInvoiceSalesTaxRate,
+  resolveSalesTaxByState,
+  listUsStates,
+} from "./services/sales-tax.service";
 import { MonitoringService } from "./services/monitoring.service";
 import { NotificationService } from "./services/notification.service";
 import {
@@ -342,6 +347,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Get tenant error:", error);
       res.status(500).json({ message: "Failed to fetch tenant" });
     }
+  });
+
+  // Sales-tax helper endpoints. These power the rental-client form
+  // (state dropdown) and the invoice editor (per-state rate prefill) so
+  // managers can see exactly which rate the engine will apply *before*
+  // they save anything. Both endpoints are read-only and return the same
+  // built-in US state table the server uses to compute invoice tax.
+  app.get("/api/sales-tax/states", authorize(), (_req, res) => {
+    res.json(listUsStates());
+  });
+
+  app.get("/api/sales-tax/resolve", authorize(), async (req, res) => {
+    const stateInput = typeof req.query.state === "string" ? req.query.state : null;
+    const tenantDefault = req.tenant?.salesTaxRate ?? null;
+    const resolved = resolveInvoiceSalesTaxRate({
+      clientState: stateInput,
+      tenantDefaultRate: tenantDefault,
+    });
+    // Also surface the pure state-table lookup so the UI can distinguish
+    // "this state has no entry, falling back to tenant default" from
+    // "this state explicitly resolves to 0% (NOMAD state)".
+    const stateOnly = resolveSalesTaxByState(stateInput);
+    res.json({
+      input: stateInput,
+      rate: resolved.rate,
+      source: resolved.source,
+      stateCode: resolved.stateCode,
+      stateName: resolved.stateName,
+      stateTableMatch: stateOnly
+        ? { rate: stateOnly.rate, stateCode: stateOnly.stateCode, stateName: stateOnly.stateName }
+        : null,
+    });
   });
 
   // Read tenant billing configuration (Manager / Admin only) — kept off the
@@ -1340,16 +1377,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // automated invoice creation.
       const invoiceNumber = await storage.getNextInvoiceNumber(req.tenantId!);
 
-      // Resolve sales-tax breakdown. Manager-supplied values win; otherwise
-      // derive subtotal from `amount` and tax from the tenant's default
-      // salesTaxRate. The breakdown is then frozen on the invoice so future
-      // tenant rate changes never retroactively alter past invoices.
+      // Resolve sales-tax breakdown. Resolution order:
+      //   1. Manager-supplied per-invoice rate (explicit override, always wins)
+      //   2. Customer billing state, looked up in the US sales-tax table
+      //   3. Tenant default rate
+      //   4. 0%
+      // The resolved breakdown is then frozen on the invoice so future
+      // tenant rate or tax-table changes never retroactively alter past
+      // invoices.
       const incoming = validation.data;
       const incomingAmount = parseFloat(String(incoming.amount));
       const tenantForTax = await storage.getTenant(req.tenantId!).catch(() => null);
-      const tenantDefaultRate = tenantForTax?.salesTaxRate
-        ? parseFloat(tenantForTax.salesTaxRate.toString())
-        : 0;
+
+      // Pull the contract → client so we know which state to bill against.
+      // If anything in this lookup fails we silently fall back to the
+      // tenant default; we never want a missing client lookup to block a
+      // legitimate invoice from being created.
+      let clientStateForTax: string | null = null;
+      try {
+        const contractForTax = await storage.getRentalContract(
+          incoming.contractId,
+          req.tenantId!,
+        );
+        if (contractForTax) {
+          const clientForTax = await storage.getRentalClient(
+            contractForTax.clientId,
+            req.tenantId!,
+          );
+          clientStateForTax = clientForTax?.state ?? null;
+        }
+      } catch {
+        clientStateForTax = null;
+      }
 
       const supplied = (v: unknown): v is string | number => v !== undefined && v !== null && v !== "";
       let subtotal: number;
@@ -1368,7 +1427,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       } else {
-        salesTaxRate = Number.isFinite(tenantDefaultRate) && tenantDefaultRate >= 0 ? tenantDefaultRate : 0;
+        const resolved = resolveInvoiceSalesTaxRate({
+          clientState: clientStateForTax,
+          tenantDefaultRate: tenantForTax?.salesTaxRate ?? null,
+        });
+        salesTaxRate = resolved.rate;
       }
 
       if (supplied(incoming.subtotal)) {

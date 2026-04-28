@@ -501,14 +501,24 @@ export default function Invoices() {
     queryKey: ["/api/trailers"],
   });
 
-  // Tenant billing config — used to prefill the per-invoice "Sales Tax Rate"
-  // field with the tenant's default rate when the manager opens the
-  // "New invoice" dialog. The rate stays editable so the manager can override
-  // it for individual invoices (e.g. exempt customers).
+  // Tenant billing config — used as the *fallback* for the per-invoice
+  // "Sales Tax Rate" field when we can't resolve it from the customer's
+  // billing state. The rate stays editable so the manager can override it
+  // for individual invoices (e.g. exempt customers).
   const { data: tenantBilling } = useQuery<{ salesTaxRate: string | null }>({
     queryKey: ["/api/tenant/billing"],
   });
   const defaultSalesTaxRate = tenantBilling?.salesTaxRate ?? "0";
+
+  // US state → state-tax-rate table, used to look up the rate the engine
+  // will apply based on the selected contract's customer billing state.
+  // This mirrors the server's resolver so the previewed total in the
+  // dialog matches what the API will store on submit.
+  const { data: usStates = [] } = useQuery<
+    Array<{ code: string; name: string; rate: number }>
+  >({
+    queryKey: ["/api/sales-tax/states"],
+  });
 
   const trailerDisplay = (trailer?: Trailer) => {
     if (!trailer) return "—";
@@ -543,10 +553,28 @@ export default function Invoices() {
     },
   });
 
+  // Mirror of the server's tax resolver. Given a customer billing state,
+  // return the rate the server would apply (state lookup → tenant default
+  // → 0%). Keeping this in sync with sales-tax.service.ts avoids a round
+  // trip to the API on every contract switch in the create dialog.
+  const resolveTaxRateForState = (rawState: string | null | undefined): string => {
+    if (rawState) {
+      const trimmed = String(rawState).trim();
+      const upper = trimmed.toUpperCase();
+      const byCode = usStates.find(
+        (s) => s.code === upper || s.name.toLowerCase() === trimmed.toLowerCase(),
+      );
+      if (byCode) return byCode.rate.toFixed(2);
+    }
+    return defaultSalesTaxRate;
+  };
+
   // When the dialog opens (or when the tenant default rate finishes loading),
   // refresh the salesTaxRate field with the tenant default unless the user
   // already typed a custom value. This keeps create/edit pre-filled without
-  // overwriting the manager's manual override.
+  // overwriting the manager's manual override. Once a contract is selected,
+  // the contract-change effect below replaces this with the customer's
+  // state-resolved rate.
   useEffect(() => {
     if (!isCreateOpen) return;
     const current = form.getValues("salesTaxRate");
@@ -586,7 +614,15 @@ export default function Invoices() {
     const dmm = String(due.getUTCMonth() + 1).padStart(2, "0");
     const ddd = String(due.getUTCDate()).padStart(2, "0");
     form.setValue("dueDate", `${dyyyy}-${dmm}-${ddd}`, { shouldDirty: true });
-  }, [watchedContractId, isCreateOpen, contracts, form]);
+
+    // Resolve the sales tax rate from the customer's billing state. We
+    // overwrite the field on every contract switch so the rate stays in
+    // sync with the selected customer; the manager can still type a
+    // custom value afterwards to override it.
+    const client = rentalClients.find((c) => c.id === contract.clientId);
+    const resolvedRate = resolveTaxRateForState(client?.state ?? null);
+    form.setValue("salesTaxRate", resolvedRate, { shouldDirty: true });
+  }, [watchedContractId, isCreateOpen, contracts, rentalClients, usStates, defaultSalesTaxRate, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InvoiceFormData) => {
@@ -1266,31 +1302,68 @@ export default function Invoices() {
               <FormField
                 control={form.control}
                 name="salesTaxRate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground">{t('invoices.formSalesTaxRate')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        placeholder="0.00"
-                        value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                        className="bg-background dark:bg-background text-foreground border-input"
-                        data-testid="input-sales-tax-rate"
-                      />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      {t('invoices.formSalesTaxRateHelp')}
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  // Surface the state used to resolve the rate so the manager
+                  // can see at a glance whether the prefilled value came from
+                  // the customer's billing state, the tenant default, or a
+                  // manual override.
+                  const selectedContract = contracts.find((c) => c.id === watchedContractId);
+                  const selectedClient = selectedContract
+                    ? rentalClients.find((rc) => rc.id === selectedContract.clientId)
+                    : null;
+                  const stateRaw = selectedClient?.state ?? null;
+                  const stateMatch = stateRaw
+                    ? usStates.find(
+                        (s) =>
+                          s.code === String(stateRaw).trim().toUpperCase() ||
+                          s.name.toLowerCase() === String(stateRaw).trim().toLowerCase(),
+                      )
+                    : null;
+                  const stateHint = stateMatch
+                    ? t('invoices.formSalesTaxRateFromState', {
+                        stateName: stateMatch.name,
+                        stateCode: stateMatch.code,
+                        rate: stateMatch.rate.toFixed(2),
+                      })
+                    : selectedClient
+                    ? t('invoices.formSalesTaxRateFallback', {
+                        rate: defaultSalesTaxRate,
+                      })
+                    : null;
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-foreground">{t('invoices.formSalesTaxRate')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          placeholder="0.00"
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                          className="bg-background dark:bg-background text-foreground border-input"
+                          data-testid="input-sales-tax-rate"
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        {t('invoices.formSalesTaxRateHelp')}
+                      </p>
+                      {stateHint && (
+                        <p
+                          className="text-xs text-muted-foreground"
+                          data-testid="text-sales-tax-rate-source"
+                        >
+                          {stateHint}
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <InvoiceTotalsSummary form={form} />

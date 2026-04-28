@@ -34,6 +34,10 @@ Security is enforced through policy-based authorization with dynamic route match
 
 An idempotent payment service automatically generates 2% monthly returns for active shares. Administrative endpoints allow manual payment generation and retrieval of historical financial data. An automated cron job runs monthly for payment generation. Unique and performance indexes are used for financial records. Invoice automation includes monthly generation, overdue checks, and payment reminders via a robust email service with production SMTP and development mock modes.
 
+### US Sales-Tax Engine
+
+`server/services/sales-tax.service.ts` resolves the per-invoice sales-tax rate from a built-in table of US state base rates (50 states + DC; NOMAD states return 0%). Both the manual `POST /api/invoices` route and the auto-generation service (`generateInvoiceForContract`) call `resolveInvoiceSalesTaxRate` with the customer's billing state (`rentalClients.state`) and the tenant's default rate. Resolution order: manager-supplied per-invoice override → customer state lookup → tenant default → 0%. The resolved breakdown is frozen on each invoice at creation, so future table or tenant-rate changes never alter past invoices. Helper endpoints `GET /api/sales-tax/states` and `GET /api/sales-tax/resolve?state=XX` expose the table to the UI; the rental-client form uses a state dropdown so the value always matches the engine, and the invoice-create dialog shows which state produced the prefilled rate. The table covers state-level rates only — local/county surtaxes are out of scope.
+
 ### Asset Management
 
 The platform includes a comprehensive broker dispatch management system for freight operations, allowing managers to list, create, update, and track dispatches with status workflows and full internationalization. An asset allocation system enables managers to assign trailers to specific investors or make them available for open quotation. Automatic share creation occurs for specific investor allocations. Trailer IDs are auto-generated sequentially by trailer type (e.g., TRS001 for Seco).

@@ -4,6 +4,7 @@ import { EmailService, type EmailAttachment, type EmailTenant } from "./email.se
 import { WhatsAppService } from "./whatsapp.service";
 import { PDFService, fetchLogoAsDataUrl } from "./pdf.service";
 import type { RentalContract, Invoice, Tenant } from "@shared/schema";
+import { resolveInvoiceSalesTaxRate } from "./sales-tax.service";
 
 /**
  * Best-effort builder for the per-invoice email payload (tenant + PDF
@@ -223,17 +224,30 @@ export class InvoiceAutomationService {
 
     const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
 
-    // Resolve the tenant's default sales-tax rate so the auto-generated
-    // invoice freezes the breakdown (subtotal / salesTax / total) at issuance
-    // time instead of re-deriving it from the tenant later.
+    // Resolve the sales-tax rate to apply. We prefer the customer's billing
+    // state (so a Texas customer of a California-based tenant is billed at
+    // 6.25% Texas, not 7.25% California) and only fall back to the tenant
+    // default when the state can't be matched. The resolved breakdown is
+    // frozen on the invoice at issuance time so future tax-table or tenant
+    // rate changes never retroactively alter past invoices.
     const tenantForTax = await storage.getTenant(contract.tenantId).catch(() => null);
-    const tenantRate = tenantForTax?.salesTaxRate
-      ? parseFloat(tenantForTax.salesTaxRate.toString())
-      : 0;
-    const safeRate = Number.isFinite(tenantRate) && tenantRate >= 0 ? tenantRate : 0;
+    const clientForTax = await storage
+      .getRentalClient(contract.clientId, contract.tenantId)
+      .catch(() => null);
+    const resolvedTax = resolveInvoiceSalesTaxRate({
+      clientState: clientForTax?.state ?? null,
+      tenantDefaultRate: tenantForTax?.salesTaxRate ?? null,
+    });
+    const safeRate = Number.isFinite(resolvedTax.rate) && resolvedTax.rate >= 0 ? resolvedTax.rate : 0;
     const subtotalNum = parseFloat(contract.monthlyRate.toString());
     const taxAmount = Number((subtotalNum * (safeRate / 100)).toFixed(2));
     const totalAmount = Number((subtotalNum + taxAmount).toFixed(2));
+
+    log(
+      "info",
+      "generateInvoiceForContract",
+      `tax resolved contract=${contract.contractNumber} source=${resolvedTax.source} state=${resolvedTax.stateCode ?? "—"} rate=${safeRate}`,
+    );
 
     let invoice: Invoice;
     try {

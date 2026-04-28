@@ -939,6 +939,8 @@
     "formAmountHelp": "Pre-tax subtotal. Sales tax (below) is added on top to compute the invoice total.",
     "formSalesTaxRate": "Sales Tax Rate (%)",
     "formSalesTaxRateHelp": "Defaults to your billing settings. Enter 0 if you do not collect sales tax for this invoice.",
+    "formSalesTaxRateFromState": "Resolved from customer billing state: {{stateName}} ({{stateCode}}) — {{rate}}%",
+    "formSalesTaxRateFallback": "Customer has no recognized US state — using tenant default {{rate}}%",
     "formDueDate": "Data de Vencimento",
     "formReferenceMonth": "Mês de Referência",
     "formNotes": "Observações",
