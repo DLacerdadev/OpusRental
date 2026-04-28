@@ -103,6 +103,7 @@ function InvoiceTotalsSummary({
 }: {
   form: ReturnType<typeof useForm<InvoiceFormData>>;
 }) {
+  const { t } = useTranslation();
   const amountStr = useWatch({ control: form.control, name: "amount" }) ?? "";
   const rateStr = useWatch({ control: form.control, name: "salesTaxRate" }) ?? "";
 
@@ -115,6 +116,7 @@ function InvoiceTotalsSummary({
 
   const fmt = (n: number) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const rateLabel = safeRate.toLocaleString("en-US", { maximumFractionDigits: 3 });
 
   return (
     <div
@@ -122,21 +124,21 @@ function InvoiceTotalsSummary({
       data-testid="invoice-totals-summary"
     >
       <div className="flex items-center justify-between py-0.5">
-        <span className="text-muted-foreground">Subtotal</span>
+        <span className="text-muted-foreground">{t('invoices.totalsSubtotal')}</span>
         <span className="text-foreground" data-testid="text-totals-subtotal">
           {fmt(safeSubtotal)}
         </span>
       </div>
       <div className="flex items-center justify-between py-0.5">
         <span className="text-muted-foreground">
-          Sales Tax ({safeRate.toLocaleString("en-US", { maximumFractionDigits: 3 })}%)
+          {t('invoices.totalsSalesTax', { rate: rateLabel })}
         </span>
         <span className="text-foreground" data-testid="text-totals-tax">
           {fmt(taxAmount)}
         </span>
       </div>
       <div className="mt-1 flex items-center justify-between border-t border-border pt-1.5">
-        <span className="font-semibold text-foreground">Total</span>
+        <span className="font-semibold text-foreground">{t('invoices.totalsTotal')}</span>
         <span className="font-semibold text-foreground" data-testid="text-totals-total">
           {fmt(total)}
         </span>
