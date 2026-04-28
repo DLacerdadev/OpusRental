@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "nBUTBLnSq_-nP1X4Q-ZNx"
+uri = "file://backups/db_dump_20260428_001238.sql.gz"
+type = "unspecified"
+title = "Dump SQL do banco (compactado, gz)"
