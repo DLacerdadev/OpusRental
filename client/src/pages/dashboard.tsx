@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "@/lib/currency";
+import { dashboardLabel } from "@/lib/dashboard-labels";
 
 interface InvestorStats {
   totalValue: number;
@@ -130,14 +131,14 @@ export default function Dashboard() {
                 </div>
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.totalFleetValue')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-fleet-value">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{t('dashboard.totalFleetValue')}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums break-words" data-testid="text-total-fleet-value">
                 {formatCurrency(companyStats.totalFleetValue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
-              <div className="mt-3 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4 text-accent" />
+              <div className="mt-3 flex items-center gap-2 min-w-0">
+                <ArrowUpRight className="w-4 h-4 text-accent flex-shrink-0" />
                 <span className="text-xs text-accent font-semibold">+12.5%</span>
-                <span className="text-xs text-muted-foreground/70">{t('dashboard.thisMonth')}</span>
+                <span className="text-xs text-muted-foreground/70 truncate">{dashboardLabel(t, 'thisMonth', i18n.language)}</span>
               </div>
             </CardContent>
           </Card>
@@ -152,8 +153,8 @@ export default function Dashboard() {
                 </div>
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.totalTrailers')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-trailers">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{t('dashboard.totalTrailers')}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums" data-testid="text-total-trailers">
                 {companyStats.totalTrailers}
               </p>
               <div className="mt-3">
@@ -173,13 +174,13 @@ export default function Dashboard() {
                 </div>
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.sharesSold')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-shares-sold">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{t('dashboard.sharesSold')}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums" data-testid="text-shares-sold">
                 {companyStats.totalSharesSold}
               </p>
-              <div className="mt-3 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-accent" />
-                <span className="text-xs text-muted-foreground/70">{t('dashboard.investors')}</span>
+              <div className="mt-3 flex items-center gap-2 min-w-0">
+                <TrendingUp className="w-4 h-4 text-accent flex-shrink-0" />
+                <span className="text-xs text-muted-foreground/70 truncate">{dashboardLabel(t, 'investors', i18n.language)}</span>
               </div>
             </CardContent>
           </Card>
@@ -194,14 +195,14 @@ export default function Dashboard() {
                 </div>
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.totalMargin')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-margin">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{t('dashboard.totalMargin')}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums break-words" data-testid="text-total-margin">
                 {formatCurrency(companyStats.totalMargin, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
-              <div className="mt-3 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4 text-accent" />
+              <div className="mt-3 flex items-center gap-2 min-w-0">
+                <ArrowUpRight className="w-4 h-4 text-accent flex-shrink-0" />
                 <span className="text-xs text-accent font-semibold">+8.2%</span>
-                <span className="text-xs text-muted-foreground/70">{t('dashboard.thisMonth')}</span>
+                <span className="text-xs text-muted-foreground/70 truncate">{dashboardLabel(t, 'thisMonth', i18n.language)}</span>
               </div>
             </CardContent>
           </Card>
@@ -374,7 +375,7 @@ export default function Dashboard() {
                   <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center">
                     <Activity className="h-10 w-10 text-accent/40" />
                   </div>
-                  <p className="text-sm text-muted-foreground font-medium">{t('dashboard.noActivity')}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{dashboardLabel(t, 'noActivity', i18n.language)}</p>
                 </div>
               )}
             </div>
@@ -398,7 +399,7 @@ export default function Dashboard() {
               {t('dashboard.welcome')}, {user?.firstName}
             </h1>
             <p className="text-muted-foreground mt-1 font-medium">
-              {t('dashboard.yourPortfolio')}
+              {dashboardLabel(t, 'yourPortfolio', i18n.language)}
             </p>
           </div>
         </div>
@@ -413,14 +414,14 @@ export default function Dashboard() {
                   <Wallet className="h-7 w-7 text-accent" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.totalValue')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-value">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{t('dashboard.totalValue')}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums break-words" data-testid="text-total-value">
                 {formatCurrency(investorStats.totalValue, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
-              <div className="mt-3 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4 text-accent" />
+              <div className="mt-3 flex items-center gap-2 min-w-0">
+                <ArrowUpRight className="w-4 h-4 text-accent flex-shrink-0" />
                 <span className="text-xs text-accent font-semibold">+2.0%</span>
-                <span className="text-xs text-muted-foreground/70">{t('dashboard.thisMonth')}</span>
+                <span className="text-xs text-muted-foreground/70 truncate">{dashboardLabel(t, 'thisMonth', i18n.language)}</span>
               </div>
             </CardContent>
           </Card>
@@ -433,11 +434,11 @@ export default function Dashboard() {
                   <Package className="h-7 w-7 text-foreground" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.activeShares')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-active-shares">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{dashboardLabel(t, 'activeShares', i18n.language)}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums" data-testid="text-active-shares">
                 {investorStats.activeShares}
               </p>
-              <p className="text-xs text-muted-foreground/70 mt-2 font-medium">{t('dashboard.shares')}</p>
+              <p className="text-xs text-muted-foreground/70 mt-2 font-medium truncate">{dashboardLabel(t, 'shares', i18n.language)}</p>
             </CardContent>
           </Card>
 
@@ -449,11 +450,11 @@ export default function Dashboard() {
                   <TrendingUp className="h-7 w-7 text-accent" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.monthlyReturn')}</p>
-              <p className="text-3xl font-bold text-accent" data-testid="text-monthly-return">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{dashboardLabel(t, 'monthlyReturn', i18n.language)}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-accent tabular-nums break-words" data-testid="text-monthly-return">
                 {formatCurrency(investorStats.monthlyReturn, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
-              <p className="text-xs text-muted-foreground/70 mt-2 font-medium">2.0% {t('dashboard.monthly')}</p>
+              <p className="text-xs text-muted-foreground/70 mt-2 font-medium truncate">2.0% {dashboardLabel(t, 'monthly', i18n.language)}</p>
             </CardContent>
           </Card>
 
@@ -465,11 +466,11 @@ export default function Dashboard() {
                   <DollarSign className="h-7 w-7 text-foreground" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground font-semibold mb-2">{t('dashboard.totalReturns')}</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="text-total-returns">
+              <p className="text-sm text-muted-foreground font-semibold mb-2 truncate">{dashboardLabel(t, 'totalReturns', i18n.language)}</p>
+              <p className="text-2xl xl:text-3xl font-bold text-foreground tabular-nums break-words" data-testid="text-total-returns">
                 {formatCurrency(investorStats.totalReturns, i18n.language === 'pt-BR' ? 'BRL' : 'USD')}
               </p>
-              <p className="text-xs text-muted-foreground/70 mt-2 font-medium">{t('dashboard.allTime')}</p>
+              <p className="text-xs text-muted-foreground/70 mt-2 font-medium truncate">{dashboardLabel(t, 'allTime', i18n.language)}</p>
             </CardContent>
           </Card>
         </div>
@@ -515,7 +516,7 @@ export default function Dashboard() {
                   <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center">
                     <Calendar className="h-10 w-10 text-accent/40" />
                   </div>
-                  <p className="text-sm text-muted-foreground font-medium">{t('dashboard.noPayments')}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{dashboardLabel(t, 'noPayments', i18n.language)}</p>
                 </div>
               )}
             </div>

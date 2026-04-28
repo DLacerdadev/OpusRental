@@ -108,7 +108,14 @@
     "recentPayments": "Recent Payments",
     "shares": "shares",
     "sharesSold": "Shares Sold",
-    "totalMargin": "Total Margin"
+    "totalMargin": "Total Margin",
+    "thisMonth": "this month",
+    "investors": "investors",
+    "monthly": "monthly",
+    "allTime": "all time",
+    "noActivity": "No activity yet",
+    "noPayments": "No payments yet",
+    "yourPortfolio": "Overview of your investment portfolio"
   },
   "portfolio": {
     "title": "My Portfolio",

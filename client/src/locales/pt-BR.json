@@ -105,7 +105,14 @@
     "recentPayments": "Pagamentos Recentes",
     "shares": "cotas",
     "sharesSold": "Cotas Vendidas",
-    "totalMargin": "Margem Total"
+    "totalMargin": "Margem Total",
+    "thisMonth": "este mês",
+    "investors": "investidores",
+    "monthly": "mensal",
+    "allTime": "desde o início",
+    "noActivity": "Nenhuma atividade ainda",
+    "noPayments": "Nenhum pagamento ainda",
+    "yourPortfolio": "Visão geral do seu portfólio de investimentos"
   },
   "portfolio": {
     "title": "Minha Carteira",
