@@ -36,6 +36,7 @@ import {
   invoicePayments,
   type InvoicePayment,
   type InsertInvoicePayment,
+  processedStripeEvents,
   type TrackingData,
   type InsertTrackingData,
   type Document,
@@ -130,6 +131,13 @@ export interface IStorage {
   createInvoicePayment(payment: InsertInvoicePayment): Promise<InvoicePayment>;
   getInvoicePaymentByStripePaymentIntent(stripePaymentIntentId: string): Promise<InvoicePayment | undefined>;
   listInvoicePaymentsByInvoice(invoiceId: string, tenantId: string): Promise<InvoicePayment[]>;
+
+  // Stripe webhook idempotency (event-level, prevents duplicate side-effects on re-delivery)
+  // Lease-based: a stale `processing` row can be reclaimed after `leaseSeconds`
+  // so a process crash mid-handler does not permanently strand a payment.
+  claimStripeEvent(eventId: string, leaseSeconds?: number): Promise<{ claimed: boolean; existingStatus?: string }>;
+  completeStripeEvent(eventId: string): Promise<void>;
+  releaseStripeEventClaim(eventId: string): Promise<void>;
   
   // Tracking operations
   getLatestTrackingByTrailerId(trailerId: string, tenantId: string): Promise<TrackingData | undefined>;
@@ -646,6 +654,85 @@ export class DatabaseStorage implements IStorage {
       .from(invoicePayments)
       .where(and(eq(invoicePayments.invoiceId, invoiceId), eq(invoicePayments.tenantId, tenantId)))
       .orderBy(desc(invoicePayments.paidAt));
+  }
+
+  async claimStripeEvent(
+    eventId: string,
+    leaseSeconds: number = 300,
+  ): Promise<{ claimed: boolean; existingStatus?: string }> {
+    // Atomic lease-based claim. Three possible outcomes encoded in a single
+    // round-trip:
+    //   1. No row existed → INSERT wins, status='processing', we own it.
+    //   2. Row exists with status='processing' but `processed_at` older
+    //      than the lease (process crashed or stuck) → UPDATE refreshes
+    //      `processed_at` and we steal the claim.
+    //   3. Row exists with status='completed', OR status='processing' and
+    //      still inside the lease window → ON CONFLICT WHERE clause does
+    //      not match, no row returned, we treat it as a duplicate.
+    type ClaimRow = { event_id: string; status: string };
+    const result = await db.execute<ClaimRow>(sql`
+      INSERT INTO processed_stripe_events (event_id, status, processed_at)
+      VALUES (${eventId}, 'processing', NOW())
+      ON CONFLICT (event_id) DO UPDATE
+        SET processed_at = NOW(), status = 'processing'
+        WHERE processed_stripe_events.status = 'processing'
+          AND processed_stripe_events.processed_at < NOW() - make_interval(secs => ${leaseSeconds})
+      RETURNING event_id, status
+    `);
+
+    if (result.rows.length > 0) {
+      return { claimed: true };
+    }
+
+    // Conflict + WHERE didn't match → fetch existing status for diagnostics.
+    const [existing] = await db
+      .select({ status: processedStripeEvents.status })
+      .from(processedStripeEvents)
+      .where(eq(processedStripeEvents.eventId, eventId))
+      .limit(1);
+    return { claimed: false, existingStatus: existing?.status };
+  }
+
+  async completeStripeEvent(eventId: string): Promise<void> {
+    // Retry the completion a few times before giving up. The caller treats
+    // a thrown error as "do not 200 to Stripe" (fail-closed) so completion
+    // must be robust against transient network/db blips. If every retry
+    // fails, the row stays `processing` and Stripe will redeliver — within
+    // the lease window the next delivery short-circuits as duplicate, so
+    // no double side-effects can occur until completion is finally
+    // recorded.
+    const maxAttempts = 5;
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await db
+          .update(processedStripeEvents)
+          .set({ status: "completed", processedAt: new Date() })
+          .where(eq(processedStripeEvents.eventId, eventId));
+        return;
+      } catch (err) {
+        lastErr = err;
+        const backoffMs = 50 * Math.pow(2, attempt - 1);
+        if (attempt < maxAttempts) {
+          await new Promise((r) => setTimeout(r, backoffMs));
+        }
+      }
+    }
+    throw lastErr instanceof Error
+      ? lastErr
+      : new Error(`completeStripeEvent failed after ${maxAttempts} attempts`);
+  }
+
+  async releaseStripeEventClaim(eventId: string): Promise<void> {
+    // Only release while still in `processing` — never undo a completed row.
+    await db
+      .delete(processedStripeEvents)
+      .where(
+        and(
+          eq(processedStripeEvents.eventId, eventId),
+          eq(processedStripeEvents.status, "processing"),
+        ),
+      );
   }
 
   // Tracking operations

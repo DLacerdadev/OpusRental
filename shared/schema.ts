@@ -185,6 +185,30 @@ export const invoicePayments = pgTable("invoice_payments", {
   idxTenant: index("idx_invoice_payments_tenant").on(t.tenantId),
 }));
 
+/**
+ * Tracks Stripe webhook event IDs and their lifecycle, so re-deliveries
+ * never trigger duplicate side-effects (audit log, manager notifications).
+ *
+ * Lifecycle:
+ *  - `processing`: a webhook handler has claimed the event and is running
+ *    the side-effects. Other concurrent deliveries see this and bail out.
+ *  - `completed`: the handler finished successfully. All future deliveries
+ *    short-circuit forever.
+ *
+ * Crash safety: if the process dies between claim and completion, the row
+ * stays `processing`. After the lease window (`processed_at` older than ~5
+ * minutes), the next Stripe retry can reclaim it via an atomic conditional
+ * UPDATE in `ON CONFLICT`, so payments are never permanently stuck.
+ *
+ * Stored without a tenant scope because Stripe event IDs are globally
+ * unique across the account.
+ */
+export const processedStripeEvents = pgTable("processed_stripe_events", {
+  eventId: varchar("event_id").primaryKey(),
+  status: text("status").notNull().default("processing"), // 'processing' | 'completed'
+  processedAt: timestamp("processed_at").notNull().defaultNow(),
+});
+
 // Tracking data table
 export const trackingData = pgTable("tracking_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -762,6 +786,10 @@ export const insertInvoicePaymentSchema = createInsertSchema(invoicePayments).om
   createdAt: true,
 });
 
+export const insertProcessedStripeEventSchema = createInsertSchema(processedStripeEvents).omit({
+  processedAt: true,
+});
+
 export const insertTrackingDataSchema = createInsertSchema(trackingData).omit({
   id: true,
   timestamp: true,
@@ -880,6 +908,9 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 
 export type InvoicePayment = typeof invoicePayments.$inferSelect;
 export type InsertInvoicePayment = z.infer<typeof insertInvoicePaymentSchema>;
+
+export type ProcessedStripeEvent = typeof processedStripeEvents.$inferSelect;
+export type InsertProcessedStripeEvent = z.infer<typeof insertProcessedStripeEventSchema>;
 
 export type TrackingData = typeof trackingData.$inferSelect;
 export type InsertTrackingData = z.infer<typeof insertTrackingDataSchema>;

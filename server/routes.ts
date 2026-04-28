@@ -4009,6 +4009,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Idempotency at the event level: Stripe can re-deliver the same event
+    // (network blip, retry from the dashboard, missed ack, two parallel
+    // deliveries). The invoice ledger already prevents double-charging at
+    // the financial layer, but re-running this handler would duplicate
+    // audit log entries and manager notifications.
+    //
+    // Lease-based claim: in a single atomic upsert we either insert a fresh
+    // `processing` row, steal a stale `processing` row whose owner crashed
+    // (lease expired), or fail because someone else holds a fresh claim or
+    // the event is already `completed`. This eliminates the check-then-mark
+    // race AND keeps Stripe's retries useful when a process crashes mid-
+    // handler — without ever running side-effects twice for the same id.
+    //
+    // The claim is REQUIRED to proceed: a DB error here returns 500 so
+    // Stripe retries, rather than processing without a persisted claim.
+    let claimed = false;
+    try {
+      const claim = await storage.claimStripeEvent(event.id);
+      claimed = claim.claimed;
+      if (!claim.claimed) {
+        if (claim.existingStatus === "completed") {
+          // Terminal: side-effects ran and were finalized. Acknowledge
+          // with 200 so Stripe stops retrying.
+          console.log(
+            `ℹ️  Stripe event ${event.id} (${event.type}) já está completed — reentrega ignorada.`,
+          );
+          return res.json({ received: true, duplicate: true, status: "completed" });
+        }
+        // status === 'processing': either another worker is genuinely
+        // mid-flight, OR a prior attempt's completion step failed. We
+        // CANNOT acknowledge with 200 here, because that would make Stripe
+        // stop retrying — leaving the row stuck in 'processing' if the
+        // current worker also crashes. Returning a 4xx keeps Stripe's
+        // retry chain alive: the next retry will either see 'completed'
+        // (200), still see 'processing' within the lease (4xx, keep
+        // retrying), or after the 5-min lease expires it will be allowed
+        // to reclaim and reprocess (with the invoice ledger UNIQUE still
+        // protecting against double-charging).
+        console.warn(
+          `⚠️  Stripe event ${event.id} (${event.type}) está em processing — recusando reentrega para forçar retry do Stripe.`,
+        );
+        return res.status(409).json({
+          message: "Event currently processing; will be retried",
+          status: "processing",
+        });
+      }
+    } catch (claimError) {
+      console.error(
+        `❌ Failed to claim Stripe event ${event.id} for idempotency — refusing to process without a claim so Stripe will retry:`,
+        claimError,
+      );
+      return res.status(500).json({ message: "Failed to record event for idempotency; please retry" });
+    }
+
     // Handle the event
     try {
       switch (event.type) {
@@ -4249,9 +4303,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Unhandled Stripe event type: ${event.type}`);
       }
 
+      // Mark the claim as completed so future re-deliveries short-circuit
+      // forever (no lease window applies to `completed` rows). This is
+      // FAIL-CLOSED: if completion fails after the storage retries, we
+      // return 500 so Stripe retries the delivery. Within the lease window
+      // the next delivery short-circuits as duplicate, so no double
+      // side-effects happen until completion is finally recorded.
+      try {
+        await storage.completeStripeEvent(event.id);
+      } catch (completeError) {
+        console.error(
+          `❌ Failed to mark Stripe event ${event.id} as completed after retries — returning 500 so Stripe will retry. Side-effects already ran; the lease prevents re-execution until the next attempt finally completes.`,
+          completeError,
+        );
+        return res.status(500).json({ message: "Failed to finalize event idempotency record; please retry" });
+      }
+
       res.json({ received: true });
     } catch (error) {
       console.error('Webhook processing error:', error);
+      // Release the claim so Stripe's retry can attempt the event again
+      // immediately instead of waiting for the lease to expire.
+      if (claimed) {
+        try {
+          await storage.releaseStripeEventClaim(event.id);
+        } catch (releaseError) {
+          console.error(
+            `⚠️  Failed to release idempotency claim for ${event.id}:`,
+            releaseError,
+          );
+        }
+      }
       res.status(500).json({ message: "Webhook processing failed" });
     }
   });
