@@ -4049,7 +4049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
 
-            const invoice = await storage.getInvoice(invoiceId, tenantId);
+            let invoice = await storage.getInvoice(invoiceId, tenantId);
             if (!invoice) {
               await storage.createAuditLog({
                 tenantId,
@@ -4071,38 +4071,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
 
-            const validation = validateInvoicePayment(
-              invoice,
-              paymentIntent.amount,
-              "stripe",
+            // Webhook idempotency + side-effect recovery:
+            //
+            // The ledger is the **source of truth** for "this Stripe event
+            // already produced a payment". We check it FIRST so re-deliveries
+            // never re-validate (which would reject because the invoice
+            // status already flipped to `paid`) and never duplicate audit /
+            // notification side-effects. If a previous run inserted the
+            // ledger row but crashed before marking the invoice paid /
+            // notifying, we detect that here and complete the missing steps.
+            const existingLedger = await storage.getInvoicePaymentByStripePaymentIntent(
+              paymentIntent.id,
             );
 
-            if (!validation.valid) {
-              const auditAction =
-                validation.reason === "amount_mismatch"
-                  ? "payment_rejected_amount"
-                  : "payment_rejected_status";
-
-              await storage.createAuditLog({
-                tenantId,
-                userId: null,
-                action: auditAction,
-                entityType: "invoice",
-                entityId: invoice.id,
+            let validation;
+            if (existingLedger) {
+              // Re-delivery (or recovery from a partial failure). Skip
+              // validation — invoice status will already be `paid` in the
+              // success case, which the validator would otherwise refuse.
+              validation = {
+                valid: true as const,
                 details: {
-                  ...validation.details,
-                  reason: validation.reason,
-                  paymentIntentId: paymentIntent.id,
-                  invoiceNumber: invoice.invoiceNumber,
+                  expectedAmountCents: Math.round(parseFloat(invoice.amount) * 100),
+                  receivedAmountCents: paymentIntent.amount,
+                  invoiceStatus: invoice.status,
+                  source: "stripe" as const,
                 },
-                ipAddress: req.ip,
-              });
-
-              console.error(
-                `❌ Stripe payment rejected for invoice ${invoice.invoiceNumber} (${invoice.id}): reason=${validation.reason} expected=${validation.details.expectedAmountCents}c received=${validation.details.receivedAmountCents}c status=${validation.details.invoiceStatus}`,
+              };
+              if (invoice.status === "paid") {
+                console.log(
+                  `ℹ️  Stripe paymentIntent ${paymentIntent.id} já processado integralmente — reentrega ignorada.`,
+                );
+                break;
+              }
+              console.warn(
+                `⚠️  Recovering side-effects for paymentIntent ${paymentIntent.id} (ledger exists, invoice status=${invoice.status}).`,
               );
-              // Always 200 to Stripe so it does not retry indefinitely.
-              break;
+            } else {
+              validation = validateInvoicePayment(
+                invoice,
+                paymentIntent.amount,
+                "stripe",
+              );
+
+              if (!validation.valid) {
+                const auditAction =
+                  validation.reason === "amount_mismatch"
+                    ? "payment_rejected_amount"
+                    : "payment_rejected_status";
+
+                await storage.createAuditLog({
+                  tenantId,
+                  userId: null,
+                  action: auditAction,
+                  entityType: "invoice",
+                  entityId: invoice.id,
+                  details: {
+                    ...validation.details,
+                    reason: validation.reason,
+                    paymentIntentId: paymentIntent.id,
+                    invoiceNumber: invoice.invoiceNumber,
+                  },
+                  ipAddress: req.ip,
+                });
+
+                console.error(
+                  `❌ Stripe payment rejected for invoice ${invoice.invoiceNumber} (${invoice.id}): reason=${validation.reason} expected=${validation.details.expectedAmountCents}c received=${validation.details.receivedAmountCents}c status=${validation.details.invoiceStatus}`,
+                );
+                // Always 200 to Stripe so it does not retry indefinitely.
+                break;
+              }
+
+              // Insert ledger BEFORE flipping invoice status. The unique
+              // index on `stripe_payment_intent_id` covers the race where two
+              // concurrent webhook deliveries pass the upfront check at the
+              // same time. On 23505 the loser does NOT just exit — it
+              // re-reads the invoice and, if the winner crashed before
+              // completing side-effects, finishes them itself. This keeps
+              // mark-paid/audit/notify guaranteed even under retries.
+              try {
+                await storage.createInvoicePayment({
+                  tenantId,
+                  invoiceId: invoice.id,
+                  amount: (paymentIntent.amount / 100).toFixed(2),
+                  paidAt: new Date(),
+                  method: "stripe",
+                  stripePaymentIntentId: paymentIntent.id,
+                });
+              } catch (ledgerError: any) {
+                const isUniqueViolation =
+                  ledgerError?.code === "23505" ||
+                  /duplicate key value/i.test(ledgerError?.message ?? "");
+                if (!isUniqueViolation) throw ledgerError;
+
+                // Concurrent delivery already inserted the ledger row.
+                // Re-fetch the invoice; if the winner already marked it
+                // paid, we are done. Otherwise fall through to recovery.
+                const refreshed = await storage.getInvoice(invoice.id, tenantId);
+                if (!refreshed || refreshed.status === "paid") {
+                  console.log(
+                    `ℹ️  Concurrent webhook delivery already finalized ${paymentIntent.id} — exiting.`,
+                  );
+                  break;
+                }
+                console.warn(
+                  `⚠️  Concurrent ledger insert detected for ${paymentIntent.id}; finishing side-effects (invoice still ${refreshed.status}).`,
+                );
+                invoice = refreshed;
+              }
             }
 
             await storage.updateInvoice(
@@ -4114,36 +4190,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tenantId,
             );
 
-            // Persist the customer payment in the dedicated ledger so the
-            // tenant has a queryable record of "fatura X foi paga em Y via
-            // Stripe". The unique index on `stripe_payment_intent_id` makes
-            // this idempotent: if Stripe reenvia o mesmo evento, a inserção
-            // aciona `unique_violation` (Postgres 23505) e seguimos o fluxo
-            // sem duplicar nem alarmar a operação.
-            try {
-              await storage.createInvoicePayment({
-                tenantId,
-                invoiceId: invoice.id,
-                amount: (paymentIntent.amount / 100).toFixed(2),
-                paidAt: new Date(),
-                method: "stripe",
-                stripePaymentIntentId: paymentIntent.id,
-              });
-            } catch (ledgerError: any) {
-              const isUniqueViolation =
-                ledgerError?.code === "23505" ||
-                /duplicate key value/i.test(ledgerError?.message ?? "");
-              if (isUniqueViolation) {
-                console.log(
-                  `ℹ️  Stripe paymentIntent ${paymentIntent.id} já registrado em invoice_payments — ignorando reentrega.`,
-                );
-                // Reentrega: invoice já foi marcada paga e notificações já
-                // saíram em uma execução anterior — não duplicamos nada.
-                break;
-              }
-              throw ledgerError;
-            }
-
             await storage.createAuditLog({
               tenantId,
               userId: null,
@@ -4154,6 +4200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ...validation.details,
                 paymentIntentId: paymentIntent.id,
                 invoiceNumber: invoice.invoiceNumber,
+                ...(existingLedger ? { recovery: true } : {}),
               },
               ipAddress: req.ip,
             });

@@ -198,7 +198,11 @@ export async function fetchLogoAsDataUrl(url: string | null | undefined): Promis
     if (!res) return null; // exhausted redirect budget
     if (!res.ok) return null;
 
-    const contentType = res.headers.get('content-type') ?? '';
+    // Normalize the MIME by stripping any parameters (`charset=...`, etc.)
+    // so downstream consumers can rely on the bare type/subtype when the
+    // upstream server appends extras like `image/jpeg; charset=binary`.
+    const rawContentType = res.headers.get('content-type') ?? '';
+    const contentType = rawContentType.split(';')[0].trim().toLowerCase();
     if (!contentType.startsWith('image/')) return null;
 
     const declaredLength = Number(res.headers.get('content-length') ?? '0');
@@ -292,9 +296,17 @@ export class PDFService {
     let textX = 20;
     if (logoDataUrl) {
       try {
-        // Render the logo on the left and shift the brand name to the right
-        // of it. jsPDF detects the image format from the data URL prefix.
-        doc.addImage(logoDataUrl, 'PNG', 14, 8, 24, 24);
+        // Pick the jsPDF format string from the data URL MIME type. jsPDF
+        // does NOT auto-detect; passing the wrong format silently corrupts
+        // the embedded image (e.g. JPEG bytes interpreted as PNG → blank
+        // header). Default to PNG when MIME is unknown so behaviour stays
+        // unchanged for already-deployed PNG logos.
+        let format: 'PNG' | 'JPEG' | 'WEBP' = 'PNG';
+        const mimeMatch = logoDataUrl.match(/^data:image\/([a-zA-Z0-9.+-]+);base64,/);
+        const mime = mimeMatch?.[1]?.toLowerCase();
+        if (mime === 'jpeg' || mime === 'jpg') format = 'JPEG';
+        else if (mime === 'webp') format = 'WEBP';
+        doc.addImage(logoDataUrl, format, 14, 8, 24, 24);
         textX = 44;
       } catch {
         // Silent fallback to name-only header.
