@@ -73,7 +73,7 @@ import {
   type InsertTenant,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, gte } from "drizzle-orm";
+import { eq, desc, and, sql, gte, inArray, asc } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -102,6 +102,11 @@ export interface IStorage {
   createTrailerDocument(doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }): Promise<TrailerDocument>;
   updateTrailerDocument(id: string, data: Partial<TrailerDocument>, tenantId: string): Promise<TrailerDocument | undefined>;
   deleteTrailerDocument(id: string, tenantId: string): Promise<boolean>;
+  reorderTrailerDocuments(
+    trailerId: string,
+    tenantId: string,
+    orderedIds: string[],
+  ): Promise<TrailerDocument[]>;
   
   // Share operations
   getShare(id: string, tenantId: string): Promise<Share | undefined>;
@@ -403,7 +408,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(trailerDocuments)
       .where(and(eq(trailerDocuments.trailerId, trailerId), eq(trailerDocuments.tenantId, tenantId)))
-      .orderBy(desc(trailerDocuments.uploadedAt));
+      .orderBy(asc(trailerDocuments.sortOrder), desc(trailerDocuments.uploadedAt));
   }
 
   async getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined> {
@@ -417,7 +422,22 @@ export class DatabaseStorage implements IStorage {
   async createTrailerDocument(
     doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }
   ): Promise<TrailerDocument> {
-    const [created] = await db.insert(trailerDocuments).values(doc).returning();
+    // Place new uploads at the end of the trailer's existing list so they
+    // never collide with reordered rows (which might also start at 0).
+    const [{ maxSort }] = await db
+      .select({ maxSort: sql<number>`COALESCE(MAX(${trailerDocuments.sortOrder}), -1)` })
+      .from(trailerDocuments)
+      .where(
+        and(
+          eq(trailerDocuments.trailerId, doc.trailerId),
+          eq(trailerDocuments.tenantId, doc.tenantId),
+        ),
+      );
+    const nextSort = (Number(maxSort) ?? -1) + 1;
+    const [created] = await db
+      .insert(trailerDocuments)
+      .values({ ...doc, sortOrder: nextSort })
+      .returning();
     return created;
   }
 
@@ -446,6 +466,51 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)))
       .returning();
     return result.length > 0;
+  }
+
+  async reorderTrailerDocuments(
+    trailerId: string,
+    tenantId: string,
+    orderedIds: string[],
+  ): Promise<TrailerDocument[]> {
+    if (orderedIds.length === 0) {
+      return await this.getTrailerDocuments(trailerId, tenantId);
+    }
+
+    // Verify every id belongs to this trailer + tenant before reordering so a
+    // caller can never use this endpoint to touch documents outside of scope.
+    const existing = await db
+      .select()
+      .from(trailerDocuments)
+      .where(
+        and(
+          eq(trailerDocuments.trailerId, trailerId),
+          eq(trailerDocuments.tenantId, tenantId),
+          inArray(trailerDocuments.id, orderedIds),
+        ),
+      );
+    if (existing.length !== orderedIds.length) {
+      throw new Error("One or more documents do not belong to this trailer");
+    }
+
+    // Persist the new ordering using the index in `orderedIds` as the new
+    // sortOrder. Run as a transaction so partial reorders never happen.
+    await db.transaction(async (tx) => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        await tx
+          .update(trailerDocuments)
+          .set({ sortOrder: i })
+          .where(
+            and(
+              eq(trailerDocuments.id, orderedIds[i]),
+              eq(trailerDocuments.tenantId, tenantId),
+              eq(trailerDocuments.trailerId, trailerId),
+            ),
+          );
+      }
+    });
+
+    return await this.getTrailerDocuments(trailerId, tenantId);
   }
 
   // Share operations

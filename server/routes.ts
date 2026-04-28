@@ -2444,6 +2444,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder trailer documents — accepts an array of document ids in the
+  // desired order and persists each one's `sortOrder`. Same role policy as
+  // PATCH/POST so any user who can edit documents can reorder them.
+  // NOTE: Must be registered BEFORE the `/:docId` PATCH route so Express
+  // doesn't match `:docId = "reorder"`.
+  app.patch("/api/trailers/:id/documents/reorder", authorize(), async (req, res) => {
+    try {
+      const trailer = await storage.getTrailer(req.params.id, req.tenantId!);
+      if (!trailer) return res.status(404).json({ message: "Trailer not found" });
+
+      const body = req.body ?? {};
+      const orderedIds = body.orderedIds;
+      if (
+        !Array.isArray(orderedIds) ||
+        orderedIds.length === 0 ||
+        orderedIds.some((id) => typeof id !== "string" || id.length === 0)
+      ) {
+        return res
+          .status(400)
+          .json({ message: "orderedIds must be a non-empty array of strings" });
+      }
+
+      // Reject duplicate ids — they would otherwise silently collapse
+      // into a single update and leave the surrounding docs at sortOrder 0.
+      if (new Set(orderedIds).size !== orderedIds.length) {
+        return res.status(400).json({ message: "orderedIds must be unique" });
+      }
+
+      // Require the caller to include EVERY document for the trailer in the
+      // payload — partial reorders would leave the omitted rows mixed in at
+      // their old sortOrder values and produce visually ambiguous output.
+      const allDocs = await storage.getTrailerDocuments(req.params.id, req.tenantId!);
+      if (orderedIds.length !== allDocs.length) {
+        return res.status(400).json({
+          message: "orderedIds must contain every document for this trailer",
+        });
+      }
+
+      let updated;
+      try {
+        updated = await storage.reorderTrailerDocuments(
+          req.params.id,
+          req.tenantId!,
+          orderedIds,
+        );
+      } catch (err: any) {
+        return res.status(400).json({ message: err?.message ?? "Failed to reorder documents" });
+      }
+
+      await storage.createAuditLog({
+        tenantId: req.tenantId!,
+        userId: req.session.userId!,
+        action: "reorder_trailer_documents",
+        entityType: "trailer_document",
+        entityId: req.params.id,
+        details: { trailerId: req.params.id, count: orderedIds.length },
+        ipAddress: req.ip,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Reorder trailer documents error:", error);
+      res.status(500).json({ message: "Failed to reorder documents" });
+    }
+  });
+
   // PATCH a trailer document — currently used to recategorize a document
   // without re-uploading the file. Same role policy as POST.
   app.patch("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {

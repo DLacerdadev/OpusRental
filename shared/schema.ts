@@ -116,6 +116,7 @@ export const trailerDocuments = pgTable("trailer_documents", {
   documentCategory: text("document_category").notNull(), // title, registration, insurance, inspection, purchase_invoice, other
   fileName: text("file_name").notNull(),
   fileUrl: text("file_url").notNull(), // Object storage path (e.g. /objects/uploads/<uuid>)
+  sortOrder: integer("sort_order").notNull().default(0),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
 }, (t) => ({
@@ -715,6 +716,7 @@ export const insertTrailerSchema = createInsertSchema(trailers, {
 export const insertTrailerDocumentSchema = createInsertSchema(trailerDocuments).omit({
   id: true,
   tenantId: true,
+  sortOrder: true,
   uploadedAt: true,
   uploadedBy: true,
 });

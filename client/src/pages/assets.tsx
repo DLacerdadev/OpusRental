@@ -1,5 +1,22 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw } from "lucide-react";
+import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw, GripVertical } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1355,8 +1372,16 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
     queryKey: ["/api/trailers", trailerId, "documents"],
   });
 
-  // Group documents by category so the visual order is stable and
-  // categorization changes immediately reflect in the list.
+  // Local copy of the document list used to drive the rendered order. We
+  // keep our own copy (rather than rendering directly from the query data)
+  // so an in-flight reorder feels instant: the user sees the new order the
+  // moment they release the drag, and we only fall back to server data once
+  // the mutation completes (or fails).
+  const [orderedDocs, setOrderedDocs] = useState<EnrichedDocument[]>([]);
+
+  // Sort documents into a stable, category-grouped order. Within a category
+  // the server already returns rows in `sortOrder` ASC, so we just preserve
+  // the incoming order rather than re-sorting by upload date.
   const sortedDocuments = useMemo(() => {
     if (!documents) return [];
     const idx: Record<string, number> = Object.fromEntries(
@@ -1365,11 +1390,33 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
     return [...documents].sort((a, b) => {
       const catCmp = (idx[a.documentCategory] ?? 99) - (idx[b.documentCategory] ?? 99);
       if (catCmp !== 0) return catCmp;
-      const ad = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
-      const bd = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
-      return bd - ad;
+      return 0;
     });
   }, [documents]);
+
+  // Sync local ordering whenever the server data changes (e.g. after an
+  // upload, delete, or reorder confirmation).
+  useEffect(() => {
+    setOrderedDocs(sortedDocuments);
+  }, [sortedDocuments]);
+
+  // Normalize a possibly-legacy documentCategory value into a known bucket.
+  // We have to use the same mapping in both the visual grouping AND the
+  // reorder rebuild loop, otherwise a row shown under "other" would never
+  // be matched when reordering that group.
+  const normalizeCategory = (cat: string) =>
+    (DOCUMENT_CATEGORIES as readonly string[]).includes(cat) ? cat : "other";
+
+  // Group the ordered list by category so each category renders inside its
+  // own SortableContext (drag is restricted to within a category).
+  const docsByCategory = useMemo(() => {
+    const groups: Record<string, EnrichedDocument[]> = {};
+    for (const cat of DOCUMENT_CATEGORIES) groups[cat] = [];
+    for (const doc of orderedDocs) {
+      groups[normalizeCategory(doc.documentCategory)].push(doc);
+    }
+    return groups;
+  }, [orderedDocs]);
 
   const createDocMutation = useMutation({
     mutationFn: async (payload: {
@@ -1430,6 +1477,60 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
       });
     },
   });
+
+  const reorderDocsMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      return apiRequest("PATCH", `/api/trailers/${trailerId}/documents/reorder`, {
+        orderedIds,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+    },
+    onError: (err: any) => {
+      // Roll back the optimistic order by re-syncing from the server.
+      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
+      toast({
+        title: t('assets.docReorderError', 'Falha ao reordenar'),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Stable sensors so React doesn't recreate them on every render.
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (cat: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const group = docsByCategory[cat];
+    const oldIndex = group.findIndex((d) => d.id === active.id);
+    const newIndex = group.findIndex((d) => d.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reorderedGroup = arrayMove(group, oldIndex, newIndex);
+
+    // Rebuild the full ordered list, swapping in the reordered group for
+    // the affected category — other categories stay where they are. Use
+    // the normalized category here so legacy/unknown values that visually
+    // sit in "other" are matched correctly.
+    const newOrdered: EnrichedDocument[] = [];
+    let groupCursor = 0;
+    for (const doc of orderedDocs) {
+      if (normalizeCategory(doc.documentCategory) === cat) {
+        newOrdered.push(reorderedGroup[groupCursor++]);
+      } else {
+        newOrdered.push(doc);
+      }
+    }
+    setOrderedDocs(newOrdered);
+    reorderDocsMutation.mutate(newOrdered.map((d) => d.id));
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1557,101 +1658,203 @@ function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
           {t('assets.noDocuments', 'Nenhum documento anexado ainda.')}
         </div>
       ) : (
-        <div className="space-y-2">
-          {sortedDocuments.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg hover-elevate"
-              data-testid={`row-document-${doc.id}`}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate" data-testid={`text-document-name-${doc.id}`}>
-                    {doc.fileName}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                    {doc.uploadedAt && (
-                      <span data-testid={`text-document-date-${doc.id}`}>
-                        {format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm")}
-                      </span>
-                    )}
-                    {doc.uploader && (
-                      <>
-                        <span>•</span>
-                        <span data-testid={`text-document-uploader-${doc.id}`}>
-                          {t('assets.docUploadedBy', 'por')} {doc.uploader.name}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Select
-                  value={doc.documentCategory}
-                  onValueChange={(value) => {
-                    if (value === doc.documentCategory) return;
-                    updateDocMutation.mutate({ docId: doc.id, documentCategory: value });
-                  }}
-                  disabled={updateDocMutation.isPending}
+        <div className="space-y-6">
+          {DOCUMENT_CATEGORIES.map((cat) => {
+            const group = docsByCategory[cat];
+            if (!group || group.length === 0) return null;
+            return (
+              <div key={cat} className="space-y-2" data-testid={`group-document-category-${cat}`}>
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  {categoryLabel(cat)}
+                </h4>
+                <DndContext
+                  sensors={dndSensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd(cat)}
                 >
-                  <SelectTrigger
-                    className="h-8 min-w-[140px] text-xs"
-                    data-testid={`select-document-category-${doc.id}`}
+                  <SortableContext
+                    items={group.map((d) => d.id)}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DOCUMENT_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {categoryLabel(cat)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(doc.fileUrl, "_blank")}
-                  data-testid={`button-view-document-${doc.id}`}
-                  title={t('assets.viewDocument', 'Visualizar')}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => startReplace(doc.id)}
-                  disabled={
-                    isUploading ||
-                    createDocMutation.isPending ||
-                    deleteDocMutation.isPending ||
-                    replacingDocId !== null
-                  }
-                  data-testid={`button-replace-document-${doc.id}`}
-                  title={t('assets.replaceDocument', 'Substituir arquivo')}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (confirm(t('assets.confirmDeleteDoc', 'Excluir este documento?'))) {
-                      deleteDocMutation.mutate(doc.id);
-                    }
-                  }}
-                  disabled={deleteDocMutation.isPending}
-                  data-testid={`button-delete-document-${doc.id}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                    <div className="space-y-2">
+                      {group.map((doc) => (
+                        <SortableDocumentRow
+                          key={doc.id}
+                          doc={doc}
+                          onView={() => window.open(doc.fileUrl, "_blank")}
+                          onReplace={() => startReplace(doc.id)}
+                          onDelete={() => {
+                            if (confirm(t('assets.confirmDeleteDoc', 'Excluir este documento?'))) {
+                              deleteDocMutation.mutate(doc.id);
+                            }
+                          }}
+                          onCategoryChange={(value) => {
+                            if (value === doc.documentCategory) return;
+                            updateDocMutation.mutate({ docId: doc.id, documentCategory: value });
+                          }}
+                          replaceDisabled={
+                            isUploading ||
+                            createDocMutation.isPending ||
+                            deleteDocMutation.isPending ||
+                            replacingDocId !== null
+                          }
+                          deleteDisabled={deleteDocMutation.isPending}
+                          updateDisabled={updateDocMutation.isPending}
+                          dragDisabled={reorderDocsMutation.isPending}
+                          categories={DOCUMENT_CATEGORIES as readonly string[]}
+                          categoryLabel={categoryLabel}
+                          t={t}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
+    </div>
+  );
+}
+
+type SortableDocumentRowProps = {
+  doc: TrailerDocument & {
+    uploader?: { id: string; name: string; email: string | null } | null;
+  };
+  onView: () => void;
+  onReplace: () => void;
+  onDelete: () => void;
+  onCategoryChange: (value: string) => void;
+  replaceDisabled: boolean;
+  deleteDisabled: boolean;
+  updateDisabled: boolean;
+  dragDisabled: boolean;
+  categories: readonly string[];
+  categoryLabel: (cat: string) => string;
+  t: ReturnType<typeof useTranslation>["t"];
+};
+
+function SortableDocumentRow({
+  doc,
+  onView,
+  onReplace,
+  onDelete,
+  onCategoryChange,
+  replaceDisabled,
+  deleteDisabled,
+  updateDisabled,
+  dragDisabled,
+  categories,
+  categoryLabel,
+  t,
+}: SortableDocumentRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: doc.id, disabled: dragDisabled });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : "auto",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg bg-background hover-elevate"
+      data-testid={`row-document-${doc.id}`}
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <button
+          type="button"
+          disabled={dragDisabled}
+          className={`touch-none p-1 -m-1 text-muted-foreground ${dragDisabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing hover:text-foreground"}`}
+          aria-label={t('assets.dragDocument', 'Arrastar para reordenar')}
+          data-testid={`drag-handle-document-${doc.id}`}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="font-medium truncate" data-testid={`text-document-name-${doc.id}`}>
+            {doc.fileName}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+            {doc.uploadedAt && (
+              <span data-testid={`text-document-date-${doc.id}`}>
+                {format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm")}
+              </span>
+            )}
+            {doc.uploader && (
+              <>
+                <span>•</span>
+                <span data-testid={`text-document-uploader-${doc.id}`}>
+                  {t('assets.docUploadedBy', 'por')} {doc.uploader.name}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Select
+          value={doc.documentCategory}
+          onValueChange={onCategoryChange}
+          disabled={updateDisabled}
+        >
+          <SelectTrigger
+            className="h-8 min-w-[140px] text-xs"
+            data-testid={`select-document-category-${doc.id}`}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {categoryLabel(cat)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onView}
+          data-testid={`button-view-document-${doc.id}`}
+          title={t('assets.viewDocument', 'Visualizar')}
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onReplace}
+          disabled={replaceDisabled}
+          data-testid={`button-replace-document-${doc.id}`}
+          title={t('assets.replaceDocument', 'Substituir arquivo')}
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDelete}
+          disabled={deleteDisabled}
+          data-testid={`button-delete-document-${doc.id}`}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
