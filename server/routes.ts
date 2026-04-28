@@ -4114,6 +4114,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tenantId,
             );
 
+            // Persist the customer payment in the dedicated ledger so the
+            // tenant has a queryable record of "fatura X foi paga em Y via
+            // Stripe". The unique index on `stripe_payment_intent_id` makes
+            // this idempotent: if Stripe reenvia o mesmo evento, a inserção
+            // aciona `unique_violation` (Postgres 23505) e seguimos o fluxo
+            // sem duplicar nem alarmar a operação.
+            try {
+              await storage.createInvoicePayment({
+                tenantId,
+                invoiceId: invoice.id,
+                amount: (paymentIntent.amount / 100).toFixed(2),
+                paidAt: new Date(),
+                method: "stripe",
+                stripePaymentIntentId: paymentIntent.id,
+              });
+            } catch (ledgerError: any) {
+              const isUniqueViolation =
+                ledgerError?.code === "23505" ||
+                /duplicate key value/i.test(ledgerError?.message ?? "");
+              if (isUniqueViolation) {
+                console.log(
+                  `ℹ️  Stripe paymentIntent ${paymentIntent.id} já registrado em invoice_payments — ignorando reentrega.`,
+                );
+                // Reentrega: invoice já foi marcada paga e notificações já
+                // saíram em uma execução anterior — não duplicamos nada.
+                break;
+              }
+              throw ledgerError;
+            }
+
             await storage.createAuditLog({
               tenantId,
               userId: null,

@@ -160,6 +160,31 @@ export const payments = pgTable("payments", {
   idxTenant: index("idx_payments_tenant").on(t.tenantId),
 }));
 
+/**
+ * Ledger of customer payments collected for invoices via Stripe.
+ *
+ * Kept separate from `payments` because that table models share/investor
+ * distributions (NOT NULL `shareId` + `userId`, unique on `shareId+month`)
+ * and reusing it for client invoice payments would either break those
+ * constraints or require nullable foreign keys that weaken multi-tenant
+ * isolation. This table is the source of truth for "fatura X foi paga em
+ * Y" and provides idempotency through the unique `stripePaymentIntentId`.
+ */
+export const invoicePayments = pgTable("invoice_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
+  invoiceId: varchar("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paidAt: timestamp("paid_at").notNull().defaultNow(),
+  method: text("method").notNull().default("stripe"), // stripe, pix, manual
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+  uniqStripePI: uniqueIndex("uniq_invoice_payments_stripe_pi").on(t.stripePaymentIntentId),
+  idxInvoice: index("idx_invoice_payments_invoice").on(t.invoiceId),
+  idxTenant: index("idx_invoice_payments_tenant").on(t.tenantId),
+}));
+
 // Tracking data table
 export const trackingData = pgTable("tracking_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -732,6 +757,11 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   createdAt: true,
 });
 
+export const insertInvoicePaymentSchema = createInsertSchema(invoicePayments).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertTrackingDataSchema = createInsertSchema(trackingData).omit({
   id: true,
   timestamp: true,
@@ -847,6 +877,9 @@ export type InsertShare = z.infer<typeof insertShareSchema>;
 
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export type InvoicePayment = typeof invoicePayments.$inferSelect;
+export type InsertInvoicePayment = z.infer<typeof insertInvoicePaymentSchema>;
 
 export type TrackingData = typeof trackingData.$inferSelect;
 export type InsertTrackingData = z.infer<typeof insertTrackingDataSchema>;

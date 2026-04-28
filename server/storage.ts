@@ -33,6 +33,9 @@ import {
   type InsertShare,
   type Payment,
   type InsertPayment,
+  invoicePayments,
+  type InvoicePayment,
+  type InsertInvoicePayment,
   type TrackingData,
   type InsertTrackingData,
   type Document,
@@ -122,6 +125,11 @@ export interface IStorage {
   getPaymentsByUserId(userId: string, tenantId: string): Promise<Payment[]>;
   getPaymentsByShareId(shareId: string, tenantId: string): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
+
+  // Invoice payment ledger (customer payments collected via Stripe / PIX / manual)
+  createInvoicePayment(payment: InsertInvoicePayment): Promise<InvoicePayment>;
+  getInvoicePaymentByStripePaymentIntent(stripePaymentIntentId: string): Promise<InvoicePayment | undefined>;
+  listInvoicePaymentsByInvoice(invoiceId: string, tenantId: string): Promise<InvoicePayment[]>;
   
   // Tracking operations
   getLatestTrackingByTrailerId(trailerId: string, tenantId: string): Promise<TrackingData | undefined>;
@@ -610,6 +618,34 @@ export class DatabaseStorage implements IStorage {
   async createPayment(payment: InsertPayment): Promise<Payment> {
     const [newPayment] = await db.insert(payments).values(payment).returning();
     return newPayment;
+  }
+
+  // Invoice payment ledger (customer payments collected via Stripe / PIX / manual)
+  async createInvoicePayment(payment: InsertInvoicePayment): Promise<InvoicePayment> {
+    const [row] = await db.insert(invoicePayments).values(payment).returning();
+    return row;
+  }
+
+  async getInvoicePaymentByStripePaymentIntent(
+    stripePaymentIntentId: string,
+  ): Promise<InvoicePayment | undefined> {
+    const [row] = await db
+      .select()
+      .from(invoicePayments)
+      .where(eq(invoicePayments.stripePaymentIntentId, stripePaymentIntentId))
+      .limit(1);
+    return row;
+  }
+
+  async listInvoicePaymentsByInvoice(
+    invoiceId: string,
+    tenantId: string,
+  ): Promise<InvoicePayment[]> {
+    return await db
+      .select()
+      .from(invoicePayments)
+      .where(and(eq(invoicePayments.invoiceId, invoiceId), eq(invoicePayments.tenantId, tenantId)))
+      .orderBy(desc(invoicePayments.paidAt));
   }
 
   // Tracking operations
