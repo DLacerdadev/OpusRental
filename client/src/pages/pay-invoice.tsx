@@ -286,7 +286,7 @@ export default function PayInvoicePage() {
               <div>
                 <CardTitle className="flex items-center gap-2" data-testid="text-invoice-number">
                   <FileText className="h-5 w-5" />
-                  Invoice {data.invoice.invoiceNumber}
+                  Invoice #{data.invoice.invoiceNumber}
                 </CardTitle>
                 <CardDescription>
                   {data.client?.tradeName || data.client?.companyName || "Customer"}

@@ -604,7 +604,11 @@ export class InvoiceAutomationService {
           }
 
           if (client.phone) {
-            const dueDateFormatted = new Date(invoice.dueDate).toLocaleDateString("en-US");
+            const dueDateFormatted = new Date(invoice.dueDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
             await WhatsAppService.sendEvent(
               "invoice_issued",
               {

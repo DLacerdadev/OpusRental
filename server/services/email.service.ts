@@ -181,7 +181,7 @@ function renderInvoiceTotalsText(invoice: Invoice): string {
 
 function formatUSDate(value: string | Date): string {
   const d = value instanceof Date ? value : new Date(value);
-  return d.toLocaleDateString("en-US");
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
 function publicPaymentLinkFor(invoiceId: string): string | null {
