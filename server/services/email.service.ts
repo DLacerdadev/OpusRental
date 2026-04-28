@@ -111,6 +111,74 @@ function formatUSD(amount: string | number): string {
   });
 }
 
+function formatRate(rate: string | number | null | undefined): string {
+  if (rate == null) return "0";
+  const n = typeof rate === "number" ? rate : parseFloat(rate);
+  if (!Number.isFinite(n)) return "0";
+  return n
+    .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+}
+
+/**
+ * Render the Subtotal / Sales Tax / Total breakdown rows that appear at the
+ * bottom of every invoice email. When the invoice has a stored subtotal we
+ * always show the three rows, even if Sales Tax = $0.00, so the customer can
+ * verify the math. Legacy invoices that were created before this change have
+ * `subtotal == null` — in that case we fall back to a single "Amount due" row.
+ *
+ * @param amountClass CSS class to apply to the bold "Total / Amount due"
+ *                    line so the colour matches the surrounding template.
+ */
+function renderInvoiceTotalsRows(
+  invoice: Invoice,
+  amountClass: string,
+): string {
+  const total = formatUSD(invoice.amount);
+  if (invoice.subtotal == null) {
+    return `
+        <div class="detail-row">
+          <span class="label">Amount due:</span>
+          <span class="${amountClass}">${total}</span>
+        </div>`;
+  }
+  const subtotal = formatUSD(invoice.subtotal);
+  const taxAmount = formatUSD(invoice.salesTaxAmount ?? "0");
+  const ratePct = formatRate(invoice.salesTaxRate);
+  return `
+        <div class="detail-row">
+          <span class="label">Subtotal:</span>
+          <span class="value">${subtotal}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Sales Tax (${ratePct}%):</span>
+          <span class="value">${taxAmount}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Total:</span>
+          <span class="${amountClass}">${total}</span>
+        </div>`;
+}
+
+/**
+ * Plaintext counterpart of {@link renderInvoiceTotalsRows} used in the
+ * `text` body of every invoice email. Mirrors the HTML breakdown so that
+ * mail clients without HTML support still see the same numbers.
+ */
+function renderInvoiceTotalsText(invoice: Invoice): string {
+  const total = formatUSD(invoice.amount);
+  if (invoice.subtotal == null) {
+    return `Amount: ${total}`;
+  }
+  const subtotal = formatUSD(invoice.subtotal);
+  const taxAmount = formatUSD(invoice.salesTaxAmount ?? "0");
+  const ratePct = formatRate(invoice.salesTaxRate);
+  return [
+    `Subtotal: ${subtotal}`,
+    `Sales Tax (${ratePct}%): ${taxAmount}`,
+    `Total: ${total}`,
+  ].join("\n");
+}
+
 function formatUSDate(value: string | Date): string {
   const d = value instanceof Date ? value : new Date(value);
   return d.toLocaleDateString("en-US");
@@ -232,7 +300,6 @@ export class EmailService {
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(invoice.id);
     const dueDate = formatUSDate(invoice.dueDate);
-    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
       ? `<a href="${paymentUrl}" class="button">Pay invoice</a>`
       : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
@@ -284,10 +351,7 @@ export class EmailService {
           <span class="value">${dueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
-        <div class="detail-row">
-          <span class="label">Amount due:</span>
-          <span class="amount">${amount}</span>
-        </div>
+        ${renderInvoiceTotalsRows(invoice, "amount")}
       </div>
 
       <p>Please pay by the due date to avoid late fees.</p>
@@ -317,7 +381,6 @@ export class EmailService {
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(invoice.id);
     const dueDate = formatUSDate(invoice.dueDate);
-    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
       ? `<a href="${paymentUrl}" class="button">Pay now</a>`
       : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
@@ -370,10 +433,7 @@ export class EmailService {
           <span class="value overdue">${daysOverdue} day${daysOverdue > 1 ? 's' : ''}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
-        <div class="detail-row">
-          <span class="label">Amount due:</span>
-          <span class="amount">${amount}</span>
-        </div>
+        ${renderInvoiceTotalsRows(invoice, "amount")}
       </div>
 
       <p><strong>If you have already made the payment, please disregard this notice.</strong></p>
@@ -403,7 +463,6 @@ export class EmailService {
     const paymentUrl = publicPaymentLinkFor(invoice.id);
     const newDueDate = formatUSDate(invoice.dueDate);
     const oldDueDate = formatUSDate(previousDueDate);
-    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
       ? `<a href="${paymentUrl}" class="button">Pay now</a>`
       : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
@@ -460,10 +519,7 @@ export class EmailService {
           <span class="value new-date">${newDueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
-        <div class="detail-row">
-          <span class="label">Amount due:</span>
-          <span class="amount">${amount}</span>
-        </div>
+        ${renderInvoiceTotalsRows(invoice, "amount")}
       </div>
 
       <p><strong>If you have already made the payment, please disregard this notice.</strong></p>
@@ -498,7 +554,7 @@ Hello ${data.client.tradeName || data.client.companyName},
 
 Your monthly rental invoice (Contract ${data.contract.contractNumber}) is available.
 
-Amount: ${formatUSD(data.invoice.amount)}
+${renderInvoiceTotalsText(data.invoice)}
 Due date: ${formatUSDate(data.invoice.dueDate)}
 Reference month: ${data.invoice.referenceMonth}
 ${paymentUrl ? `Pay online: ${paymentUrl}` : ""}
@@ -534,7 +590,7 @@ Hello ${data.client.tradeName || data.client.companyName},
 
 This invoice is ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due.
 
-Amount: ${formatUSD(data.invoice.amount)}
+${renderInvoiceTotalsText(data.invoice)}
 Original due date: ${formatUSDate(data.invoice.dueDate)}
 ${paymentUrl ? `Pay now: ${paymentUrl}` : ""}
 
@@ -571,7 +627,7 @@ Hello ${data.client.tradeName || data.client.companyName},
 
 Invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
 
-Amount: ${formatUSD(data.invoice.amount)}
+${renderInvoiceTotalsText(data.invoice)}
 Previous due date: ${oldDueDateStr}
 New due date: ${newDueDateStr}
 Reference month: ${data.invoice.referenceMonth}

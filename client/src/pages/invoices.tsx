@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertInvoiceSchema, type Invoice, type RentalContract, type RentalClient, type Trailer } from "@shared/schema";
 import { z } from "zod";
@@ -86,6 +86,64 @@ interface InvoiceItemRow {
   quantity: string;
   amount: string;
   sortOrder: number;
+}
+
+/**
+ * Live Subtotal / Sales Tax / Total preview shown inside the invoice form.
+ * Reads `amount` (subtotal entered by the manager) and `salesTaxRate` from
+ * the form state via `useWatch` so the breakdown updates as the user types,
+ * matching exactly what the backend will store and what the customer will
+ * see on the PDF, the e-mail, and the public payment page.
+ *
+ * The formatting matches the rest of the customer-facing flow: en-US locale,
+ * USD currency, two-decimal precision.
+ */
+function InvoiceTotalsSummary({
+  form,
+}: {
+  form: ReturnType<typeof useForm<InvoiceFormData>>;
+}) {
+  const control = form.control as unknown as Control<InvoiceFormData>;
+  const amountStr = useWatch({ control, name: "amount" }) ?? "";
+  const rateStr = useWatch({ control, name: "salesTaxRate" }) ?? "";
+
+  const subtotalNum = parseFloat(amountStr as string);
+  const rateNum = parseFloat(rateStr as string);
+  const safeSubtotal = Number.isFinite(subtotalNum) ? subtotalNum : 0;
+  const safeRate = Number.isFinite(rateNum) ? rateNum : 0;
+  const taxAmount = Math.round(safeSubtotal * safeRate) / 100;
+  const total = Math.round((safeSubtotal + taxAmount) * 100) / 100;
+
+  const fmt = (n: number) =>
+    n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+  return (
+    <div
+      className="rounded-md border border-border bg-muted/40 p-3 text-sm"
+      data-testid="invoice-totals-summary"
+    >
+      <div className="flex items-center justify-between py-0.5">
+        <span className="text-muted-foreground">Subtotal</span>
+        <span className="text-foreground" data-testid="text-totals-subtotal">
+          {fmt(safeSubtotal)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between py-0.5">
+        <span className="text-muted-foreground">
+          Sales Tax ({safeRate.toLocaleString("en-US", { maximumFractionDigits: 3 })}%)
+        </span>
+        <span className="text-foreground" data-testid="text-totals-tax">
+          {fmt(taxAmount)}
+        </span>
+      </div>
+      <div className="mt-1 flex items-center justify-between border-t border-border pt-1.5">
+        <span className="font-semibold text-foreground">Total</span>
+        <span className="font-semibold text-foreground" data-testid="text-totals-total">
+          {fmt(total)}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -444,6 +502,15 @@ export default function Invoices() {
     queryKey: ["/api/trailers"],
   });
 
+  // Tenant billing config — used to prefill the per-invoice "Sales Tax Rate"
+  // field with the tenant's default rate when the manager opens the
+  // "New invoice" dialog. The rate stays editable so the manager can override
+  // it for individual invoices (e.g. exempt customers).
+  const { data: tenantBilling } = useQuery<{ salesTaxRate: string | null }>({
+    queryKey: ["/api/tenant/billing"],
+  });
+  const defaultSalesTaxRate = tenantBilling?.salesTaxRate ?? "0";
+
   const trailerDisplay = (trailer?: Trailer) => {
     if (!trailer) return "—";
     const parts = [
@@ -473,8 +540,21 @@ export default function Invoices() {
       status: "pending",
       referenceMonth: "",
       notes: "",
+      salesTaxRate: defaultSalesTaxRate,
     },
   });
+
+  // When the dialog opens (or when the tenant default rate finishes loading),
+  // refresh the salesTaxRate field with the tenant default unless the user
+  // already typed a custom value. This keeps create/edit pre-filled without
+  // overwriting the manager's manual override.
+  useEffect(() => {
+    if (!isCreateOpen) return;
+    const current = form.getValues("salesTaxRate");
+    if (current == null || current === "") {
+      form.setValue("salesTaxRate", defaultSalesTaxRate, { shouldDirty: false });
+    }
+  }, [isCreateOpen, defaultSalesTaxRate, form]);
 
   // Auto-fill amount / referenceMonth / dueDate when the manager picks a contract
   // in the "New invoice" dialog. We always recompute on change so switching
@@ -1213,6 +1293,9 @@ export default function Invoices() {
                   </FormItem>
                 )}
               />
+
+              <InvoiceTotalsSummary form={form} />
+
 
               <FormField
                 control={form.control}

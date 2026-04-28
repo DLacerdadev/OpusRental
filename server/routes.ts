@@ -1666,7 +1666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const tenantLogoDataUrl = await fetchLogoAsDataUrl(req.tenant?.logoUrl ?? null);
             const attachments = trailerForPdf
               ? [{
-                  filename: `Fatura-${reissued.invoiceNumber}.pdf`,
+                  filename: `Invoice-${reissued.invoiceNumber}.pdf`,
                   content: PDFService.generateInvoicePDF({
                     ...reissued,
                     contract: { ...contract, client, trailer: trailerForPdf },
@@ -3772,9 +3772,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!t?.name?.trim()) tenantBillingMissing.push("name");
       if (!t?.logoUrl?.trim()) tenantBillingMissing.push("logoUrl");
       if (!t?.billingEmail?.trim()) tenantBillingMissing.push("billingEmail");
-      const hasPix = !!t?.pixKey?.trim();
       const hasBank = !!(t?.bankName?.trim() && t?.bankAccount?.trim());
-      if (!hasPix && !hasBank) tenantBillingMissing.push("paymentMethod");
+      if (!hasBank) tenantBillingMissing.push("paymentMethod");
 
       res.json({
         timestamp: now.toISOString(),
