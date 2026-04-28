@@ -6,16 +6,17 @@ import { buildPublicPaymentUrl } from "./invoice-token.service";
 /**
  * Tenant fields needed by the e-mail templates. Includes the brand name,
  * the white-label billing email (used as the From address override) and the
- * payment-method configuration so the HTML body can render the PIX / bank
- * block alongside the public payment button. All payment fields are optional;
- * when missing the template silently omits the block instead of breaking.
+ * ACH bank-transfer payment configuration so the HTML body can render the
+ * "Other ways to pay" block alongside the public payment button. All payment
+ * fields are optional; when missing the template silently omits the block
+ * instead of breaking.
+ *
+ * Note: `bankAgency` is reused semantically as the ACH routing number.
  */
 export type EmailTenant = Pick<
   Tenant,
   | "name"
   | "billingEmail"
-  | "pixKey"
-  | "pixBeneficiary"
   | "bankName"
   | "bankAgency"
   | "bankAccount"
@@ -66,52 +67,53 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * Build the HTML block listing the tenant's PIX and bank-transfer details.
+ * Build the HTML block listing the tenant's ACH bank-transfer details.
  * Returns an empty string when nothing is configured so the template skips
  * the section instead of showing an empty box. Only fields that the tenant
  * filled in are rendered — partial configurations are supported.
+ *
+ * `bankAgency` is reused semantically as the ACH routing number.
  */
 function renderPaymentMethodsBlock(tenant?: EmailTenant | null): string {
   if (!tenant) return "";
-  const pixKey = tenant.pixKey?.trim();
   const bankName = tenant.bankName?.trim();
   const bankAccount = tenant.bankAccount?.trim();
-  if (!pixKey && !(bankName && bankAccount)) return "";
+  if (!(bankName && bankAccount)) return "";
 
-  const sections: string[] = [];
+  const routing = tenant.bankAgency?.trim();
+  const holder = tenant.bankAccountHolder?.trim();
+  const accountType = tenant.bankAccountType?.trim();
+  const accountTypeLabel =
+    accountType === "checking" ? "Checking" : accountType === "savings" ? "Savings" : accountType;
 
-  if (pixKey) {
-    const beneficiary = tenant.pixBeneficiary?.trim();
-    sections.push(`
-        <div style="margin-bottom:16px">
-          <p style="margin:0 0 6px 0;font-weight:bold;color:#111">PIX</p>
-          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Chave:</span> <strong>${escapeHtml(pixKey)}</strong></p>
-          ${beneficiary ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Beneficiário:</span> ${escapeHtml(beneficiary)}</p>` : ""}
-        </div>`);
-  }
-
-  if (bankName && bankAccount) {
-    const agency = tenant.bankAgency?.trim();
-    const holder = tenant.bankAccountHolder?.trim();
-    const accountType = tenant.bankAccountType?.trim();
-    const accountTypeLabel =
-      accountType === "checking" ? "Corrente" : accountType === "savings" ? "Poupança" : accountType;
-    sections.push(`
+  const section = `
         <div>
-          <p style="margin:0 0 6px 0;font-weight:bold;color:#111">Transferência Bancária</p>
-          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Banco:</span> ${escapeHtml(bankName)}</p>
-          ${agency ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Agência:</span> ${escapeHtml(agency)}</p>` : ""}
-          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Conta:</span> ${escapeHtml(bankAccount)}</p>
-          ${holder ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Titular:</span> ${escapeHtml(holder)}</p>` : ""}
-          ${accountTypeLabel ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Tipo:</span> ${escapeHtml(accountTypeLabel)}</p>` : ""}
-        </div>`);
-  }
+          <p style="margin:0 0 6px 0;font-weight:bold;color:#111">Bank Transfer (ACH)</p>
+          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Bank:</span> ${escapeHtml(bankName)}</p>
+          ${routing ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Routing Number:</span> ${escapeHtml(routing)}</p>` : ""}
+          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Account:</span> ${escapeHtml(bankAccount)}</p>
+          ${holder ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Account Holder:</span> ${escapeHtml(holder)}</p>` : ""}
+          ${accountTypeLabel ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Type:</span> ${escapeHtml(accountTypeLabel)}</p>` : ""}
+        </div>`;
 
   return `
       <div style="background:white;padding:20px;margin:20px 0;border-radius:8px;border-left:4px solid #16a34a">
-        <h3 style="margin:0 0 12px 0;font-size:16px;color:#111">Outras formas de pagamento</h3>
-        ${sections.join("")}
+        <h3 style="margin:0 0 12px 0;font-size:16px;color:#111">Other ways to pay</h3>
+        ${section}
       </div>`;
+}
+
+function formatUSD(amount: string | number): string {
+  const n = typeof amount === "number" ? amount : parseFloat(amount);
+  return (Number.isFinite(n) ? n : 0).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+}
+
+function formatUSDate(value: string | Date): string {
+  const d = value instanceof Date ? value : new Date(value);
+  return d.toLocaleDateString("en-US");
 }
 
 function publicPaymentLinkFor(invoiceId: string): string | null {
@@ -229,14 +231,11 @@ export class EmailService {
     const { invoice, contract, client } = data;
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(invoice.id);
-    const dueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
-    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
+    const dueDate = formatUSDate(invoice.dueDate);
+    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
-      ? `<a href="${paymentUrl}" class="button">Pagar fatura</a>`
-      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
+      ? `<a href="${paymentUrl}" class="button">Pay invoice</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
     const paymentMethodsBlock = renderPaymentMethodsBlock(data.tenant);
 
     return `
@@ -260,38 +259,38 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Fatura ${invoice.invoiceNumber}</h1>
+      <h1>Invoice ${invoice.invoiceNumber}</h1>
       <p>${brandName}</p>
     </div>
     <div class="content">
-      <h2>Olá ${client.tradeName || client.companyName},</h2>
-      <p>Sua fatura mensal de locação está disponível. O PDF está em anexo neste e-mail.</p>
+      <h2>Hello ${client.tradeName || client.companyName},</h2>
+      <p>Your monthly rental invoice is available. The PDF is attached to this email.</p>
 
       <div class="invoice-details">
         <div class="detail-row">
-          <span class="label">Número da fatura:</span>
+          <span class="label">Invoice number:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contrato:</span>
+          <span class="label">Contract:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Mês de referência:</span>
+          <span class="label">Reference month:</span>
           <span class="value">${invoice.referenceMonth}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Vencimento:</span>
+          <span class="label">Due date:</span>
           <span class="value">${dueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Valor a pagar:</span>
+          <span class="label">Amount due:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p>Pague até o vencimento para evitar juros e multa.</p>
+      <p>Please pay by the due date to avoid late fees.</p>
 
       <center>
         ${buttonHtml}
@@ -301,7 +300,7 @@ export class EmailService {
 
       <div class="footer">
         <p><strong>${brandName}</strong></p>
-        <p>Em caso de dúvidas, responda a este e-mail.</p>
+        <p>If you have any questions, simply reply to this email.</p>
       </div>
     </div>
   </div>
@@ -317,14 +316,11 @@ export class EmailService {
     const { invoice, contract, client } = data;
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(invoice.id);
-    const dueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
-    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
+    const dueDate = formatUSDate(invoice.dueDate);
+    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
-      ? `<a href="${paymentUrl}" class="button">Pagar agora</a>`
-      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
+      ? `<a href="${paymentUrl}" class="button">Pay now</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
 
     return `
 <!DOCTYPE html>
@@ -348,40 +344,40 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Lembrete de pagamento</h1>
-      <p>Fatura ${invoice.invoiceNumber} em atraso</p>
+      <h1>Payment reminder</h1>
+      <p>Invoice ${invoice.invoiceNumber} is overdue</p>
     </div>
     <div class="content">
-      <h2>Olá ${client.tradeName || client.companyName},</h2>
-      <p><strong class="overdue">Esta fatura está ${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso.</strong></p>
-      <p>Ainda não recebemos o pagamento da fatura abaixo. Por favor regularize o quanto antes para evitar a suspensão do serviço.</p>
+      <h2>Hello ${client.tradeName || client.companyName},</h2>
+      <p><strong class="overdue">This invoice is ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due.</strong></p>
+      <p>We haven't received payment for the invoice below yet. Please settle it as soon as possible to avoid service suspension.</p>
 
       <div class="warning-box">
         <div class="detail-row">
-          <span class="label">Número da fatura:</span>
+          <span class="label">Invoice number:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contrato:</span>
+          <span class="label">Contract:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Vencimento original:</span>
+          <span class="label">Original due date:</span>
           <span class="value overdue">${dueDate}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Dias em atraso:</span>
-          <span class="value overdue">${daysOverdue} dia${daysOverdue > 1 ? 's' : ''}</span>
+          <span class="label">Days past due:</span>
+          <span class="value overdue">${daysOverdue} day${daysOverdue > 1 ? 's' : ''}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Valor a pagar:</span>
+          <span class="label">Amount due:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p><strong>Se o pagamento já foi efetuado, por favor desconsidere este aviso.</strong></p>
-      <p>Em caso de dúvidas sobre esta fatura, entre em contato conosco.</p>
+      <p><strong>If you have already made the payment, please disregard this notice.</strong></p>
+      <p>If you have any questions about this invoice, please contact us.</p>
 
       <center>
         ${buttonHtml}
@@ -389,7 +385,7 @@ export class EmailService {
 
       <div class="footer">
         <p><strong>${brandName}</strong></p>
-        <p>Em caso de dúvidas, responda a este e-mail.</p>
+        <p>If you have any questions, simply reply to this email.</p>
       </div>
     </div>
   </div>
@@ -399,21 +395,18 @@ export class EmailService {
   }
 
   /**
-   * Generate invoice reissued (2ª via) email HTML
+   * Generate reissued-invoice email HTML
    */
   static generateInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): string {
     const { invoice, contract, client } = data;
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(invoice.id);
-    const newDueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
-    const oldDueDate = new Date(previousDueDate).toLocaleDateString("pt-BR");
-    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
+    const newDueDate = formatUSDate(invoice.dueDate);
+    const oldDueDate = formatUSDate(previousDueDate);
+    const amount = formatUSD(invoice.amount);
     const buttonHtml = paymentUrl
-      ? `<a href="${paymentUrl}" class="button">Pagar agora</a>`
-      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
+      ? `<a href="${paymentUrl}" class="button">Pay now</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
 
     return `
 <!DOCTYPE html>
@@ -438,43 +431,43 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Fatura reemitida (2ª via)</h1>
-      <p>Fatura ${invoice.invoiceNumber} — novo vencimento</p>
+      <h1>Reissued invoice</h1>
+      <p>Invoice ${invoice.invoiceNumber} — new due date</p>
     </div>
     <div class="content">
-      <h2>Olá ${client.tradeName || client.companyName},</h2>
-      <p>A fatura <strong>${invoice.invoiceNumber}</strong> foi reemitida com novo vencimento. O PDF atualizado segue em anexo.</p>
+      <h2>Hello ${client.tradeName || client.companyName},</h2>
+      <p>Invoice <strong>${invoice.invoiceNumber}</strong> has been reissued with a new due date. The updated PDF is attached.</p>
 
       <div class="warning-box">
         <div class="detail-row">
-          <span class="label">Número da fatura:</span>
+          <span class="label">Invoice number:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contrato:</span>
+          <span class="label">Contract:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Mês de referência:</span>
+          <span class="label">Reference month:</span>
           <span class="value">${invoice.referenceMonth}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Vencimento anterior:</span>
+          <span class="label">Previous due date:</span>
           <span class="value old-date">${oldDueDate}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Novo vencimento:</span>
+          <span class="label">New due date:</span>
           <span class="value new-date">${newDueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Valor a pagar:</span>
+          <span class="label">Amount due:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p><strong>Se o pagamento já foi efetuado, por favor desconsidere este aviso.</strong></p>
-      <p>Em caso de dúvidas sobre esta fatura, entre em contato conosco.</p>
+      <p><strong>If you have already made the payment, please disregard this notice.</strong></p>
+      <p>If you have any questions about this invoice, please contact us.</p>
 
       <center>
         ${buttonHtml}
@@ -482,7 +475,7 @@ export class EmailService {
 
       <div class="footer">
         <p><strong>${brandName}</strong></p>
-        <p>Em caso de dúvidas, responda a este e-mail.</p>
+        <p>If you have any questions, simply reply to this email.</p>
       </div>
     </div>
   </div>
@@ -499,18 +492,18 @@ export class EmailService {
     const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generateInvoiceEmail(data);
     const text = `
-Fatura ${data.invoice.invoiceNumber}
+Invoice ${data.invoice.invoiceNumber}
 
-Olá ${data.client.tradeName || data.client.companyName},
+Hello ${data.client.tradeName || data.client.companyName},
 
-Sua fatura mensal de locação (Contrato ${data.contract.contractNumber}) está disponível.
+Your monthly rental invoice (Contract ${data.contract.contractNumber}) is available.
 
-Valor: R$ ${data.invoice.amount}
-Vencimento: ${new Date(data.invoice.dueDate).toLocaleDateString("pt-BR")}
-Mês de referência: ${data.invoice.referenceMonth}
-${paymentUrl ? `Pagar online: ${paymentUrl}` : ""}
+Amount: ${formatUSD(data.invoice.amount)}
+Due date: ${formatUSDate(data.invoice.dueDate)}
+Reference month: ${data.invoice.referenceMonth}
+${paymentUrl ? `Pay online: ${paymentUrl}` : ""}
 
-Por favor pague até o vencimento.
+Please pay by the due date.
 
 ${brandName}
     `.trim();
@@ -520,7 +513,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Fatura ${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
+      subject: `Invoice ${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
       html,
       text,
       attachments: data.attachments,
@@ -535,17 +528,17 @@ ${brandName}
     const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generatePaymentReminderEmail(data, daysOverdue);
     const text = `
-LEMBRETE DE PAGAMENTO — Fatura ${data.invoice.invoiceNumber}
+PAYMENT REMINDER — Invoice ${data.invoice.invoiceNumber}
 
-Olá ${data.client.tradeName || data.client.companyName},
+Hello ${data.client.tradeName || data.client.companyName},
 
-Esta fatura está ${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso.
+This invoice is ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due.
 
-Valor: R$ ${data.invoice.amount}
-Vencimento original: ${new Date(data.invoice.dueDate).toLocaleDateString("pt-BR")}
-${paymentUrl ? `Pagar agora: ${paymentUrl}` : ""}
+Amount: ${formatUSD(data.invoice.amount)}
+Original due date: ${formatUSDate(data.invoice.dueDate)}
+${paymentUrl ? `Pay now: ${paymentUrl}` : ""}
 
-Se já pagou, desconsidere este aviso.
+If you have already paid, please disregard this notice.
 
 ${brandName}
     `.trim();
@@ -555,7 +548,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Lembrete de pagamento — Fatura ${data.invoice.invoiceNumber} (${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso)`,
+      subject: `Payment reminder — Invoice ${data.invoice.invoiceNumber} (${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due)`,
       html,
       text,
       attachments: data.attachments,
@@ -569,22 +562,22 @@ ${brandName}
     const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
     const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generateInvoiceReissuedEmail(data, previousDueDate);
-    const newDueDateStr = new Date(data.invoice.dueDate).toLocaleDateString("pt-BR");
-    const oldDueDateStr = new Date(previousDueDate).toLocaleDateString("pt-BR");
+    const newDueDateStr = formatUSDate(data.invoice.dueDate);
+    const oldDueDateStr = formatUSDate(previousDueDate);
     const text = `
-Fatura reemitida (2ª via) — ${data.invoice.invoiceNumber}
+Reissued invoice — ${data.invoice.invoiceNumber}
 
-Olá ${data.client.tradeName || data.client.companyName},
+Hello ${data.client.tradeName || data.client.companyName},
 
-A fatura ${data.invoice.invoiceNumber} (Contrato ${data.contract.contractNumber}) foi reemitida com novo vencimento.
+Invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
 
-Valor: R$ ${data.invoice.amount}
-Vencimento anterior: ${oldDueDateStr}
-Novo vencimento: ${newDueDateStr}
-Mês de referência: ${data.invoice.referenceMonth}
-${paymentUrl ? `Pagar agora: ${paymentUrl}` : ""}
+Amount: ${formatUSD(data.invoice.amount)}
+Previous due date: ${oldDueDateStr}
+New due date: ${newDueDateStr}
+Reference month: ${data.invoice.referenceMonth}
+${paymentUrl ? `Pay now: ${paymentUrl}` : ""}
 
-Se já pagou, desconsidere este aviso.
+If you have already paid, please disregard this notice.
 
 ${brandName}
     `.trim();
@@ -594,7 +587,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Fatura reemitida (2ª via) — ${data.invoice.invoiceNumber} — novo vencimento ${newDueDateStr}`,
+      subject: `Reissued invoice — ${data.invoice.invoiceNumber} — new due date ${newDueDateStr}`,
       html,
       text,
       attachments: data.attachments,

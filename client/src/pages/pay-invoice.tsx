@@ -4,23 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Receipt, Calendar, FileText, AlertCircle, CheckCircle2, Copy, Building2 } from "lucide-react";
+import { Calendar, FileText, AlertCircle, CheckCircle2, Copy, Building2 } from "lucide-react";
 import { useRoute } from "wouter";
 
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
 interface PaymentMethodDetail {
-  type: "stripe" | "pix" | "boleto" | "bank_transfer";
+  type: "stripe" | "bank_transfer";
   available: boolean;
   configured: boolean;
   publicPaymentUrl?: string;
-  pixKey?: string;
-  pixKeyType?: string;
-  beneficiaryName?: string;
-  bankName?: string;
-  agency?: string;
-  account?: string;
+  bankName?: string | null;
+  routingNumber?: string | null;
+  account?: string | null;
+  accountHolder?: string | null;
+  accountType?: string | null;
   instructions?: string;
 }
 
@@ -41,8 +40,13 @@ interface PublicInvoiceResponse {
   stripeEnabled: boolean;
 }
 
-const formatBRL = (n: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+const formatUSD = (n: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+
+const formatUSDate = (input: string | Date) => {
+  const d = typeof input === "string" ? new Date(input) : input;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+};
 
 function StripePaymentForm({
   amount,
@@ -70,14 +74,14 @@ function StripePaymentForm({
     setIsProcessing(false);
     if (error) {
       toast({
-        title: "Pagamento não concluído",
-        description: error.message ?? "Tente novamente.",
+        title: "Payment not completed",
+        description: error.message ?? "Please try again.",
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Pagamento aprovado",
-        description: `Fatura ${invoiceNumber} paga com sucesso.`,
+        title: "Payment approved",
+        description: `Invoice ${invoiceNumber} paid successfully.`,
       });
       onSuccess();
     }
@@ -92,10 +96,10 @@ function StripePaymentForm({
         className="w-full h-12 text-base"
         data-testid="button-submit-payment"
       >
-        {isProcessing ? "Processando..." : `Pagar ${formatBRL(amount)}`}
+        {isProcessing ? "Processing..." : `Pay ${formatUSD(amount)}`}
       </Button>
       <p className="text-xs text-center text-muted-foreground">
-        Pagamento seguro processado pelo Stripe.
+        Secure payment processed by Stripe.
       </p>
     </form>
   );
@@ -105,45 +109,59 @@ function PaymentMethodCard({ method }: { method: PaymentMethodDetail }) {
   const { toast } = useToast();
   const copy = (value: string, label: string) => {
     navigator.clipboard.writeText(value);
-    toast({ title: `${label} copiado`, description: value });
+    toast({ title: `${label} copied`, description: value });
   };
 
-  if (method.type === "pix") {
+  if (method.type === "bank_transfer") {
+    const accountTypeLabel =
+      method.accountType === "checking"
+        ? "Checking"
+        : method.accountType === "savings"
+          ? "Savings"
+          : method.accountType ?? null;
     return (
-      <div className="rounded-lg border bg-card p-4 space-y-2" data-testid="card-method-pix">
+      <div className="rounded-lg border bg-card p-4 space-y-2" data-testid="card-method-ach">
         <h4 className="font-semibold flex items-center gap-2">
-          <Receipt className="h-4 w-4" /> PIX
+          <Building2 className="h-4 w-4" /> Bank Transfer (ACH)
         </h4>
-        {method.pixKey && (
+        {method.bankName && <p className="text-sm">Bank: {method.bankName}</p>}
+        {method.routingNumber && (
           <div className="flex items-center justify-between text-sm">
             <span>
-              <span className="text-muted-foreground">Chave ({method.pixKeyType ?? "PIX"}):</span>{" "}
-              <code className="font-mono">{method.pixKey}</code>
+              <span className="text-muted-foreground">Routing Number:</span>{" "}
+              <code className="font-mono">{method.routingNumber}</code>
             </span>
-            <Button size="sm" variant="ghost" onClick={() => copy(method.pixKey!, "Chave PIX")} data-testid="button-copy-pix">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => copy(method.routingNumber!, "Routing Number")}
+              data-testid="button-copy-routing"
+            >
               <Copy className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
-        {method.beneficiaryName && (
-          <p className="text-sm text-muted-foreground">Beneficiário: {method.beneficiaryName}</p>
+        {method.account && (
+          <div className="flex items-center justify-between text-sm">
+            <span>
+              <span className="text-muted-foreground">Account Number:</span>{" "}
+              <code className="font-mono">{method.account}</code>
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => copy(method.account!, "Account Number")}
+              data-testid="button-copy-account"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         )}
-        {method.instructions && <p className="text-xs text-muted-foreground">{method.instructions}</p>}
-      </div>
-    );
-  }
-
-  if (method.type === "bank_transfer") {
-    return (
-      <div className="rounded-lg border bg-card p-4 space-y-2" data-testid="card-method-bank">
-        <h4 className="font-semibold flex items-center gap-2">
-          <Building2 className="h-4 w-4" /> Transferência bancária
-        </h4>
-        {method.bankName && <p className="text-sm">Banco: {method.bankName}</p>}
-        {method.agency && <p className="text-sm">Agência: {method.agency}</p>}
-        {method.account && <p className="text-sm">Conta: {method.account}</p>}
-        {method.beneficiaryName && (
-          <p className="text-sm text-muted-foreground">Favorecido: {method.beneficiaryName}</p>
+        {method.accountHolder && (
+          <p className="text-sm text-muted-foreground">Account Holder: {method.accountHolder}</p>
+        )}
+        {accountTypeLabel && (
+          <p className="text-sm text-muted-foreground">Type: {accountTypeLabel}</p>
         )}
         {method.instructions && <p className="text-xs text-muted-foreground">{method.instructions}</p>}
       </div>
@@ -170,7 +188,7 @@ export default function PayInvoicePage() {
       .then(async (r) => {
         if (!r.ok) {
           const body = await r.json().catch(() => ({}));
-          throw new Error(body.message ?? "Falha ao carregar a fatura.");
+          throw new Error(body.message ?? "Failed to load invoice.");
         }
         return r.json() as Promise<PublicInvoiceResponse>;
       })
@@ -187,10 +205,10 @@ export default function PayInvoicePage() {
         headers: { "Content-Type": "application/json" },
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.message ?? "Falha ao iniciar pagamento.");
+      if (!res.ok) throw new Error(body.message ?? "Failed to initiate payment.");
       setClientSecret(body.clientSecret);
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
       setLoadingIntent(false);
     }
@@ -208,13 +226,13 @@ export default function PayInvoicePage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              <CardTitle>Link indisponível</CardTitle>
+              <CardTitle>Link unavailable</CardTitle>
             </div>
-            <CardDescription>{error ?? "Token de pagamento ausente."}</CardDescription>
+            <CardDescription>{error ?? "Payment token is missing."}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Solicite um novo link de pagamento ao emissor da fatura.
+              Please request a new payment link from the invoice issuer.
             </p>
           </CardContent>
         </Card>
@@ -228,9 +246,9 @@ export default function PayInvoicePage() {
         <div className="flex flex-col items-center gap-3">
           <div
             className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full"
-            aria-label="Carregando"
+            aria-label="Loading"
           />
-          <p className="text-sm text-muted-foreground">Carregando fatura...</p>
+          <p className="text-sm text-muted-foreground">Loading invoice...</p>
         </div>
       </div>
     );
@@ -255,9 +273,9 @@ export default function PayInvoicePage() {
             </div>
           )}
           <div>
-            <p className="text-sm text-muted-foreground">Pagamento</p>
+            <p className="text-sm text-muted-foreground">Payment</p>
             <h1 className="text-xl font-semibold" data-testid="text-tenant-name">
-              {data.tenant?.name ?? "Pagamento de Fatura"}
+              {data.tenant?.name ?? "Invoice Payment"}
             </h1>
           </div>
         </header>
@@ -268,10 +286,10 @@ export default function PayInvoicePage() {
               <div>
                 <CardTitle className="flex items-center gap-2" data-testid="text-invoice-number">
                   <FileText className="h-5 w-5" />
-                  Fatura {data.invoice.invoiceNumber}
+                  Invoice {data.invoice.invoiceNumber}
                 </CardTitle>
                 <CardDescription>
-                  {data.client?.tradeName || data.client?.companyName || "Cliente"}
+                  {data.client?.tradeName || data.client?.companyName || "Customer"}
                 </CardDescription>
               </div>
               {isPaid ? (
@@ -279,14 +297,14 @@ export default function PayInvoicePage() {
                   className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 text-xs font-semibold"
                   data-testid="status-paid"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Paga
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Paid
                 </span>
               ) : (
                 <span
                   className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-3 py-1 text-xs font-semibold"
                   data-testid="status-pending"
                 >
-                  Em aberto
+                  Open
                 </span>
               )}
             </div>
@@ -294,29 +312,29 @@ export default function PayInvoicePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground">Valor</p>
+                <p className="text-xs text-muted-foreground">Amount</p>
                 <p className="text-2xl font-bold" data-testid="text-invoice-amount">
-                  {formatBRL(amountNum)}
+                  {formatUSD(amountNum)}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> Vencimento
+                  <Calendar className="h-3.5 w-3.5" /> Due Date
                 </p>
                 <p className="text-base font-medium" data-testid="text-invoice-due">
-                  {new Date(data.invoice.dueDate).toLocaleDateString("pt-BR")}
+                  {formatUSDate(data.invoice.dueDate)}
                 </p>
               </div>
               {data.invoice.referenceMonth && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Mês de referência</p>
+                  <p className="text-xs text-muted-foreground">Reference Month</p>
                   <p className="text-base">{data.invoice.referenceMonth}</p>
                 </div>
               )}
               {data.trailer && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Equipamento</p>
-                  <p className="text-base">Frota {data.trailer.fleetNumber}</p>
+                  <p className="text-xs text-muted-foreground">Equipment</p>
+                  <p className="text-base">Unit {data.trailer.fleetNumber}</p>
                 </div>
               )}
             </div>
@@ -326,13 +344,13 @@ export default function PayInvoicePage() {
         {!isPaid && (
           <Card>
             <CardHeader>
-              <CardTitle>Como pagar</CardTitle>
-              <CardDescription>Escolha a forma de pagamento de sua preferência.</CardDescription>
+              <CardTitle>How to Pay</CardTitle>
+              <CardDescription>Choose your preferred payment method.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {stripeMethod && stripePromise && (
                 <div className="rounded-lg border bg-card p-4 space-y-3">
-                  <h4 className="font-semibold">Cartão de crédito</h4>
+                  <h4 className="font-semibold">Credit Card</h4>
                   {!clientSecret ? (
                     <Button
                       onClick={startStripeCheckout}
@@ -340,7 +358,7 @@ export default function PayInvoicePage() {
                       className="w-full"
                       data-testid="button-start-card-payment"
                     >
-                      {loadingIntent ? "Preparando..." : `Pagar ${formatBRL(amountNum)} com cartão`}
+                      {loadingIntent ? "Preparing..." : `Pay ${formatUSD(amountNum)} by card`}
                     </Button>
                   ) : (
                     <Elements stripe={stripePromise} options={{ clientSecret }}>
@@ -362,7 +380,7 @@ export default function PayInvoicePage() {
 
               {!stripeMethod && data.paymentMethods.filter((m) => m.available).length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Nenhum método de pagamento configurado. Entre em contato com o emissor.
+                  No payment method has been configured. Please contact the issuer.
                 </p>
               )}
             </CardContent>
@@ -373,9 +391,9 @@ export default function PayInvoicePage() {
           <Card className="border-green-200 dark:border-green-900">
             <CardContent className="py-6 text-center space-y-2">
               <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400 mx-auto" />
-              <p className="font-semibold">Pagamento confirmado</p>
+              <p className="font-semibold">Payment confirmed</p>
               <p className="text-sm text-muted-foreground">
-                Você pode fechar esta página. Em instantes a baixa aparecerá no sistema.
+                You can close this page. The system will reflect the payment shortly.
               </p>
             </CardContent>
           </Card>

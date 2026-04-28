@@ -14,8 +14,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type TenantBillingConfig = {
-  pixKey: string | null;
-  pixBeneficiary: string | null;
   bankName: string | null;
   bankAgency: string | null;
   bankAccount: string | null;
@@ -23,6 +21,7 @@ type TenantBillingConfig = {
   bankAccountType: string | null;
   billingEmail: string | null;
   logoUrl: string | null;
+  salesTaxRate: string | null;
 };
 
 function IntegrationStatusCard({
@@ -99,8 +98,6 @@ export default function Settings() {
   });
 
   const [billing, setBilling] = useState<TenantBillingConfig>({
-    pixKey: "",
-    pixBeneficiary: "",
     bankName: "",
     bankAgency: "",
     bankAccount: "",
@@ -108,13 +105,12 @@ export default function Settings() {
     bankAccountType: "",
     billingEmail: "",
     logoUrl: "",
+    salesTaxRate: "0",
   });
 
   useEffect(() => {
     if (tenant) {
       setBilling({
-        pixKey: tenant.pixKey ?? "",
-        pixBeneficiary: tenant.pixBeneficiary ?? "",
         bankName: tenant.bankName ?? "",
         bankAgency: tenant.bankAgency ?? "",
         bankAccount: tenant.bankAccount ?? "",
@@ -122,6 +118,7 @@ export default function Settings() {
         bankAccountType: tenant.bankAccountType ?? "",
         billingEmail: tenant.billingEmail ?? "",
         logoUrl: tenant.logoUrl ?? "",
+        salesTaxRate: tenant.salesTaxRate ?? "0",
       });
     }
   }, [tenant]);
@@ -359,35 +356,30 @@ export default function Settings() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* PIX Section */}
+                {/* Sales Tax Section */}
                 <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
                   <div>
-                    <h3 className="font-semibold text-foreground">{t("settings.billingPixTitle")}</h3>
-                    <p className="text-xs text-muted-foreground">{t("settings.billingPixDescription")}</p>
+                    <h3 className="font-semibold text-foreground">{t("settings.billingSalesTaxTitle")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("settings.billingSalesTaxDescription")}</p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="billing-pix-key" className="text-xs">{t("settings.billingPixKey")}</Label>
+                    <Label htmlFor="billing-sales-tax-rate" className="text-xs">{t("settings.billingSalesTaxRate")}</Label>
                     <Input
-                      id="billing-pix-key"
-                      value={billing.pixKey ?? ""}
-                      onChange={(e) => updateBillingField("pixKey", e.target.value)}
-                      placeholder={t("settings.billingPixKeyPlaceholder")}
-                      data-testid="input-billing-pix-key"
+                      id="billing-sales-tax-rate"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={billing.salesTaxRate ?? "0"}
+                      onChange={(e) => updateBillingField("salesTaxRate", e.target.value)}
+                      placeholder="0.00"
+                      data-testid="input-billing-sales-tax-rate"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="billing-pix-beneficiary" className="text-xs">{t("settings.billingPixBeneficiary")}</Label>
-                    <Input
-                      id="billing-pix-beneficiary"
-                      value={billing.pixBeneficiary ?? ""}
-                      onChange={(e) => updateBillingField("pixBeneficiary", e.target.value)}
-                      placeholder={t("settings.billingPixBeneficiaryPlaceholder")}
-                      data-testid="input-billing-pix-beneficiary"
-                    />
+                    <p className="text-xs text-muted-foreground">{t("settings.billingSalesTaxRateHelp")}</p>
                   </div>
                 </div>
 
-                {/* Bank Transfer Section */}
+                {/* ACH Bank Transfer Section */}
                 <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
                   <div>
                     <h3 className="font-semibold text-foreground">{t("settings.billingBankTitle")}</h3>
@@ -404,12 +396,13 @@ export default function Settings() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="billing-bank-agency" className="text-xs">{t("settings.billingBankAgency")}</Label>
+                      <Label htmlFor="billing-bank-agency" className="text-xs">{t("settings.billingBankRouting")}</Label>
                       <Input
                         id="billing-bank-agency"
                         value={billing.bankAgency ?? ""}
                         onChange={(e) => updateBillingField("bankAgency", e.target.value)}
-                        data-testid="input-billing-bank-agency"
+                        placeholder="123456789"
+                        data-testid="input-billing-bank-routing"
                       />
                     </div>
                     <div className="space-y-2">

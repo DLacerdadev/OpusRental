@@ -361,6 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bankAccountType: req.tenant.bankAccountType ?? null,
         billingEmail: req.tenant.billingEmail ?? null,
         logoUrl: req.tenant.logoUrl ?? null,
+        salesTaxRate: req.tenant.salesTaxRate ?? "0",
       });
     } catch (error) {
       console.error("Get tenant billing error:", error);
@@ -394,6 +395,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bankAccountHolder: optionalString,
         bankAccountType: z.enum(["checking", "savings"]).optional().nullable()
           .transform((v) => (v === undefined ? undefined : v ?? null)),
+        // Default sales tax percentage (0–100, up to 2 decimals). Stored as
+        // a string in the DB to match Drizzle's decimal type. Empty string
+        // is treated as 0 so the form can clear the field.
+        salesTaxRate: z
+          .union([z.string(), z.number()])
+          .optional()
+          .transform((v) => {
+            if (v === undefined) return undefined;
+            const n = typeof v === "number" ? v : parseFloat(v === "" ? "0" : v);
+            if (!Number.isFinite(n) || n < 0 || n > 100) {
+              throw new Error("salesTaxRate must be between 0 and 100");
+            }
+            return n.toFixed(2);
+          }),
       });
 
       const data = updateSchema.parse(req.body);
@@ -1313,8 +1328,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // automated invoice creation.
       const invoiceNumber = await storage.getNextInvoiceNumber(req.tenantId!);
 
+      // Resolve sales-tax breakdown. Manager-supplied values win; otherwise
+      // derive subtotal from `amount` and tax from the tenant's default
+      // salesTaxRate. The breakdown is then frozen on the invoice so future
+      // tenant rate changes never retroactively alter past invoices.
+      const incoming = validation.data;
+      const incomingAmount = parseFloat(String(incoming.amount));
+      const tenantForTax = await storage.getTenant(req.tenantId!).catch(() => null);
+      const tenantDefaultRate = tenantForTax?.salesTaxRate
+        ? parseFloat(tenantForTax.salesTaxRate.toString())
+        : 0;
+
+      const supplied = (v: unknown): v is string | number => v !== undefined && v !== null && v !== "";
+      let subtotal: number;
+      let salesTaxRate: number;
+      let salesTaxAmount: number;
+      let amount: number;
+
+      if (supplied(incoming.salesTaxRate)) {
+        salesTaxRate = parseFloat(String(incoming.salesTaxRate));
+        if (!Number.isFinite(salesTaxRate) || salesTaxRate < 0) salesTaxRate = 0;
+      } else {
+        salesTaxRate = Number.isFinite(tenantDefaultRate) && tenantDefaultRate >= 0 ? tenantDefaultRate : 0;
+      }
+
+      if (supplied(incoming.subtotal)) {
+        subtotal = parseFloat(String(incoming.subtotal));
+        if (!Number.isFinite(subtotal) || subtotal < 0) subtotal = incomingAmount;
+      } else {
+        // No subtotal supplied — treat the typed `amount` as the subtotal,
+        // and recompute the total to include sales tax.
+        subtotal = Number.isFinite(incomingAmount) ? incomingAmount : 0;
+      }
+
+      salesTaxAmount = supplied(incoming.salesTaxAmount)
+        ? parseFloat(String(incoming.salesTaxAmount))
+        : Number((subtotal * (salesTaxRate / 100)).toFixed(2));
+      if (!Number.isFinite(salesTaxAmount) || salesTaxAmount < 0) salesTaxAmount = 0;
+
+      amount = Number((subtotal + salesTaxAmount).toFixed(2));
+
       const invoice = await storage.createInvoice({
         ...validation.data,
+        amount: amount.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+        salesTaxRate: salesTaxRate.toFixed(2),
+        salesTaxAmount: salesTaxAmount.toFixed(2),
         invoiceNumber,
         tenantId: req.tenantId!,
       });
@@ -3931,17 +3990,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate amount in cents
       const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
 
-      // Create Stripe payment intent (BRL — Real brasileiro)
+      // Create Stripe payment intent (USD)
       const paymentIntent = await stripe!.paymentIntents.create({
         amount: amountInCents,
-        currency: "brl",
+        currency: "usd",
         metadata: {
           type: "invoice_payment",
           invoiceId: invoiceId,
           contractId: invoice.contractId,
           tenantId: req.tenantId!,
         },
-        description: `Pagamento da fatura ${invoice.invoiceNumber}`,
+        description: `Payment for invoice ${invoice.invoiceNumber}`,
       });
 
       await storage.createAuditLog({
@@ -4255,16 +4314,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               );
               if (managers.length > 0) {
                 const notifier = new NotificationService();
-                const amountBRL = (paymentIntent.amount / 100).toLocaleString("pt-BR", {
+                const amountUSD = (paymentIntent.amount / 100).toLocaleString("en-US", {
                   style: "currency",
-                  currency: "BRL",
+                  currency: "USD",
                 });
                 await Promise.all(
                   managers.map((m) =>
                     notifier.createNotification({
                       userId: m.id,
-                      title: "Fatura paga",
-                      message: `Fatura ${invoice.invoiceNumber} foi paga via cartão (${amountBRL}).`,
+                      title: "Invoice paid",
+                      message: `Invoice ${invoice.invoiceNumber} was paid by credit card (${amountUSD}).`,
                       type: "system_alert",
                       severity: "info",
                       metadata: {
@@ -4421,12 +4480,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const invoiceId = verifyInvoiceToken(req.params.token);
       if (!invoiceId) {
-        return res.status(401).json({ message: "Link inválido ou expirado." });
+        return res.status(401).json({ message: "Invalid or expired link." });
       }
 
       const invoice = await storage.getInvoiceByIdPublic(invoiceId);
       if (!invoice) {
-        return res.status(404).json({ message: "Fatura não encontrada." });
+        return res.status(404).json({ message: "Invoice not found." });
       }
 
       const tenantId = invoice.tenantId;
@@ -4476,35 +4535,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Public invoice fetch error:", error);
-      res.status(500).json({ message: "Falha ao carregar fatura." });
+      res.status(500).json({ message: "Failed to load invoice." });
     }
   });
 
   app.post("/api/public/invoices/:token/payment-intent", apiLimiter, async (req, res) => {
     try {
       if (!isStripeConfigured()) {
-        return res.status(503).json({ message: "Pagamento por cartão indisponível no momento." });
+        return res.status(503).json({ message: "Card payments are unavailable at the moment." });
       }
 
       const invoiceId = verifyInvoiceToken(req.params.token);
       if (!invoiceId) {
-        return res.status(401).json({ message: "Link inválido ou expirado." });
+        return res.status(401).json({ message: "Invalid or expired link." });
       }
 
       const invoice = await storage.getInvoiceByIdPublic(invoiceId);
       if (!invoice) {
-        return res.status(404).json({ message: "Fatura não encontrada." });
+        return res.status(404).json({ message: "Invoice not found." });
       }
 
       if (invoice.status === "paid") {
-        return res.status(400).json({ message: "Esta fatura já foi paga." });
+        return res.status(400).json({ message: "This invoice has already been paid." });
       }
 
       const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
 
       const paymentIntent = await stripe!.paymentIntents.create({
         amount: amountInCents,
-        currency: "brl",
+        currency: "usd",
         metadata: {
           type: "invoice_payment",
           invoiceId: invoice.id,
@@ -4512,7 +4571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tenantId: invoice.tenantId,
           source: "public_link",
         },
-        description: `Pagamento da fatura ${invoice.invoiceNumber}`,
+        description: `Payment for invoice ${invoice.invoiceNumber}`,
       });
 
       res.json({
@@ -4523,7 +4582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Public invoice payment intent error:", error);
-      res.status(500).json({ message: "Falha ao iniciar pagamento: " + error.message });
+      res.status(500).json({ message: "Failed to initiate payment: " + error.message });
     }
   });
 

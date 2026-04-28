@@ -39,14 +39,23 @@ export const tenants = pgTable("tenants", {
   stripeSubscriptionId: text("stripe_subscription_id"),
 
   // Per-tenant payment method configuration (Template 3)
+  // Note: pixKey / pixBeneficiary columns are retained for backward
+  // compatibility but are no longer surfaced in the US localized flow.
   pixKey: text("pix_key"),
   pixBeneficiary: text("pix_beneficiary"),
+  // ACH bank-transfer details. `bankAgency` is reused semantically as the
+  // routing number in the US flow (column name kept to avoid a destructive
+  // rename). `bankAccountType` carries "checking" | "savings".
   bankName: text("bank_name"),
   bankAgency: text("bank_agency"),
   bankAccount: text("bank_account"),
   bankAccountHolder: text("bank_account_holder"),
   bankAccountType: text("bank_account_type"), // "checking" | "savings"
-  
+
+  // Default sales tax percentage applied to new invoices for this tenant
+  // (e.g. "8.25" for 8.25%). Per-invoice rate may override this default.
+  salesTaxRate: decimal("sales_tax_rate", { precision: 5, scale: 2 }).notNull().default("0"),
+
   // Status
   status: text("status").notNull().default("active"), // active, suspended, cancelled
   trialEndsAt: timestamp("trial_ends_at"),
@@ -343,7 +352,14 @@ export const invoices = pgTable("invoices", {
   // independent sequence without colliding with other tenants.
   invoiceNumber: text("invoice_number").notNull(),
   contractId: varchar("contract_id").notNull().references(() => rentalContracts.id),
+  // `amount` is the gross total = subtotal + salesTaxAmount and is what the
+  // customer is asked to pay. `subtotal` and `salesTaxAmount` are kept as
+  // separate columns so the PDF / e-mail can show a breakdown without having
+  // to re-derive it from the tenant rate at render time.
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }),
+  salesTaxRate: decimal("sales_tax_rate", { precision: 5, scale: 2 }),
+  salesTaxAmount: decimal("sales_tax_amount", { precision: 10, scale: 2 }),
   dueDate: date("due_date").notNull(),
   paidDate: date("paid_date"),
   status: text("status").notNull().default("pending"), // pending, paid, overdue, cancelled, reissued

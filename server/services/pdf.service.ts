@@ -630,13 +630,11 @@ export class PDFService {
    * looks like — keeping PDF and JSON consistent.
    */
   static buildInvoiceData(data: InvoicePDFData): InvoiceData {
-    const tax = 0;
-
     // Items: prefer stored line-items when present (multi-trailer / add-ons);
-    // otherwise synthesize the legacy single "Locação Mensal" row from the
+    // otherwise synthesize the legacy single "Monthly Rental" row from the
     // contract so existing single-trailer invoices keep producing identical
-    // output. Totals are always recomputed from the rendered items so the
-    // table sum and the totals block can never disagree.
+    // output. The line-items subtotal is always recomputed so the table sum
+    // and the totals block can never disagree.
     let items: InvoiceDataItem[];
     if (data.lineItems && data.lineItems.length > 0) {
       items = data.lineItems.map((item) => {
@@ -654,11 +652,25 @@ export class PDFService {
       const rate = parseFloat(data.contract.monthlyRate.toString());
       const qty = 1;
       const amount = rate * qty;
-      const description = `Locação Mensal — ${data.contract.trailer.trailerId} — ${data.referenceMonth}`;
+      const description = `Monthly Rental — ${data.contract.trailer.trailerId} — ${data.referenceMonth}`;
       items = [{ description, rate, qty, amount }];
     }
 
-    const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+    // Sales tax: prefer the per-invoice values stored on the invoice itself
+    // (so historical invoices stay frozen). Fall back to the tenant's default
+    // rate applied to the items subtotal for invoices created before tax
+    // localization was rolled out.
+    const itemsSubtotal = items.reduce((sum, item) => sum + item.amount, 0);
+    const storedSubtotal = data.subtotal != null ? parseFloat(data.subtotal.toString()) : null;
+    const storedTax = data.salesTaxAmount != null ? parseFloat(data.salesTaxAmount.toString()) : null;
+    const tenantRate = data.tenant?.salesTaxRate != null ? parseFloat(data.tenant.salesTaxRate.toString()) : 0;
+
+    const subtotal = storedSubtotal != null && Number.isFinite(storedSubtotal) ? storedSubtotal : itemsSubtotal;
+    const tax = storedTax != null && Number.isFinite(storedTax)
+      ? storedTax
+      : Number.isFinite(tenantRate) && tenantRate > 0
+        ? Number((itemsSubtotal * (tenantRate / 100)).toFixed(2))
+        : 0;
     const total = subtotal + tax;
 
     const dueDate = this.toISO(data.dueDate);
@@ -726,28 +738,28 @@ export class PDFService {
     const doc = new jsPDF();
     const brandName = data.tenant?.name ?? null;
 
-    this.addHeader(doc, 'Fatura', brandName, data.tenantLogoDataUrl ?? null);
+    this.addHeader(doc, 'Invoice', brandName, data.tenantLogoDataUrl ?? null);
 
     let yPos = 50;
 
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('FATURA', 20, yPos);
+    doc.text('INVOICE', 20, yPos);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Fatura nº ${invoiceData.invoiceNumber}`, 150, yPos);
+    doc.text(`Invoice # ${invoiceData.invoiceNumber}`, 150, yPos);
     yPos += 6;
-    doc.text(`Emissão: ${this.formatDate(invoiceData.issueDate)}`, 150, yPos);
+    doc.text(`Issued: ${this.formatDate(invoiceData.issueDate)}`, 150, yPos);
     yPos += 6;
-    doc.text(`Vencimento: ${this.formatDate(invoiceData.dueDate)}`, 150, yPos);
+    doc.text(`Due: ${this.formatDate(invoiceData.dueDate)}`, 150, yPos);
 
     yPos += 15;
 
     doc.setFillColor(245, 247, 250);
     doc.rect(20, yPos, 75, 8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.text('CLIENTE', 22, yPos + 5);
+    doc.text('BILL TO', 22, yPos + 5);
     yPos += 12;
 
     doc.setFont('helvetica', 'normal');
@@ -769,7 +781,7 @@ export class PDFService {
 
     autoTable(doc, {
       startY: yPos,
-      head: [['Descrição', 'Valor Unit.', 'Qtd.', 'Total']],
+      head: [['Description', 'Unit Rate', 'Qty', 'Total']],
       body: invoiceData.items.map((item) => [
         item.description,
         this.formatCurrency(item.rate),
@@ -799,7 +811,7 @@ export class PDFService {
     doc.text('Subtotal:', 125, yPos + 8);
     doc.text(this.formatCurrency(invoiceData.totals.subtotal), 185, yPos + 8, { align: 'right' });
 
-    doc.text('Impostos:', 125, yPos + 16);
+    doc.text('Sales Tax:', 125, yPos + 16);
     doc.text(this.formatCurrency(invoiceData.totals.tax), 185, yPos + 16, { align: 'right' });
 
     doc.setFont('helvetica', 'bold');
@@ -815,10 +827,11 @@ export class PDFService {
     const statusColor = invoiceData.status === 'paid' ? [34, 197, 94] :
                        invoiceData.status === 'overdue' ? [239, 68, 68] :
                        [251, 191, 36];
-    const statusLabel = invoiceData.status === 'paid' ? 'PAGA' :
-                        invoiceData.status === 'overdue' ? 'EM ATRASO' :
-                        invoiceData.status === 'open' ? 'EM ABERTO' :
-                        invoiceData.status === 'cancelled' ? 'CANCELADA' :
+    const statusLabel = invoiceData.status === 'paid' ? 'PAID' :
+                        invoiceData.status === 'overdue' ? 'OVERDUE' :
+                        invoiceData.status === 'pending' ? 'OPEN' :
+                        invoiceData.status === 'open' ? 'OPEN' :
+                        invoiceData.status === 'cancelled' ? 'CANCELLED' :
                         invoiceData.status.toUpperCase();
     doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
     doc.rect(20, yPos, 50, 8, 'F');
@@ -829,10 +842,10 @@ export class PDFService {
     if (invoiceData.status === 'paid' && invoiceData.paidDate) {
       yPos += 10;
       doc.setFont('helvetica', 'normal');
-      doc.text(`Paga em: ${this.formatDate(invoiceData.paidDate)}`, 22, yPos);
+      doc.text(`Paid on: ${this.formatDate(invoiceData.paidDate)}`, 22, yPos);
     }
 
-    // Diagonal "PAGA" watermark when invoice is settled — leaves no doubt
+    // Diagonal "PAID" watermark when invoice is settled — leaves no doubt
     // that this PDF represents a closed-out invoice.
     if (invoiceData.status === 'paid') {
       const center = doc.internal.pageSize.width / 2;
@@ -842,7 +855,7 @@ export class PDFService {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(80);
       doc.setTextColor(220, 240, 220);
-      doc.text('PAGA', center, middle, { align: 'center', angle: 30 });
+      doc.text('PAID', center, middle, { align: 'center', angle: 30 });
       doc.setTextColor(0, 0, 0);
       doc.restoreGraphicsState?.();
     }
@@ -852,7 +865,7 @@ export class PDFService {
     doc.rect(20, yPos - 5, 170, 8, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.text('COMO PAGAR', 22, yPos);
+    doc.text('HOW TO PAY', 22, yPos);
     yPos += 8;
 
     // Public payment link prominently at the top — works for the customer
@@ -868,7 +881,7 @@ export class PDFService {
     if (publicPaymentUrl) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text('Pague online (cartão de crédito):', 22, yPos);
+      doc.text('Pay online (credit card):', 22, yPos);
       yPos += 5;
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(33, 99, 232);
@@ -894,7 +907,7 @@ export class PDFService {
       yPos += 5;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.text('OBSERVAÇÕES', 22, yPos);
+      doc.text('NOTES', 22, yPos);
       yPos += 6;
 
       doc.setFont('helvetica', 'normal');

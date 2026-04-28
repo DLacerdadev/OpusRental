@@ -6,20 +6,15 @@ import type { Tenant, Invoice } from '@shared/schema';
  * tenant has not configured are simply omitted from the list.
  *
  * All methods share a `reference` field equal to the invoice number so the
- * tenant can reconcile incoming PIX/bank transfers against the invoice.
+ * tenant can reconcile incoming ACH transfers against the invoice.
+ *
+ * Note: the `bankAgency` column on the tenant is reused semantically as the
+ * ACH routing number for the US flow.
  */
-export type PaymentMethodPix = {
-  type: 'pix';
-  pixKey: string;
-  beneficiary: string | null;
-  amount: number;
-  reference: string;
-};
-
 export type PaymentMethodBank = {
   type: 'bank_transfer';
   bankName: string;
-  agency: string | null;
+  routingNumber: string | null;
   account: string;
   accountHolder: string | null;
   accountType: string | null;
@@ -35,15 +30,10 @@ export type PaymentMethodStripe = {
   publicPaymentUrl?: string;
 };
 
-export type PaymentMethod =
-  | PaymentMethodPix
-  | PaymentMethodBank
-  | PaymentMethodStripe;
+export type PaymentMethod = PaymentMethodBank | PaymentMethodStripe;
 
 type MinimalTenant = Pick<
   Tenant,
-  | 'pixKey'
-  | 'pixBeneficiary'
   | 'bankName'
   | 'bankAgency'
   | 'bankAccount'
@@ -63,24 +53,13 @@ export function buildPaymentMethods(
   const amount = parseFloat(invoice.amount?.toString() ?? '0');
   const reference = invoice.invoiceNumber;
 
-  const pixKey = tenant?.pixKey?.trim();
-  if (pixKey) {
-    methods.push({
-      type: 'pix',
-      pixKey,
-      beneficiary: tenant?.pixBeneficiary?.trim() || null,
-      amount,
-      reference,
-    });
-  }
-
   const bankName = tenant?.bankName?.trim();
   const bankAccount = tenant?.bankAccount?.trim();
   if (bankName && bankAccount) {
     methods.push({
       type: 'bank_transfer',
       bankName,
-      agency: tenant?.bankAgency?.trim() || null,
+      routingNumber: tenant?.bankAgency?.trim() || null,
       account: bankAccount,
       accountHolder: tenant?.bankAccountHolder?.trim() || null,
       accountType: tenant?.bankAccountType?.trim() || null,
@@ -112,7 +91,7 @@ export function paymentMethodsToInstructionLines(
   methods: PaymentMethod[],
 ): string[] {
   if (methods.length === 0) {
-    return ['Nenhum método de pagamento configurado. Entre em contato com o emissor.'];
+    return ['No payment method configured. Please contact the issuer.'];
   }
 
   const lines: string[] = [];
@@ -120,31 +99,25 @@ export function paymentMethodsToInstructionLines(
   methods.forEach((method, index) => {
     if (index > 0) lines.push('');
 
-    if (method.type === 'pix') {
-      lines.push('PIX');
-      lines.push(`Chave: ${method.pixKey}`);
-      if (method.beneficiary) lines.push(`Beneficiário: ${method.beneficiary}`);
-      lines.push(`Valor: ${formatAmount(method.amount)}`);
-      lines.push(`Referência: ${method.reference}`);
-    } else if (method.type === 'bank_transfer') {
-      lines.push('Transferência Bancária');
-      lines.push(`Banco: ${method.bankName}`);
-      if (method.agency) lines.push(`Agência: ${method.agency}`);
-      lines.push(`Conta: ${method.account}`);
-      if (method.accountHolder) lines.push(`Titular: ${method.accountHolder}`);
+    if (method.type === 'bank_transfer') {
+      lines.push('Bank Transfer (ACH)');
+      lines.push(`Bank: ${method.bankName}`);
+      if (method.routingNumber) lines.push(`Routing Number: ${method.routingNumber}`);
+      lines.push(`Account: ${method.account}`);
+      if (method.accountHolder) lines.push(`Account Holder: ${method.accountHolder}`);
       if (method.accountType) {
-        lines.push(`Tipo: ${method.accountType === 'checking' ? 'Corrente' : method.accountType === 'savings' ? 'Poupança' : method.accountType}`);
+        lines.push(`Type: ${method.accountType === 'checking' ? 'Checking' : method.accountType === 'savings' ? 'Savings' : method.accountType}`);
       }
-      lines.push(`Valor: ${formatAmount(method.amount)}`);
-      lines.push(`Referência: ${method.reference}`);
+      lines.push(`Amount: ${formatAmount(method.amount)}`);
+      lines.push(`Reference: ${method.reference}`);
     } else if (method.type === 'stripe') {
-      lines.push('Cartão (Online)');
-      lines.push(`Valor: ${formatAmount(method.amount)}`);
-      lines.push(`Referência: ${method.reference}`);
+      lines.push('Credit Card (Online)');
+      lines.push(`Amount: ${formatAmount(method.amount)}`);
+      lines.push(`Reference: ${method.reference}`);
       if (method.publicPaymentUrl) {
-        lines.push(`Pague online em: ${method.publicPaymentUrl}`);
+        lines.push(`Pay online at: ${method.publicPaymentUrl}`);
       } else {
-        lines.push('Pague online pelo link da fatura no seu portal.');
+        lines.push('Pay online via the invoice link in your portal.');
       }
     }
   });
@@ -153,5 +126,5 @@ export function paymentMethodsToInstructionLines(
 }
 
 function formatAmount(amount: number): string {
-  return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }

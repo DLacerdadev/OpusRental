@@ -667,9 +667,9 @@ export default function Invoices() {
     .reduce((sum: number, i: any) => sum + parseFloat(i.amount || "0"), 0);
 
   const formatBRL = (value: number | string) =>
-    new Intl.NumberFormat("pt-BR", {
+    new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "BRL",
+      currency: "USD",
     }).format(typeof value === "string" ? parseFloat(value || "0") : value);
 
   const getStatusBadge = (status: string) => {
@@ -1176,6 +1176,39 @@ export default function Invoices() {
                         data-testid="input-amount"
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {t('invoices.formAmountHelp')}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="salesTaxRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground">{t('invoices.formSalesTaxRate')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        placeholder="0.00"
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                        className="bg-background dark:bg-background text-foreground border-input"
+                        data-testid="input-sales-tax-rate"
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {t('invoices.formSalesTaxRateHelp')}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -28,8 +28,6 @@ async function buildInvoiceEmailExtras(
       tenant = {
         name: fullTenant.name,
         billingEmail: fullTenant.billingEmail ?? null,
-        pixKey: fullTenant.pixKey ?? null,
-        pixBeneficiary: fullTenant.pixBeneficiary ?? null,
         bankName: fullTenant.bankName ?? null,
         bankAgency: fullTenant.bankAgency ?? null,
         bankAccount: fullTenant.bankAccount ?? null,
@@ -53,7 +51,7 @@ async function buildInvoiceEmailExtras(
         tenantLogoDataUrl,
       });
       attachments.push({
-        filename: `Fatura-${invoice.invoiceNumber}.pdf`,
+        filename: `Invoice-${invoice.invoiceNumber}.pdf`,
         content: pdfBuffer,
         contentType: "application/pdf",
       });
@@ -225,13 +223,28 @@ export class InvoiceAutomationService {
 
     const invoiceNumber = await storage.getNextInvoiceNumber(contract.tenantId);
 
+    // Resolve the tenant's default sales-tax rate so the auto-generated
+    // invoice freezes the breakdown (subtotal / salesTax / total) at issuance
+    // time instead of re-deriving it from the tenant later.
+    const tenantForTax = await storage.getTenant(contract.tenantId).catch(() => null);
+    const tenantRate = tenantForTax?.salesTaxRate
+      ? parseFloat(tenantForTax.salesTaxRate.toString())
+      : 0;
+    const safeRate = Number.isFinite(tenantRate) && tenantRate >= 0 ? tenantRate : 0;
+    const subtotalNum = parseFloat(contract.monthlyRate.toString());
+    const taxAmount = Number((subtotalNum * (safeRate / 100)).toFixed(2));
+    const totalAmount = Number((subtotalNum + taxAmount).toFixed(2));
+
     let invoice: Invoice;
     try {
       invoice = await storage.createInvoice({
         tenantId: contract.tenantId,
         invoiceNumber,
         contractId: contract.id,
-        amount: contract.monthlyRate,
+        amount: totalAmount.toFixed(2),
+        subtotal: subtotalNum.toFixed(2),
+        salesTaxRate: safeRate.toFixed(2),
+        salesTaxAmount: taxAmount.toFixed(2),
         dueDate: formatDateOnly(dueDate),
         paidDate: null,
         status: "pending",
