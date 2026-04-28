@@ -352,6 +352,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Tenant not found" });
       }
       res.json({
+        // @deprecated PIX is BR-only and is no longer surfaced to customers in
+        // the US flow. These two fields are kept on the response purely for
+        // backwards compatibility with older admin clients and must not be
+        // reintroduced into customer-facing templates / UI.
         pixKey: req.tenant.pixKey ?? null,
         pixBeneficiary: req.tenant.pixBeneficiary ?? null,
         bankName: req.tenant.bankName ?? null,
@@ -448,6 +452,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         secondaryColor: updatedTenant.secondaryColor,
         status: updatedTenant.status,
         billingEmail: updatedTenant.billingEmail ?? null,
+        // @deprecated PIX is BR-only. Echoed back only for backwards
+        // compatibility with older admin clients; do not consume in any
+        // customer-facing template or UI.
         pixKey: updatedTenant.pixKey ?? null,
         pixBeneficiary: updatedTenant.pixBeneficiary ?? null,
         bankName: updatedTenant.bankName ?? null,
