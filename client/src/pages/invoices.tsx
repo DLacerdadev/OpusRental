@@ -103,9 +103,8 @@ function InvoiceTotalsSummary({
 }: {
   form: ReturnType<typeof useForm<InvoiceFormData>>;
 }) {
-  const control = form.control as unknown as Control<InvoiceFormData>;
-  const amountStr = useWatch({ control, name: "amount" }) ?? "";
-  const rateStr = useWatch({ control, name: "salesTaxRate" }) ?? "";
+  const amountStr = useWatch({ control: form.control, name: "amount" }) ?? "";
+  const rateStr = useWatch({ control: form.control, name: "salesTaxRate" }) ?? "";
 
   const subtotalNum = parseFloat(amountStr as string);
   const rateNum = parseFloat(rateStr as string);

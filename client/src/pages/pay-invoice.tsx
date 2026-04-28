@@ -312,7 +312,7 @@ export default function PayInvoicePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground">Amount</p>
+                <p className="text-xs text-muted-foreground">Amount Due</p>
                 <p className="text-2xl font-bold" data-testid="text-invoice-amount">
                   {formatUSD(amountNum)}
                 </p>
@@ -350,7 +350,7 @@ export default function PayInvoicePage() {
             <CardContent className="space-y-4">
               {stripeMethod && stripePromise && (
                 <div className="rounded-lg border bg-card p-4 space-y-3">
-                  <h4 className="font-semibold">Credit Card</h4>
+                  <h4 className="font-semibold">Pay with Card</h4>
                   {!clientSecret ? (
                     <Button
                       onClick={startStripeCheckout}
