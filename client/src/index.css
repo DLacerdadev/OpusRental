@@ -116,7 +116,7 @@
 
 @layer components {
   .card {
-    @apply shadow-md border-border/60;
+    @apply shadow-md border-border;
   }
 
   .card:hover {
