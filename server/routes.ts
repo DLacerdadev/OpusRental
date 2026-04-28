@@ -1366,9 +1366,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subtotal = Number.isFinite(incomingAmount) ? incomingAmount : 0;
       }
 
-      salesTaxAmount = supplied(incoming.salesTaxAmount)
-        ? parseFloat(String(incoming.salesTaxAmount))
-        : Number((subtotal * (salesTaxRate / 100)).toFixed(2));
+      // Always derive salesTaxAmount server-side from subtotal × rate. We
+      // intentionally ignore any client-supplied salesTaxAmount so the
+      // invariant `salesTaxAmount = round(subtotal * salesTaxRate / 100, 2)`
+      // can never be violated by a malicious or buggy client.
+      salesTaxAmount = Number((subtotal * (salesTaxRate / 100)).toFixed(2));
       if (!Number.isFinite(salesTaxAmount) || salesTaxAmount < 0) salesTaxAmount = 0;
 
       amount = Number((subtotal + salesTaxAmount).toFixed(2));

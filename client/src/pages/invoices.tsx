@@ -1645,7 +1645,6 @@ export default function Invoices() {
                       value={m.type}
                       data-testid={`tab-pay-${m.type}`}
                     >
-                      {m.type === 'pix' && t('invoices.payTabPix')}
                       {m.type === 'bank_transfer' && t('invoices.payTabBank')}
                       {m.type === 'stripe' && t('invoices.payTabCard')}
                     </TabsTrigger>
@@ -1654,27 +1653,13 @@ export default function Invoices() {
 
                 {methods.map((m: any) => (
                   <TabsContent key={m.type} value={m.type} className="mt-4">
-                    {m.type === 'pix' && (
-                      <PayMethodPanel
-                        icon={<Wallet className="h-5 w-5 text-emerald-600" />}
-                        title={t('invoices.payTabPix')}
-                        rows={[
-                          { label: t('invoices.payPixKey'), value: m.pixKey, copy: true },
-                          ...(m.beneficiary ? [{ label: t('invoices.payPixBeneficiary'), value: m.beneficiary, copy: true }] : []),
-                          { label: t('invoices.payAmount'), value: `$${Number(m.amount).toFixed(2)}`, copy: true },
-                          { label: t('invoices.payReference'), value: m.reference, copy: true },
-                        ]}
-                        onCopy={copyToClipboard}
-                        testIdPrefix="pix"
-                      />
-                    )}
                     {m.type === 'bank_transfer' && (
                       <PayMethodPanel
                         icon={<Banknote className="h-5 w-5 text-blue-600" />}
                         title={t('invoices.payTabBank')}
                         rows={[
                           { label: t('invoices.payBankName'), value: m.bankName, copy: true },
-                          ...(m.agency ? [{ label: t('invoices.payBankAgency'), value: m.agency, copy: true }] : []),
+                          ...(m.routingNumber ? [{ label: t('invoices.payBankAgency'), value: m.routingNumber, copy: true }] : []),
                           { label: t('invoices.payBankAccount'), value: m.account, copy: true },
                           ...(m.accountHolder ? [{ label: t('invoices.payBankHolder'), value: m.accountHolder, copy: true }] : []),
                           ...(m.accountType ? [{ label: t('invoices.payBankType'), value: t(`settings.billingBankType${m.accountType.charAt(0).toUpperCase()}${m.accountType.slice(1)}`), copy: false }] : []),
