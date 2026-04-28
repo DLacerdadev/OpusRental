@@ -21,13 +21,14 @@ import {
   auditLogs,
   users
 } from "@shared/schema";
-import { PDFService } from "./services/pdf.service";
+import { PDFService, fetchLogoAsDataUrl } from "./services/pdf.service";
 import { buildPaymentMethods } from "./services/payment-methods.service";
 import { EmailService } from "./services/email.service";
 import { verifyInvoiceToken, buildPublicPaymentUrl } from "./services/invoice-token.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
 import { MonitoringService } from "./services/monitoring.service";
+import { NotificationService } from "./services/notification.service";
 import {
   validateInvoicePayment,
   invoiceAmountToCents,
@@ -358,6 +359,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bankAccount: req.tenant.bankAccount ?? null,
         bankAccountHolder: req.tenant.bankAccountHolder ?? null,
         bankAccountType: req.tenant.bankAccountType ?? null,
+        billingEmail: req.tenant.billingEmail ?? null,
+        logoUrl: req.tenant.logoUrl ?? null,
       });
     } catch (error) {
       console.error("Get tenant billing error:", error);
@@ -376,6 +379,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
         secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
         logoUrl: z.string().url().optional().nullable(),
+        // White-label billing email used as From address for invoice emails.
+        // Accepts a valid email or null to clear the override.
+        billingEmail: z
+          .union([z.string().email(), z.literal(""), z.null()])
+          .optional()
+          .transform((v) => (v === undefined ? undefined : !v ? null : v)),
         // Per-tenant payment configuration (Template 3)
         pixKey: optionalString,
         pixBeneficiary: optionalString,
@@ -419,6 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primaryColor: updatedTenant.primaryColor,
         secondaryColor: updatedTenant.secondaryColor,
         status: updatedTenant.status,
+        billingEmail: updatedTenant.billingEmail ?? null,
         pixKey: updatedTenant.pixKey ?? null,
         pixBeneficiary: updatedTenant.pixBeneficiary ?? null,
         bankName: updatedTenant.bankName ?? null,
@@ -1594,6 +1604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const trailerForPdf = await storage.getTrailer(contract.trailerId, req.tenantId!).catch(() => null);
             const lineItemsForPdf = await storage.getInvoiceItems(reissued.id, req.tenantId!).catch(() => []);
+            const tenantLogoDataUrl = await fetchLogoAsDataUrl(req.tenant?.logoUrl ?? null);
             const attachments = trailerForPdf
               ? [{
                   filename: `Fatura-${reissued.invoiceNumber}.pdf`,
@@ -1602,6 +1613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     contract: { ...contract, client, trailer: trailerForPdf },
                     tenant: req.tenant ?? null,
                     lineItems: lineItemsForPdf,
+                    tenantLogoDataUrl,
                   }),
                   contentType: "application/pdf" as const,
                 }]
@@ -3332,6 +3344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const lineItems = await storage.getInvoiceItems(invoice.id, req.tenantId!);
+      const tenantLogoDataUrl = await fetchLogoAsDataUrl(req.tenant?.logoUrl ?? null);
 
       const pdfBuffer = PDFService.generateInvoicePDF({
         ...invoice,
@@ -3342,6 +3355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         tenant: req.tenant ?? null,
         lineItems,
+        tenantLogoDataUrl,
       });
 
       await storage.createAuditLog({
@@ -3690,6 +3704,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ),
       ]);
 
+      // Inspect tenant billing configuration so the Settings page can warn
+      // managers when invoices will go out without PIX/bank info or branding.
+      // We treat "configured" as: at least the brand name and logo are set
+      // AND at least one payment method (PIX key or bank account) is filled.
+      const t = req.tenant;
+      const tenantBillingMissing: string[] = [];
+      if (!t?.name?.trim()) tenantBillingMissing.push("name");
+      if (!t?.logoUrl?.trim()) tenantBillingMissing.push("logoUrl");
+      if (!t?.billingEmail?.trim()) tenantBillingMissing.push("billingEmail");
+      const hasPix = !!t?.pixKey?.trim();
+      const hasBank = !!(t?.bankName?.trim() && t?.bankAccount?.trim());
+      if (!hasPix && !hasBank) tenantBillingMissing.push("paymentMethod");
+
       res.json({
         timestamp: now.toISOString(),
         currentMonth,
@@ -3715,6 +3742,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           smtp: !!(process.env.SMTP_HOST && process.env.SMTP_USER),
           whatsapp: !!(process.env.TWILIO_ACCOUNT_SID || process.env.META_WHATSAPP_TOKEN),
           sessionStore: "postgresql",
+        },
+        tenantBilling: {
+          configured: tenantBillingMissing.length === 0,
+          missing: tenantBillingMissing,
         },
       });
     } catch (error) {
@@ -3956,7 +3987,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (webhookSecret) {
-        event = stripe!.webhooks.constructEvent(req.body, sig, webhookSecret);
+        // Stripe signature verification REQUIRES the original raw bytes — the
+        // parsed JSON body would change ordering / whitespace and fail the
+        // HMAC check. We capture the raw buffer in `index.ts` via the
+        // express.json() verify hook and use it here.
+        const rawBody = (req as any).rawBody;
+        if (!Buffer.isBuffer(rawBody)) {
+          console.error("Webhook rejected: raw body unavailable for signature verification");
+          return res.status(400).send("Raw body required for signature verification");
+        }
+        event = stripe!.webhooks.constructEvent(rawBody, sig, webhookSecret);
       } else if (process.env.NODE_ENV === "production") {
         console.error("Webhook rejected: STRIPE_WEBHOOK_SECRET not configured in production");
         return res.status(503).send("Webhook secret not configured");
@@ -4087,6 +4127,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
               },
               ipAddress: req.ip,
             });
+
+            // Fan-out an in-app notification to every manager / admin of the
+            // tenant so the team sees the paid status without having to refresh
+            // the invoices list. Failures here must NOT break the webhook
+            // response — Stripe will keep retrying if we error out and we'd
+            // double-pay the invoice. Silent best-effort instead.
+            try {
+              const tenantUsers = await storage.getAllUsers(tenantId);
+              const managers = tenantUsers.filter(
+                (u) => u.role === "manager" || u.role === "admin",
+              );
+              if (managers.length > 0) {
+                const notifier = new NotificationService();
+                const amountBRL = (paymentIntent.amount / 100).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                });
+                await Promise.all(
+                  managers.map((m) =>
+                    notifier.createNotification({
+                      userId: m.id,
+                      title: "Fatura paga",
+                      message: `Fatura ${invoice.invoiceNumber} foi paga via cartão (${amountBRL}).`,
+                      type: "system_alert",
+                      severity: "info",
+                      metadata: {
+                        invoiceId: invoice.id,
+                        invoiceNumber: invoice.invoiceNumber,
+                        paymentIntentId: paymentIntent.id,
+                        amountCents: paymentIntent.amount,
+                        source: "stripe_webhook",
+                      },
+                    }),
+                  ),
+                );
+              }
+            } catch (notifyError) {
+              console.error(
+                `⚠️  Failed to send paid-invoice notifications for ${invoice.invoiceNumber}:`,
+                notifyError,
+              );
+            }
 
             console.log(
               `✅ Invoice ${invoice.invoiceNumber} (${invoice.id}) paid via Stripe (paymentIntent=${paymentIntent.id})`,

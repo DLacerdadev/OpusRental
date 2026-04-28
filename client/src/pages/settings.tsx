@@ -21,6 +21,8 @@ type TenantBillingConfig = {
   bankAccount: string | null;
   bankAccountHolder: string | null;
   bankAccountType: string | null;
+  billingEmail: string | null;
+  logoUrl: string | null;
 };
 
 function IntegrationStatusCard({
@@ -89,6 +91,7 @@ export default function Settings() {
 
   type SystemStatus = {
     integrations: { stripe: boolean; smtp: boolean; whatsapp: boolean };
+    tenantBilling?: { configured: boolean; missing: string[] };
   };
   const { data: systemStatus } = useQuery<SystemStatus>({
     queryKey: ["/api/system/status"],
@@ -103,6 +106,8 @@ export default function Settings() {
     bankAccount: "",
     bankAccountHolder: "",
     bankAccountType: "",
+    billingEmail: "",
+    logoUrl: "",
   });
 
   useEffect(() => {
@@ -115,6 +120,8 @@ export default function Settings() {
         bankAccount: tenant.bankAccount ?? "",
         bankAccountHolder: tenant.bankAccountHolder ?? "",
         bankAccountType: tenant.bankAccountType ?? "",
+        billingEmail: tenant.billingEmail ?? "",
+        logoUrl: tenant.logoUrl ?? "",
       });
     }
   }, [tenant]);
@@ -320,6 +327,37 @@ export default function Settings() {
               </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-border">
+                <div className="space-y-2">
+                  <Label htmlFor="billing-email" className="text-xs">
+                    {t("settings.billingEmail")}
+                  </Label>
+                  <Input
+                    id="billing-email"
+                    type="email"
+                    value={billing.billingEmail ?? ""}
+                    onChange={(e) => updateBillingField("billingEmail", e.target.value)}
+                    placeholder={t("settings.billingEmailPlaceholder")}
+                    data-testid="input-billing-email"
+                  />
+                  <p className="text-xs text-muted-foreground">{t("settings.billingEmailHelper")}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="billing-logo-url" className="text-xs">
+                    {t("settings.billingLogoUrl")}
+                  </Label>
+                  <Input
+                    id="billing-logo-url"
+                    type="url"
+                    value={billing.logoUrl ?? ""}
+                    onChange={(e) => updateBillingField("logoUrl", e.target.value)}
+                    placeholder={t("settings.billingLogoUrlPlaceholder")}
+                    data-testid="input-billing-logo-url"
+                  />
+                  <p className="text-xs text-muted-foreground">{t("settings.billingLogoUrlHelper")}</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* PIX Section */}
                 <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
@@ -441,7 +479,24 @@ export default function Settings() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <IntegrationStatusCard
+                  icon={<Wallet className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
+                  iconBg="bg-emerald-50 dark:bg-emerald-950"
+                  title={t("settings.statusTenantBillingTitle")}
+                  description={t("settings.statusTenantBillingDesc")}
+                  configured={!!systemStatus?.tenantBilling?.configured}
+                  configuredLabel={t("settings.statusTenantBillingConfigured")}
+                  missingLabel={t("settings.statusTenantBillingMissing")}
+                  helper={
+                    systemStatus?.tenantBilling?.configured
+                      ? t("settings.statusTenantBillingHelperOk")
+                      : t("settings.statusTenantBillingHelperMissing", {
+                          fields: (systemStatus?.tenantBilling?.missing ?? []).join(", ") || "-",
+                        })
+                  }
+                  testId="status-tenant-billing"
+                />
                 <IntegrationStatusCard
                   icon={<CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                   iconBg="bg-purple-50 dark:bg-purple-950"

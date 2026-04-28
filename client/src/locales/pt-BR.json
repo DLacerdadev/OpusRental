@@ -514,7 +514,19 @@
     "billingSaveSuccessTitle": "Dados de cobrança salvos",
     "billingSaveSuccessDescription": "As novas faturas usarão estes dados.",
     "billingSaveErrorTitle": "Erro ao salvar",
-    "billingSaveErrorDescription": "Não foi possível salvar os dados de cobrança."
+    "billingSaveErrorDescription": "Não foi possível salvar os dados de cobrança.",
+    "billingEmail": "E-mail de cobrança (remetente)",
+    "billingEmailPlaceholder": "cobranca@suaempresa.com.br",
+    "billingEmailHelper": "Aparece como remetente nas faturas enviadas e recebe respostas dos clientes.",
+    "billingLogoUrl": "URL do logo (PNG/JPG)",
+    "billingLogoUrlPlaceholder": "https://...",
+    "billingLogoUrlHelper": "Logo exibido no cabeçalho do PDF e do e-mail. Use uma URL pública.",
+    "statusTenantBillingTitle": "Dados de cobrança",
+    "statusTenantBillingDesc": "Marca, e-mail e métodos de pagamento",
+    "statusTenantBillingConfigured": "Tudo configurado",
+    "statusTenantBillingMissing": "Faltam dados",
+    "statusTenantBillingHelperOk": "Faturas e e-mails serão enviados com a sua marca e ao menos um método de pagamento.",
+    "statusTenantBillingHelperMissing": "Preencha: {{fields}} para que o cliente receba uma fatura completa."
   },
   "investorShares": {
     "title": "Relatório de Investidores",

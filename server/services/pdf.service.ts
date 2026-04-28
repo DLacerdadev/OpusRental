@@ -32,6 +32,202 @@ interface InvoicePDFData extends Invoice {
    * stored items keep producing identical output.
    */
   lineItems?: InvoiceItem[];
+  /**
+   * Pre-fetched tenant logo as a data URL (e.g. "data:image/png;base64,...").
+   * Renderer is synchronous, so the caller is responsible for fetching the
+   * `tenant.logoUrl` in advance and passing it here. When omitted the header
+   * falls back to the brand name only.
+   */
+  tenantLogoDataUrl?: string | null;
+}
+
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+const LOGO_FETCH_TIMEOUT_MS = 5_000;
+const MAX_REDIRECT_HOPS = 5;
+
+/**
+ * Returns true when the given numeric IP address (v4 or v6) is in a range we
+ * MUST NOT make outbound requests to from server context (loopback, private,
+ * link-local, CGNAT, benchmarking, multicast, IPv4-mapped IPv6, etc.).
+ *
+ * Designed to be the single chokepoint for SSRF protection — the URL host
+ * must resolve to a public, routable address before we issue the HTTP
+ * request, and again on every redirect hop.
+ */
+function isPrivateIp(ip: string): boolean {
+  const lower = ip.toLowerCase();
+
+  // IPv4-mapped IPv6 (`::ffff:0:0/96`) covers both:
+  //   - dotted-decimal form: `::ffff:127.0.0.1`
+  //   - hex-compressed form: `::ffff:7f00:1`
+  // Both refer to the same underlying IPv4 host. The dotted form is decoded
+  // back to v4 for precise range checking; for the hex form there's no
+  // legitimate use case in a tenant-supplied URL — block the entire `::ffff:`
+  // prefix to prevent textual-encoding bypasses to loopback / private IPs.
+  if (lower.startsWith('::ffff:')) {
+    const dotted = lower.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+    if (dotted) return isPrivateIp(dotted[1]);
+    // Hex form (or anything else under ::ffff:) — refuse outright.
+    return true;
+  }
+
+  // IPv4 literal
+  const v4 = lower.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const [, a, b] = v4.map(Number);
+    // 0.0.0.0/8 (current network)
+    if (a === 0) return true;
+    // 10.0.0.0/8 private
+    if (a === 10) return true;
+    // 127.0.0.0/8 loopback
+    if (a === 127) return true;
+    // 169.254.0.0/16 link-local (incl. AWS/GCP metadata 169.254.169.254)
+    if (a === 169 && b === 254) return true;
+    // 172.16.0.0/12 private
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    // 192.168.0.0/16 private
+    if (a === 192 && b === 168) return true;
+    // 100.64.0.0/10 CGNAT
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    // 198.18.0.0/15 benchmarking
+    if (a === 198 && (b === 18 || b === 19)) return true;
+    // 224.0.0.0/4 multicast, 240.0.0.0/4 reserved
+    if (a >= 224) return true;
+    return false;
+  }
+
+  // IPv6 loopback / unspecified
+  if (lower === '::1' || lower === '::') return true;
+  // Link-local fe80::/10
+  if (/^fe[89ab][0-9a-f]?:/.test(lower)) return true;
+  // Unique-local fc00::/7
+  if (/^f[cd][0-9a-f]{0,2}:/.test(lower)) return true;
+  // Multicast ff00::/8
+  if (lower.startsWith('ff')) return true;
+
+  return false;
+}
+
+/**
+ * Resolve the URL's hostname and ensure every returned address is public.
+ * Throws when the URL is unsafe (bad scheme, unresolvable, or any address
+ * lands inside a blocked range — also catches DNS rebinding for this hop).
+ */
+async function assertSafeHttpsUrl(rawUrl: string): Promise<URL> {
+  const dns = await import('node:dns/promises');
+  const net = await import('node:net');
+
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error('invalid url');
+  }
+  if (parsed.protocol !== 'https:') throw new Error('non-https');
+
+  // If the host is itself an IP literal, validate it directly (no DNS needed).
+  if (net.isIP(parsed.hostname)) {
+    if (isPrivateIp(parsed.hostname)) throw new Error('private ip literal');
+    return parsed;
+  }
+
+  // Otherwise resolve all addresses and reject if any is private. We check
+  // every record to defend against round-robin rebinding tricks.
+  const addrs = await dns.lookup(parsed.hostname, { all: true });
+  if (!addrs.length) throw new Error('dns: no addresses');
+  for (const a of addrs) {
+    if (isPrivateIp(a.address)) throw new Error(`dns: private address ${a.address}`);
+  }
+  return parsed;
+}
+
+/**
+ * Best-effort fetch of a remote image, returned as a data URL the PDF
+ * renderer can embed. Returns null on any failure so the caller falls back
+ * to a name-only header without aborting PDF generation.
+ *
+ * SSRF / DOS hardening:
+ *  - HTTPS only.
+ *  - Per-hop DNS resolution: every resolved IP must be public (defends
+ *    against private-IP literals, IPv4-mapped IPv6, CGNAT, link-local,
+ *    cloud metadata addresses, multicast, etc.).
+ *  - Manual redirect loop (max 5 hops) re-runs the host check before
+ *    following any 3xx, blocking redirect-to-private bypass.
+ *  - 5s `AbortController` timeout for the entire fetch chain.
+ *  - `Content-Length` precheck plus 2MB hard cap on the streamed body
+ *    (with reader.cancel() on overflow).
+ *  - `Content-Type` must start with `image/`.
+ *
+ * Note: a determined attacker could still race DNS between our `lookup` and
+ * Node's internal resolution (classic DNS rebinding). For a production
+ * threat model of "tenant supplies a logo URL" this is acceptable — the
+ * payload is bounded, the response body is base64-embedded into a PDF only,
+ * and no response data is echoed back to the attacker.
+ */
+export async function fetchLogoAsDataUrl(url: string | null | undefined): Promise<string | null> {
+  if (!url || typeof url !== 'string') return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOGO_FETCH_TIMEOUT_MS);
+
+  try {
+    let currentUrl = url;
+    let res: Response | null = null;
+
+    for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop++) {
+      const safe = await assertSafeHttpsUrl(currentUrl);
+      const r = await fetch(safe.toString(), {
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+
+      // Handle redirects ourselves so we can re-validate the next host.
+      if (r.status >= 300 && r.status < 400) {
+        const loc = r.headers.get('location');
+        if (!loc) return null;
+        // Resolve relative redirects against the current URL.
+        currentUrl = new URL(loc, safe).toString();
+        try { await r.body?.cancel(); } catch { /* ignore */ }
+        continue;
+      }
+
+      res = r;
+      break;
+    }
+
+    if (!res) return null; // exhausted redirect budget
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.startsWith('image/')) return null;
+
+    const declaredLength = Number(res.headers.get('content-length') ?? '0');
+    if (declaredLength && declaredLength > MAX_LOGO_BYTES) return null;
+
+    if (!res.body) return null;
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        total += value.byteLength;
+        if (total > MAX_LOGO_BYTES) {
+          try { await reader.cancel(); } catch { /* ignore */ }
+          return null;
+        }
+        chunks.push(value);
+      }
+    }
+    if (total === 0) return null;
+    const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
+    return `data:${contentType};base64,${buf.toString('base64')}`;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export interface InvoiceDataItem {
@@ -83,19 +279,36 @@ export interface InvoiceData {
 const DEFAULT_BRAND_NAME = 'Opus Rental Capital';
 
 export class PDFService {
-  private static addHeader(doc: jsPDF, title: string, brandName?: string | null) {
+  private static addHeader(
+    doc: jsPDF,
+    title: string,
+    brandName?: string | null,
+    logoDataUrl?: string | null,
+  ) {
     const name = (brandName && brandName.trim()) || DEFAULT_BRAND_NAME;
     doc.setFillColor(33, 51, 82);
     doc.rect(0, 0, doc.internal.pageSize.width, 40, 'F');
 
+    let textX = 20;
+    if (logoDataUrl) {
+      try {
+        // Render the logo on the left and shift the brand name to the right
+        // of it. jsPDF detects the image format from the data URL prefix.
+        doc.addImage(logoDataUrl, 'PNG', 14, 8, 24, 24);
+        textX = 44;
+      } catch {
+        // Silent fallback to name-only header.
+      }
+    }
+
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text(name, 20, 20);
+    doc.text(name, textX, 20);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(title, 20, 30);
+    doc.text(title, textX, 30);
 
     doc.setTextColor(0, 0, 0);
   }
@@ -505,7 +718,7 @@ export class PDFService {
     const doc = new jsPDF();
     const brandName = data.tenant?.name ?? null;
 
-    this.addHeader(doc, 'Fatura', brandName);
+    this.addHeader(doc, 'Fatura', brandName, data.tenantLogoDataUrl ?? null);
 
     let yPos = 50;
 
@@ -627,10 +840,40 @@ export class PDFService {
     }
 
     yPos += 20;
+    doc.setFillColor(245, 247, 250);
+    doc.rect(20, yPos - 5, 170, 8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text('INSTRUÇÕES DE PAGAMENTO', 22, yPos);
+    doc.setFontSize(11);
+    doc.text('COMO PAGAR', 22, yPos);
     yPos += 8;
+
+    // Public payment link prominently at the top — works for the customer
+    // to pay by card without needing to log in. Falls back gracefully to the
+    // payment-method instructions when the link cannot be built.
+    let publicPaymentUrl: string | null = null;
+    try {
+      publicPaymentUrl = buildPublicPaymentUrl(data.id);
+    } catch {
+      publicPaymentUrl = null;
+    }
+
+    if (publicPaymentUrl) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('Pague online (cartão de crédito):', 22, yPos);
+      yPos += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(33, 99, 232);
+      const linkLines = doc.splitTextToSize(publicPaymentUrl, 165);
+      doc.textWithLink(String(linkLines[0]), 22, yPos, { url: publicPaymentUrl });
+      yPos += 5;
+      for (let i = 1; i < linkLines.length; i++) {
+        doc.textWithLink(String(linkLines[i]), 22, yPos, { url: publicPaymentUrl });
+        yPos += 5;
+      }
+      doc.setTextColor(0, 0, 0);
+      yPos += 3;
+    }
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);

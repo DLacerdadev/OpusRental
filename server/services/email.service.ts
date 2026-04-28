@@ -3,6 +3,26 @@ import type { Transporter } from "nodemailer";
 import type { Invoice, RentalClient, RentalContract, InsertEmailLog, Tenant } from "@shared/schema";
 import { buildPublicPaymentUrl } from "./invoice-token.service";
 
+/**
+ * Tenant fields needed by the e-mail templates. Includes the brand name,
+ * the white-label billing email (used as the From address override) and the
+ * payment-method configuration so the HTML body can render the PIX / bank
+ * block alongside the public payment button. All payment fields are optional;
+ * when missing the template silently omits the block instead of breaking.
+ */
+export type EmailTenant = Pick<
+  Tenant,
+  | "name"
+  | "billingEmail"
+  | "pixKey"
+  | "pixBeneficiary"
+  | "bankName"
+  | "bankAgency"
+  | "bankAccount"
+  | "bankAccountHolder"
+  | "bankAccountType"
+>;
+
 export interface EmailAttachment {
   filename: string;
   content: Buffer;
@@ -16,6 +36,13 @@ export interface EmailOptions {
   html: string;
   text?: string;
   fromName?: string;
+  /**
+   * Optional From address override (e.g. tenant `billingEmail`). When set,
+   * the message is sent from this address and Reply-To is set to it as well
+   * so customer replies reach the tenant inbox even if the SMTP provider
+   * forces the envelope From back to the platform domain (DMARC alignment).
+   */
+  fromAddress?: string;
   attachments?: EmailAttachment[];
 }
 
@@ -24,9 +51,67 @@ export interface InvoiceEmailData {
   contract: RentalContract;
   client: RentalClient;
   /** Tenant the invoice belongs to. Used to render branded emails. */
-  tenant?: Pick<Tenant, "name"> | null;
+  tenant?: EmailTenant | null;
   /** Optional PDF (or other) attachments to include in the email. */
   attachments?: EmailAttachment[];
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Build the HTML block listing the tenant's PIX and bank-transfer details.
+ * Returns an empty string when nothing is configured so the template skips
+ * the section instead of showing an empty box. Only fields that the tenant
+ * filled in are rendered — partial configurations are supported.
+ */
+function renderPaymentMethodsBlock(tenant?: EmailTenant | null): string {
+  if (!tenant) return "";
+  const pixKey = tenant.pixKey?.trim();
+  const bankName = tenant.bankName?.trim();
+  const bankAccount = tenant.bankAccount?.trim();
+  if (!pixKey && !(bankName && bankAccount)) return "";
+
+  const sections: string[] = [];
+
+  if (pixKey) {
+    const beneficiary = tenant.pixBeneficiary?.trim();
+    sections.push(`
+        <div style="margin-bottom:16px">
+          <p style="margin:0 0 6px 0;font-weight:bold;color:#111">PIX</p>
+          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Chave:</span> <strong>${escapeHtml(pixKey)}</strong></p>
+          ${beneficiary ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Beneficiário:</span> ${escapeHtml(beneficiary)}</p>` : ""}
+        </div>`);
+  }
+
+  if (bankName && bankAccount) {
+    const agency = tenant.bankAgency?.trim();
+    const holder = tenant.bankAccountHolder?.trim();
+    const accountType = tenant.bankAccountType?.trim();
+    const accountTypeLabel =
+      accountType === "checking" ? "Corrente" : accountType === "savings" ? "Poupança" : accountType;
+    sections.push(`
+        <div>
+          <p style="margin:0 0 6px 0;font-weight:bold;color:#111">Transferência Bancária</p>
+          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Banco:</span> ${escapeHtml(bankName)}</p>
+          ${agency ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Agência:</span> ${escapeHtml(agency)}</p>` : ""}
+          <p style="margin:2px 0;font-size:13px"><span style="color:#666">Conta:</span> ${escapeHtml(bankAccount)}</p>
+          ${holder ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Titular:</span> ${escapeHtml(holder)}</p>` : ""}
+          ${accountTypeLabel ? `<p style="margin:2px 0;font-size:13px"><span style="color:#666">Tipo:</span> ${escapeHtml(accountTypeLabel)}</p>` : ""}
+        </div>`);
+  }
+
+  return `
+      <div style="background:white;padding:20px;margin:20px 0;border-radius:8px;border-left:4px solid #16a34a">
+        <h3 style="margin:0 0 12px 0;font-size:16px;color:#111">Outras formas de pagamento</h3>
+        ${sections.join("")}
+      </div>`;
 }
 
 function publicPaymentLinkFor(invoiceId: string): string | null {
@@ -107,11 +192,17 @@ export class EmailService {
         throw new Error("SMTP transporter not configured. Please set SMTP environment variables.");
       }
 
-      const from = process.env.SMTP_FROM || "noreply@opusrentalcapital.com";
+      const defaultFrom = process.env.SMTP_FROM || "noreply@opusrentalcapital.com";
+      const overrideFrom = options.fromAddress?.trim();
+      const from = overrideFrom || defaultFrom;
       const fromName = options.fromName?.trim() || "Opus Rental Capital";
 
       const info = await transporter.sendMail({
         from: `"${fromName}" <${from}>`,
+        // Always route replies to the tenant's billing email when available,
+        // so that even if the SMTP provider rewrites the envelope From for
+        // DMARC alignment, customer responses still reach the tenant inbox.
+        replyTo: overrideFrom ? `"${fromName}" <${overrideFrom}>` : undefined,
         to: options.toName ? `"${options.toName}" <${options.to}>` : options.to,
         subject: options.subject,
         text: options.text,
@@ -146,6 +237,7 @@ export class EmailService {
     const buttonHtml = paymentUrl
       ? `<a href="${paymentUrl}" class="button">Pagar fatura</a>`
       : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
+    const paymentMethodsBlock = renderPaymentMethodsBlock(data.tenant);
 
     return `
 <!DOCTYPE html>
@@ -204,6 +296,8 @@ export class EmailService {
       <center>
         ${buttonHtml}
       </center>
+
+      ${paymentMethodsBlock}
 
       <div class="footer">
         <p><strong>${brandName}</strong></p>
@@ -425,6 +519,7 @@ ${brandName}
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
+      fromAddress: data.tenant?.billingEmail?.trim() || undefined,
       subject: `Fatura ${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
       html,
       text,
@@ -459,6 +554,7 @@ ${brandName}
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
+      fromAddress: data.tenant?.billingEmail?.trim() || undefined,
       subject: `Lembrete de pagamento — Fatura ${data.invoice.invoiceNumber} (${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso)`,
       html,
       text,
@@ -497,6 +593,7 @@ ${brandName}
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
+      fromAddress: data.tenant?.billingEmail?.trim() || undefined,
       subject: `Fatura reemitida (2ª via) — ${data.invoice.invoiceNumber} — novo vencimento ${newDueDateStr}`,
       html,
       text,

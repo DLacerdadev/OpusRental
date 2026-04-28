@@ -1,25 +1,42 @@
 import cron from "node-cron";
 import { storage } from "../storage";
-import { EmailService, type EmailAttachment } from "./email.service";
+import { EmailService, type EmailAttachment, type EmailTenant } from "./email.service";
 import { WhatsAppService } from "./whatsapp.service";
-import { PDFService } from "./pdf.service";
-import type { RentalContract, Invoice } from "@shared/schema";
+import { PDFService, fetchLogoAsDataUrl } from "./pdf.service";
+import type { RentalContract, Invoice, Tenant } from "@shared/schema";
 
 /**
  * Best-effort builder for the per-invoice email payload (tenant + PDF
  * attachment). Returns an empty object on any failure so the email can still
  * be sent without these enhancements rather than aborting the notification.
+ *
+ * Includes the full billing-related tenant fields so the e-mail HTML can show
+ * PIX/bank details, and pre-fetches the tenant logo as a data URL so the PDF
+ * header can render it without making the renderer async.
  */
 async function buildInvoiceEmailExtras(
   invoice: Invoice,
   contract: RentalContract,
   client: { companyName: string; tradeName: string | null; email: string; phone: string; address: string | null; taxId: string | null },
-): Promise<{ tenant: { name: string } | null; attachments: EmailAttachment[] }> {
-  let tenant: { name: string } | null = null;
+): Promise<{ tenant: EmailTenant | null; attachments: EmailAttachment[] }> {
+  let tenant: EmailTenant | null = null;
+  let fullTenant: Tenant | null = null;
   const attachments: EmailAttachment[] = [];
   try {
-    const t = await storage.getTenant(invoice.tenantId);
-    if (t) tenant = { name: t.name };
+    fullTenant = (await storage.getTenant(invoice.tenantId)) ?? null;
+    if (fullTenant) {
+      tenant = {
+        name: fullTenant.name,
+        billingEmail: fullTenant.billingEmail ?? null,
+        pixKey: fullTenant.pixKey ?? null,
+        pixBeneficiary: fullTenant.pixBeneficiary ?? null,
+        bankName: fullTenant.bankName ?? null,
+        bankAgency: fullTenant.bankAgency ?? null,
+        bankAccount: fullTenant.bankAccount ?? null,
+        bankAccountHolder: fullTenant.bankAccountHolder ?? null,
+        bankAccountType: fullTenant.bankAccountType ?? null,
+      };
+    }
   } catch (err) {
     log("warn", "buildInvoiceEmailExtras", `getTenant failed: ${err instanceof Error ? err.message : String(err)}`);
   }
@@ -27,11 +44,13 @@ async function buildInvoiceEmailExtras(
     const trailer = await storage.getTrailer(contract.trailerId, invoice.tenantId).catch(() => null);
     if (trailer) {
       const lineItems = await storage.getInvoiceItems(invoice.id, invoice.tenantId).catch(() => []);
+      const tenantLogoDataUrl = await fetchLogoAsDataUrl(fullTenant?.logoUrl ?? null);
       const pdfBuffer = PDFService.generateInvoicePDF({
         ...invoice,
         contract: { ...contract, client: client as any, trailer },
-        tenant: (await storage.getTenant(invoice.tenantId).catch(() => null)) ?? null,
+        tenant: fullTenant,
         lineItems,
+        tenantLogoDataUrl,
       });
       attachments.push({
         filename: `Fatura-${invoice.invoiceNumber}.pdf`,

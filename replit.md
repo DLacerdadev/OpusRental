@@ -69,6 +69,25 @@ Provider selection via `WHATSAPP_PROVIDER` environment variable:
 
 Retry policy: 3 retries after initial attempt (4 total), exponential backoff 1s / 2s / 4s. All sends are logged to the `whatsapp_logs` table with tenant isolation enforced. Test endpoint: `POST /api/whatsapp/test` (admin only). Logs endpoint: `GET /api/whatsapp/logs?limit=N&offset=M` (manager/admin).
 
+## Invoice → Payment → Settlement Runbook
+
+End-to-end flow for closing an invoice via Stripe (works in development with the mock Stripe key and in production once `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are set).
+
+1. **Tenant setup** (Settings page, Manager/Admin only)
+   - `Settings → Dados de Cobrança`: fill PIX key and/or bank details, the `E-mail de cobrança` and the `URL do logo`. The `Status do sistema` card "Dados de cobrança" turns green when name + logo + billing email + at least one payment method are configured.
+2. **Issue an invoice** — automatic monthly cron, manual from `Faturas`, or POST `/api/contracts/:id/invoices`. The PDF includes the tenant logo in the header and a "COMO PAGAR" block listing the public payment link plus PIX/bank instructions. The customer e-mail repeats the link as a button and renders a "Outras formas de pagamento" section with the same data.
+3. **Customer pays via card** — the public link `/pay/:invoiceId?token=…` opens Stripe Elements without requiring a login. Use card `4242 4242 4242 4242`, any future expiry, any CVC and any ZIP for the test card.
+4. **Webhook closes the invoice** — Stripe sends `payment_intent.succeeded` to `/api/webhooks/stripe`. The handler validates amount + status, marks the invoice `paid`, writes a `payment_validated` audit log, and dispatches an in-app notification ("Fatura paga …") to every manager/admin of the tenant via the WebSocket notification service. Failures during notification fan-out are swallowed so Stripe is never asked to retry an already-paid invoice.
+5. **Verification** — the invoice flips to `paid` in `/financial`, the manager sees a real-time toast/notification, and `audit_logs` keeps both `payment_validated` (success) and `payment_rejected_amount`/`payment_rejected_status` (failure) entries for compliance review.
+
+Note: payment confirmations from invoices are recorded via `audit_logs` + in-app notifications. They are intentionally NOT inserted into the `payments` table, which is constrained to share-level investor distributions (`shareId` + `referenceMonth` unique). Adding invoice payments there would either require nullable share IDs (loosening cross-tenant isolation guarantees) or a separate ledger table, both out of scope for this feature.
+
+### Security & integrity guards
+
+- **Webhook signature**: `/api/webhooks/stripe` verifies the Stripe signature against the original raw request bytes (captured by `express.json({ verify })` in `server/index.ts` and exposed as `req.rawBody`). The handler refuses the request when the raw buffer is missing — required because the parsed JSON body would change byte ordering and fail HMAC validation.
+- **Tenant From / Reply-To**: when `tenant.billingEmail` is set, invoice/reminder/2ª-via e-mails are sent with that address as both `From` and `Reply-To`. The default `SMTP_FROM` is used as fallback so the platform stays deliverable for tenants that haven't configured their own mailbox.
+- **Logo fetch hardening** (`fetchLogoAsDataUrl` in `server/services/pdf.service.ts`): HTTPS-only, hostname blocklist for private/loopback/link-local ranges (basic SSRF guard), 5s `AbortController` timeout, `Content-Length` precheck and a 2MB hard cap on the streamed body. Any failure returns `null` so PDF generation falls back to the name-only header.
+
 ## Pending Configuration
 
 ⚠️ **Stripe Integration**: Currently disabled for development. Will be configured when implementing checkout functionality. The code is prepared to work with or without Stripe credentials.
