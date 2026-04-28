@@ -150,6 +150,12 @@ export const trailerDocuments = pgTable("trailer_documents", {
   sortOrder: integer("sort_order").notNull().default(0),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
+  // Soft-delete marker. When non-null, the row is treated as deleted by
+  // the application: it is hidden from listings, ignored by version-chain
+  // lookups (so a new upload starts a fresh chain), and ignored when
+  // promoting a previous version to current after a delete. The row stays
+  // in the table to preserve audit history.
+  deletedAt: timestamp("deleted_at"),
   // DEPRECATED — legacy single-category column. Kept nullable so the
   // backfill migration can map it to (category, documentType). New writes
   // must not depend on this field.

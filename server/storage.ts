@@ -77,7 +77,7 @@ import {
   type InsertTenant,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, gte, inArray, asc } from "drizzle-orm";
+import { eq, desc, and, sql, gte, inArray, asc, isNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -449,14 +449,28 @@ export class DatabaseStorage implements IStorage {
 
   // Trailer document operations
   async getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]> {
+    // Soft-deleted rows are hidden from listings — they exist only to
+    // preserve audit history. The DELETE route sets `deletedAt`; nothing
+    // else writes to that column.
     return await db
       .select()
       .from(trailerDocuments)
-      .where(and(eq(trailerDocuments.trailerId, trailerId), eq(trailerDocuments.tenantId, tenantId)))
+      .where(
+        and(
+          eq(trailerDocuments.trailerId, trailerId),
+          eq(trailerDocuments.tenantId, tenantId),
+          isNull(trailerDocuments.deletedAt),
+        ),
+      )
       .orderBy(asc(trailerDocuments.sortOrder), desc(trailerDocuments.uploadedAt));
   }
 
   async getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined> {
+    // Note: this method INCLUDES soft-deleted rows on purpose so the
+    // DELETE route can still look them up if hit twice, and so an audit
+    // viewer can resolve a deleted entityId. Callers that should not see
+    // deleted docs (e.g. status mutations, object-stream ACL check) must
+    // filter on `deletedAt` themselves.
     const [doc] = await db
       .select()
       .from(trailerDocuments)
@@ -475,6 +489,9 @@ export class DatabaseStorage implements IStorage {
     // single transaction so a partial failure can never leave two rows
     // marked is_current=true for the same type.
     return await db.transaction(async (tx) => {
+      // Look up the existing current row IGNORING soft-deleted ones, so a
+      // brand-new upload after a soft-delete starts a fresh chain rather
+      // than re-resurrecting the old (deleted) one.
       const [previous] = await tx
         .select()
         .from(trailerDocuments)
@@ -484,6 +501,7 @@ export class DatabaseStorage implements IStorage {
             eq(trailerDocuments.tenantId, doc.tenantId),
             eq(trailerDocuments.documentType, doc.documentType!),
             eq(trailerDocuments.isCurrent, true),
+            isNull(trailerDocuments.deletedAt),
           ),
         )
         .limit(1);

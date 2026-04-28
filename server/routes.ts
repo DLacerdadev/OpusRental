@@ -47,7 +47,7 @@ import { tenantMiddleware, requireTenant } from "./tenant-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { db, pool } from "./db";
-import { sql, eq, and } from "drizzle-orm";
+import { sql, eq, and, isNull } from "drizzle-orm";
 import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
 import { ObjectStorageService, ObjectNotFoundError } from "./replit_integrations/object_storage/objectStorage";
@@ -2810,14 +2810,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete a single document version. Behaviour:
-  //  - Deletes the underlying object best-effort (never blocks the row delete)
-  //  - If the deleted row was `is_current=true` AND another version of the
-  //    same chain exists, the most recent remaining version is promoted to
-  //    `is_current=true` so the type does not silently disappear from the
-  //    checklist.
-  //  - If it was the only version, the chain is gone (the type goes back to
-  //    showing as "missing" in the UI).
+  // Soft-delete a single document version. Behaviour:
+  //  - Sets `deleted_at` so the row is hidden from listings/version chain
+  //    lookups but stays in the table to preserve audit history. The
+  //    underlying object in storage is intentionally NOT deleted so the
+  //    history can still be reviewed if needed.
+  //  - If the deleted row was `is_current=true` AND another non-deleted
+  //    version of the same chain exists, the most recent remaining version
+  //    (highest `version`) is promoted to `is_current=true` so the
+  //    document type does not silently disappear from the checklist.
+  //  - If it was the only non-deleted version, the chain is gone and the
+  //    type returns to "missing" in the UI checklist.
+  //  - Re-deleting an already soft-deleted row is a no-op (idempotent).
   app.delete("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
     try {
       const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
@@ -2825,19 +2829,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
 
-      try {
-        const file = await objectStorageService.getObjectEntityFile(doc.fileUrl);
-        await file.delete();
-      } catch (err) {
-        if (!(err instanceof ObjectNotFoundError)) {
-          console.warn("Object delete warning:", err);
-        }
+      // Idempotent: re-deleting already-deleted row returns success
+      // without rewriting `deletedAt` or re-emitting an audit log.
+      if (doc.deletedAt) {
+        return res.json({ success: true, alreadyDeleted: true });
       }
 
-      const ok = await storage.deleteTrailerDocument(req.params.docId, req.tenantId!);
-      if (!ok) return res.status(404).json({ message: "Document not found" });
+      const now = new Date();
+      const [updated] = await db
+        .update(trailerDocuments)
+        .set({ deletedAt: now, isCurrent: false })
+        .where(
+          and(
+            eq(trailerDocuments.id, req.params.docId),
+            eq(trailerDocuments.tenantId, req.tenantId!),
+          ),
+        )
+        .returning();
+      if (!updated) return res.status(404).json({ message: "Document not found" });
 
-      // Promote the latest remaining version of this chain to current.
+      // Promote the latest remaining (non-deleted) version of this chain
+      // to current — only relevant if the deleted row was the current one.
       if (doc.isCurrent && doc.documentType) {
         const siblings = await db
           .select()
@@ -2847,6 +2859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               eq(trailerDocuments.trailerId, req.params.id),
               eq(trailerDocuments.tenantId, req.tenantId!),
               eq(trailerDocuments.documentType, doc.documentType),
+              isNull(trailerDocuments.deletedAt),
             ),
           )
           .orderBy(sql`version desc`)
@@ -2875,6 +2888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: doc.category,
           documentType: doc.documentType,
           version: doc.version,
+          softDelete: true,
         },
         ipAddress: req.ip,
       });
