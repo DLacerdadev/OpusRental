@@ -1,0 +1,49 @@
+feat(docs): tabbed trailer documents with versioning + soft-delete
+
+Refactor the per-trailer Documents tab from a flat list into a 4-tab
+checklist UI (Vehicle / Insurance / Contracts / Tracking) with required
+vs optional types per tab, automatic version chains, manager-only
+approve/reject flow, and soft-delete that preserves audit history.
+
+## Backend
+- Extended trailer_documents: category, document_type, status, version,
+  parent_document_id (self-FK), is_current, rejection_reason, reviewed_by,
+  reviewed_at, file_size, mime_type, deleted_at. Old document_category
+  column kept nullable for the backfill window.
+- Indexes: tenant, trailer, (trailer, type), (trailer, type, current),
+  plus a unique partial index on (trailer_id, document_type) WHERE
+  is_current AND deleted_at IS NULL — DB-level guarantee of one active
+  current per type per trailer.
+- Shared catalog (shared/document-types.ts) drives both server validation
+  and UI checklist; adding a doc type is a single edit.
+- storage.createTrailerDocument auto-versions inside a transaction.
+- New storage.setTrailerDocumentStatus + PATCH /:docId/status
+  (manager-only). Rejects soft-deleted rows (404).
+- DELETE is soft: sets deleted_at, leaves the object intact, idempotent
+  on re-call, and promotes the next non-deleted version to current.
+- Listings + chain lookups filter deleted_at IS NULL.
+- Audit log entries for uploaded / version_added / status_changed /
+  deleted (with softDelete=true).
+- Backfill (server/migrations/backfill-trailer-docs.ts) is truly
+  idempotent: groups legacy rows by (tenant, trailer, mapped_type), and
+  for any group containing at least one un-migrated row, reloads ALL
+  siblings (including already-migrated) and rebuilds the entire chain
+  inside a transaction, so partial reruns cannot create duplicate v1
+  roots or break parent_document_id lineage.
+
+## Frontend (client/src/pages/assets.tsx)
+- New TrailerDocumentsTab with shadcn Tabs + per-category panel rendering
+  every catalog type (current file, status badge, version, uploader/
+  reviewer info, history popover, upload/replace/view/delete buttons,
+  approve/reject for managers).
+- Removed the old DnD reorder UI and SortableDocumentRow.
+
+## i18n
+- Added assets.docs.* keys (categories, types, statuses, actions, reject
+  dialog) in en-US and pt-BR.
+
+## Drift
+- Rejection reason is REQUIRED instead of optional (better
+  accountability).
+- API returns flat doc list; client groups using the shared catalog
+  (avoids duplicating grouping logic).

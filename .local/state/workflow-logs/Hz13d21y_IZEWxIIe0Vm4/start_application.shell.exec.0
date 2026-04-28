@@ -1,0 +1,362 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K{"level":"info","timestamp":"2026-04-28T15:36:43.785Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-28T15:36:43.786Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-28T15:36:43.792Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+3:36:43 PM [express] WebSocket server initialized for real-time notifications
+3:36:43 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-28T15:36:45.819Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/","status":200,"duration":"43ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:46.535Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@vite/client","status":200,"duration":"51ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-04-28T15:36:46.990Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/main.tsx","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.011Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@react-refresh","status":304,"duration":"45ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.062Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"37ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.215Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"64ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.432Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/i18n.ts","status":200,"duration":"57ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.433Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/index.css","status":200,"duration":"56ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.442Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/App.tsx","status":200,"duration":"64ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.785Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.787Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.959Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.962Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.969Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:49.972Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.147Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.171Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.174Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.176Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.245Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.311Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.333Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.341Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.344Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.410Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.480Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.497Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.507Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.509Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.583Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.643Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.661Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.672Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.675Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.753Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.812Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.823Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.841Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.845Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.928Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.981Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:50.986Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.007Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.010Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/pay-invoice.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.095Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.149Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.151Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.170Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.176Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.261Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.317Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.319Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.351Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.353Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.430Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.478Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.484Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.515Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.518Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.596Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.642Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.649Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.676Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.680Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.764Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.811Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.813Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.839Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.848Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/dashboard-labels.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.931Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.973Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:51.979Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.004Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.013Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/collapsible.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.095Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.135Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/use-upload.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.144Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.166Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.176Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.260Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.298Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.307Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.329Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:52.339Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:36:53.566Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"8ms","ip":"127.0.0.1"}
+3:36:53 PM [express] GET /api/auth/user 304 in 18ms :: {"id":"526fae16-5da1-4335-b878-5919afde1cb4",…
+✅ Access: {"timestamp":"2026-04-28T15:36:53.574Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/api/auth/user","status":304,"duration":"12ms","ip":"127.0.0.1"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:43:00 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ, /src/pages/gps-config.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:43:09 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ, /src/pages/gps-config.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:47:52 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ[22m
+Failed to prune sessions: error: relation "session" does not exist
+    at [90mfile:///home/runner/workspace/[39mnode_modules/[4m@neondatabase/serverless[24m/index.mjs:1345:74
+[90m    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+    at async PGStore._asyncQuery [90m(/home/runner/workspace/[39mnode_modules/[4mconnect-pg-simple[24m/index.js:322:21[90m)[39m {
+  length: [33m106[39m,
+  severity: [32m'ERROR'[39m,
+  code: [32m'42P01'[39m,
+  detail: [90mundefined[39m,
+  hint: [90mundefined[39m,
+  position: [32m'13'[39m,
+  internalPosition: [90mundefined[39m,
+  internalQuery: [90mundefined[39m,
+  where: [90mundefined[39m,
+  schema: [90mundefined[39m,
+  table: [90mundefined[39m,
+  column: [90mundefined[39m,
+  dataType: [90mundefined[39m,
+  constraint: [90mundefined[39m,
+  file: [32m'parse_relation.c'[39m,
+  line: [32m'1452'[39m,
+  routine: [32m'parserOpenTable'[39m
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:49:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:49:55 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/locales/en-US.json[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:49:55 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/locales/pt-BR.json[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:51:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:52:33 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/assets.tsx, /src/index.css?v=C_p1aQ7a5Mrm0UhYRrCoQ[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:52:45 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/locales/en-US.json[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m3:52:45 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/locales/pt-BR.json[22m

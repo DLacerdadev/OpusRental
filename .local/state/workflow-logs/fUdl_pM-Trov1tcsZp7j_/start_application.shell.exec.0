@@ -1,0 +1,68 @@
+[1G[0K⠙[1G[0K
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K⠙[1G[0K{"level":"info","timestamp":"2026-04-28T13:22:50.329Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-28T13:22:50.330Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-28T13:22:50.338Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+1:22:50 PM [express] WebSocket server initialized for real-time notifications
+1:22:50 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-28T13:22:54.337Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"40ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T13:22:55.256Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"29ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T13:22:55.298Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T13:22:55.300Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-04-28T13:22:55.931Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T13:22:55.933Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m1:22:56 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: [postcss] /home/runner/workspace/client/src/index.css:119:5: The `border-border/60` class does not exist. If `border-border/60` is a custom class, make sure it is defined within a `@layer` directive.[39m
+  Plugin: [35mvite:css[39m
+  File: [36m/home/runner/workspace/client/src/index.css[39m:119:4
+[33m  117|  @layer components {
+  118|    .card {
+  119|      @apply shadow-md border-border/60;
+     |      ^
+  120|    }
+  121|  [39m
+      at Input.error (/home/runner/workspace/node_modules/postcss/lib/input.js:106:16)
+      at AtRule.error (/home/runner/workspace/node_modules/postcss/lib/node.js:115:32)
+      at processApply (/home/runner/workspace/node_modules/tailwindcss/lib/lib/expandApplyAtRules.js:380:29)
+      at /home/runner/workspace/node_modules/tailwindcss/lib/lib/expandApplyAtRules.js:551:9
+      at /home/runner/workspace/node_modules/tailwindcss/lib/processTailwindFeatures.js:55:50
+      at async plugins (/home/runner/workspace/node_modules/tailwindcss/lib/plugin.js:38:17)
+      at async LazyResult.runAsync (/home/runner/workspace/node_modules/postcss/lib/lazy-result.js:261:11)
+      at async compileCSS (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:36898:21)
+      at async TransformPluginContext.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:36171:11)
+      at async PluginContainer.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49099:18)
+      at async loadAndTransform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:51977:27)
+[1G[0K⠙[1G[0K[1mnpm[22m [96mnotice[39m
+[1mnpm[22m [96mnotice[39m New [31mmajor[39m version of npm available! [31m10.8.2[39m -> [34m11.13.0[39m
+[1mnpm[22m [96mnotice[39m Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.13.0[39m
+[1mnpm[22m [96mnotice[39m To update run: [4mnpm install -g npm@11.13.0[24m
+[1mnpm[22m [96mnotice[39m
+[1G[0K⠙[1G[0K

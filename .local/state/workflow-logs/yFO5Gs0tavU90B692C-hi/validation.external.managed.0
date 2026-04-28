@@ -1,0 +1,35 @@
+VERDICT: REJECTED
+The diff delivers most of the refactor (typed catalog in `shared/document-types.ts`, tabbed UI checklist, versioned uploads, status workflow, and audit logging), but it misses a core functional requirement: DELETE is implemented as haVERDICT: REJECTED
+rd delete, not soft delete preserving history.
+
+Critical findings:
+- **Blocking requirement miss – soft delete not implemented**: `DELETE /api/trailers/:id/documents/:docId` physically deletes the DB row via `storage.deleteTrailerDocument()` and best-effort deletes the object. The task explicitly requires “DELETE soft que mantém histórico”. Hard delete destroys version history and contradicts the versioning/audit intent.
+- Versioning and approval flow are otherwise broadly correct:
+  - `createTrailerDocument` auto-versions per `(trailerId, documentType)`, flips prior current to `isCurrent=false`, sets new row `status='pending'`.
+  - Manager-only status route exists (`/status`) and records reviewer/time/reason.
+  - UI shows 4 category tabs, required/optional badges, current status, upload/replace, history popover, manager approve/reject dialog.
+- Notable deviation from model integrity (non-blocking but important): `category` and `documentType` are nullable in schema and `parentDocumentId` lacks self-FK; this weakens data guarantees from the proposed model, though app-layer validation mitigates normal writes.
+- The declared drift (flat list response vs grouped server response, mandatory rejection reason) is acceptable as stated and does not by itself block approval.
+
+Security: none observed (no serious authz/injection/secret leakage issues introduced in reviewed diff).
+
+Next actions:
+1. Implement true soft-delete semantics for trailer documents (e.g., `deletedAt`/`isDeleted`), exclude soft-deleted rows from “current” selection/listing while retaining historical records.
+2. Adjust current-version promotion logic to ignore soft-deleted rows and keep chain consistency.
+3. (Strongly recommended) Add DB-level integrity constraints for one-current-per-type (prefer partial unique index) and non-null `category/documentType` after backfill stabilization.The diff delivers most of the refactor (typed catalog in `shared/document-types.ts`, tabbed UI checklist, versioned uploads, status workflow, and audit logging), but it misses a core functional requirement: DELETE is implemented as hard delete, not soft delete preserving history.
+
+Critical findings:
+- **Blocking requirement miss – soft delete not implemented**: `DELETE /api/trailers/:id/documents/:docId` physically deletes the DB row via `storage.deleteTrailerDocument()` and best-effort deletes the object. The task explicitly requires “DELETE soft que mantém histórico”. Hard delete destroys version history and contradicts the versioning/audit intent.
+- Versioning and approval flow are otherwise broadly correct:
+  - `createTrailerDocument` auto-versions per `(trailerId, documentType)`, flips prior current to `isCurrent=false`, sets new row `status='pending'`.
+  - Manager-only status route exists (`/status`) and records reviewer/time/reason.
+  - UI shows 4 category tabs, required/optional badges, current status, upload/replace, history popover, manager approve/reject dialog.
+- Notable deviation from model integrity (non-blocking but important): `category` and `documentType` are nullable in schema and `parentDocumentId` lacks self-FK; this weakens data guarantees from the proposed model, though app-layer validation mitigates normal writes.
+- The declared drift (flat list response vs grouped server response, mandatory rejection reason) is acceptable as stated and does not by itself block approval.
+
+Security: none observed (no serious authz/injection/secret leakage issues introduced in reviewed diff).
+
+Next actions:
+1. Implement true soft-delete semantics for trailer documents (e.g., `deletedAt`/`isDeleted`), exclude soft-deleted rows from “current” selection/listing while retaining historical records.
+2. Adjust current-version promotion logic to ignore soft-deleted rows and keep chain consistency.
+3. (Strongly recommended) Add DB-level integrity constraints for one-current-per-type (prefer partial unique index) and non-null `category/documentType` after backfill stabilization.

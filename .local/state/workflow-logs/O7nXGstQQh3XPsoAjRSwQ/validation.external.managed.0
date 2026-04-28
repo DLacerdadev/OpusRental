@@ -1,0 +1,41 @@
+VERDICT: APPROVED_WITH_COMMENTS
+The diff implements the core task successfully: documents are refactored into 4 tabs via shared catalog config, uploads now create version chains per (trailer, documentType), approval status flow (pending/approved/rejectVERDICT: APPROVED_WITH_COMMENTS
+ed) is implemented with manager-only status endpoint, and soft-delete plus audit logging is in place for all key mutations (upload/version add/status change/delete).
+
+Critical findings / analysis:
+- Data model extension is coherent: `category`, `documentType`, `status`, `version`, `parentDocumentId`, `isCurrent`, review metadata, and soft-delete are wired through schema, storage, routes, and UI.
+- Versioning behavior is correct in storage: existing current row is demoted, new row becomes current with incremented version and parent chain reference.
+- UI behavior aligns with checklist requirement: fixed tab/category layout from `shared/document-types.ts`, required/optional markers, current status badges, version history popover, upload/replace semantics, and manager approve/reject controls with required rejection reason.
+- Backfill script is high quality and effectively idempotent for mixed migrated/unmigrated groups.
+- Audit logging coverage is good and includes version/status metadata.
+
+Non-blocking comments:
+1) DELETE current + sibling promotion is not transactional (two DB operations). This is usually fine, but a transaction would remove race-window edge cases under concurrent mutations.
+2) `category`/`documentType` remain nullable at DB schema level (enforced in app/Zod). Functional today, but DB-level NOT NULL/check constraints would better protect long-term integrity.
+3) GET documents enriches users with per-user fetch loop; acceptable at current scale, but consider batched user fetch if trailer version history grows large.
+
+Security: none observed (no serious authz/injection/secrets issues introduced). Tenant scoping is preserved, manager guard exists for status changes, and status endpoint rejects soft-deleted rows.
+
+Next actions:
+1) Add a transaction around soft-delete + current-sibling promotion to harden concurrency.
+2) Consider DB-level integrity constraints for `category`/`document_type` once backfill is complete.
+3) Optionally optimize uploader/reviewer enrichment with a batched query path if needed for scale.The diff implements the core task successfully: documents are refactored into 4 tabs via shared catalog config, uploads now create version chains per (trailer, documentType), approval status flow (pending/approved/rejected) is implemented with manager-only status endpoint, and soft-delete plus audit logging is in place for all key mutations (upload/version add/status change/delete).
+
+Critical findings / analysis:
+- Data model extension is coherent: `category`, `documentType`, `status`, `version`, `parentDocumentId`, `isCurrent`, review metadata, and soft-delete are wired through schema, storage, routes, and UI.
+- Versioning behavior is correct in storage: existing current row is demoted, new row becomes current with incremented version and parent chain reference.
+- UI behavior aligns with checklist requirement: fixed tab/category layout from `shared/document-types.ts`, required/optional markers, current status badges, version history popover, upload/replace semantics, and manager approve/reject controls with required rejection reason.
+- Backfill script is high quality and effectively idempotent for mixed migrated/unmigrated groups.
+- Audit logging coverage is good and includes version/status metadata.
+
+Non-blocking comments:
+1) DELETE current + sibling promotion is not transactional (two DB operations). This is usually fine, but a transaction would remove race-window edge cases under concurrent mutations.
+2) `category`/`documentType` remain nullable at DB schema level (enforced in app/Zod). Functional today, but DB-level NOT NULL/check constraints would better protect long-term integrity.
+3) GET documents enriches users with per-user fetch loop; acceptable at current scale, but consider batched user fetch if trailer version history grows large.
+
+Security: none observed (no serious authz/injection/secrets issues introduced). Tenant scoping is preserved, manager guard exists for status changes, and status endpoint rejects soft-deleted rows.
+
+Next actions:
+1) Add a transaction around soft-delete + current-sibling promotion to harden concurrency.
+2) Consider DB-level integrity constraints for `category`/`document_type` once backfill is complete.
+3) Optionally optimize uploader/reviewer enrichment with a batched query path if needed for scale.

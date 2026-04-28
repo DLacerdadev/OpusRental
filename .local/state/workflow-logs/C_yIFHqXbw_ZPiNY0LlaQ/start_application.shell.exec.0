@@ -1,0 +1,295 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K{"level":"info","timestamp":"2026-04-28T15:53:28.472Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-28T15:53:28.472Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-28T15:53:28.482Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+3:53:28 PM [express] WebSocket server initialized for real-time notifications
+3:53:28 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-28T15:53:30.433Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"180ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Error: socket hang up
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async PGStore._asyncQuery (/home/runner/workspace/node_modules/connect-pg-simple/index.js:322:21)
+✅ Access: {"timestamp":"2026-04-28T15:53:37.213Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"2004ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:37.751Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"213ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.172Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"39ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.173Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.367Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.387Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"20ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.409Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":200,"duration":"21ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.587Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"154ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.596Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.733Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react_jsx-dev-runtime.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.734Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-dom_client.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.738Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.757Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.758Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.807Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.813Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZMLY2J2T.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.820Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-276SZO74.js","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.821Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4B2QHNJT.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.821Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.831Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.837Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.862Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.863Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.866Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.866Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.868Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.868Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.931Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-i18next.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.932Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.933Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.934Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.935Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:38.940Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.008Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":200,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.023Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":200,"duration":"14ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.033Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":200,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.040Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.068Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":200,"duration":"25ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.071Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.091Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.099Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.106Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.118Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":200,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.124Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.144Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":200,"duration":"14ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.158Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":200,"duration":"13ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.161Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.169Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.173Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.181Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.196Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.199Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.202Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.203Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.216Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.223Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.225Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.226Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/pay-invoice.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.230Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.233Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.237Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/i18next.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.256Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.260Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.266Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.266Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.267Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.273Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CRNJR6QK.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.288Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.291Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/class-variance-authority.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.305Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/lucide-react.js","status":200,"duration":"14ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.306Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.309Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.309Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.313Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.336Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.342Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.343Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.346Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.350Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.359Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.363Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.367Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.368Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.373Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.378Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.382Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.383Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.384Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.388Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/date-fns.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.406Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.419Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.421Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/dashboard-labels.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.422Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.427Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.429Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.430Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.452Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/collapsible.tsx","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.453Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-hook-form.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.467Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.468Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@hookform_resolvers_zod.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.469Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/zod.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.496Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/document-types.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.509Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.510Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.511Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-upload.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.512Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.512Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.513Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.514Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.549Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/date-fns_locale.js","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.551Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.552Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.552Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@stripe_react-stripe-js.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.560Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/recharts.js","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.561Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@stripe_stripe-js.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.610Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-toast.js","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.616Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4S3MVH6E.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.621Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-QQTJIP4R.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.624Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5GWRQQ35.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.628Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VKGQSCIA.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.635Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TVBOY2LS.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.641Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-W26MZUFT.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.644Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CDJ7QCJS.js","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.649Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.651Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-APDZTKBG.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.652Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-6ZEHPUQI.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.654Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DER63BAK.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.657Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKFJJYQE.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.659Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/clsx.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.660Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/tailwind-merge.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.702Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-avatar.js","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.708Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IZOHAVDA.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.712Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U7P2NEEE.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.717Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slot.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.725Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GFMKRM3F.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.743Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.758Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/dotted-map.js","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.759Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-popover.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.760Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-label.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.761Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.766Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.767Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IIGUYIAY.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.783Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.787Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YGCRICWC.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.787Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/cmdk.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.788Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-collapsible.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.790Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WGQNECLP.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.791Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/drizzle-orm.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.811Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/drizzle-orm_pg-core.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.813Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/jspdf-autotable.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.819Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/xlsx.js","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.820Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/drizzle-zod.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.825Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/jspdf.js","status":200,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.826Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-switch.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.888Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/react-leaflet.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.897Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.901Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NHY3NUFE.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.906Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.910Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/leaflet.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.915Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OG7JVJJN.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.934Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-V5HFRF4I.js","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.936Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.939Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AEA2R5VH.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.943Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BTNF3AGM.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.947Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-COCYWFQH.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.952Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GNFJLXVI.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.958Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-S32ZQ654.js","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.963Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-D7ZASVPN.js","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.973Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ACMJLHWK.js","status":200,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:39.982Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.106Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.165Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.282Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.336Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.459Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.509Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.635Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.682Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.835Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:40.859Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:41.329Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:41.344Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:41.530Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:41.928Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:41.993Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+3:53:42 PM [express] GET /api/auth/user 401 in 11ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-28T15:53:42.631Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:42.738Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:42.743Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:42.831Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":200,"duration":"199ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:42.907Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:42.933Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.080Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.105Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.253Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.283Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.433Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.469Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.631Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.641Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.825Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:43.830Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.045Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.055Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/pay-invoice.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.219Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.227Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.403Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.411Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.597Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.785Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:44.880Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.027Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.053Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.210Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.472Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.492Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.646Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.704Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.817Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.877Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:45.990Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.084Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.162Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.254Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.340Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.424Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.813Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.816Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:46.993Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.020Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/dashboard-labels.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.165Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.210Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.345Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.380Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.518Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.558Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/collapsible.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.705Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.727Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/document-types.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:47.951Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-upload.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.065Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.123Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.236Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.399Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.405Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.586Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:53:48.830Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"1ms","ip":"127.0.0.1"}
+3:54:05 PM [express] GET /api/auth/user 401 in 43ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-28T15:54:05.860Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T15:54:05.868Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+{"level":"info","timestamp":"2026-04-28T16:00:00.007Z","service":"scheduler","operation":"geofence_check_start","tenantId":null}
+[NotificationService] Checking for geofence alerts...
+{"level":"info","timestamp":"2026-04-28T16:00:00.028Z","service":"scheduler","operation":"geofence_check_complete","tenantId":null}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:01:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/rental-clients.tsx, /src/index.css?v=rhM2so-zcz5Ce1ouVJNN0, /src/pages/gps-config.tsx, /src/pages/rental-contracts.tsx, /src/pages/invoices.tsx, /src/pages/assets.tsx[22m

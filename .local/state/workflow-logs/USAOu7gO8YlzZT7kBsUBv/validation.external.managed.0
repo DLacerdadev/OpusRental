@@ -1,0 +1,31 @@
+VERDICT: REJECTED
+The refactor is substantial and close, but it has a blocking data-migration/versioning flaw that can hide existing documents and break the “preserve existing uploads with version history” requirement.
+
+Critical findings:
+1) **VERDICT: REJECTED
+Backfill does not build valid version chains for legacy duplicates** (blocking): `The refactor is substantial and close, but it has a blocking data-migration/versioning flaw that can hide existing documents and break the “preserve existing uploads with version history” requirement.
+server/migrations/backfill-trailer-docs.ts` sets `is_curre
+nt=true`, `version=1`, and no `parent_document_id` for eCritical findings:
+very migrated row. In the legacy model, users could upload multiple docs under the same category/type. After this migration, multiple rows can remain `is_current=true` for a single `(trailer, document_type)`. The UI grouping logic (`assets.tsx`) keeps only one `current` per type and only shows rows with `isCurrent=false` in history, so additional legacy rows become effectively invisible (not current, not history) depending on iteration overwrite. This violates preservation/visibility and version-history expectations.
+
+2) **No hard guard to enforce a single current row per type** (high impact): schema adds only a non-unique index (`idxCurrent`) rather than a unique partial constraint for `(trailer_id, document_type) WHERE is_current AND deleted_at IS NULL`. Concurrency or bad legacy state can create multiple currents and inconsistent behavior.
+
+3) **Status route can mutate soft-deleted documents** (non-blocking but notable): `PATCH /documents/:docId/status` uses `getTrailerDocument` (which intentionally includes deleted rows) and does not reject `deletedAt != null`, allowing review actions on hidden/deleted versions.
+
+Security: none observed of serious severity (no clear authz bypass, injection, or secret exposure in this diff).
+
+Next actions:
+1) Fix migration/backfill to deterministically chain legacy rows per `(tenant, trailer, document_type)` by upload/sort order: assign `version` sequence, set exactly one current (latest non-deleted), set `parent_document_id` to v1 for all later versions, and mark older ones `is_current=false`.
+2) Add DB-level integrity: unique partial index (or equivalent constraint) for one active current per `(trailer_id, document_type)` among non-deleted rows.
+3) In status PATCH route, reject operations when `doc.deletedAt` is set (404 or 400) to keep soft-delete semantics consistent.1) **Backfill does not build valid version chains for legacy duplicates** (blocking): `server/migrations/backfill-trailer-docs.ts` sets `is_current=true`, `version=1`, and no `parent_document_id` for every migrated row. In the legacy model, users could upload multiple docs under the same category/type. After this migration, multiple rows can remain `is_current=true` for a single `(trailer, document_type)`. The UI grouping logic (`assets.tsx`) keeps only one `current` per type and only shows rows with `isCurrent=false` in history, so additional legacy rows become effectively invisible (not current, not history) depending on iteration overwrite. This violates preservation/visibility and version-history expectations.
+
+2) **No hard guard to enforce a single current row per type** (high impact): schema adds only a non-unique index (`idxCurrent`) rather than a unique partial constraint for `(trailer_id, document_type) WHERE is_current AND deleted_at IS NULL`. Concurrency or bad legacy state can create multiple currents and inconsistent behavior.
+
+3) **Status route can mutate soft-deleted documents** (non-blocking but notable): `PATCH /documents/:docId/status` uses `getTrailerDocument` (which intentionally includes deleted rows) and does not reject `deletedAt != null`, allowing review actions on hidden/deleted versions.
+
+Security: none observed of serious severity (no clear authz bypass, injection, or secret exposure in this diff).
+
+Next actions:
+1) Fix migration/backfill to deterministically chain legacy rows per `(tenant, trailer, document_type)` by upload/sort order: assign `version` sequence, set exactly one current (latest non-deleted), set `parent_document_id` to v1 for all later versions, and mark older ones `is_current=false`.
+2) Add DB-level integrity: unique partial index (or equivalent constraint) for one active current per `(trailer_id, document_type)` among non-deleted rows.
+3) In status PATCH route, reject operations when `doc.deletedAt` is set (404 or 400) to keep soft-delete semantics consistent.

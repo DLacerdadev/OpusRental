@@ -1,0 +1,197 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K{"level":"info","timestamp":"2026-04-28T16:09:08.957Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-28T16:09:08.958Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-28T16:09:08.966Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+4:09:08 PM [express] WebSocket server initialized for real-time notifications
+4:09:09 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-28T16:09:09.916Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"30ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-04-28T16:09:12.692Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"117ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:12.796Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:12.834Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:12.886Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.165Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.201Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.209Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.316Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.384Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.385Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.643Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.648Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.649Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.649Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.661Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.683Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.804Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.813Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.814Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.819Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.824Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.845Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.970Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.978Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.979Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.986Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:13.990Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.010Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.132Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.142Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.143Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.150Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.155Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.177Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.294Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.303Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.304Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.318Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.359Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.360Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.455Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.462Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.466Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.485Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/pay-invoice.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.521Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.522Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.617Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.630Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.631Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.651Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.685Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.686Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.786Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.793Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.794Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.816Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.852Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.854Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.952Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.957Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.958Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:14.982Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.015Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.021Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.114Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.115Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.120Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/dashboard-labels.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.147Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.179Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.182Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.276Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.280Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.283Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.311Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.343Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/collapsible.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.345Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.442Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/document-types.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.446Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.447Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-upload.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.480Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.510Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.531Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.602Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:15.608Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"1ms","ip":"127.0.0.1"}
+4:09:16 PM [express] GET /api/auth/user 401 in 8ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-28T16:09:16.860Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-28T16:09:16.862Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:12:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/gps-config.tsx, /src/index.css?v=zYGxiw17PeS0yuZg7Dud, /src/pages/assets.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:12:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/gps-config.tsx, /src/index.css?v=zYGxiw17PeS0yuZg7Dud, /src/pages/assets.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:13:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/gps-config.tsx, /src/index.css?v=zYGxiw17PeS0yuZg7Dud, /src/pages/assets.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m [33m(x3)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m4:13:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/gps-config.tsx, /src/index.css?v=zYGxiw17PeS0yuZg7Dud, /src/pages/assets.tsx, /src/pages/rental-contracts.tsx, /src/pages/rental-clients.tsx, /src/pages/invoices.tsx[22m [33m(x4)[39m

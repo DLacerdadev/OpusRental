@@ -1,0 +1,41 @@
+VERDICT: REJECTED
+The feature set is largely implemented (tabbed UI, versioning, status workflow, soft-delete behavior, audit logging, shared catalog), but there is a blocking data-migration correctness issue and notable AI-slop indicators in the diff.VERDICT: REJECTED
+
+
+Critical findings:
+1) **Backfill script is not truly idempotent and can corrupt version chains on partiThe feature set is largely implemented (tabbed UI, versioning, status workflow, soft-delete behavior, audit logging, shared catalog), but there is a blocking data-migration correctness issue and notable AI-slop indicators in the diff.
+al reruns** (`server/migrations/backfill-trailer-docs.t
+s`).
+   - The script selects only rows where `cateCritical findings:
+gory/documentType` are null, then rebuilds chains only fro1) **Backfill script is not truly idempotent and can corrupt version chains on partial reruns** (`server/migrations/backfill-trailer-docs.ts`).
+m that subset.
+   - If a prior run partially updated a group, r   - The script selects only rows where `category/documentType` are null, then rebuilds chains only from that subset.
+erun excludes already-updated rows and can create duplicate `version=1` roots / broken `parent_document_id` lineage for the same `(tenant,trailer,type)`.
+   - This directly risks violating the task’s core requirement to preserve historical versions correctly for legacy data.
+
+2) **AI-generated slop present (non-trivial)** in changed files (especially `client/src/pages/assets.tsx`, `server/routes.ts`, `shared/schema.ts`, migration file): oversized explanatory comment blocks and pervasive tutorial-style inline comments inconsistent with production code intent. Given review policy, this is reject-worthy.
+
+3) Minor but relevant completeness gaps (non-blocking alone, but reinforce rejection context):
+   - Proposed model specified `parent_document_id` FK; schema currently leaves `parentDocumentId` without FK reference, reducing integrity guarantees.
+   - `category/documentType` remain nullable at DB layer, so consistency relies on app logic + one-shot script rather than schema-level enforcement.
+
+Security: none observed (no serious authz/injection/secret exposure regressions in this diff).
+
+Next actions:
+1) Fix backfill to be safely rerunnable: for each affected `(tenant,trailer,type)`, include already-migrated siblings when computing chain, and update each group transactionally.
+2) Remove/reduce AI-slop comments to concise, codebase-consistent comments only where needed.
+3) Tighten DB integrity after backfill: add FK for `parent_document_id`, and enforce non-null `category/document_type` (post-migration) if operationally feasible.   - If a prior run partially updated a group, rerun excludes already-updated rows and can create duplicate `version=1` roots / broken `parent_document_id` lineage for the same `(tenant,trailer,type)`.
+   - This directly risks violating the task’s core requirement to preserve historical versions correctly for legacy data.
+
+2) **AI-generated slop present (non-trivial)** in changed files (especially `client/src/pages/assets.tsx`, `server/routes.ts`, `shared/schema.ts`, migration file): oversized explanatory comment blocks and pervasive tutorial-style inline comments inconsistent with production code intent. Given review policy, this is reject-worthy.
+
+3) Minor but relevant completeness gaps (non-blocking alone, but reinforce rejection context):
+   - Proposed model specified `parent_document_id` FK; schema currently leaves `parentDocumentId` without FK reference, reducing integrity guarantees.
+   - `category/documentType` remain nullable at DB layer, so consistency relies on app logic + one-shot script rather than schema-level enforcement.
+
+Security: none observed (no serious authz/injection/secret exposure regressions in this diff).
+
+Next actions:
+1) Fix backfill to be safely rerunnable: for each affected `(tenant,trailer,type)`, include already-migrated siblings when computing chain, and update each group transactionally.
+2) Remove/reduce AI-slop comments to concise, codebase-consistent comments only where needed.
+3) Tighten DB integrity after backfill: add FK for `parent_document_id`, and enforce non-null `category/document_type` (post-migration) if operationally feasible.
