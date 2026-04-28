@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,14 +19,33 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, Edit, XCircle, Eye, DollarSign, Calendar, Receipt } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  FileText,
+  Plus,
+  Edit,
+  XCircle,
+  Eye,
+  Calendar,
+  Receipt,
+  CheckCircle,
+  Search,
+  Filter,
+  MoreHorizontal,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRentalContractSchema, type InsertRentalContract } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 export default function RentalContracts() {
@@ -36,6 +55,8 @@ export default function RentalContracts() {
   const [editingContract, setEditingContract] = useState<any>(null);
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [generateInvoiceContract, setGenerateInvoiceContract] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const { toast } = useToast();
   const { user } = useAuth();
   // The "Generate invoice now" button calls a server endpoint guarded by
@@ -238,9 +259,12 @@ export default function RentalContracts() {
       cancelled: t('rentalContracts.statusCancelled'),
     };
     const variants: Record<string, string> = {
-      active: "bg-green-600 dark:bg-green-400 text-white",
-      expired: "bg-orange-600 dark:bg-orange-400 text-white",
-      cancelled: "bg-red-600 dark:bg-red-400 text-white",
+      active:
+        "bg-emerald-500 text-white hover:bg-emerald-500/90 font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide",
+      expired:
+        "bg-amber-500 text-white hover:bg-amber-500/90 font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide",
+      cancelled:
+        "bg-slate-500 text-white hover:bg-slate-500/90 font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide",
     };
     const label = labels[status] || labels.active;
     const variant = variants[status] || variants.active;
@@ -257,9 +281,15 @@ export default function RentalContracts() {
     return trailer ? `${trailer.trailerId} - ${trailer.model}` : t('rentalContracts.unknownTrailer');
   };
 
+  const formatMonthlyRate = (value: string | number) => {
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    if (Number.isNaN(num)) return String(value);
+    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   if (isLoading) {
     return (
-      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8 bg-background">
         <Skeleton className="h-32" />
         <Skeleton className="h-96" />
       </div>
@@ -273,11 +303,92 @@ export default function RentalContracts() {
     cancelled: contracts.filter((c: any) => c.status === "cancelled").length,
   };
 
+  const filteredContracts = contracts.filter((c: any) => {
+    const term = searchTerm.toLowerCase().trim();
+    const matchesSearch =
+      term === "" ||
+      (c.contractNumber || "").toLowerCase().includes(term) ||
+      getClientName(c.clientId).toLowerCase().includes(term);
+    const matchesStatus = statusFilter === "ALL" || c.status === statusFilter.toLowerCase();
+    return matchesSearch && matchesStatus;
+  });
+
+  const ActionMenu = ({ contract }: { contract: any }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-8 w-8 p-0"
+          data-testid={`button-actions-${contract.id}`}
+        >
+          <span className="sr-only">{t('rentalContracts.openMenu', 'Abrir menu')}</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {t('rentalContracts.actionsLabel', 'Ações')}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => handleViewDetails(contract)}
+          className="cursor-pointer"
+          data-testid={`menu-view-${contract.id}`}
+        >
+          <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>{t('rentalContracts.actionViewDetails', 'Ver Detalhes')}</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleEdit(contract)}
+          className="cursor-pointer"
+          data-testid={`menu-edit-${contract.id}`}
+        >
+          <Edit className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>{t('rentalContracts.actionEdit', 'Editar')}</span>
+        </DropdownMenuItem>
+        {contract.status === "active" && canGenerateInvoice && (
+          <DropdownMenuItem
+            onClick={() => setGenerateInvoiceContract(contract)}
+            className="cursor-pointer"
+            data-testid={`menu-generate-invoice-${contract.id}`}
+          >
+            <Receipt className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-blue-600 dark:text-blue-400">
+              {t('rentalContracts.generateInvoiceNow')}
+            </span>
+          </DropdownMenuItem>
+        )}
+        {contract.status === "active" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => handleTerminate(contract.id)}
+              className="cursor-pointer focus:bg-red-50 dark:focus:bg-red-500/10"
+              data-testid={`menu-terminate-${contract.id}`}
+            >
+              <XCircle className="mr-2 h-4 w-4 text-red-600 dark:text-red-400" />
+              <span className="text-red-600 dark:text-red-400">
+                {t('rentalContracts.actionTerminate', 'Encerrar Contrato')}
+              </span>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-rental-contracts">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+    <div
+      className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8 bg-background min-h-screen"
+      data-testid="page-rental-contracts"
+    >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-rental-contracts">
+          <h1
+            className="text-2xl font-bold text-foreground tracking-tight"
+            data-testid="heading-rental-contracts"
+          >
             {t('rentalContracts.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -286,10 +397,10 @@ export default function RentalContracts() {
         </div>
         <Button
           onClick={handleNewContract}
-          className="bg-accent hover:bg-accent/90 shadow-lg h-11 w-full sm:w-auto"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm font-medium w-full sm:w-auto"
           data-testid="button-new-contract"
         >
-          <Plus className="h-4 w-4 sm:mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">{t('rentalContracts.newContract')}</span>
           <span className="sm:hidden">{t('rentalContracts.newContractShort')}</span>
         </Button>
@@ -297,202 +408,306 @@ export default function RentalContracts() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-accent/10 p-3 rounded-2xl">
-                <FileText className="h-6 w-6 text-accent" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalContracts.totalContracts')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-foreground"
+                data-testid="text-total-contracts"
+              >
+                {stats.total}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.totalContracts')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-total-contracts">
-              {stats.total}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-green-50 dark:bg-green-950 p-3 rounded-2xl">
-                <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalContracts.active')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"
+                data-testid="text-active-contracts"
+              >
+                {stats.active}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.active')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-active-contracts">
-              {stats.active}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-orange-50 dark:bg-orange-950 p-3 rounded-2xl">
-                <FileText className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalContracts.expired')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-amber-600 dark:text-amber-400"
+                data-testid="text-expired-contracts"
+              >
+                {stats.expired}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.expired')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-expired-contracts">
-              {stats.expired}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-amber-50 dark:bg-amber-500/15 flex items-center justify-center">
+              <Calendar className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-red-50 dark:bg-red-950 p-3 rounded-2xl">
-                <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalContracts.cancelled')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-red-600 dark:text-red-400"
+                data-testid="text-cancelled-contracts"
+              >
+                {stats.cancelled}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalContracts.cancelled')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-cancelled-contracts">
-              {stats.cancelled}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-red-50 dark:bg-red-500/15 flex items-center justify-center">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Contracts Table */}
-      <Card className="shadow-lg">
-        <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">{t('rentalContracts.contractList')}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 border-b">
-                <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalContracts.tableContract')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
-                    {t('rentalContracts.tableClient')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
-                    {t('rentalContracts.tableTrailer')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
-                    {t('rentalContracts.tablePeriod')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalContracts.tableMonthlyRate')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalContracts.tableStatus')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalContracts.tableActions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-card divide-y divide-border">
-                {contracts && contracts.length > 0 ? (
-                  contracts.map((contract: any) => (
-                    <tr
-                      key={contract.id}
-                      className="hover:bg-muted/30 transition-colors"
-                      data-testid={`row-contract-${contract.id}`}
-                    >
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-accent" />
-                          <span className="text-sm font-semibold text-foreground">
-                            {contract.contractNumber}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
-                        <span className="text-sm text-foreground">
-                          {getClientName(contract.clientId)}
-                        </span>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
-                        <span className="text-sm text-foreground">
-                          {getTrailerName(contract.trailerId)}
-                        </span>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 hidden xl:table-cell">
-                        <div className="flex items-center gap-2 text-sm text-foreground">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
+      {/* Main Content Card */}
+      <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+        {/* Toolbar */}
+        <div className="p-4 md:p-5 border-b border-border flex flex-col md:flex-row gap-4 justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('rentalContracts.searchPlaceholder', 'Buscar por contrato ou cliente...')}
+              className="pl-9 bg-muted/40 border-border"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search-contracts"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-56">
+              <Filter className="h-4 w-4 text-muted-foreground hidden sm:block" />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger
+                  className="bg-muted/40 border-border"
+                  data-testid="select-status-filter"
+                >
+                  <SelectValue
+                    placeholder={t('rentalContracts.filterAllStatus', 'Todos os status')}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">
+                    {t('rentalContracts.filterAllStatus', 'Todos os status')}
+                  </SelectItem>
+                  <SelectItem value="ACTIVE">{t('rentalContracts.statusActive')}</SelectItem>
+                  <SelectItem value="EXPIRED">{t('rentalContracts.statusExpired')}</SelectItem>
+                  <SelectItem value="CANCELLED">{t('rentalContracts.statusCancelled')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/40">
+              <tr className="border-b border-border">
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalContracts.tableContract')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalContracts.tableClient')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
+                  {t('rentalContracts.tableTrailer')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
+                  {t('rentalContracts.tablePeriod')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalContracts.tableMonthlyRate')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalContracts.tableStatus')}
+                </th>
+                <th className="px-4 sm:px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalContracts.tableActions')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredContracts && filteredContracts.length > 0 ? (
+                filteredContracts.map((contract: any) => (
+                  <tr
+                    key={contract.id}
+                    className="border-b border-border hover:bg-muted/30 transition-colors"
+                    data-testid={`row-contract-${contract.id}`}
+                  >
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      <span
+                        className="text-sm font-medium text-foreground"
+                        data-testid={`text-contract-number-${contract.id}`}
+                      >
+                        {contract.contractNumber}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <span
+                        className="text-sm text-foreground"
+                        data-testid={`text-client-${contract.id}`}
+                      >
+                        {getClientName(contract.clientId)}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
+                      <span className="text-sm text-muted-foreground">
+                        {getTrailerName(contract.trailerId)}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 hidden xl:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>
                           {contract.startDate} → {contract.endDate}
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                          <span className="text-sm font-semibold text-foreground">
-                            {parseFloat(contract.monthlyRate).toLocaleString('en-US', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2
-                            })}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(contract.status)}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(contract)}
-                            data-testid={`button-view-${contract.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(contract)}
-                            data-testid={`button-edit-${contract.id}`}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          {contract.status === "active" && canGenerateInvoice && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setGenerateInvoiceContract(contract)}
-                              className="text-accent hover:text-accent"
-                              title={t('rentalContracts.generateInvoiceNow')}
-                              data-testid={`button-generate-invoice-${contract.id}`}
-                            >
-                              <Receipt className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {contract.status === "active" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleTerminate(contract.id)}
-                              className="text-destructive hover:text-destructive"
-                              data-testid={`button-terminate-${contract.id}`}
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="text-center text-muted-foreground">
-                        <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">{t('rentalContracts.noContracts')}</p>
-                        <p className="text-xs mt-1">{t('rentalContracts.noContractsHint')}</p>
+                        </span>
                       </div>
                     </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      <span
+                        className="text-sm font-semibold text-emerald-600 dark:text-emerald-400"
+                        data-testid={`text-monthly-rate-${contract.id}`}
+                      >
+                        {formatMonthlyRate(contract.monthlyRate)}
+                      </span>
+                    </td>
+                    <td
+                      className="px-4 sm:px-6 py-4 whitespace-nowrap"
+                      data-testid={`status-${contract.id}`}
+                    >
+                      {getStatusBadge(contract.status)}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
+                      <ActionMenu contract={contract} />
+                    </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="text-center text-muted-foreground">
+                      <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">{t('rentalContracts.noContracts')}</p>
+                      <p className="text-xs mt-1">{t('rentalContracts.noContractsHint')}</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden flex flex-col p-4 gap-4 bg-muted/20">
+          {filteredContracts && filteredContracts.length > 0 ? (
+            filteredContracts.map((contract: any) => (
+              <Card
+                key={contract.id}
+                className="bg-card border border-border shadow-sm rounded-xl overflow-hidden"
+                data-testid={`card-contract-${contract.id}`}
+              >
+                <CardContent className="p-0">
+                  {/* Header */}
+                  <div className="p-4 border-b border-border flex justify-between items-start gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className="font-medium text-foreground truncate"
+                        data-testid={`text-contract-number-${contract.id}`}
+                      >
+                        {contract.contractNumber}
+                      </p>
+                    </div>
+                    <div data-testid={`status-${contract.id}`}>
+                      {getStatusBadge(contract.status)}
+                    </div>
+                  </div>
+
+                  {/* Middle */}
+                  <div className="p-4 grid grid-cols-2 gap-3 bg-muted/20">
+                    <div className="col-span-2">
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        {t('rentalContracts.tableClient')}
+                      </p>
+                      <p
+                        className="text-sm text-foreground font-medium line-clamp-1"
+                        data-testid={`text-client-${contract.id}`}
+                      >
+                        {getClientName(contract.clientId)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        {t('rentalContracts.tablePeriod')}
+                      </p>
+                      <p className="text-sm text-foreground">
+                        {contract.startDate} → {contract.endDate}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        {t('rentalContracts.tableMonthlyRate')}
+                      </p>
+                      <p
+                        className="text-sm font-bold text-emerald-600 dark:text-emerald-400"
+                        data-testid={`text-monthly-rate-${contract.id}`}
+                      >
+                        {formatMonthlyRate(contract.monthlyRate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDetails(contract)}
+                      className="flex-1 justify-center"
+                      data-testid={`button-view-${contract.id}`}
+                    >
+                      <Eye className="mr-2 h-3.5 w-3.5" />
+                      {t('rentalContracts.actionView', 'Ver')}
+                    </Button>
+                    <ActionMenu contract={contract} />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="py-12 text-center text-muted-foreground bg-card rounded-xl border border-border">
+              <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">{t('rentalContracts.noContracts')}</p>
+              <p className="text-xs mt-1">{t('rentalContracts.noContractsHint')}</p>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* Create/Edit Dialog */}

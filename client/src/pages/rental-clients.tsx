@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,7 +8,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, Edit, Trash2, Mail, Phone, MapPin } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Building2,
+  Plus,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  MapPin,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Eye,
+  CheckCircle,
+  AlertCircle,
+  MinusCircle,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRentalClientSchema, type InsertRentalClient } from "@shared/schema";
@@ -22,6 +46,8 @@ export default function RentalClients() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const { toast } = useToast();
 
   const { data: clients = [], isLoading } = useQuery<any[]>({
@@ -172,14 +198,68 @@ export default function RentalClients() {
       suspended: t('rentalClients.statusSuspended'),
     };
     const variants: Record<string, string> = {
-      active: "bg-green-600 dark:bg-green-400 text-white",
-      inactive: "bg-gray-500 dark:bg-gray-400 text-white",
-      suspended: "bg-red-600 dark:bg-red-400 text-white",
+      active: "bg-emerald-500 text-white hover:bg-emerald-500/90",
+      inactive: "bg-slate-500 text-white hover:bg-slate-500/90",
+      suspended: "bg-red-500 text-white hover:bg-red-500/90",
     };
     const label = labels[status] || labels.active;
     const variant = variants[status] || variants.active;
-    return <Badge className={variant}>{label}</Badge>;
+    return (
+      <Badge
+        className={`${variant} font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide`}
+      >
+        {label}
+      </Badge>
+    );
   };
+
+  const ActionMenu = ({ client }: { client: any }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-8 w-8 p-0"
+          data-testid={`button-actions-${client.id}`}
+        >
+          <span className="sr-only">{t('rentalClients.tableActions')}</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {t('rentalClients.tableActions')}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => handleViewDetails(client)}
+          data-testid={`button-view-${client.id}`}
+        >
+          <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>{t('rentalClients.buttonView')}</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => handleEdit(client)}
+          data-testid={`button-edit-${client.id}`}
+        >
+          <Edit className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>{t('rentalClients.buttonEdit', 'Editar')}</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="cursor-pointer focus:bg-red-50 dark:focus:bg-red-500/15 focus:text-red-600 dark:focus:text-red-400"
+          onClick={() => handleDelete(client.id)}
+          data-testid={`button-delete-${client.id}`}
+        >
+          <Trash2 className="mr-2 h-4 w-4 text-red-600 dark:text-red-400" />
+          <span className="text-red-600 dark:text-red-400">
+            {t('rentalClients.buttonDelete', 'Excluir')}
+          </span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   if (isLoading) {
     return (
@@ -197,11 +277,31 @@ export default function RentalClients() {
     suspended: clients?.filter((c: any) => c.status === "suspended").length || 0,
   };
 
+  const filteredClients = (clients || []).filter((client: any) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch =
+      term === "" ||
+      client.companyName?.toLowerCase().includes(term) ||
+      client.tradeName?.toLowerCase().includes(term) ||
+      client.taxId?.toLowerCase().includes(term) ||
+      client.email?.toLowerCase().includes(term);
+    const matchesStatus =
+      statusFilter === "ALL" || client.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-rental-clients">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+    <div
+      className="bg-background p-4 md:p-6 lg:p-8 flex flex-col gap-6"
+      data-testid="page-rental-clients"
+    >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-rental-clients">
+          <h1
+            className="text-2xl font-bold text-foreground tracking-tight"
+            data-testid="heading-rental-clients"
+          >
             {t('rentalClients.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -210,207 +310,334 @@ export default function RentalClients() {
         </div>
         <Button
           onClick={handleNewClient}
-          className="bg-accent hover:bg-accent/90 shadow-lg h-11 w-full sm:w-auto"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium w-full sm:w-auto"
           data-testid="button-new-client"
         >
-          <Plus className="h-4 w-4 sm:mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">{t('rentalClients.newClient')}</span>
           <span className="sm:hidden">{t('rentalClients.newClientShort')}</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        <Card className="border-l-4 border-l-accent shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-accent/10 p-3 rounded-2xl">
-                <Building2 className="h-6 w-6 text-accent" />
-              </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalClients.totalClients')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-foreground"
+                data-testid="text-total-clients"
+              >
+                {stats.total}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.totalClients')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-total-clients">
-              {stats.total}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-muted-foreground" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-green-50 dark:bg-green-950 p-3 rounded-2xl">
-                <Building2 className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalClients.active')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"
+                data-testid="text-active-clients"
+              >
+                {stats.active}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.active')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-active-clients">
-              {stats.active}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-gray-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-gray-50 dark:bg-gray-950 p-3 rounded-2xl">
-                <Building2 className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalClients.inactive')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-foreground"
+                data-testid="text-inactive-clients"
+              >
+                {stats.inactive}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.inactive')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-inactive-clients">
-              {stats.inactive}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <MinusCircle className="h-5 w-5 text-muted-foreground" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-red-50 dark:bg-red-950 p-3 rounded-2xl">
-                <Building2 className="h-6 w-6 text-red-600 dark:text-red-400" />
-              </div>
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('rentalClients.suspended')}
+              </p>
+              <h3
+                className="text-2xl font-bold text-red-600 dark:text-red-400"
+                data-testid="text-suspended-clients"
+              >
+                {stats.suspended}
+              </h3>
             </div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">{t('rentalClients.suspended')}</p>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-suspended-clients">
-              {stats.suspended}
-            </p>
+            <div className="h-10 w-10 rounded-full bg-red-50 dark:bg-red-500/15 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Clients Table */}
-      <Card className="shadow-lg">
-        <CardHeader className="border-b bg-muted/30">
-          <CardTitle className="text-lg font-bold">{t('rentalClients.clientList')}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50 border-b">
-                <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalClients.tableCompany')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
-                    {t('rentalClients.tableTaxId')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
-                    {t('rentalClients.tableContact')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
-                    {t('rentalClients.tableLocation')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalClients.tableStatus')}
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('rentalClients.tableActions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-card divide-y divide-border">
-                {clients && clients.length > 0 ? (
-                  clients.map((client: any) => (
-                    <tr
-                      key={client.id}
-                      className="hover:bg-muted/30 transition-colors"
-                      data-testid={`row-client-${client.id}`}
-                    >
-                      <td className="px-4 sm:px-6 py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-accent/10 p-2 rounded-lg">
-                            <Building2 className="h-5 w-5 text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-foreground">
-                              {client.companyName}
-                            </p>
-                            {client.tradeName && (
-                              <p className="text-xs text-muted-foreground">
-                                {client.tradeName}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                        <span className="text-sm text-foreground font-mono">
-                          {client.taxId}
-                        </span>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-foreground">{client.email}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-foreground">{client.phone}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 hidden xl:table-cell">
-                        {client.city && client.state ? (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-foreground">
-                              {client.city}, {client.state}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(client.status)}
-                      </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(client)}
-                            data-testid={`button-view-${client.id}`}
-                          >
-                            <span className="text-xs">{t('rentalClients.buttonView')}</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(client)}
-                            data-testid={`button-edit-${client.id}`}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(client.id)}
-                            className="text-destructive hover:text-destructive"
-                            data-testid={`button-delete-${client.id}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
-                      <div className="text-center text-muted-foreground">
-                        <Building2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p className="text-sm">{t('rentalClients.noClients')}</p>
-                        <p className="text-xs mt-1">{t('rentalClients.noClientsHint')}</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* Main List Card */}
+      <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden flex-1">
+        {/* Toolbar */}
+        <div className="p-4 md:p-5 border-b border-border flex flex-col md:flex-row gap-4 justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t(
+                'rentalClients.searchPlaceholder',
+                'Buscar por empresa, CNPJ ou e-mail...'
+              )}
+              className="pl-9 bg-muted/40 border-border"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search-clients"
+            />
           </div>
-        </CardContent>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-56">
+              <Filter className="h-4 w-4 text-muted-foreground hidden sm:block" />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger
+                  className="bg-muted/40 border-border"
+                  data-testid="select-status-filter"
+                >
+                  <SelectValue
+                    placeholder={t(
+                      'rentalClients.allStatuses',
+                      'Todos os status'
+                    )}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">
+                    {t('rentalClients.allStatuses', 'Todos os status')}
+                  </SelectItem>
+                  <SelectItem value="active">
+                    {t('rentalClients.statusActive')}
+                  </SelectItem>
+                  <SelectItem value="inactive">
+                    {t('rentalClients.statusInactive')}
+                  </SelectItem>
+                  <SelectItem value="suspended">
+                    {t('rentalClients.statusSuspended')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-muted/40">
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-4">
+                  {t('rentalClients.tableCompany')}
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalClients.tableTaxId')}
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalClients.tableContact')}
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalClients.tableLocation')}
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('rentalClients.tableStatus')}
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                  {t('rentalClients.tableActions')}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredClients.length > 0 ? (
+                filteredClients.map((client: any) => (
+                  <TableRow
+                    key={client.id}
+                    className="border-border hover:bg-muted/30 transition-colors"
+                    data-testid={`row-client-${client.id}`}
+                  >
+                    <TableCell className="py-4">
+                      <div>
+                        <p
+                          className="font-medium text-foreground"
+                          data-testid={`text-company-${client.id}`}
+                        >
+                          {client.companyName}
+                        </p>
+                        {client.tradeName && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {client.tradeName}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className="font-mono text-sm text-foreground"
+                      data-testid={`text-taxid-${client.id}`}
+                    >
+                      {client.taxId}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Mail className="h-3 w-3 text-muted-foreground" />
+                          <span>{client.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Phone className="h-3 w-3 text-muted-foreground" />
+                          <span>{client.phone}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {client.city || client.state ? (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">
+                            {[client.city, client.state]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell data-testid={`status-${client.id}`}>
+                      {getStatusBadge(client.status)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <ActionMenu client={client} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="h-32 text-center text-muted-foreground"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2 py-6">
+                      <Building2 className="h-10 w-10 opacity-40" />
+                      <p className="text-sm">{t('rentalClients.noClients')}</p>
+                      <p className="text-xs">
+                        {t('rentalClients.noClientsHint')}
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden flex flex-col p-4 gap-4 bg-muted/20">
+          {filteredClients.length > 0 ? (
+            filteredClients.map((client: any) => (
+              <Card
+                key={client.id}
+                className="bg-card border border-border shadow-sm overflow-hidden"
+                data-testid={`card-client-${client.id}`}
+              >
+                <CardContent className="p-0">
+                  <div className="p-4 border-b border-border flex justify-between items-start gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className="font-medium text-foreground truncate"
+                        data-testid={`text-company-${client.id}`}
+                      >
+                        {client.companyName}
+                      </p>
+                      {client.tradeName && (
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {client.tradeName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="shrink-0">{getStatusBadge(client.status)}</div>
+                  </div>
+
+                  <div className="p-4 bg-muted/20 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">
+                        {t('rentalClients.tableTaxId')}
+                      </span>
+                      <span className="text-sm font-mono text-foreground">
+                        {client.taxId}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <span className="truncate">{client.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <span>{client.phone}</span>
+                    </div>
+                    {(client.city || client.state) && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <span>
+                          {[client.city, client.state]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="px-4 py-3 border-t border-border flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 flex-1 justify-center"
+                      onClick={() => handleViewDetails(client)}
+                      data-testid={`button-view-mobile-${client.id}`}
+                    >
+                      <Eye className="mr-2 h-3.5 w-3.5" />
+                      {t('rentalClients.buttonView')}
+                    </Button>
+                    <ActionMenu client={client} />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="py-12 text-center text-muted-foreground bg-card rounded-lg border border-border">
+              <Building2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">{t('rentalClients.noClients')}</p>
+              <p className="text-xs mt-1">{t('rentalClients.noClientsHint')}</p>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* Create/Edit Dialog */}

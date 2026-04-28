@@ -29,7 +29,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw, GripVertical, History as HistoryIcon, User as UserIcon } from "lucide-react";
+import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw, GripVertical, History as HistoryIcon, User as UserIcon, MoreHorizontal, Truck, Package, Calendar as CalendarIcon, CheckCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -327,11 +328,38 @@ export default function Assets() {
   }, [trailers, filterYear, filterMake, filterVehicleUse, filterSearch]);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
-      active: { variant: "default", label: t('assets.statusActive') },
-      stock: { variant: "secondary", label: t('assets.statusStock') },
-      maintenance: { variant: "outline", label: t('assets.statusMaintenance') },
-      expired: { variant: "destructive", label: t('assets.statusExpired') },
+    const pillBase = "text-white font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide";
+    const variants: Record<string, { variant: any; label: string; className: string }> = {
+      active: {
+        variant: "default",
+        label: t('assets.statusActive'),
+        className: `bg-emerald-500 hover:bg-emerald-500/90 ${pillBase}`,
+      },
+      rented: {
+        variant: "default",
+        label: t('assets.statusRented', 'Em Locação'),
+        className: `bg-emerald-500 hover:bg-emerald-500/90 ${pillBase}`,
+      },
+      stock: {
+        variant: "secondary",
+        label: t('assets.statusStock'),
+        className: `bg-blue-500 hover:bg-blue-500/90 ${pillBase}`,
+      },
+      maintenance: {
+        variant: "outline",
+        label: t('assets.statusMaintenance'),
+        className: `bg-amber-500 hover:bg-amber-500/90 ${pillBase}`,
+      },
+      expired: {
+        variant: "destructive",
+        label: t('assets.statusExpired'),
+        className: `bg-red-500 hover:bg-red-500/90 ${pillBase}`,
+      },
+      sold: {
+        variant: "default",
+        label: t('assets.statusSold', 'Vendido'),
+        className: `bg-violet-500 hover:bg-violet-500/90 ${pillBase}`,
+      },
     };
     return variants[status] || variants.stock;
   };
@@ -445,16 +473,21 @@ export default function Assets() {
     );
   }
 
+  const totalAssets = trailers?.length || 0;
+  const stockCount = trailers?.filter((t: any) => t.status === 'stock').length || 0;
+  const rentedCount = trailers?.filter((t: any) => t.status === 'rented').length || 0;
+  const soldCount = trailers?.filter((t: any) => t.status === 'sold').length || 0;
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="bg-background p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-assets">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{t('assets.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('assets.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('assets.subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <Button
-            className="bg-accent hover:bg-accent/90 shadow-lg"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm font-medium"
             data-testid="button-new-asset"
             onClick={() => {
               setEditingTrailer(null);
@@ -466,9 +499,8 @@ export default function Assets() {
             <Plus className="mr-2 h-4 w-4" />
             {t('assets.newAsset')}
           </Button>
-          <Button 
-            variant="outline" 
-            className="border-2" 
+          <Button
+            variant="outline"
             data-testid="button-export"
             onClick={handleExport}
           >
@@ -476,6 +508,57 @@ export default function Assets() {
             {t('assets.export')}
           </Button>
         </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden" data-testid="card-stat-total">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('assets.statTotal', 'Total de Ativos')}</p>
+              <h3 className="text-2xl font-bold text-foreground" data-testid="text-stat-total">{totalAssets}</h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <Truck className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden" data-testid="card-stat-stock">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('assets.statStock', 'Em Estoque')}</p>
+              <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-stat-stock">{stockCount}</h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center">
+              <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden" data-testid="card-stat-rented">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('assets.statRented', 'Em Locação')}</p>
+              <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" data-testid="text-stat-rented">{rentedCount}</h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+              <CalendarIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden" data-testid="card-stat-sold">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">{t('assets.statSold', 'Vendidos')}</p>
+              <h3 className="text-2xl font-bold text-violet-600 dark:text-violet-400" data-testid="text-stat-sold">{soldCount}</h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-violet-50 dark:bg-violet-500/15 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog
@@ -1192,167 +1275,180 @@ export default function Assets() {
         </DialogContent>
       </Dialog>
 
-      {/* Filters */}
-      <Card className="shadow-sm">
-        <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="relative">
+      {/* List Card with toolbar + table */}
+      <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+        {/* Toolbar / Filters */}
+        <div className="p-4 md:p-5 border-b border-border flex flex-col md:flex-row gap-4 justify-between">
+          <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
               placeholder={t('assets.filterSearchPlaceholder', 'ID, VIN ou nº do título')}
-              className="pl-9"
+              className="pl-9 bg-muted/40 border-border"
               data-testid="input-filter-search"
             />
           </div>
-          <Select value={filterYear} onValueChange={setFilterYear}>
-            <SelectTrigger data-testid="select-filter-year">
-              <SelectValue placeholder={t('assets.year', 'Ano')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('assets.filterAll', 'Todos os anos')}</SelectItem>
-              {filterOptions.years.map((y: any) => (
-                <SelectItem key={y} value={String(y)}>{String(y)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterMake} onValueChange={setFilterMake}>
-            <SelectTrigger data-testid="select-filter-make">
-              <SelectValue placeholder={t('assets.make', 'Marca')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('assets.filterAllMakes', 'Todas as marcas')}</SelectItem>
-              {filterOptions.makes.map((m: string) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterVehicleUse} onValueChange={setFilterVehicleUse}>
-            <SelectTrigger data-testid="select-filter-vehicle-use">
-              <SelectValue placeholder={t('assets.vehicleUse', 'Uso')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('assets.filterAllUses', 'Todos os usos')}</SelectItem>
-              <SelectItem value="PRIVATE">{t('assets.vehicleUsePrivate', 'Privado')}</SelectItem>
-              <SelectItem value="COMMERCIAL">{t('assets.vehicleUseCommercial', 'Comercial')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger className="bg-muted/40 border-border w-full sm:w-40" data-testid="select-filter-year">
+                <SelectValue placeholder={t('assets.year', 'Ano')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('assets.filterAll', 'Todos os anos')}</SelectItem>
+                {filterOptions.years.map((y: any) => (
+                  <SelectItem key={y} value={String(y)}>{String(y)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterMake} onValueChange={setFilterMake}>
+              <SelectTrigger className="bg-muted/40 border-border w-full sm:w-40" data-testid="select-filter-make">
+                <SelectValue placeholder={t('assets.make', 'Marca')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('assets.filterAllMakes', 'Todas as marcas')}</SelectItem>
+                {filterOptions.makes.map((m: string) => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterVehicleUse} onValueChange={setFilterVehicleUse}>
+              <SelectTrigger className="bg-muted/40 border-border w-full sm:w-40" data-testid="select-filter-vehicle-use">
+                <SelectValue placeholder={t('assets.vehicleUse', 'Uso')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('assets.filterAllUses', 'Todos os usos')}</SelectItem>
+                <SelectItem value="PRIVATE">{t('assets.vehicleUsePrivate', 'Privado')}</SelectItem>
+                <SelectItem value="COMMERCIAL">{t('assets.vehicleUseCommercial', 'Comercial')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      <Card className="shadow-lg">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">ID</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableType')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableModel')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.status')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableShares')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableTrafficLight')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tablePurchaseValue')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableValue')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableAcquisition')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableLocation')}</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">{t('assets.tableActions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTrailers.map((trailer: any) => {
-                  const statusInfo = getStatusBadge(trailer.status);
-                  return (
-                    <tr
-                      key={trailer.id}
-                      className="border-b border-border hover:bg-accent/5 transition-colors"
-                      data-testid={`trailer-${trailer.id}`}
-                    >
-                      <td className="py-4 px-6">
-                        <span className="font-bold text-primary">{trailer.trailerId}</span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge variant="outline" className="font-medium">
-                          {trailer.trailerType === "Seco" ? t('assets.trailerTypeSeco') : 
-                           trailer.trailerType === "Climatizado" ? t('assets.trailerTypeClimatizado') : 
-                           trailer.trailerType === "Lonado" ? t('assets.trailerTypeLonado') : 
-                           trailer.trailerType || "—"}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="text-foreground">{trailer.model || "—"}</span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge variant={statusInfo.variant} className="rounded-full">
-                          {statusInfo.label}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="font-semibold text-foreground" data-testid={`text-shares-${trailer.id}`}>
-                          {trailer.soldShares || 0}/{trailer.totalShares || 1}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 ${getTrafficLight(trailer.purchaseDate)} rounded-full shadow-lg`}></div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="font-semibold text-muted-foreground">
-                          {formatCurrency(parseFloat(trailer.purchaseValue), user?.country)}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="font-bold text-foreground">
-                          {formatCurrency(parseFloat(trailer.currentValue), user?.country)}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-muted-foreground">
-                        {format(new Date(trailer.purchaseDate), "dd/MM/yyyy")}
-                      </td>
-                      <td className="py-4 px-6 text-muted-foreground">{trailer.location || "—"}</td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-1">
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40">
+              <tr>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableType')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableModel')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.status')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableShares')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableTrafficLight')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tablePurchaseValue')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableValue')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableAcquisition')}</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableLocation')}</th>
+                <th className="text-right py-4 px-6 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('assets.tableActions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTrailers.map((trailer: any) => {
+                const statusInfo = getStatusBadge(trailer.status);
+                return (
+                  <tr
+                    key={trailer.id}
+                    className="border-b border-border hover:bg-muted/30 transition-colors"
+                    data-testid={`trailer-${trailer.id}`}
+                  >
+                    <td className="py-4 px-6">
+                      <span className="font-semibold text-foreground" data-testid={`text-trailer-id-${trailer.id}`}>{trailer.trailerId}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <Badge variant="outline" className="font-medium border-border">
+                        {trailer.trailerType === "Seco" ? t('assets.trailerTypeSeco') :
+                         trailer.trailerType === "Climatizado" ? t('assets.trailerTypeClimatizado') :
+                         trailer.trailerType === "Lonado" ? t('assets.trailerTypeLonado') :
+                         trailer.trailerType || "—"}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-foreground">{trailer.model || "—"}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <Badge className={statusInfo.className} data-testid={`badge-status-${trailer.id}`}>
+                        {statusInfo.label}
+                      </Badge>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="font-semibold text-foreground" data-testid={`text-shares-${trailer.id}`}>
+                        {trailer.soldShares || 0}/{trailer.totalShares || 1}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 ${getTrafficLight(trailer.purchaseDate)} rounded-full`}></div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="font-medium text-muted-foreground">
+                        {formatCurrency(parseFloat(trailer.purchaseValue), user?.country)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="font-semibold text-foreground">
+                        {formatCurrency(parseFloat(trailer.currentValue), user?.country)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-muted-foreground">
+                      {format(new Date(trailer.purchaseDate), "dd/MM/yyyy")}
+                    </td>
+                    <td className="py-4 px-6 text-muted-foreground">{trailer.location || "—"}</td>
+                    <td className="py-4 px-6 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="hover:bg-accent/20 hover:text-accent"
+                            className="h-8 w-8 p-0"
+                            data-testid={`button-actions-${trailer.id}`}
+                          >
+                            <span className="sr-only">{t('assets.tableActions')}</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {t('assets.tableActions')}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="cursor-pointer"
                             onClick={() => {
                               setSelectedTrailer(trailer);
                               setDetailsDialogOpen(true);
                             }}
                             data-testid={`button-view-${trailer.id}`}
                           >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-accent/20 hover:text-accent"
+                            <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>{t('assets.viewDetails', 'Ver Detalhes')}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
                             onClick={() => openEditDialog(trailer)}
                             data-testid={`button-edit-${trailer.id}`}
-                            title={t('assets.editAsset', 'Editar Ativo')}
                           >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredTrailers.length === 0 && (
-                  <tr>
-                    <td colSpan={11} className="text-center py-12 text-muted-foreground">
-                      {(!trailers || trailers.length === 0)
-                        ? t('assets.noAssets')
-                        : t('assets.noFilterResults', 'Nenhum ativo corresponde aos filtros aplicados')}
+                            <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>{t('assets.editAsset', 'Editar Ativo')}</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+                );
+              })}
+              {filteredTrailers.length === 0 && (
+                <tr>
+                  <td colSpan={11} className="text-center py-12 text-muted-foreground">
+                    {(!trailers || trailers.length === 0)
+                      ? t('assets.noAssets')
+                      : t('assets.noFilterResults', 'Nenhum ativo corresponde aos filtros aplicados')}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </Card>
     </div>
   );

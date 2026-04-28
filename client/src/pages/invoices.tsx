@@ -58,8 +58,19 @@ import {
   Copy,
   Wallet,
   Banknote,
+  MoreHorizontal,
+  Search,
+  Filter,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -631,7 +642,8 @@ export default function Invoices() {
     setIsViewOpen(true);
   };
 
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const totalInvoices = invoices.length;
   const pendingInvoices = invoices.filter((i: any) => i.status === "pending").length;
@@ -639,13 +651,26 @@ export default function Invoices() {
   const overdueInvoices = invoices.filter((i: any) => i.status === "overdue").length;
   const reissuedInvoices = invoices.filter((i: any) => i.status === "reissued").length;
 
-  const filteredInvoices = statusFilter === "all"
-    ? invoices
-    : invoices.filter((i: any) => i.status === statusFilter);
+  const filteredInvoices = invoices.filter((inv: any) => {
+    const matchesStatus =
+      statusFilter === "ALL" || inv.status === statusFilter.toLowerCase();
+    const term = searchTerm.trim().toLowerCase();
+    const matchesSearch =
+      term === "" ||
+      (inv.invoiceNumber || "").toLowerCase().includes(term) ||
+      (inv.clientName || "").toLowerCase().includes(term);
+    return matchesStatus && matchesSearch;
+  });
 
   const totalRevenue = invoices
     .filter((i: any) => i.status === "paid")
     .reduce((sum: number, i: any) => sum + parseFloat(i.amount || "0"), 0);
+
+  const formatBRL = (value: number | string) =>
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(typeof value === "string" ? parseFloat(value || "0") : value);
 
   const getStatusBadge = (status: string) => {
     const labels: Record<string, string> = {
@@ -655,16 +680,94 @@ export default function Invoices() {
       cancelled: t('invoices.statusCancelled'),
       reissued: t('invoices.statusReissued'),
     };
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", className: string }> = {
-      pending: { variant: "outline", className: "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800" },
-      paid: { variant: "default", className: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" },
-      overdue: { variant: "destructive", className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800" },
-      cancelled: { variant: "secondary", className: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800" },
-      reissued: { variant: "outline", className: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800" },
+    const classes: Record<string, string> = {
+      pending: "bg-amber-500 text-white hover:bg-amber-500/90",
+      paid: "bg-emerald-500 text-white hover:bg-emerald-500/90",
+      overdue: "bg-red-500 text-white hover:bg-red-500/90",
+      reissued: "bg-violet-500 text-white hover:bg-violet-500/90",
+      cancelled: "bg-slate-500 text-white hover:bg-slate-500/90",
     };
     const label = labels[status] || labels.pending;
-    const config = variants[status] || variants.pending;
-    return <Badge variant={config.variant} className={config.className}>{label}</Badge>;
+    const cls = classes[status] || classes.pending;
+    return (
+      <Badge
+        className={`${cls} font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide`}
+        data-testid={`badge-status-${status}`}
+      >
+        {label}
+      </Badge>
+    );
+  };
+
+  const ActionMenu = ({ invoice }: { invoice: any }) => {
+    const isPayable = invoice.status === "pending" || invoice.status === "overdue";
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            data-testid={`button-actions-${invoice.id}`}
+          >
+            <span className="sr-only">{t('invoices.tableActions')}</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {t('invoices.tableActions')}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => handleView(invoice)}
+            className="cursor-pointer"
+            data-testid={`button-view-${invoice.id}`}
+          >
+            <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span>{t('invoices.menuViewDetails', 'Ver Detalhes')}</span>
+          </DropdownMenuItem>
+          {isPayable && (
+            <>
+              <DropdownMenuItem
+                onClick={() => setPayInvoice(invoice)}
+                className="cursor-pointer"
+                data-testid={`button-pay-${invoice.id}`}
+              >
+                <Wallet className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span>{t('invoices.menuPayInvoice', 'Pagar Fatura')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleMarkAsPaid(invoice)}
+                className="cursor-pointer"
+                data-testid={`button-mark-paid-${invoice.id}`}
+              >
+                <CheckCircle className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{t('invoices.menuMarkAsPaid', 'Marcar como Pago')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setReissueInvoice(invoice)}
+                className="cursor-pointer"
+                data-testid={`button-reissue-${invoice.id}`}
+              >
+                <RotateCcw className="mr-2 h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <span>{t('invoices.buttonReissue')}</span>
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => handleDelete(invoice.id)}
+            className="cursor-pointer focus:bg-red-50 dark:focus:bg-red-500/10"
+            data-testid={`button-delete-${invoice.id}`}
+          >
+            <Trash2 className="mr-2 h-4 w-4 text-red-600 dark:text-red-400" />
+            <span className="text-red-600 dark:text-red-400">
+              {t('invoices.menuDeleteInvoice', 'Excluir Fatura')}
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
   };
 
   if (isLoading) {
@@ -676,19 +779,20 @@ export default function Invoices() {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-invoices">
+    <div className="bg-background min-h-full p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-invoices">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="heading-invoices">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight" data-testid="heading-invoices">
             {t('invoices.title')}
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {t('invoices.subtitle')}
           </p>
         </div>
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto shadow-sm"
           data-testid="button-new-invoice"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -697,188 +801,297 @@ export default function Invoices() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-        <Card className="bg-card dark:bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.totalInvoices')}</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-total-invoices">
-              {totalInvoices}
-            </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <Card className="bg-card border border-border shadow-sm rounded-xl col-span-2 md:col-span-1">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('invoices.totalInvoices')}
+              </p>
+              <h3 className="text-2xl font-bold text-foreground" data-testid="text-total-invoices">
+                {totalInvoices}
+              </h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card dark:bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.pending')}</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-pending-invoices">
-              {pendingInvoices}
-            </p>
+        <Card className="bg-card border border-border shadow-sm rounded-xl">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('invoices.pending')}
+              </p>
+              <h3 className="text-2xl font-bold text-amber-600 dark:text-amber-400" data-testid="text-pending-invoices">
+                {pendingInvoices}
+              </h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-amber-50 dark:bg-amber-500/15 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card dark:bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.paid')}</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-paid-invoices">
-              {paidInvoices}
-            </p>
+        <Card className="bg-card border border-border shadow-sm rounded-xl">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('invoices.paid')}
+              </p>
+              <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" data-testid="text-paid-invoices">
+                {paidInvoices}
+              </h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card dark:bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.overdue')}</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-500 dark:text-red-400" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-overdue-invoices">
-              {overdueInvoices}
-            </p>
+        <Card className="bg-card border border-border shadow-sm rounded-xl">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('invoices.overdue')}
+              </p>
+              <h3 className="text-2xl font-bold text-red-600 dark:text-red-400" data-testid="text-overdue-invoices">
+                {overdueInvoices}
+              </h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-red-50 dark:bg-red-500/15 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card dark:bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{t('invoices.statusReissued')}</CardTitle>
-            <RotateCcw className="h-4 w-4 text-purple-500 dark:text-purple-400" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground" data-testid="text-reissued-invoices">
-              {reissuedInvoices}
-            </p>
+        <Card className="bg-card border border-border shadow-sm rounded-xl">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t('invoices.statusReissued')}
+              </p>
+              <h3 className="text-2xl font-bold text-violet-600 dark:text-violet-400" data-testid="text-reissued-invoices">
+                {reissuedInvoices}
+              </h3>
+            </div>
+            <div className="h-10 w-10 rounded-full bg-violet-50 dark:bg-violet-500/15 flex items-center justify-center">
+              <RotateCcw className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Invoices Table */}
-      <Card className="bg-card dark:bg-card border-border">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <CardTitle className="text-card-foreground">{t('invoices.allInvoices')}</CardTitle>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40 bg-background border-input text-foreground" data-testid="select-status-filter">
-              <SelectValue placeholder={t('invoices.filterAll')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('invoices.filterAll')}</SelectItem>
-              <SelectItem value="pending">{t('invoices.statusPending')}</SelectItem>
-              <SelectItem value="paid">{t('invoices.statusPaid')}</SelectItem>
-              <SelectItem value="overdue">{t('invoices.statusOverdue')}</SelectItem>
-              <SelectItem value="cancelled">{t('invoices.statusCancelled')}</SelectItem>
-              <SelectItem value="reissued">{t('invoices.statusReissued')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full min-w-[640px]">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableInvoice')}</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableClient')}</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableAmount')}</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableDueDate')}</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableStatus')}</th>
-                  <th className="text-left p-2 sm:p-4 text-xs sm:text-sm font-medium text-muted-foreground">{t('invoices.tableActions')}</th>
+      {/* Invoices List Card */}
+      <Card className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
+        {/* Toolbar */}
+        <div className="p-4 md:p-5 border-b border-border flex flex-col md:flex-row gap-4 justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('invoices.searchPlaceholder', 'Buscar por cliente ou fatura...')}
+              className="pl-9 bg-muted/40 border-border"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search-invoices"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Filter className="h-4 w-4 text-muted-foreground hidden sm:block" />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger
+                className="w-full md:w-48 bg-muted/40 border-border text-foreground"
+                data-testid="select-status-filter"
+              >
+                <SelectValue placeholder={t('invoices.filterAll')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">{t('invoices.filterAll')}</SelectItem>
+                <SelectItem value="PENDING">{t('invoices.statusPending')}</SelectItem>
+                <SelectItem value="PAID">{t('invoices.statusPaid')}</SelectItem>
+                <SelectItem value="OVERDUE">{t('invoices.statusOverdue')}</SelectItem>
+                <SelectItem value="CANCELLED">{t('invoices.statusCancelled')}</SelectItem>
+                <SelectItem value="REISSUED">{t('invoices.statusReissued')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Desktop / Tablet Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full min-w-[720px]">
+            <thead className="bg-muted/40">
+              <tr className="border-b border-border">
+                <th className="text-left px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableInvoice')}
+                </th>
+                <th className="text-left px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableClient')}
+                </th>
+                <th className="text-left px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableAmount')}
+                </th>
+                <th className="text-left px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableDueDate')}
+                </th>
+                <th className="text-left px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableStatus')}
+                </th>
+                <th className="text-right px-4 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('invoices.tableActions')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInvoices.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="h-32 text-center text-muted-foreground"
+                    data-testid="text-no-invoices"
+                  >
+                    {t('invoices.noInvoices')}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center p-8 text-muted-foreground">
-                      {t('invoices.noInvoices')}
+              ) : (
+                filteredInvoices.map((invoice: any) => (
+                  <tr
+                    key={invoice.id}
+                    className="border-b border-border hover:bg-muted/30 transition-colors"
+                    data-testid={`row-invoice-${invoice.id}`}
+                  >
+                    <td
+                      className="px-4 py-3 text-sm font-medium text-foreground"
+                      data-testid={`text-invoice-number-${invoice.id}`}
+                    >
+                      {invoice.invoiceNumber}
+                    </td>
+                    <td
+                      className="px-4 py-3 text-sm text-foreground"
+                      data-testid={`text-invoice-client-${invoice.id}`}
+                    >
+                      {invoice.clientName || "—"}
+                    </td>
+                    <td
+                      className="px-4 py-3 text-sm font-medium text-foreground"
+                      data-testid={`text-invoice-amount-${invoice.id}`}
+                    >
+                      {formatBRL(invoice.amount || "0")}
+                    </td>
+                    <td
+                      className="px-4 py-3 text-sm text-muted-foreground"
+                      data-testid={`text-invoice-duedate-${invoice.id}`}
+                    >
+                      {invoice.dueDate
+                        ? format(new Date(invoice.dueDate), "dd/MM/yyyy")
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-3">{getStatusBadge(invoice.status)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <ActionMenu invoice={invoice} />
                     </td>
                   </tr>
-                ) : (
-                  filteredInvoices.map((invoice: any) => (
-                    <tr
-                      key={invoice.id}
-                      className="border-b border-border hover:bg-muted/50 dark:hover:bg-muted/20 transition-colors"
-                      data-testid={`row-invoice-${invoice.id}`}
-                    >
-                      <td className="p-2 sm:p-4 text-xs sm:text-sm text-foreground font-medium">
-                        {invoice.invoiceNumber}
-                      </td>
-                      <td className="p-2 sm:p-4 text-xs sm:text-sm text-foreground">
-                        {invoice.clientName || "N/A"}
-                      </td>
-                      <td className="p-2 sm:p-4 text-xs sm:text-sm text-foreground">
-                        ${parseFloat(invoice.amount || "0").toFixed(2)}
-                      </td>
-                      <td className="p-2 sm:p-4 text-xs sm:text-sm text-foreground">
-                        {invoice.dueDate ? format(new Date(invoice.dueDate), "MMM dd, yyyy") : "N/A"}
-                      </td>
-                      <td className="p-2 sm:p-4">{getStatusBadge(invoice.status)}</td>
-                      <td className="p-2 sm:p-4">
-                        <div className="flex items-center gap-1 sm:gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleView(invoice)}
-                            className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                            data-testid={`button-view-${invoice.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {(invoice.status === "pending" || invoice.status === "overdue") && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setPayInvoice(invoice)}
-                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                                data-testid={`button-pay-${invoice.id}`}
-                                title={t('invoices.payButtonTitle')}
-                              >
-                                <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleMarkAsPaid(invoice)}
-                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                                data-testid={`button-mark-paid-${invoice.id}`}
-                              >
-                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setReissueInvoice(invoice)}
-                                className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                                data-testid={`button-reissue-${invoice.id}`}
-                                title={t('invoices.buttonReissue')}
-                              >
-                                <RotateCcw className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(invoice.id)}
-                            className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
-                            data-testid={`button-delete-${invoice.id}`}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden flex flex-col p-4 gap-4 bg-muted/20">
+          {filteredInvoices.length === 0 ? (
+            <div
+              className="py-12 text-center text-muted-foreground bg-card rounded-lg border border-border"
+              data-testid="text-no-invoices-mobile"
+            >
+              {t('invoices.noInvoices')}
+            </div>
+          ) : (
+            filteredInvoices.map((invoice: any) => {
+              const isPayable =
+                invoice.status === "pending" || invoice.status === "overdue";
+              return (
+                <Card
+                  key={invoice.id}
+                  className="bg-card border border-border shadow-sm rounded-xl overflow-hidden"
+                  data-testid={`card-invoice-${invoice.id}`}
+                >
+                  <CardContent className="p-0">
+                    <div className="p-4 border-b border-border flex justify-between items-start gap-3">
+                      <div className="min-w-0">
+                        <p
+                          className="font-medium text-foreground truncate"
+                          data-testid={`text-invoice-number-mobile-${invoice.id}`}
+                        >
+                          {invoice.invoiceNumber}
+                        </p>
+                        <p
+                          className="text-sm text-muted-foreground line-clamp-1 mt-0.5"
+                          data-testid={`text-invoice-client-mobile-${invoice.id}`}
+                        >
+                          {invoice.clientName || "—"}
+                        </p>
+                      </div>
+                      <div>{getStatusBadge(invoice.status)}</div>
+                    </div>
+                    <div className="p-4 bg-muted/20 flex justify-between items-center gap-3">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          {t('invoices.tableDueDate')}
+                        </p>
+                        <p
+                          className="text-sm font-medium text-foreground"
+                          data-testid={`text-invoice-duedate-mobile-${invoice.id}`}
+                        >
+                          {invoice.dueDate
+                            ? format(new Date(invoice.dueDate), "dd/MM/yyyy")
+                            : "—"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          {t('invoices.tableAmount')}
+                        </p>
+                        <p
+                          className="text-sm font-bold text-foreground"
+                          data-testid={`text-invoice-amount-mobile-${invoice.id}`}
+                        >
+                          {formatBRL(invoice.amount || "0")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 border-t border-border flex justify-end gap-2 bg-card">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(invoice)}
+                        className="flex-1 justify-center"
+                        data-testid={`button-view-mobile-${invoice.id}`}
+                      >
+                        <Eye className="mr-2 h-3.5 w-3.5" />
+                        {t('invoices.menuView', 'Ver')}
+                      </Button>
+                      {isPayable && (
+                        <Button
+                          size="sm"
+                          onClick={() => setPayInvoice(invoice)}
+                          className="flex-1 justify-center bg-primary hover:bg-primary/90 text-primary-foreground"
+                          data-testid={`button-pay-mobile-${invoice.id}`}
+                        >
+                          <Wallet className="mr-2 h-3.5 w-3.5" />
+                          {t('invoices.menuPay', 'Pagar')}
+                        </Button>
+                      )}
+                      <ActionMenu invoice={invoice} />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
       </Card>
 
       {/* Create Invoice Dialog */}
