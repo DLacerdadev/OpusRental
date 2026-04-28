@@ -3991,7 +3991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // parsed JSON body would change ordering / whitespace and fail the
         // HMAC check. We capture the raw buffer in `index.ts` via the
         // express.json() verify hook and use it here.
-        const rawBody = (req as any).rawBody;
+        const rawBody = req.rawBody;
         if (!Buffer.isBuffer(rawBody)) {
           console.error("Webhook rejected: raw body unavailable for signature verification");
           return res.status(400).send("Raw body required for signature verification");
