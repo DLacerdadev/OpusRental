@@ -13,6 +13,14 @@ import type { Tenant, Invoice } from '@shared/schema';
  */
 export type PaymentMethodBank = {
   type: 'bank_transfer';
+  /**
+   * Whether this method is rendered to the customer. The frontend
+   * (`/pay/:token`) gates each method card on this flag. We only push a
+   * method to the array once it's configured, so we always emit `true`
+   * here — the field exists so the frontend contract stays explicit.
+   */
+  available: boolean;
+  configured: boolean;
   bankName: string;
   routingNumber: string | null;
   account: string;
@@ -24,6 +32,9 @@ export type PaymentMethodBank = {
 
 export type PaymentMethodStripe = {
   type: 'stripe';
+  /** See {@link PaymentMethodBank.available}. */
+  available: boolean;
+  configured: boolean;
   amount: number;
   reference: string;
   checkoutPath: string;
@@ -58,6 +69,8 @@ export function buildPaymentMethods(
   if (bankName && bankAccount) {
     methods.push({
       type: 'bank_transfer',
+      available: true,
+      configured: true,
       bankName,
       routingNumber: tenant?.bankAgency?.trim() || null,
       account: bankAccount,
@@ -73,6 +86,8 @@ export function buildPaymentMethods(
   // the link so the UI can show the tab.
   methods.push({
     type: 'stripe',
+    available: true,
+    configured: true,
     amount,
     reference,
     checkoutPath: `/checkout/invoice?invoiceId=${invoice.id}`,

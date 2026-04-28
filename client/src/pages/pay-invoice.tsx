@@ -361,7 +361,10 @@ export default function PayInvoicePage() {
                       {loadingIntent ? "Preparing..." : `Pay ${formatUSD(amountNum)} by card`}
                     </Button>
                   ) : (
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <Elements
+                      stripe={stripePromise}
+                      options={{ clientSecret, currency: "usd", locale: "en" }}
+                    >
                       <StripePaymentForm
                         amount={amountNum}
                         invoiceNumber={data.invoice.invoiceNumber}

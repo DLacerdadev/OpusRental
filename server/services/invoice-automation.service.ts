@@ -567,12 +567,15 @@ export class InvoiceAutomationService {
 
           try {
             const extras = await buildInvoiceEmailExtras(invoice, contract, client);
-            await EmailService.sendInvoiceEmail({
+            // Use the dedicated "due soon" template/subject so the customer
+            // can tell this apart from the original invoice email and from
+            // an overdue notice. We're 3 days out per the cron filter above.
+            await EmailService.sendDueSoonReminderEmail({
               invoice,
               contract,
               client,
               ...extras,
-            });
+            }, 3);
             emailStatus = "sent";
           } catch (error) {
             emailStatus = "failed";
@@ -601,7 +604,7 @@ export class InvoiceAutomationService {
           }
 
           if (client.phone) {
-            const dueDateFormatted = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
+            const dueDateFormatted = new Date(invoice.dueDate).toLocaleDateString("en-US");
             await WhatsAppService.sendEvent(
               "invoice_issued",
               {

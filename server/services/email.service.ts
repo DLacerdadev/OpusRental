@@ -455,6 +455,92 @@ export class EmailService {
   }
 
   /**
+   * Generate "due soon" reminder email HTML — sent before the due date
+   * (typically 3 days before) to nudge customers into paying on time.
+   * Visually softer than the overdue reminder (blue accent rather than red)
+   * so customers don't feel they're already late.
+   */
+  static generateDueSoonReminderEmail(data: InvoiceEmailData, daysUntilDue: number): string {
+    const { invoice, contract, client } = data;
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(invoice.id);
+    const dueDate = formatUSDate(invoice.dueDate);
+    const buttonHtml = paymentUrl
+      ? `<a href="${paymentUrl}" class="button">Pay now</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Payment link unavailable</span>`;
+    const paymentMethodsBlock = renderPaymentMethodsBlock(data.tenant);
+    const dayLabel = daysUntilDue === 1 ? "tomorrow" : `in ${daysUntilDue} days`;
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #eff6ff; padding: 30px; border-radius: 0 0 8px 8px; }
+    .info-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #2563eb; }
+    .detail-row { display: flex; justify-content: space-between; margin: 10px 0; }
+    .label { font-weight: bold; color: #666; }
+    .value { color: #333; }
+    .amount { font-size: 24px; font-weight: bold; color: #1d4ed8; }
+    .due-soon { color: #1d4ed8; font-weight: bold; }
+    .button { display: inline-block; background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Friendly reminder</h1>
+      <p>Invoice ${invoice.invoiceNumber} is due ${dayLabel}</p>
+    </div>
+    <div class="content">
+      <h2>Hello ${client.tradeName || client.companyName},</h2>
+      <p>This is a friendly reminder that invoice <strong>${invoice.invoiceNumber}</strong> is due <strong class="due-soon">${dayLabel}</strong> (${dueDate}).</p>
+
+      <div class="info-box">
+        <div class="detail-row">
+          <span class="label">Invoice number:</span>
+          <span class="value">${invoice.invoiceNumber}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Contract:</span>
+          <span class="value">${contract.contractNumber}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Reference month:</span>
+          <span class="value">${invoice.referenceMonth}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Due date:</span>
+          <span class="value due-soon">${dueDate}</span>
+        </div>
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+        ${renderInvoiceTotalsRows(invoice, "amount")}
+      </div>
+
+      <p>Pay by the due date to avoid late fees.</p>
+
+      <center>
+        ${buttonHtml}
+      </center>
+
+      ${paymentMethodsBlock}
+
+      <div class="footer">
+        <p><strong>${brandName}</strong></p>
+        <p>If you have already paid, please disregard this notice.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+  }
+
+  /**
    * Generate reissued-invoice email HTML
    */
   static generateInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): string {
@@ -605,6 +691,47 @@ ${brandName}
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
       subject: `Payment reminder — Invoice ${data.invoice.invoiceNumber} (${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due)`,
+      html,
+      text,
+      attachments: data.attachments,
+    });
+  }
+
+  /**
+   * Send the "due soon" reminder to the client (typically 3 days before
+   * the due date). Uses the dedicated due-soon template + a distinct
+   * subject so the customer can tell it apart from the original invoice
+   * email and from an overdue notice.
+   */
+  static async sendDueSoonReminderEmail(data: InvoiceEmailData, daysUntilDue: number): Promise<boolean> {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(data.invoice.id);
+    const html = this.generateDueSoonReminderEmail(data, daysUntilDue);
+    const dayLabel = daysUntilDue === 1 ? "tomorrow" : `in ${daysUntilDue} days`;
+    const dueDateStr = formatUSDate(data.invoice.dueDate);
+    const text = `
+Friendly reminder — Invoice ${data.invoice.invoiceNumber}
+
+Hello ${data.client.tradeName || data.client.companyName},
+
+Invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) is due ${dayLabel} (${dueDateStr}).
+
+${renderInvoiceTotalsText(data.invoice)}
+Due date: ${dueDateStr}
+Reference month: ${data.invoice.referenceMonth}
+${paymentUrl ? `Pay now: ${paymentUrl}` : ""}
+
+Pay by the due date to avoid late fees.
+
+${brandName}
+    `.trim();
+
+    return this.sendEmail({
+      to: data.client.email,
+      toName: data.client.tradeName || data.client.companyName,
+      fromName: brandName,
+      fromAddress: data.tenant?.billingEmail?.trim() || undefined,
+      subject: `Reminder: Invoice ${data.invoice.invoiceNumber} due ${dayLabel} (${dueDateStr})`,
       html,
       text,
       attachments: data.attachments,
