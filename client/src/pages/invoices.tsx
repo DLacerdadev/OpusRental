@@ -651,7 +651,7 @@ export default function Invoices() {
   const overdueInvoices = invoices.filter((i: any) => i.status === "overdue").length;
   const reissuedInvoices = invoices.filter((i: any) => i.status === "reissued").length;
 
-  const filteredInvoices = invoices.filter((inv: any) => {
+  const filteredInvoices = invoices.filter((inv: Invoice & { clientName?: string }) => {
     const matchesStatus =
       statusFilter === "ALL" || inv.status === statusFilter.toLowerCase();
     const term = searchTerm.trim().toLowerCase();
@@ -699,7 +699,7 @@ export default function Invoices() {
     );
   };
 
-  const ActionMenu = ({ invoice }: { invoice: any }) => {
+  const ActionMenu = ({ invoice }: { invoice: Invoice }) => {
     const isPayable = invoice.status === "pending" || invoice.status === "overdue";
     return (
       <DropdownMenu>
@@ -956,7 +956,7 @@ export default function Invoices() {
                   </td>
                 </tr>
               ) : (
-                filteredInvoices.map((invoice: any) => (
+                filteredInvoices.map((invoice: Invoice & { clientName?: string }) => (
                   <tr
                     key={invoice.id}
                     className="border-b border-border hover:bg-muted/30 transition-colors"
@@ -1009,7 +1009,7 @@ export default function Invoices() {
               {t('invoices.noInvoices')}
             </div>
           ) : (
-            filteredInvoices.map((invoice: any) => {
+            filteredInvoices.map((invoice: Invoice & { clientName?: string }) => {
               const isPayable =
                 invoice.status === "pending" || invoice.status === "overdue";
               return (

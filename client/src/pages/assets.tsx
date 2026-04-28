@@ -203,9 +203,6 @@ export default function Assets() {
   });
 
   const onSubmit = (data: AssetFormData) => {
-    console.log("✅ Form submitted with data:", data);
-    console.log("✅ Form errors:", form.formState.errors);
-
     // Normalize: convert "" → undefined for every optional vehicle/location
     // field so the backend stores NULL rather than persisting empty strings
     // (which would defeat indexes and downstream filters).
@@ -238,7 +235,6 @@ export default function Assets() {
       // PATCH: drop allocation-only and server-managed fields that don't
       // belong to a partial trailer update.
       const { allocationType: _a, investorId: _i, trailerId: _tid, ...patchData } = cleanedData;
-      console.log("✅ Update payload:", patchData);
       updateTrailerMutation.mutate({ id: editingTrailer.id, data: patchData as Partial<InsertTrailer> });
       return;
     }
@@ -246,7 +242,6 @@ export default function Assets() {
     cleanedData.allocationType = data.allocationType || "open";
     cleanedData.investorId = data.allocationType === "specific" ? data.investorId : undefined;
 
-    console.log("✅ Cleaned data:", cleanedData);
     createTrailerMutation.mutate(cleanedData as any);
   };
 
@@ -289,8 +284,6 @@ export default function Assets() {
   };
 
   const onFormError = (errors: any) => {
-    console.error("❌ Form validation failed:", errors);
-    
     // Show toast with validation errors
     const errorMessages = Object.entries(errors)
       .map(([field, error]: [string, any]) => `${field}: ${error.message}`)
@@ -329,7 +322,7 @@ export default function Assets() {
 
   const getStatusBadge = (status: string) => {
     const pillBase = "text-white font-medium border-none rounded-sm px-2.5 py-0.5 text-xs uppercase tracking-wide";
-    const variants: Record<string, { variant: any; label: string; className: string }> = {
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; className: string }> = {
       active: {
         variant: "default",
         label: t('assets.statusActive'),
@@ -474,9 +467,9 @@ export default function Assets() {
   }
 
   const totalAssets = trailers?.length || 0;
-  const stockCount = trailers?.filter((t: any) => t.status === 'stock').length || 0;
-  const rentedCount = trailers?.filter((t: any) => t.status === 'rented').length || 0;
-  const soldCount = trailers?.filter((t: any) => t.status === 'sold').length || 0;
+  const stockCount = trailers?.filter((t: Trailer) => t.status === 'stock').length || 0;
+  const rentedCount = trailers?.filter((t: Trailer) => t.status === 'rented').length || 0;
+  const soldCount = trailers?.filter((t: Trailer) => t.status === 'sold').length || 0;
 
   return (
     <div className="bg-background p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8" data-testid="page-assets">
@@ -1296,8 +1289,8 @@ export default function Assets() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('assets.filterAll', 'Todos os anos')}</SelectItem>
-                {filterOptions.years.map((y: any) => (
-                  <SelectItem key={y} value={String(y)}>{String(y)}</SelectItem>
+                {filterOptions.years.map((y) => (
+                  <SelectItem key={String(y)} value={String(y)}>{String(y)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1344,7 +1337,7 @@ export default function Assets() {
               </tr>
             </thead>
             <tbody>
-              {filteredTrailers.map((trailer: any) => {
+              {filteredTrailers.map((trailer: Trailer & { soldShares?: number }) => {
                 const statusInfo = getStatusBadge(trailer.status);
                 return (
                   <tr

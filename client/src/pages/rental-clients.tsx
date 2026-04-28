@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRentalClientSchema, type InsertRentalClient } from "@shared/schema";
+import { insertRentalClientSchema, type InsertRentalClient, type RentalClient } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -213,7 +213,7 @@ export default function RentalClients() {
     );
   };
 
-  const ActionMenu = ({ client }: { client: any }) => (
+  const ActionMenu = ({ client }: { client: RentalClient }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -277,7 +277,7 @@ export default function RentalClients() {
     suspended: clients?.filter((c: any) => c.status === "suspended").length || 0,
   };
 
-  const filteredClients = (clients || []).filter((client: any) => {
+  const filteredClients = (clients || []).filter((client: RentalClient) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
       term === "" ||
@@ -477,7 +477,7 @@ export default function RentalClients() {
             </TableHeader>
             <TableBody>
               {filteredClients.length > 0 ? (
-                filteredClients.map((client: any) => (
+                filteredClients.map((client: RentalClient) => (
                   <TableRow
                     key={client.id}
                     className="border-border hover:bg-muted/30 transition-colors"
@@ -561,7 +561,7 @@ export default function RentalClients() {
         {/* Mobile Cards */}
         <div className="md:hidden flex flex-col p-4 gap-4 bg-muted/20">
           {filteredClients.length > 0 ? (
-            filteredClients.map((client: any) => (
+            filteredClients.map((client: RentalClient) => (
               <Card
                 key={client.id}
                 className="bg-card border border-border shadow-sm overflow-hidden"

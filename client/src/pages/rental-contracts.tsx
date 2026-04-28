@@ -42,7 +42,7 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertRentalContractSchema, type InsertRentalContract } from "@shared/schema";
+import { insertRentalContractSchema, type InsertRentalContract, type RentalContract } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -303,7 +303,7 @@ export default function RentalContracts() {
     cancelled: contracts.filter((c: any) => c.status === "cancelled").length,
   };
 
-  const filteredContracts = contracts.filter((c: any) => {
+  const filteredContracts = contracts.filter((c: RentalContract) => {
     const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
       term === "" ||
@@ -313,7 +313,7 @@ export default function RentalContracts() {
     return matchesSearch && matchesStatus;
   });
 
-  const ActionMenu = ({ contract }: { contract: any }) => (
+  const ActionMenu = ({ contract }: { contract: RentalContract }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -555,7 +555,7 @@ export default function RentalContracts() {
             </thead>
             <tbody>
               {filteredContracts && filteredContracts.length > 0 ? (
-                filteredContracts.map((contract: any) => (
+                filteredContracts.map((contract: RentalContract) => (
                   <tr
                     key={contract.id}
                     className="border-b border-border hover:bg-muted/30 transition-colors"
@@ -627,7 +627,7 @@ export default function RentalContracts() {
         {/* Mobile Cards */}
         <div className="md:hidden flex flex-col p-4 gap-4 bg-muted/20">
           {filteredContracts && filteredContracts.length > 0 ? (
-            filteredContracts.map((contract: any) => (
+            filteredContracts.map((contract: RentalContract) => (
               <Card
                 key={contract.id}
                 className="bg-card border border-border shadow-sm rounded-xl overflow-hidden"
