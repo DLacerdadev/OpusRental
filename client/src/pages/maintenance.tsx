@@ -247,10 +247,10 @@ export default function Maintenance() {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="text-page-title">
             {t("maintenance.title")}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t("maintenance.subtitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t("maintenance.subtitle")}</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
@@ -489,7 +489,7 @@ export default function Maintenance() {
                   ))
                 ) : schedules.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400" data-testid="text-empty-state">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground" data-testid="text-empty-state">
                       {t("maintenance.emptyState")}
                     </TableCell>
                   </TableRow>
@@ -708,23 +708,23 @@ export default function Maintenance() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formTrailer")}</p>
+                  <p className="text-sm text-muted-foreground">{t("maintenance.formTrailer")}</p>
                   <p className="font-medium" data-testid="details-trailer">
                     {trailers.find((t) => t.id === selectedSchedule.trailerId)?.trailerId || selectedSchedule.trailerId}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formScheduleType")}</p>
+                  <p className="text-sm text-muted-foreground">{t("maintenance.formScheduleType")}</p>
                   <p className="font-medium" data-testid="details-type">{getTypeLabel(selectedSchedule.scheduleType)}</p>
                 </div>
                 {selectedSchedule.scheduleType === "time_based" && (
                   <>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsInterval")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsInterval")}</p>
                       <p className="font-medium" data-testid="details-interval">{selectedSchedule.intervalDays} {t("maintenance.days")}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsLastMaintenance")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsLastMaintenance")}</p>
                       <p className="font-medium" data-testid="details-last-maintenance">
                         {selectedSchedule.lastMaintenanceDate
                           ? format(new Date(selectedSchedule.lastMaintenanceDate), "MMM dd, yyyy")
@@ -732,7 +732,7 @@ export default function Maintenance() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsNextMaintenance")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsNextMaintenance")}</p>
                       <p className="font-medium" data-testid="details-next-maintenance">
                         {selectedSchedule.nextMaintenanceDate
                           ? format(new Date(selectedSchedule.nextMaintenanceDate), "MMM dd, yyyy")
@@ -744,27 +744,27 @@ export default function Maintenance() {
                 {selectedSchedule.scheduleType === "km_based" && (
                   <>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsInterval")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsInterval")}</p>
                       <p className="font-medium" data-testid="details-interval">{selectedSchedule.intervalKm} km</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsLastMaintenance")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsLastMaintenance")}</p>
                       <p className="font-medium" data-testid="details-last-maintenance">{selectedSchedule.lastMaintenanceKm} km</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.detailsNextMaintenance")}</p>
+                      <p className="text-sm text-muted-foreground">{t("maintenance.detailsNextMaintenance")}</p>
                       <p className="font-medium" data-testid="details-next-maintenance">{selectedSchedule.nextMaintenanceKm} km</p>
                     </div>
                   </>
                 )}
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.tableStatus")}</p>
+                  <p className="text-sm text-muted-foreground">{t("maintenance.tableStatus")}</p>
                   <div className="mt-1" data-testid="details-status">{getStatusBadge(selectedSchedule.status, selectedSchedule.id)}</div>
                 </div>
               </div>
               {selectedSchedule.notes && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formNotes")}</p>
+                  <p className="text-sm text-muted-foreground">{t("maintenance.formNotes")}</p>
                   <p className="mt-1" data-testid="details-notes">{selectedSchedule.notes}</p>
                 </div>
               )}
@@ -782,7 +782,7 @@ export default function Maintenance() {
           {selectedSchedule && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t("maintenance.formTrailer")}</p>
+                <p className="text-sm text-muted-foreground">{t("maintenance.formTrailer")}</p>
                 <p className="font-medium" data-testid="text-complete-trailer">
                   {trailers.find((t) => t.id === selectedSchedule.trailerId)?.trailerId || selectedSchedule.trailerId}
                 </p>

@@ -199,7 +199,7 @@ export default function InvestorShares() {
                 </thead>
                 <tbody>
                   {filteredInvestors.map((investor) => (
-                    <tr key={investor.userId} className="border-b hover:bg-muted/50" data-testid={`row-investor-${investor.userId}`}>
+                    <tr key={investor.userId} className="border-b border-border hover:bg-muted/40" data-testid={`row-investor-${investor.userId}`}>
                       <td className="py-3 px-2 sm:px-4" data-testid={`text-investor-${investor.userId}`}>
                         <div className="font-medium whitespace-nowrap">
                           {investor.investorName}
@@ -214,14 +214,14 @@ export default function InvestorShares() {
                       <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-invested-${investor.userId}`}>
                         ${investor.totalInvested.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3 px-2 sm:px-4 font-semibold text-green-600 whitespace-nowrap" data-testid={`text-portfolio-${investor.userId}`}>
+                      <td className="py-3 px-2 sm:px-4 font-semibold text-green-600 dark:text-green-400 whitespace-nowrap" data-testid={`text-portfolio-${investor.userId}`}>
                         ${investor.portfolioValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
                       <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-returns-${investor.userId}`}>
                         ${investor.totalReturns.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </td>
                       <td className="py-3 px-2 sm:px-4 whitespace-nowrap" data-testid={`text-profitability-${investor.userId}`}>
-                        <span className={investor.profitability >= 0 ? "text-green-600 font-semibold" : "text-red-600"}>
+                        <span className={investor.profitability >= 0 ? "text-green-600 dark:text-green-400 font-semibold" : "text-red-600 dark:text-red-400"}>
                           {investor.profitability >= 0 ? "+" : ""}{investor.profitability.toFixed(2)}%
                         </span>
                       </td>

@@ -227,15 +227,15 @@ export default function BrokerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 p-3 sm:p-4 md:p-6 lg:p-8">
+    <div className="bg-background min-h-full p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground" data-testid="text-page-title">
               {t("broker.title")}
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" data-testid="text-page-subtitle">
+            <p className="text-sm text-muted-foreground mt-1" data-testid="text-page-subtitle">
               {t("broker.subtitle")}
             </p>
           </div>
@@ -253,16 +253,16 @@ export default function BrokerPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card data-testid="card-stat-total">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {t("broker.stats.totalDispatches")}
               </CardTitle>
               <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-stat-total">
+              <div className="text-2xl font-bold text-foreground" data-testid="text-stat-total">
                 {stats.total}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t("broker.stats.allTime")}
               </p>
             </CardContent>
@@ -270,7 +270,7 @@ export default function BrokerPage() {
 
           <Card data-testid="card-stat-pending">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {t("broker.stats.pending")}
               </CardTitle>
               <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
@@ -279,7 +279,7 @@ export default function BrokerPage() {
               <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400" data-testid="text-stat-pending">
                 {stats.pending}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t("broker.stats.awaitingDispatch")}
               </p>
             </CardContent>
@@ -287,7 +287,7 @@ export default function BrokerPage() {
 
           <Card data-testid="card-stat-in-transit">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {t("broker.stats.inTransit")}
               </CardTitle>
               <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -296,7 +296,7 @@ export default function BrokerPage() {
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-stat-in-transit">
                 {stats.inTransit}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t("broker.stats.onTheRoad")}
               </p>
             </CardContent>
@@ -304,7 +304,7 @@ export default function BrokerPage() {
 
           <Card data-testid="card-stat-delivered">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {t("broker.stats.delivered")}
               </CardTitle>
               <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -313,7 +313,7 @@ export default function BrokerPage() {
               <div className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-stat-delivered">
                 {stats.delivered}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t("broker.stats.completed")}
               </p>
             </CardContent>
@@ -323,13 +323,13 @@ export default function BrokerPage() {
         {/* Table */}
         <Card data-testid="card-dispatches-table">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+            <CardTitle className="text-lg font-semibold text-foreground">
               {t("broker.table.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400" data-testid="text-loading">
+              <div className="text-center py-8 text-muted-foreground" data-testid="text-loading">
                 {t("common.loading")}
               </div>
             ) : dispatches && dispatches.length > 0 ? (
@@ -359,17 +359,17 @@ export default function BrokerPage() {
                         <TableCell data-testid={`text-broker-${dispatch.id}`}>
                           <div>
                             <div className="font-medium">{dispatch.brokerName}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                            <div className="text-xs text-muted-foreground">
                               {dispatch.brokerEmail}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell data-testid={`text-pickup-${dispatch.id}`}>
                           <div className="flex items-start gap-1">
-                            <MapPin className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
+                            <MapPin className="w-3 h-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                             <div>
                               <div className="text-sm">{dispatch.pickupLocation}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
                                 {format(new Date(dispatch.pickupDate), "MMM dd, yyyy")}
                               </div>
@@ -378,11 +378,11 @@ export default function BrokerPage() {
                         </TableCell>
                         <TableCell data-testid={`text-delivery-${dispatch.id}`}>
                           <div className="flex items-start gap-1">
-                            <MapPin className="w-3 h-3 mt-0.5 text-gray-400 flex-shrink-0" />
+                            <MapPin className="w-3 h-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                             <div>
                               <div className="text-sm">{dispatch.deliveryLocation}</div>
                               {dispatch.estimatedDeliveryDate && (
-                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
                                   {format(new Date(dispatch.estimatedDeliveryDate), "MMM dd, yyyy")}
                                 </div>
@@ -412,7 +412,7 @@ export default function BrokerPage() {
                 </Table>
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400" data-testid="text-empty-state">
+              <div className="text-center py-12 text-muted-foreground" data-testid="text-empty-state">
                 <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-1">{t("broker.emptyState.title")}</p>
                 <p className="text-sm">{t("broker.emptyState.description")}</p>

@@ -70,15 +70,15 @@ export default function Financial() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-primary shadow-md hover:shadow-lg transition-all active:opacity-90">
+        <Card className="border-l-4 border-l-primary dark:border-l-accent shadow-md hover:shadow-lg transition-all active:opacity-90">
           <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="bg-primary/10 p-3 rounded-2xl">
-                <PieChart className="h-6 w-6 text-primary" />
+              <div className="bg-primary/10 dark:bg-accent/15 p-3 rounded-2xl">
+                <PieChart className="h-6 w-6 text-primary dark:text-accent" />
               </div>
             </div>
             <p className="text-sm font-semibold text-muted-foreground mb-2">{t('financial.companyMargin')}</p>
-            <p className="text-2xl font-bold text-primary break-words" data-testid="text-company-margin">
+            <p className="text-2xl font-bold text-primary dark:text-accent break-words" data-testid="text-company-margin">
               {formatCurrency(current?.companyMargin || 0, user?.country)}
             </p>
           </CardContent>
@@ -124,17 +124,17 @@ export default function Financial() {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl border border-green-200">
+              <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-500/10 rounded-xl border border-green-200 dark:border-green-500/30">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
-                  <span className="font-semibold text-green-900">{t('financial.trailerRevenue')}</span>
+                  <span className="font-semibold text-green-900 dark:text-green-300">{t('financial.trailerRevenue')}</span>
                 </div>
                 <span className="font-bold text-green-600 dark:text-green-400 text-lg break-words">
                   +{formatCurrency(current?.totalRevenue || 0, user?.country)}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center p-4 bg-accent/10 rounded-xl border border-accent/30">
+              <div className="flex justify-between items-center p-4 bg-accent/10 dark:bg-accent/15 rounded-xl border border-accent/30">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-accent rounded-full shadow-lg"></div>
                   <span className="font-semibold text-accent">{t('financial.investorPayouts')}</span>
@@ -144,10 +144,10 @@ export default function Financial() {
                 </span>
               </div>
 
-              <div className="border-t-2 pt-4">
-                <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl border-2 border-primary/30">
-                  <span className="font-bold text-primary">{t('financial.netProfit')}</span>
-                  <span className="font-bold text-primary text-2xl break-words">
+              <div className="border-t-2 border-border pt-4">
+                <div className="flex justify-between items-center p-4 bg-accent/10 dark:bg-accent/20 rounded-xl border-2 border-accent/30">
+                  <span className="font-bold text-accent">{t('financial.netProfit')}</span>
+                  <span className="font-bold text-accent text-2xl break-words">
                     {formatCurrency(current?.companyMargin || 0, user?.country)}
                   </span>
                 </div>

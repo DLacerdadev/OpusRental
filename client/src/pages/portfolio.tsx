@@ -119,8 +119,8 @@ export default function Portfolio() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="bg-primary/10 p-2 rounded-lg">
-                              <Truck className="h-6 w-6 text-primary" />
+                            <div className="bg-primary/10 dark:bg-accent/15 p-2 rounded-lg">
+                              <Truck className="h-6 w-6 text-primary dark:text-accent" />
                             </div>
                             <div className="flex-1">
                               <h3 className="font-bold text-lg" data-testid={`text-trailer-id-${trailer.id}`}>
@@ -199,7 +199,7 @@ export default function Portfolio() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
+                  <thead className="bg-muted/40">
                     <tr>
                       <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.monthYear')}</th>
                       <th className="text-left py-4 px-4 sm:px-6 font-semibold text-muted-foreground whitespace-nowrap">{t('portfolio.amountPaid')}</th>
@@ -211,7 +211,7 @@ export default function Portfolio() {
                     {portfolio?.payments?.map((payment: any) => (
                       <tr key={payment.id} className="border-b border-border hover:bg-muted/20 transition-colors" data-testid={`payment-${payment.id}`}>
                         <td className="py-4 px-4 sm:px-6 font-medium whitespace-nowrap">{payment.referenceMonth}</td>
-                        <td className="py-4 px-4 sm:px-6 font-bold text-green-600 whitespace-nowrap">
+                        <td className="py-4 px-4 sm:px-6 font-bold text-green-600 dark:text-green-400 whitespace-nowrap">
                           {formatCurrency(parseFloat(payment.amount), user?.country)}
                         </td>
                         <td className="py-4 px-4 sm:px-6 whitespace-nowrap">{format(new Date(payment.paymentDate), "dd/MM/yyyy")}</td>
@@ -281,7 +281,7 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-3">
                 {portfolio?.shares?.map((share: any) => (
-                  <div key={share.id} className="p-3 bg-muted/50 rounded-md" data-testid={`share-card-${share.id}`}>
+                  <div key={share.id} className="p-3 bg-muted/40 dark:bg-muted/30 rounded-md border border-border" data-testid={`share-card-${share.id}`}>
                     <div className="flex justify-between items-center gap-2 mb-2">
                       <span className="font-medium truncate" title={`${t('portfolio.share')} #${share.id}`}>{t('portfolio.share')} #{share.id.slice(0, 8)}</span>
                       <Badge variant={share.status === "active" ? "default" : "secondary"} className="flex-shrink-0">
@@ -291,7 +291,7 @@ export default function Portfolio() {
                     <div className="text-sm text-muted-foreground space-y-1">
                       <p className="break-all">{t('portfolio.value')} {formatCurrency(parseFloat(share.purchaseValue), user?.country)}</p>
                       <p>{t('portfolio.acquired')} {format(new Date(share.purchaseDate), "dd/MM/yyyy")}</p>
-                      <p className="text-green-600 font-medium break-all">
+                      <p className="text-green-600 dark:text-green-400 font-medium break-all">
                         {t('portfolio.monthlyReturnValue')} {formatCurrency(parseFloat(share.purchaseValue) * parseFloat(share.monthlyReturn) / 100, user?.country)}
                       </p>
                     </div>

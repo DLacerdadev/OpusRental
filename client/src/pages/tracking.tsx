@@ -107,7 +107,7 @@ export default function Tracking() {
                 {trackingData?.map((track: any) => (
                   <tr key={track.id} className="border-b border-border hover:bg-accent/5 transition-colors">
                     <td className="py-4 px-6">
-                      <span className="font-bold text-primary">{track.trailerId}</span>
+                      <span className="font-bold text-primary dark:text-accent">{track.trailerId}</span>
                     </td>
                     <td className="py-4 px-6">
                       <span className="flex items-center gap-2">

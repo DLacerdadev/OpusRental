@@ -206,11 +206,11 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg border-l-4 border-l-primary">
+        <Card className="shadow-lg border-l-4 border-l-primary dark:border-l-accent">
           <CardHeader className="border-b bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-3 rounded-2xl">
-                <Bell className="h-6 w-6 text-primary" />
+              <div className="bg-primary/10 dark:bg-accent/15 p-3 rounded-2xl">
+                <Bell className="h-6 w-6 text-primary dark:text-accent" />
               </div>
               <CardTitle className="text-lg font-bold">{t('settings.notifications')}</CardTitle>
             </div>
