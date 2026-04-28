@@ -6,6 +6,7 @@ import {
   paymentMethodsToInstructionLines,
   type PaymentMethod,
 } from './payment-methods.service';
+import { buildPublicPaymentUrl } from './invoice-token.service';
 
 interface DispatchPDFData extends BrokerDispatch {
   trailer: Trailer;
@@ -79,36 +80,40 @@ export interface InvoiceData {
   paidDate: string | null;
 }
 
+const DEFAULT_BRAND_NAME = 'Opus Rental Capital';
+
 export class PDFService {
-  private static addHeader(doc: jsPDF, title: string) {
+  private static addHeader(doc: jsPDF, title: string, brandName?: string | null) {
+    const name = (brandName && brandName.trim()) || DEFAULT_BRAND_NAME;
     doc.setFillColor(33, 51, 82);
     doc.rect(0, 0, doc.internal.pageSize.width, 40, 'F');
-    
+
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('Opus Rental Capital', 20, 20);
-    
+    doc.text(name, 20, 20);
+
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.text(title, 20, 30);
-    
+
     doc.setTextColor(0, 0, 0);
   }
 
-  private static addFooter(doc: jsPDF, pageNumber: number = 1) {
+  private static addFooter(doc: jsPDF, pageNumber: number = 1, brandName?: string | null) {
     const pageHeight = doc.internal.pageSize.height;
-    
+    const name = (brandName && brandName.trim()) || DEFAULT_BRAND_NAME;
+
     doc.setFontSize(9);
     doc.setTextColor(128, 128, 128);
     doc.text(
-      'Opus Rental Capital | Commercial Trailer Investments',
+      name,
       doc.internal.pageSize.width / 2,
       pageHeight - 15,
       { align: 'center' }
     );
     doc.text(
-      `Page ${pageNumber}`,
+      `Página ${pageNumber}`,
       doc.internal.pageSize.width / 2,
       pageHeight - 10,
       { align: 'center' }
@@ -440,11 +445,22 @@ export class PDFService {
       throw new Error('Invoice is missing a due date');
     }
 
-    const paymentMethods = buildPaymentMethods(data.tenant ?? null, {
-      id: data.id,
-      invoiceNumber: data.invoiceNumber,
-      amount: data.amount,
-    });
+    let publicPaymentUrl: string | null = null;
+    try {
+      publicPaymentUrl = buildPublicPaymentUrl(data.id);
+    } catch {
+      publicPaymentUrl = null;
+    }
+
+    const paymentMethods = buildPaymentMethods(
+      data.tenant ?? null,
+      {
+        id: data.id,
+        invoiceNumber: data.invoiceNumber,
+        amount: data.amount,
+      },
+      { publicPaymentUrl },
+    );
     const paymentInstructions = paymentMethodsToInstructionLines(paymentMethods);
 
     return {
@@ -487,29 +503,30 @@ export class PDFService {
   static generateInvoicePDF(data: InvoicePDFData): Buffer {
     const invoiceData = this.buildInvoiceData(data);
     const doc = new jsPDF();
+    const brandName = data.tenant?.name ?? null;
 
-    this.addHeader(doc, 'Invoice');
+    this.addHeader(doc, 'Fatura', brandName);
 
     let yPos = 50;
 
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('INVOICE', 20, yPos);
+    doc.text('FATURA', 20, yPos);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Invoice #${invoiceData.invoiceNumber}`, 150, yPos);
+    doc.text(`Fatura nº ${invoiceData.invoiceNumber}`, 150, yPos);
     yPos += 6;
-    doc.text(`Date: ${this.formatDate(invoiceData.issueDate)}`, 150, yPos);
+    doc.text(`Emissão: ${this.formatDate(invoiceData.issueDate)}`, 150, yPos);
     yPos += 6;
-    doc.text(`Due Date: ${this.formatDate(invoiceData.dueDate)}`, 150, yPos);
+    doc.text(`Vencimento: ${this.formatDate(invoiceData.dueDate)}`, 150, yPos);
 
     yPos += 15;
 
     doc.setFillColor(245, 247, 250);
     doc.rect(20, yPos, 75, 8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.text('BILL TO', 22, yPos + 5);
+    doc.text('CLIENTE', 22, yPos + 5);
     yPos += 12;
 
     doc.setFont('helvetica', 'normal');
@@ -531,7 +548,7 @@ export class PDFService {
 
     autoTable(doc, {
       startY: yPos,
-      head: [['Description', 'Rate', 'Qty', 'Amount']],
+      head: [['Descrição', 'Valor Unit.', 'Qtd.', 'Total']],
       body: invoiceData.items.map((item) => [
         item.description,
         this.formatCurrency(item.rate),
@@ -561,7 +578,7 @@ export class PDFService {
     doc.text('Subtotal:', 125, yPos + 8);
     doc.text(this.formatCurrency(invoiceData.totals.subtotal), 185, yPos + 8, { align: 'right' });
 
-    doc.text('Tax:', 125, yPos + 16);
+    doc.text('Impostos:', 125, yPos + 16);
     doc.text(this.formatCurrency(invoiceData.totals.tax), 185, yPos + 16, { align: 'right' });
 
     doc.setFont('helvetica', 'bold');
@@ -577,21 +594,42 @@ export class PDFService {
     const statusColor = invoiceData.status === 'paid' ? [34, 197, 94] :
                        invoiceData.status === 'overdue' ? [239, 68, 68] :
                        [251, 191, 36];
+    const statusLabel = invoiceData.status === 'paid' ? 'PAGA' :
+                        invoiceData.status === 'overdue' ? 'EM ATRASO' :
+                        invoiceData.status === 'open' ? 'EM ABERTO' :
+                        invoiceData.status === 'cancelled' ? 'CANCELADA' :
+                        invoiceData.status.toUpperCase();
     doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
-    doc.rect(20, yPos, 40, 8, 'F');
+    doc.rect(20, yPos, 50, 8, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.text(`STATUS: ${invoiceData.status.toUpperCase()}`, 22, yPos + 5);
+    doc.text(`STATUS: ${statusLabel}`, 22, yPos + 5);
     doc.setTextColor(0, 0, 0);
 
     if (invoiceData.status === 'paid' && invoiceData.paidDate) {
       yPos += 10;
       doc.setFont('helvetica', 'normal');
-      doc.text(`Paid on: ${this.formatDate(invoiceData.paidDate)}`, 22, yPos);
+      doc.text(`Paga em: ${this.formatDate(invoiceData.paidDate)}`, 22, yPos);
+    }
+
+    // Diagonal "PAGA" watermark when invoice is settled — leaves no doubt
+    // that this PDF represents a closed-out invoice.
+    if (invoiceData.status === 'paid') {
+      const center = doc.internal.pageSize.width / 2;
+      const middle = doc.internal.pageSize.height / 2;
+      doc.saveGraphicsState();
+      // jspdf has setGState; rely on light gray text instead for portability.
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(80);
+      doc.setTextColor(220, 240, 220);
+      doc.text('PAGA', center, middle, { align: 'center', angle: 30 });
+      doc.setTextColor(0, 0, 0);
+      doc.restoreGraphicsState?.();
     }
 
     yPos += 20;
     doc.setFont('helvetica', 'bold');
-    doc.text('PAYMENT INSTRUCTIONS', 22, yPos);
+    doc.setFontSize(10);
+    doc.text('INSTRUÇÕES DE PAGAMENTO', 22, yPos);
     yPos += 8;
 
     doc.setFont('helvetica', 'normal');
@@ -605,7 +643,7 @@ export class PDFService {
       yPos += 5;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.text('NOTES', 22, yPos);
+      doc.text('OBSERVAÇÕES', 22, yPos);
       yPos += 6;
 
       doc.setFont('helvetica', 'normal');
@@ -614,8 +652,8 @@ export class PDFService {
       doc.text(lines, 22, yPos);
     }
 
-    this.addFooter(doc);
-    
+    this.addFooter(doc, 1, brandName);
+
     return Buffer.from(doc.output('arraybuffer'));
   }
 

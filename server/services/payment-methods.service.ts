@@ -32,6 +32,7 @@ export type PaymentMethodStripe = {
   amount: number;
   reference: string;
   checkoutPath: string;
+  publicPaymentUrl?: string;
 };
 
 export type PaymentMethod =
@@ -56,6 +57,7 @@ type MinimalInvoice = Pick<Invoice, 'id' | 'invoiceNumber' | 'amount'>;
 export function buildPaymentMethods(
   tenant: MinimalTenant,
   invoice: MinimalInvoice,
+  options?: { publicPaymentUrl?: string | null },
 ): PaymentMethod[] {
   const methods: PaymentMethod[] = [];
   const amount = parseFloat(invoice.amount?.toString() ?? '0');
@@ -95,6 +97,7 @@ export function buildPaymentMethods(
     amount,
     reference,
     checkoutPath: `/checkout/invoice?invoiceId=${invoice.id}`,
+    publicPaymentUrl: options?.publicPaymentUrl ?? undefined,
   });
 
   return methods;
@@ -109,7 +112,7 @@ export function paymentMethodsToInstructionLines(
   methods: PaymentMethod[],
 ): string[] {
   if (methods.length === 0) {
-    return ['No payment methods configured. Please contact the issuer.'];
+    return ['Nenhum método de pagamento configurado. Entre em contato com o emissor.'];
   }
 
   const lines: string[] = [];
@@ -119,24 +122,30 @@ export function paymentMethodsToInstructionLines(
 
     if (method.type === 'pix') {
       lines.push('PIX');
-      lines.push(`Key: ${method.pixKey}`);
-      if (method.beneficiary) lines.push(`Beneficiary: ${method.beneficiary}`);
-      lines.push(`Amount: ${formatAmount(method.amount)}`);
-      lines.push(`Reference: ${method.reference}`);
+      lines.push(`Chave: ${method.pixKey}`);
+      if (method.beneficiary) lines.push(`Beneficiário: ${method.beneficiary}`);
+      lines.push(`Valor: ${formatAmount(method.amount)}`);
+      lines.push(`Referência: ${method.reference}`);
     } else if (method.type === 'bank_transfer') {
-      lines.push('Bank Transfer');
-      lines.push(`Bank: ${method.bankName}`);
-      if (method.agency) lines.push(`Agency: ${method.agency}`);
-      lines.push(`Account: ${method.account}`);
-      if (method.accountHolder) lines.push(`Holder: ${method.accountHolder}`);
-      if (method.accountType) lines.push(`Type: ${method.accountType}`);
-      lines.push(`Amount: ${formatAmount(method.amount)}`);
-      lines.push(`Reference: ${method.reference}`);
+      lines.push('Transferência Bancária');
+      lines.push(`Banco: ${method.bankName}`);
+      if (method.agency) lines.push(`Agência: ${method.agency}`);
+      lines.push(`Conta: ${method.account}`);
+      if (method.accountHolder) lines.push(`Titular: ${method.accountHolder}`);
+      if (method.accountType) {
+        lines.push(`Tipo: ${method.accountType === 'checking' ? 'Corrente' : method.accountType === 'savings' ? 'Poupança' : method.accountType}`);
+      }
+      lines.push(`Valor: ${formatAmount(method.amount)}`);
+      lines.push(`Referência: ${method.reference}`);
     } else if (method.type === 'stripe') {
-      lines.push('Card (Online)');
-      lines.push(`Amount: ${formatAmount(method.amount)}`);
-      lines.push(`Reference: ${method.reference}`);
-      lines.push('Pay online via the invoice link in your portal.');
+      lines.push('Cartão (Online)');
+      lines.push(`Valor: ${formatAmount(method.amount)}`);
+      lines.push(`Referência: ${method.reference}`);
+      if (method.publicPaymentUrl) {
+        lines.push(`Pague online em: ${method.publicPaymentUrl}`);
+      } else {
+        lines.push('Pague online pelo link da fatura no seu portal.');
+      }
     }
   });
 
@@ -144,5 +153,5 @@ export function paymentMethodsToInstructionLines(
 }
 
 function formatAmount(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+  return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

@@ -1,6 +1,13 @@
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
-import type { Invoice, RentalClient, RentalContract, InsertEmailLog } from "@shared/schema";
+import type { Invoice, RentalClient, RentalContract, InsertEmailLog, Tenant } from "@shared/schema";
+import { buildPublicPaymentUrl } from "./invoice-token.service";
+
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+}
 
 export interface EmailOptions {
   to: string;
@@ -8,12 +15,26 @@ export interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  fromName?: string;
+  attachments?: EmailAttachment[];
 }
 
 export interface InvoiceEmailData {
   invoice: Invoice;
   contract: RentalContract;
   client: RentalClient;
+  /** Tenant the invoice belongs to. Used to render branded emails. */
+  tenant?: Pick<Tenant, "name"> | null;
+  /** Optional PDF (or other) attachments to include in the email. */
+  attachments?: EmailAttachment[];
+}
+
+function publicPaymentLinkFor(invoiceId: string): string | null {
+  try {
+    return buildPublicPaymentUrl(invoiceId);
+  } catch {
+    return null;
+  }
 }
 
 export class EmailService {
@@ -87,13 +108,19 @@ export class EmailService {
       }
 
       const from = process.env.SMTP_FROM || "noreply@opusrentalcapital.com";
+      const fromName = options.fromName?.trim() || "Opus Rental Capital";
 
       const info = await transporter.sendMail({
-        from: `"Opus Rental Capital" <${from}>`,
+        from: `"${fromName}" <${from}>`,
         to: options.toName ? `"${options.toName}" <${options.to}>` : options.to,
         subject: options.subject,
         text: options.text,
         html: options.html,
+        attachments: options.attachments?.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+          contentType: a.contentType,
+        })),
       });
 
       console.info(JSON.stringify({ level: "info", timestamp: new Date().toISOString(), service: "email", operation: "sendEmail", tenantId: null, detail: `sent messageId=${info.messageId} to=${options.to}` }));
@@ -109,15 +136,16 @@ export class EmailService {
    */
   static generateInvoiceEmail(data: InvoiceEmailData): string {
     const { invoice, contract, client } = data;
-    const dueDate = new Date(invoice.dueDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-    const amount = parseFloat(invoice.amount).toLocaleString("en-US", {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(invoice.id);
+    const dueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
+    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
       style: "currency",
-      currency: "USD"
+      currency: "BRL"
     });
+    const buttonHtml = paymentUrl
+      ? `<a href="${paymentUrl}" class="button">Pagar fatura</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
 
     return `
 <!DOCTYPE html>
@@ -140,47 +168,46 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🧾 Invoice ${invoice.invoiceNumber}</h1>
-      <p>Opus Rental Capital</p>
+      <h1>Fatura ${invoice.invoiceNumber}</h1>
+      <p>${brandName}</p>
     </div>
     <div class="content">
-      <h2>Hello ${client.tradeName || client.companyName},</h2>
-      <p>Your monthly invoice for trailer rental is ready.</p>
-      
+      <h2>Olá ${client.tradeName || client.companyName},</h2>
+      <p>Sua fatura mensal de locação está disponível. O PDF está em anexo neste e-mail.</p>
+
       <div class="invoice-details">
         <div class="detail-row">
-          <span class="label">Invoice Number:</span>
+          <span class="label">Número da fatura:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contract:</span>
+          <span class="label">Contrato:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Reference Month:</span>
+          <span class="label">Mês de referência:</span>
           <span class="value">${invoice.referenceMonth}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Due Date:</span>
+          <span class="label">Vencimento:</span>
           <span class="value">${dueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Amount Due:</span>
+          <span class="label">Valor a pagar:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p>Please process payment by the due date to avoid late fees.</p>
-      
+      <p>Pague até o vencimento para evitar juros e multa.</p>
+
       <center>
-        <a href="#" class="button">View Invoice Details</a>
+        ${buttonHtml}
       </center>
 
       <div class="footer">
-        <p><strong>Opus Rental Capital</strong></p>
-        <p>Commercial Trailer Rentals & Investments</p>
-        <p>Questions? Contact us at support@opusrentalcapital.com</p>
+        <p><strong>${brandName}</strong></p>
+        <p>Em caso de dúvidas, responda a este e-mail.</p>
       </div>
     </div>
   </div>
@@ -194,15 +221,16 @@ export class EmailService {
    */
   static generatePaymentReminderEmail(data: InvoiceEmailData, daysOverdue: number): string {
     const { invoice, contract, client } = data;
-    const dueDate = new Date(invoice.dueDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-    const amount = parseFloat(invoice.amount).toLocaleString("en-US", {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(invoice.id);
+    const dueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
+    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
       style: "currency",
-      currency: "USD"
+      currency: "BRL"
     });
+    const buttonHtml = paymentUrl
+      ? `<a href="${paymentUrl}" class="button">Pagar agora</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
 
     return `
 <!DOCTYPE html>
@@ -226,49 +254,48 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>⚠️ Payment Reminder</h1>
-      <p>Overdue Invoice ${invoice.invoiceNumber}</p>
+      <h1>Lembrete de pagamento</h1>
+      <p>Fatura ${invoice.invoiceNumber} em atraso</p>
     </div>
     <div class="content">
-      <h2>Hello ${client.tradeName || client.companyName},</h2>
-      <p><strong class="overdue">This invoice is ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue.</strong></p>
-      <p>We have not received payment for the invoice below. Please arrange payment as soon as possible to avoid service interruption.</p>
-      
+      <h2>Olá ${client.tradeName || client.companyName},</h2>
+      <p><strong class="overdue">Esta fatura está ${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso.</strong></p>
+      <p>Ainda não recebemos o pagamento da fatura abaixo. Por favor regularize o quanto antes para evitar a suspensão do serviço.</p>
+
       <div class="warning-box">
         <div class="detail-row">
-          <span class="label">Invoice Number:</span>
+          <span class="label">Número da fatura:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contract:</span>
+          <span class="label">Contrato:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Original Due Date:</span>
+          <span class="label">Vencimento original:</span>
           <span class="value overdue">${dueDate}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Days Overdue:</span>
-          <span class="value overdue">${daysOverdue} days</span>
+          <span class="label">Dias em atraso:</span>
+          <span class="value overdue">${daysOverdue} dia${daysOverdue > 1 ? 's' : ''}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Amount Due:</span>
+          <span class="label">Valor a pagar:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p><strong>If you have already sent payment, please disregard this notice.</strong></p>
-      <p>If you have questions about this invoice, please contact us immediately.</p>
-      
+      <p><strong>Se o pagamento já foi efetuado, por favor desconsidere este aviso.</strong></p>
+      <p>Em caso de dúvidas sobre esta fatura, entre em contato conosco.</p>
+
       <center>
-        <a href="#" class="button">Pay Now</a>
+        ${buttonHtml}
       </center>
 
       <div class="footer">
-        <p><strong>Opus Rental Capital</strong></p>
-        <p>Commercial Trailer Rentals & Investments</p>
-        <p>Urgent? Call us at +1 (555) 123-4567</p>
+        <p><strong>${brandName}</strong></p>
+        <p>Em caso de dúvidas, responda a este e-mail.</p>
       </div>
     </div>
   </div>
@@ -282,20 +309,17 @@ export class EmailService {
    */
   static generateInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): string {
     const { invoice, contract, client } = data;
-    const newDueDate = new Date(invoice.dueDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-    const oldDueDate = new Date(previousDueDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-    const amount = parseFloat(invoice.amount).toLocaleString("en-US", {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(invoice.id);
+    const newDueDate = new Date(invoice.dueDate).toLocaleDateString("pt-BR");
+    const oldDueDate = new Date(previousDueDate).toLocaleDateString("pt-BR");
+    const amount = parseFloat(invoice.amount).toLocaleString("pt-BR", {
       style: "currency",
-      currency: "USD"
+      currency: "BRL"
     });
+    const buttonHtml = paymentUrl
+      ? `<a href="${paymentUrl}" class="button">Pagar agora</a>`
+      : `<span class="button" style="background:#9ca3af;cursor:not-allowed">Link de pagamento indisponível</span>`;
 
     return `
 <!DOCTYPE html>
@@ -320,52 +344,51 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>📄 Invoice Reissued (2ª Via)</h1>
-      <p>Invoice ${invoice.invoiceNumber} — New Due Date</p>
+      <h1>Fatura reemitida (2ª via)</h1>
+      <p>Fatura ${invoice.invoiceNumber} — novo vencimento</p>
     </div>
     <div class="content">
-      <h2>Hello ${client.tradeName || client.companyName},</h2>
-      <p>Your invoice <strong>${invoice.invoiceNumber}</strong> has been reissued with a new due date. Please find the updated details below and arrange payment by the new date to avoid further charges.</p>
+      <h2>Olá ${client.tradeName || client.companyName},</h2>
+      <p>A fatura <strong>${invoice.invoiceNumber}</strong> foi reemitida com novo vencimento. O PDF atualizado segue em anexo.</p>
 
       <div class="warning-box">
         <div class="detail-row">
-          <span class="label">Invoice Number:</span>
+          <span class="label">Número da fatura:</span>
           <span class="value">${invoice.invoiceNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Contract:</span>
+          <span class="label">Contrato:</span>
           <span class="value">${contract.contractNumber}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Reference Month:</span>
+          <span class="label">Mês de referência:</span>
           <span class="value">${invoice.referenceMonth}</span>
         </div>
         <div class="detail-row">
-          <span class="label">Previous Due Date:</span>
+          <span class="label">Vencimento anterior:</span>
           <span class="value old-date">${oldDueDate}</span>
         </div>
         <div class="detail-row">
-          <span class="label">New Due Date:</span>
+          <span class="label">Novo vencimento:</span>
           <span class="value new-date">${newDueDate}</span>
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
         <div class="detail-row">
-          <span class="label">Amount Due:</span>
+          <span class="label">Valor a pagar:</span>
           <span class="amount">${amount}</span>
         </div>
       </div>
 
-      <p><strong>If you have already sent payment, please disregard this notice.</strong></p>
-      <p>If you have any questions about this reissued invoice, please contact us.</p>
+      <p><strong>Se o pagamento já foi efetuado, por favor desconsidere este aviso.</strong></p>
+      <p>Em caso de dúvidas sobre esta fatura, entre em contato conosco.</p>
 
       <center>
-        <a href="#" class="button">Pay Now</a>
+        ${buttonHtml}
       </center>
 
       <div class="footer">
-        <p><strong>Opus Rental Capital</strong></p>
-        <p>Commercial Trailer Rentals & Investments</p>
-        <p>Questions? Contact us at support@opusrentalcapital.com</p>
+        <p><strong>${brandName}</strong></p>
+        <p>Em caso de dúvidas, responda a este e-mail.</p>
       </div>
     </div>
   </div>
@@ -378,30 +401,34 @@ export class EmailService {
    * Send invoice email to client
    */
   static async sendInvoiceEmail(data: InvoiceEmailData): Promise<boolean> {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generateInvoiceEmail(data);
     const text = `
-Invoice ${data.invoice.invoiceNumber}
+Fatura ${data.invoice.invoiceNumber}
 
-Dear ${data.client.tradeName || data.client.companyName},
+Olá ${data.client.tradeName || data.client.companyName},
 
-Your monthly invoice for trailer rental (Contract ${data.contract.contractNumber}) is ready.
+Sua fatura mensal de locação (Contrato ${data.contract.contractNumber}) está disponível.
 
-Amount Due: $${data.invoice.amount}
-Due Date: ${new Date(data.invoice.dueDate).toLocaleDateString()}
-Reference Month: ${data.invoice.referenceMonth}
+Valor: R$ ${data.invoice.amount}
+Vencimento: ${new Date(data.invoice.dueDate).toLocaleDateString("pt-BR")}
+Mês de referência: ${data.invoice.referenceMonth}
+${paymentUrl ? `Pagar online: ${paymentUrl}` : ""}
 
-Please process payment by the due date.
+Por favor pague até o vencimento.
 
-Thank you,
-Opus Rental Capital
+${brandName}
     `.trim();
 
     return this.sendEmail({
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
-      subject: `Invoice ${data.invoice.invoiceNumber} - ${data.invoice.referenceMonth}`,
+      fromName: brandName,
+      subject: `Fatura ${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
       html,
-      text
+      text,
+      attachments: data.attachments,
     });
   }
 
@@ -409,31 +436,33 @@ Opus Rental Capital
    * Send payment reminder email to client
    */
   static async sendPaymentReminderEmail(data: InvoiceEmailData, daysOverdue: number): Promise<boolean> {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generatePaymentReminderEmail(data, daysOverdue);
     const text = `
-PAYMENT REMINDER - Invoice ${data.invoice.invoiceNumber}
+LEMBRETE DE PAGAMENTO — Fatura ${data.invoice.invoiceNumber}
 
-Dear ${data.client.tradeName || data.client.companyName},
+Olá ${data.client.tradeName || data.client.companyName},
 
-This is a reminder that invoice ${data.invoice.invoiceNumber} is ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue.
+Esta fatura está ${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso.
 
-Amount Due: $${data.invoice.amount}
-Original Due Date: ${new Date(data.invoice.dueDate).toLocaleDateString()}
+Valor: R$ ${data.invoice.amount}
+Vencimento original: ${new Date(data.invoice.dueDate).toLocaleDateString("pt-BR")}
+${paymentUrl ? `Pagar agora: ${paymentUrl}` : ""}
 
-Please arrange payment as soon as possible.
+Se já pagou, desconsidere este aviso.
 
-If you have already sent payment, please disregard this notice.
-
-Thank you,
-Opus Rental Capital
+${brandName}
     `.trim();
 
     return this.sendEmail({
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
-      subject: `⚠️ Payment Reminder - Invoice ${data.invoice.invoiceNumber} (${daysOverdue} days overdue)`,
+      fromName: brandName,
+      subject: `Lembrete de pagamento — Fatura ${data.invoice.invoiceNumber} (${daysOverdue} dia${daysOverdue > 1 ? 's' : ''} em atraso)`,
       html,
-      text
+      text,
+      attachments: data.attachments,
     });
   }
 
@@ -441,35 +470,37 @@ Opus Rental Capital
    * Send invoice reissued (2ª via) email to client
    */
   static async sendInvoiceReissuedEmail(data: InvoiceEmailData, previousDueDate: string): Promise<boolean> {
+    const brandName = data.tenant?.name?.trim() || "Opus Rental Capital";
+    const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generateInvoiceReissuedEmail(data, previousDueDate);
-    const newDueDateStr = new Date(data.invoice.dueDate).toLocaleDateString();
-    const oldDueDateStr = new Date(previousDueDate).toLocaleDateString();
+    const newDueDateStr = new Date(data.invoice.dueDate).toLocaleDateString("pt-BR");
+    const oldDueDateStr = new Date(previousDueDate).toLocaleDateString("pt-BR");
     const text = `
-Invoice Reissued (2ª Via) - ${data.invoice.invoiceNumber}
+Fatura reemitida (2ª via) — ${data.invoice.invoiceNumber}
 
-Dear ${data.client.tradeName || data.client.companyName},
+Olá ${data.client.tradeName || data.client.companyName},
 
-Your invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
+A fatura ${data.invoice.invoiceNumber} (Contrato ${data.contract.contractNumber}) foi reemitida com novo vencimento.
 
-Amount Due: $${data.invoice.amount}
-Previous Due Date: ${oldDueDateStr}
-New Due Date: ${newDueDateStr}
-Reference Month: ${data.invoice.referenceMonth}
+Valor: R$ ${data.invoice.amount}
+Vencimento anterior: ${oldDueDateStr}
+Novo vencimento: ${newDueDateStr}
+Mês de referência: ${data.invoice.referenceMonth}
+${paymentUrl ? `Pagar agora: ${paymentUrl}` : ""}
 
-Please process payment by the new due date to avoid further charges.
+Se já pagou, desconsidere este aviso.
 
-If you have already sent payment, please disregard this notice.
-
-Thank you,
-Opus Rental Capital
+${brandName}
     `.trim();
 
     return this.sendEmail({
       to: data.client.email,
       toName: data.client.tradeName || data.client.companyName,
-      subject: `📄 Invoice Reissued (2ª Via) - ${data.invoice.invoiceNumber} - New Due Date ${newDueDateStr}`,
+      fromName: brandName,
+      subject: `Fatura reemitida (2ª via) — ${data.invoice.invoiceNumber} — novo vencimento ${newDueDateStr}`,
       html,
-      text
+      text,
+      attachments: data.attachments,
     });
   }
 

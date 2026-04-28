@@ -186,6 +186,7 @@ export interface IStorage {
   
   // Invoice operations
   getInvoice(id: string, tenantId: string): Promise<Invoice | undefined>;
+  getInvoiceByIdPublic(id: string): Promise<Invoice | undefined>;
   getAllInvoices(tenantId: string): Promise<any[]>;
   getInvoicesByContractId(contractId: string, tenantId: string): Promise<Invoice[]>;
   getOverdueInvoices(tenantId: string): Promise<any[]>;
@@ -253,6 +254,7 @@ export interface IStorage {
 
   // Tenant operations
   updateTenant(tenantId: string, data: Partial<Tenant>): Promise<Tenant>;
+  getTenant(tenantId: string): Promise<Tenant | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1240,10 +1242,24 @@ export class DatabaseStorage implements IStorage {
         referenceMonth: invoices.referenceMonth,
         notes: invoices.notes,
         createdAt: invoices.createdAt,
+        tenantId: invoices.tenantId,
       })
       .from(invoices)
       .leftJoin(rentalContracts, eq(invoices.contractId, rentalContracts.id))
       .where(and(eq(invoices.id, id), eq(rentalContracts.tenantId, tenantId)));
+    return invoice as Invoice | undefined;
+  }
+
+  /**
+   * Look up an invoice by id WITHOUT tenant scoping. Use only on
+   * token-authenticated public endpoints — never on session routes.
+   */
+  async getInvoiceByIdPublic(id: string): Promise<Invoice | undefined> {
+    const [invoice] = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.id, id))
+      .limit(1);
     return invoice;
   }
 
@@ -1831,6 +1847,15 @@ export class DatabaseStorage implements IStorage {
     }
     
     return updated;
+  }
+
+  async getTenant(tenantId: string): Promise<Tenant | undefined> {
+    const [tenant] = await db
+      .select()
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+    return tenant;
   }
 }
 

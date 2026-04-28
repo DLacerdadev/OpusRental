@@ -36,6 +36,7 @@ import InvoiceAutomation from "@/pages/invoice-automation";
 import Analytics from "@/pages/analytics";
 import CheckoutShare from "@/pages/checkout-share";
 import CheckoutInvoice from "@/pages/checkout-invoice";
+import PayInvoice from "@/pages/pay-invoice";
 import AdminDebug from "@/pages/admin-debug";
 import AdminUsers from "@/pages/admin-users";
 
@@ -188,6 +189,7 @@ function Router() {
       </Route>
       <Route path="/checkout/share" component={CheckoutShare} />
       <Route path="/checkout/invoice" component={CheckoutInvoice} />
+      <Route path="/pay/:token" component={PayInvoice} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -23,6 +23,57 @@ type TenantBillingConfig = {
   bankAccountType: string | null;
 };
 
+function IntegrationStatusCard({
+  icon,
+  iconBg,
+  title,
+  description,
+  configured,
+  configuredLabel,
+  missingLabel,
+  helper,
+  testId,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  description: string;
+  configured: boolean;
+  configuredLabel: string;
+  missingLabel: string;
+  helper: string;
+  testId: string;
+}) {
+  return (
+    <div className="p-4 bg-muted/30 rounded-xl space-y-3 border border-border" data-testid={testId}>
+      <div className="flex items-center gap-3">
+        <div className={`${iconBg} p-2 rounded-lg`}>{icon}</div>
+        <div className="min-w-0">
+          <h3 className="font-semibold text-foreground text-sm">{title}</h3>
+          <p className="text-xs text-muted-foreground truncate">{description}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <div
+          className={`h-2 w-2 rounded-full ${
+            configured ? "bg-green-500 animate-pulse" : "bg-yellow-500"
+          }`}
+        />
+        <span
+          className={`font-medium ${
+            configured
+              ? "text-green-600 dark:text-green-400"
+              : "text-yellow-600 dark:text-yellow-400"
+          }`}
+        >
+          {configured ? configuredLabel : missingLabel}
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">{helper}</p>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
@@ -33,6 +84,14 @@ export default function Settings() {
 
   const { data: tenant } = useQuery<TenantBillingConfig>({
     queryKey: ["/api/tenant/billing"],
+    enabled: isManager,
+  });
+
+  type SystemStatus = {
+    integrations: { stripe: boolean; smtp: boolean; whatsapp: boolean };
+  };
+  const { data: systemStatus } = useQuery<SystemStatus>({
+    queryKey: ["/api/system/status"],
     enabled: isManager,
   });
 
@@ -382,145 +441,52 @@ export default function Settings() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Stripe Configuration */}
-                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-purple-50 dark:bg-purple-950 p-2 rounded-lg">
-                      <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{t('settings.stripeTitle')}</h3>
-                      <p className="text-xs text-muted-foreground">{t('settings.stripeDesc')}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="stripe-public-key" className="text-xs">{t('settings.publishableKey')}</Label>
-                      <Input 
-                        id="stripe-public-key" 
-                        placeholder="pk_live_..." 
-                        data-testid="input-stripe-public-key"
-                        className="font-mono text-xs"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="stripe-secret-key" className="text-xs">{t('settings.secretKey')}</Label>
-                      <Input 
-                        id="stripe-secret-key" 
-                        type="password" 
-                        placeholder="sk_live_..." 
-                        data-testid="input-stripe-secret-key"
-                        className="font-mono text-xs"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="stripe-webhook-secret" className="text-xs">{t('settings.webhookSecret')}</Label>
-                      <Input 
-                        id="stripe-webhook-secret" 
-                        type="password" 
-                        placeholder="whsec_..." 
-                        data-testid="input-stripe-webhook-secret"
-                        className="font-mono text-xs"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-2">
-                        <Switch data-testid="switch-stripe-test-mode" />
-                        <span className="text-xs text-muted-foreground">{t('settings.testMode')}</span>
-                      </div>
-                      <Button size="sm" variant="outline" data-testid="button-save-stripe">
-                        {t('settings.saveConfiguration')}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-border">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{t('settings.status')}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-green-600 dark:text-green-400 font-medium">{t('settings.connected')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SMTP Configuration */}
-                <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded-lg">
-                      <Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{t('settings.emailServiceTitle')}</h3>
-                      <p className="text-xs text-muted-foreground">{t('settings.emailServiceDesc')}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="smtp-host" className="text-xs">{t('settings.smtpHost')}</Label>
-                      <Input 
-                        id="smtp-host" 
-                        placeholder="smtp.example.com" 
-                        data-testid="input-smtp-host"
-                        className="text-xs"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="smtp-port" className="text-xs">{t('settings.port')}</Label>
-                        <Input 
-                          id="smtp-port" 
-                          placeholder="587" 
-                          data-testid="input-smtp-port"
-                          className="text-xs"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="smtp-from" className="text-xs">{t('settings.fromAddress')}</Label>
-                        <Input 
-                          id="smtp-from" 
-                          placeholder="noreply@..." 
-                          data-testid="input-smtp-from"
-                          className="text-xs"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="smtp-user" className="text-xs">{t('settings.username')}</Label>
-                      <Input 
-                        id="smtp-user" 
-                        placeholder="smtp-username" 
-                        data-testid="input-smtp-user"
-                        className="text-xs"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="smtp-pass" className="text-xs">{t('settings.password')}</Label>
-                      <Input 
-                        id="smtp-pass" 
-                        type="password" 
-                        placeholder="••••••••" 
-                        data-testid="input-smtp-pass"
-                        className="text-xs"
-                      />
-                    </div>
-                    <div className="flex justify-end pt-2">
-                      <Button size="sm" variant="outline" data-testid="button-save-smtp">
-                        {t('settings.saveConfiguration')}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-border">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{t('settings.status')}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">{t('settings.usingDevMock')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <IntegrationStatusCard
+                  icon={<CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                  iconBg="bg-purple-50 dark:bg-purple-950"
+                  title="Stripe"
+                  description="Cobrança via cartão de crédito"
+                  configured={!!systemStatus?.integrations.stripe}
+                  configuredLabel="Conectado"
+                  missingLabel="Não configurado"
+                  helper={
+                    systemStatus?.integrations.stripe
+                      ? "Chaves STRIPE_SECRET_KEY e VITE_STRIPE_PUBLIC_KEY ativas. Defina STRIPE_WEBHOOK_SECRET em produção."
+                      : "Defina STRIPE_SECRET_KEY, VITE_STRIPE_PUBLIC_KEY e STRIPE_WEBHOOK_SECRET para habilitar."
+                  }
+                  testId="status-stripe"
+                />
+                <IntegrationStatusCard
+                  icon={<Mail className="h-5 w-5 text-orange-600 dark:text-orange-400" />}
+                  iconBg="bg-orange-50 dark:bg-orange-950"
+                  title="E-mail (SMTP)"
+                  description="Envio de faturas e lembretes"
+                  configured={!!systemStatus?.integrations.smtp}
+                  configuredLabel="Conectado"
+                  missingLabel="Modo de desenvolvimento (mock)"
+                  helper={
+                    systemStatus?.integrations.smtp
+                      ? "SMTP_HOST e SMTP_USER configurados. E-mails reais serão enviados."
+                      : "Sem SMTP_HOST/SMTP_USER. Em produção configure um provedor SMTP."
+                  }
+                  testId="status-smtp"
+                />
+                <IntegrationStatusCard
+                  icon={<Bell className="h-5 w-5 text-green-600 dark:text-green-400" />}
+                  iconBg="bg-green-50 dark:bg-green-950"
+                  title="WhatsApp"
+                  description="Notificações por mensagem"
+                  configured={!!systemStatus?.integrations.whatsapp}
+                  configuredLabel="Conectado"
+                  missingLabel="Não configurado"
+                  helper={
+                    systemStatus?.integrations.whatsapp
+                      ? "Provedor de WhatsApp ativo (Twilio ou Meta)."
+                      : "Configure TWILIO_* ou META_WHATSAPP_TOKEN para enviar mensagens."
+                  }
+                  testId="status-whatsapp"
+                />
               </div>
 
               <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900">
@@ -531,18 +497,14 @@ export default function Settings() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">{t('settings.configurationNote')}</h4>
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
+                      Credenciais ficam no servidor
+                    </h4>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      {t('settings.configurationNoteDesc')}
+                      As chaves de Stripe, SMTP e WhatsApp são lidas das variáveis de ambiente do servidor por
+                      questão de segurança. Para alterar, use o gerenciador de segredos da plataforma e
+                      reinicie o serviço.
                     </p>
-                    <div className="mt-3 flex gap-2">
-                      <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-view-docs">
-                        {t('settings.viewDocumentation')}
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-8" data-testid="button-test-connection">
-                        {t('settings.testConnection')}
-                      </Button>
-                    </div>
                   </div>
                 </div>
               </div>

@@ -24,6 +24,7 @@ import {
 import { PDFService } from "./services/pdf.service";
 import { buildPaymentMethods } from "./services/payment-methods.service";
 import { EmailService } from "./services/email.service";
+import { verifyInvoiceToken, buildPublicPaymentUrl } from "./services/invoice-token.service";
 import { ExportService } from "./services/export.service";
 import { ImportService } from "./services/import.service";
 import { MonitoringService } from "./services/monitoring.service";
@@ -1591,8 +1592,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let errorMessage: string | undefined;
 
           try {
+            const trailerForPdf = await storage.getTrailer(contract.trailerId, req.tenantId!).catch(() => null);
+            const lineItemsForPdf = await storage.getInvoiceItems(reissued.id, req.tenantId!).catch(() => []);
+            const attachments = trailerForPdf
+              ? [{
+                  filename: `Fatura-${reissued.invoiceNumber}.pdf`,
+                  content: PDFService.generateInvoicePDF({
+                    ...reissued,
+                    contract: { ...contract, client, trailer: trailerForPdf },
+                    tenant: req.tenant ?? null,
+                    lineItems: lineItemsForPdf,
+                  }),
+                  contentType: "application/pdf" as const,
+                }]
+              : undefined;
             await EmailService.sendInvoiceReissuedEmail(
-              { invoice: reissued, contract, client },
+              { invoice: reissued, contract, client, tenant: req.tenant ?? null, attachments },
               invoice.dueDate,
             );
             emailStatus = "sent";
@@ -3885,17 +3900,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate amount in cents
       const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
 
-      // Create Stripe payment intent
+      // Create Stripe payment intent (BRL — Real brasileiro)
       const paymentIntent = await stripe!.paymentIntents.create({
         amount: amountInCents,
-        currency: "usd",
+        currency: "brl",
         metadata: {
           type: "invoice_payment",
           invoiceId: invoiceId,
           contractId: invoice.contractId,
           tenantId: req.tenantId!,
         },
-        description: `Payment for Invoice #${invoice.invoiceNumber} - Rental Fee`,
+        description: `Pagamento da fatura ${invoice.invoiceNumber}`,
       });
 
       await storage.createAuditLog({
@@ -3939,12 +3954,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event: Stripe.Event;
 
     try {
-      // Verify webhook signature (requires STRIPE_WEBHOOK_SECRET in production)
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (webhookSecret) {
         event = stripe!.webhooks.constructEvent(req.body, sig, webhookSecret);
+      } else if (process.env.NODE_ENV === "production") {
+        console.error("Webhook rejected: STRIPE_WEBHOOK_SECRET not configured in production");
+        return res.status(503).send("Webhook secret not configured");
       } else {
-        // In development, accept without verification (not recommended for production)
+        console.warn("Stripe webhook accepted without signature verification (development only)");
         event = req.body as Stripe.Event;
       }
     } catch (err: any) {
@@ -4165,6 +4182,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = error instanceof Error ? error.message : String(error);
       console.error("WhatsApp test error:", message);
       res.status(500).json({ message: "Failed to send test message: " + message });
+    }
+  });
+
+  // ============================================
+  // PUBLIC PAYMENT ENDPOINTS (token-authenticated)
+  // ============================================
+  // These endpoints are reachable without a logged-in session. They rely on
+  // a signed HMAC token (generated when the invoice email is sent) to scope
+  // access to a single invoice.
+
+  app.get("/api/public/invoices/:token", apiLimiter, async (req, res) => {
+    try {
+      const invoiceId = verifyInvoiceToken(req.params.token);
+      if (!invoiceId) {
+        return res.status(401).json({ message: "Link inválido ou expirado." });
+      }
+
+      const invoice = await storage.getInvoiceByIdPublic(invoiceId);
+      if (!invoice) {
+        return res.status(404).json({ message: "Fatura não encontrada." });
+      }
+
+      const tenantId = invoice.tenantId;
+      const tenant = await storage.getTenant(tenantId);
+      const contract = await storage.getRentalContract(invoice.contractId, tenantId);
+      const client = contract ? await storage.getRentalClient(contract.clientId, tenantId) : null;
+      const trailer = contract ? await storage.getTrailer(contract.trailerId, tenantId) : null;
+
+      const paymentMethods = buildPaymentMethods(
+        tenant ?? null,
+        invoice,
+        { publicPaymentUrl: buildPublicPaymentUrl(invoice.id) },
+      );
+
+      res.json({
+        invoice: {
+          id: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          amount: invoice.amount,
+          dueDate: invoice.dueDate,
+          status: invoice.status,
+          referenceMonth: invoice.referenceMonth,
+          notes: invoice.notes,
+        },
+        client: client
+          ? {
+              companyName: client.companyName,
+              tradeName: client.tradeName,
+              email: client.email,
+            }
+          : null,
+        trailer: trailer
+          ? {
+              fleetNumber: trailer.trailerId,
+              chassisNumber: trailer.vin ?? null,
+            }
+          : null,
+        tenant: tenant
+          ? {
+              name: tenant.name,
+              logoUrl: tenant.logoUrl ?? null,
+              primaryColor: tenant.primaryColor ?? null,
+            }
+          : null,
+        paymentMethods,
+        stripeEnabled: isStripeConfigured(),
+      });
+    } catch (error) {
+      console.error("Public invoice fetch error:", error);
+      res.status(500).json({ message: "Falha ao carregar fatura." });
+    }
+  });
+
+  app.post("/api/public/invoices/:token/payment-intent", apiLimiter, async (req, res) => {
+    try {
+      if (!isStripeConfigured()) {
+        return res.status(503).json({ message: "Pagamento por cartão indisponível no momento." });
+      }
+
+      const invoiceId = verifyInvoiceToken(req.params.token);
+      if (!invoiceId) {
+        return res.status(401).json({ message: "Link inválido ou expirado." });
+      }
+
+      const invoice = await storage.getInvoiceByIdPublic(invoiceId);
+      if (!invoice) {
+        return res.status(404).json({ message: "Fatura não encontrada." });
+      }
+
+      if (invoice.status === "paid") {
+        return res.status(400).json({ message: "Esta fatura já foi paga." });
+      }
+
+      const amountInCents = Math.round(parseFloat(invoice.amount) * 100);
+
+      const paymentIntent = await stripe!.paymentIntents.create({
+        amount: amountInCents,
+        currency: "brl",
+        metadata: {
+          type: "invoice_payment",
+          invoiceId: invoice.id,
+          contractId: invoice.contractId,
+          tenantId: invoice.tenantId,
+          source: "public_link",
+        },
+        description: `Pagamento da fatura ${invoice.invoiceNumber}`,
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        amount: parseFloat(invoice.amount),
+        invoiceNumber: invoice.invoiceNumber,
+      });
+    } catch (error: any) {
+      console.error("Public invoice payment intent error:", error);
+      res.status(500).json({ message: "Falha ao iniciar pagamento: " + error.message });
     }
   });
 

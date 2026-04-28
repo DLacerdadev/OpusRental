@@ -1,8 +1,49 @@
 import cron from "node-cron";
 import { storage } from "../storage";
-import { EmailService } from "./email.service";
+import { EmailService, type EmailAttachment } from "./email.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { PDFService } from "./pdf.service";
 import type { RentalContract, Invoice } from "@shared/schema";
+
+/**
+ * Best-effort builder for the per-invoice email payload (tenant + PDF
+ * attachment). Returns an empty object on any failure so the email can still
+ * be sent without these enhancements rather than aborting the notification.
+ */
+async function buildInvoiceEmailExtras(
+  invoice: Invoice,
+  contract: RentalContract,
+  client: { companyName: string; tradeName: string | null; email: string; phone: string; address: string | null; taxId: string | null },
+): Promise<{ tenant: { name: string } | null; attachments: EmailAttachment[] }> {
+  let tenant: { name: string } | null = null;
+  const attachments: EmailAttachment[] = [];
+  try {
+    const t = await storage.getTenant(invoice.tenantId);
+    if (t) tenant = { name: t.name };
+  } catch (err) {
+    log("warn", "buildInvoiceEmailExtras", `getTenant failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  try {
+    const trailer = await storage.getTrailer(contract.trailerId, invoice.tenantId).catch(() => null);
+    if (trailer) {
+      const lineItems = await storage.getInvoiceItems(invoice.id, invoice.tenantId).catch(() => []);
+      const pdfBuffer = PDFService.generateInvoicePDF({
+        ...invoice,
+        contract: { ...contract, client: client as any, trailer },
+        tenant: (await storage.getTenant(invoice.tenantId).catch(() => null)) ?? null,
+        lineItems,
+      });
+      attachments.push({
+        filename: `Fatura-${invoice.invoiceNumber}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      });
+    }
+  } catch (err) {
+    log("warn", "buildInvoiceEmailExtras", `PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  return { tenant, attachments };
+}
 
 const log = (level: "info" | "warn" | "error", operation: string, detail: string) => {
   const entry = { level, timestamp: new Date().toISOString(), service: "invoice-automation", operation, tenantId: null, detail };
@@ -206,7 +247,8 @@ export class InvoiceAutomationService {
         let errorMessage: string | undefined;
 
         try {
-          await EmailService.sendInvoiceEmail({ invoice, contract, client });
+          const extras = await buildInvoiceEmailExtras(invoice, contract, client);
+          await EmailService.sendInvoiceEmail({ invoice, contract, client, ...extras });
           emailStatus = "sent";
         } catch (error) {
           errorMessage = error instanceof Error ? error.message : "Unknown error sending email";
@@ -396,8 +438,9 @@ export class InvoiceAutomationService {
           let errorMessage: string | undefined;
 
           try {
+            const extras = await buildInvoiceEmailExtras(invoice, contract, client);
             await EmailService.sendPaymentReminderEmail(
-              { invoice, contract, client },
+              { invoice, contract, client, ...extras },
               daysOverdue
             );
             emailStatus = "sent";
@@ -491,10 +534,12 @@ export class InvoiceAutomationService {
           let errorMessage: string | undefined;
 
           try {
+            const extras = await buildInvoiceEmailExtras(invoice, contract, client);
             await EmailService.sendInvoiceEmail({
               invoice,
               contract,
               client,
+              ...extras,
             });
             emailStatus = "sent";
           } catch (error) {
