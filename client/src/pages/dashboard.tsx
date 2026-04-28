@@ -208,8 +208,8 @@ export default function Dashboard() {
         </div>
 
         {/* Gráfico e Metas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border border-border shadow-sm ">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <Card className="xl:col-span-2 border border-border shadow-sm">
             <CardHeader className="border-b border-border bg-muted/40">
               <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -286,7 +286,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           <Card className="border border-border shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -334,7 +334,7 @@ export default function Dashboard() {
         </div>
 
         {/* Atividade Recente */}
-        <Card className="border border-border shadow-sm ">
+          <Card className="border border-border shadow-sm">
           <CardHeader className="border-b border-border bg-muted/40">
             <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
