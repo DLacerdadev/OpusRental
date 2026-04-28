@@ -122,44 +122,41 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
   };
 
   return (
-    <div className={`h-screen flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
-      {/* Collapse Toggle - Hidden on mobile */}
+    <div className={`h-screen flex flex-col bg-card border-r border-border transition-all duration-300 ${effectiveCollapsed ? "w-20" : "w-72"}`}>
       {!isMobile && (
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-10 z-50 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 rounded-full p-1.5 shadow-sm hover:shadow transition-all items-center justify-center"
+          className="hidden lg:flex absolute -right-3 top-10 z-50 bg-card border border-border hover:border-foreground/20 text-muted-foreground rounded-full p-1.5 shadow-sm hover:shadow transition-all items-center justify-center"
           data-testid="button-toggle-sidebar"
         >
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       )}
 
-      {/* Header with Logo */}
-      <div className="p-6 border-b border-slate-200">
+      <div className="p-6 border-b border-border">
         {!effectiveCollapsed && (
           <div className="flex items-center gap-3">
-            <div className="bg-slate-50 p-2 rounded-xl">
+            <div className="bg-muted p-2 rounded-xl">
               <img src={logoPath} alt="Opus" className="h-10 w-10 rounded-lg" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-slate-900 tracking-tight">Opus Rental Capital</h1>
-              <p className="text-xs text-slate-500 font-medium">{t('nav.investmentPlatform')}</p>
+              <h1 className="text-base font-bold text-foreground tracking-tight">Opus Rental Capital</h1>
+              <p className="text-xs text-muted-foreground font-medium">{t('nav.investmentPlatform')}</p>
             </div>
           </div>
         )}
         {effectiveCollapsed && (
-          <div className="bg-slate-50 p-2 rounded-xl mx-auto w-fit">
+          <div className="bg-muted p-2 rounded-xl mx-auto w-fit">
             <img src={logoPath} alt="Opus" className="h-9 w-9 rounded-lg" />
           </div>
         )}
       </div>
 
-      {/* Navigation - Grouped & Clean */}
       <nav className="p-3 flex-1 overflow-y-auto">
         {filteredNavGroups.map((group, groupIndex) => (
           <div key={groupIndex} className={groupIndex > 0 ? "mt-6" : ""}>
             {!effectiveCollapsed && group.title && (
-              <div className="text-xs font-bold text-slate-400 mb-2 px-3 uppercase tracking-wider">
+              <div className="text-xs font-bold text-muted-foreground mb-2 px-3 uppercase tracking-wider">
                 {group.title}
               </div>
             )}
@@ -167,15 +164,15 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path;
-                
+
                 return (
                   <Link key={item.path} href={item.path}>
                     <button
                       onClick={onNavigate}
                       className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-3"} py-2.5 rounded-lg text-sm font-medium transition-all ${
-                        isActive 
-                          ? "bg-[#0D2847] text-white" 
-                          : "text-slate-700 hover:bg-slate-100"
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground/80 hover:bg-muted hover:text-foreground"
                       }`}
                       data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
                     >
@@ -190,10 +187,9 @@ export function Sidebar({ user, onNavigate, isMobile = false }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="p-3 border-t border-slate-200">
+      <div className="p-3 border-t border-border">
         <button
-          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-3"} py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600 transition-all`}
+          className={`w-full flex items-center ${effectiveCollapsed ? "justify-center px-3" : "px-3"} py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-destructive/10 hover:text-destructive transition-all`}
           onClick={() => logoutMutation.mutate()}
           data-testid="button-logout"
         >

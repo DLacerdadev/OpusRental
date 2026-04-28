@@ -217,7 +217,16 @@ export function Page() {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color, bgIcon, className = "" }: any) {
+type StatCardProps = {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bgIcon: string;
+  className?: string;
+};
+
+function StatCard({ title, value, icon: Icon, color, bgIcon, className = "" }: StatCardProps) {
   return (
     <Card className={`border-none shadow-sm rounded-[20px] bg-white overflow-hidden ${className}`}>
       <CardContent className="p-5 md:p-6">

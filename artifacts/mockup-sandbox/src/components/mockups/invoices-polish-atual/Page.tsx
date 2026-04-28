@@ -58,7 +58,8 @@ export function Page() {
     }
   };
 
-  const ActionMenu = ({ invoice }: { invoice: any }) => (
+  type InvoiceMock = (typeof invoicesMock)[number];
+  const ActionMenu = ({ invoice }: { invoice: InvoiceMock }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0 text-[#0E2A4D]">
