@@ -1,0 +1,31 @@
+VERDICT: REJECTED
+The diff is close, but it misses key acceptance criteria in the client behavior and should not be approved as-is.
+
+Critical findings:
+1) **Duplicate-error UX is functionally broken** (blocking). In `rental-contracts.tsx`, `onError` VERDICT: REJECTED
+assumes `apiRequest` throws messages like `"<status>: <body>"` and checks `^409` The diff is close, but it misses key acceptance criteria in the client behavior and should not be approved as-is.
+/ `duplicate` in `error.message`. That assumption is incorr
+ect for this codebase (`queryClient.ts` sets `error.message` tCritical findings:
+o JSON `message`, with status in `error.status`). For 409, backend message is `"An invoice for this contract and reference month already exists"` (no `duplicate` token, no status prefix), so the duplicate branch is not taken. Result: users get generic/error-text handling instead of the required specific duplicate toast.
+
+2) **Button visibility requirement not fully met** (blocking against done criteria). Requirement says the action should appear only for managers/admins + active contracts. Current UI only checks `contract.status === "active"`; it does not check role. This page route currently has no `allowedRoles`, so non-manager users can reach it and see the button, relying on backend 403 instead of proper UI gating.
+
+3) **Core backend path is otherwise solid**: endpoint is tenant-scoped (`getRentalContract(id, tenantId)`), protected by `authorize()+isManager`, reuses `InvoiceAutomationService.generateInvoiceForContract`, maps duplicate to 409 and missing rate to 422, and writes an audit log entry.
+
+Security: none observed (serious). Authorization on server endpoint is correct and tenant scoping is preserved.
+
+Next actions:
+1) Fix client error handling to use `error.status` and/or parsed backend `reason` (409 + `reason:"duplicate"`) for deterministic duplicate toast mapping.
+2) Gate button rendering by role (manager/admin) in `rental-contracts.tsx` (e.g., via `useAuth()`), in addition to active-status check.
+3) Keep generic fallback toast for unknown failures, but ensure duplicate path always shows localized `toastGenerateInvoiceDuplicate*` strings.1) **Duplicate-error UX is functionally broken** (blocking). In `rental-contracts.tsx`, `onError` assumes `apiRequest` throws messages like `"<status>: <body>"` and checks `^409` / `duplicate` in `error.message`. That assumption is incorrect for this codebase (`queryClient.ts` sets `error.message` to JSON `message`, with status in `error.status`). For 409, backend message is `"An invoice for this contract and reference month already exists"` (no `duplicate` token, no status prefix), so the duplicate branch is not taken. Result: users get generic/error-text handling instead of the required specific duplicate toast.
+
+2) **Button visibility requirement not fully met** (blocking against done criteria). Requirement says the action should appear only for managers/admins + active contracts. Current UI only checks `contract.status === "active"`; it does not check role. This page route currently has no `allowedRoles`, so non-manager users can reach it and see the button, relying on backend 403 instead of proper UI gating.
+
+3) **Core backend path is otherwise solid**: endpoint is tenant-scoped (`getRentalContract(id, tenantId)`), protected by `authorize()+isManager`, reuses `InvoiceAutomationService.generateInvoiceForContract`, maps duplicate to 409 and missing rate to 422, and writes an audit log entry.
+
+Security: none observed (serious). Authorization on server endpoint is correct and tenant scoping is preserved.
+
+Next actions:
+1) Fix client error handling to use `error.status` and/or parsed backend `reason` (409 + `reason:"duplicate"`) for deterministic duplicate toast mapping.
+2) Gate button rendering by role (manager/admin) in `rental-contracts.tsx` (e.g., via `useAuth()`), in addition to active-status check.
+3) Keep generic fallback toast for unknown failures, but ensure duplicate path always shows localized `toastGenerateInvoiceDuplicate*` strings.

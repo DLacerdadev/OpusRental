@@ -1,0 +1,204 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K{"level":"info","timestamp":"2026-04-27T22:30:12.564Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-27T22:30:12.565Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-27T22:30:12.572Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+10:30:12 PM [express] WebSocket server initialized for real-time notifications
+10:30:12 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-27T22:30:13.021Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"29ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:13.279Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"32ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:13.315Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:13.335Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"49ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:13.420Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"2ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-04-27T22:30:13.821Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:14.672Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"675ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.781Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.798Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.853Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.876Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.877Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:15.927Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/","status":200,"duration":"1929ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.062Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.250Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.344Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"327ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.351Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"229ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.352Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"500ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.356Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"306ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.356Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"429ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.378Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@vite/client","status":200,"duration":"69ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.464Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.531Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.532Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.533Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.534Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.548Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@react-refresh","status":304,"duration":"45ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.647Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.648Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.649Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.651Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.652Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.656Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/main.tsx","status":200,"duration":"20ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.660Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.667Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.668Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.669Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.671Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.675Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":200,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.676Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.681Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.686Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.687Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.688Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.689Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.691Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.692Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.697Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.699Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.702Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.706Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.708Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.711Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.716Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.717Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.718Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.720Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.724Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.729Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.730Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.735Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.736Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.737Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.738Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.744Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.745Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.756Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.756Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.758Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.761Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.763Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.764Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.776Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.776Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.783Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.785Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.786Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.787Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.797Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.798Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.814Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.815Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.817Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.818Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.832Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.882Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/i18n.ts","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.885Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/index.css","status":200,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:16.887Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/App.tsx","status":200,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.060Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.080Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.082Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.277Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.280Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.287Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.288Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.434Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.476Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.479Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.481Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.485Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.633Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.676Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.679Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.682Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.684Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.823Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.825Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.877Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.879Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.881Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:17.883Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.028Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.031Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.079Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.081Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.209Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoices.tsx","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.212Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.224Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.236Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.280Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.282Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.408Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.417Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.436Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.490Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.492Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+10:30:18 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:30:18.541Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.545Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.605Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.614Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.635Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.692Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.713Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.804Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.809Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.832Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.890Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.911Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:18.943Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.023Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.024Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.031Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.090Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.110Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.145Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.224Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.226Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.229Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.290Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.310Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.343Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.423Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.505Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"87ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.507Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"82ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.511Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.512Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"28ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.543Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.649Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.703Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.706Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.710Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:19.713Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:20.217Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:30:21.146Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"5ms","ip":"127.0.0.1"}
+10:30:21 PM [express] GET /api/auth/user 304 in 12ms :: {"id":"526fae16-5da1-4335-b878-5919afde1cb4",…
+✅ Access: {"timestamp":"2026-04-27T22:30:21.148Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/api/auth/user","status":304,"duration":"8ms","ip":"127.0.0.1"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m10:31:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/invoices.tsx, /src/index.css?v=5ivVaJc39M3PqsN1v3NyM[22m

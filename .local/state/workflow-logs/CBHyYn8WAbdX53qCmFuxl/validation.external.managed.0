@@ -1,0 +1,31 @@
+VERDICT: REJECTED
+
+The core scheduling/due-date logic is largely corrected, but the diff introduces (and in practice amplifies) a blocking access-control flaw in manual generation that must be fixed before approval.
+
+Critical findings / analysis:
+-VERDICT: REJECTED
+ ✅ Task goals mostly implemented: cron is now daily at 00:01 UTC; elig
+ibility is filtered by `invoiceDayOfMonth` with correct last-day-The core scheduling/due-date logic is largely corrected, but the diff introduces (and in practice amplifies) a blocking access-control flaw in manual generation that must be fixed before approval.
+of-month fallback; `dueDate` is now based on `today + p
+aymentDueDays` (default 15); idempotency remains proCritical findings / analysis:
+tected by `uniq_invoices_contract_month`; summary logging is present with eligible/generated/skipped/errors.
+- ✅ Refactor quality is acceptable: `generateInvoiceForContract()` centralizes creation logic and is reused by scheduled/manual paths.
+- ❌ Blocking issue: `generateInvoicesNow({ contractIds })` accepts user-supplied `contractIds` from `/api/invoices/generate-monthly`, but `generateMonthlyInvoices()` loads `storage.getAllRentalContracts()` without tenant scoping and filters by raw IDs. This allows a tenant-authenticated caller to force invoice generation for contracts outside their tenant if IDs are known/guessed, and bypasses `autoGenerateInvoices` as implemented.
+
+Security:
+- Serious violation observed: broken access control / cross-tenant action possibility in manual forced generation (`contractIds` path). This is directly relevant to changed code and is blocking.
+
+Next actions:
+1. Enforce tenant scoping in manual generation flow: pass `tenantId` into `generateInvoicesNow/generateMonthlyInvoices` and query contracts with `storage.getAllRentalContracts(tenantId)` (or equivalent tenant-filtered lookup).
+2. Validate `contractIds` belong to the requester’s tenant before processing; reject unknown/out-of-tenant IDs with 403/400 and log attempted misuse.
+3. Add a targeted test for multi-tenant isolation on `/api/invoices/generate-monthly` (including forced `contractIds`) to prevent regression.- ✅ Task goals mostly implemented: cron is now daily at 00:01 UTC; eligibility is filtered by `invoiceDayOfMonth` with correct last-day-of-month fallback; `dueDate` is now based on `today + paymentDueDays` (default 15); idempotency remains protected by `uniq_invoices_contract_month`; summary logging is present with eligible/generated/skipped/errors.
+- ✅ Refactor quality is acceptable: `generateInvoiceForContract()` centralizes creation logic and is reused by scheduled/manual paths.
+- ❌ Blocking issue: `generateInvoicesNow({ contractIds })` accepts user-supplied `contractIds` from `/api/invoices/generate-monthly`, but `generateMonthlyInvoices()` loads `storage.getAllRentalContracts()` without tenant scoping and filters by raw IDs. This allows a tenant-authenticated caller to force invoice generation for contracts outside their tenant if IDs are known/guessed, and bypasses `autoGenerateInvoices` as implemented.
+
+Security:
+- Serious violation observed: broken access control / cross-tenant action possibility in manual forced generation (`contractIds` path). This is directly relevant to changed code and is blocking.
+
+Next actions:
+1. Enforce tenant scoping in manual generation flow: pass `tenantId` into `generateInvoicesNow/generateMonthlyInvoices` and query contracts with `storage.getAllRentalContracts(tenantId)` (or equivalent tenant-filtered lookup).
+2. Validate `contractIds` belong to the requester’s tenant before processing; reject unknown/out-of-tenant IDs with 403/400 and log attempted misuse.
+3. Add a targeted test for multi-tenant isolation on `/api/invoices/generate-monthly` (including forced `contractIds`) to prevent regression.

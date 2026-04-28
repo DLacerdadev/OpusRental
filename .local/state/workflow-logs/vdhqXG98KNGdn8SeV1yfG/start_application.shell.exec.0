@@ -1,0 +1,1139 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development node_modules/.bin/tsx server/index.ts
+
+[1G[0K{"level":"info","timestamp":"2026-04-27T22:42:27.215Z","service":"scheduler","operation":"scheduler_started","tenantId":null,"detail":{"jobs":["Pagamentos mensais: 1º dia de cada mês às 06:00 UTC","Pagamentos atrasados: A cada 6 horas","Manutenção vencida: Diariamente às 08:00 UTC","Geofencing GPS: A cada 2 horas"]}}
+{"level":"info","timestamp":"2026-04-27T22:42:27.216Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"starting"}
+{"level":"info","timestamp":"2026-04-27T22:42:27.224Z","service":"invoice-automation","operation":"initialize","tenantId":null,"detail":"started — monthly:daily/00:01 UTC overdue:daily/09:00 UTC due-reminder:daily/09:00 UTC"}
+[WebSocket] Notification server initialized on /ws/notifications
+10:42:27 PM [express] WebSocket server initialized for real-time notifications
+10:42:27 PM [express] serving on port 5000
+✅ Access: {"timestamp":"2026-04-27T22:42:28.359Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"44ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.394Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":200,"duration":"72ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.397Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.407Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.449Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.455Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.456Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.610Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"115ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:29.618Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"124ms","ip":"127.0.0.1"}
+Browserslist: browsers data (caniuse-lite) is 18 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ Access: {"timestamp":"2026-04-27T22:42:30.132Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"679ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:30.336Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/","status":200,"duration":"895ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.248Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.286Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.291Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.343Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.343Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/","status":200,"duration":"26ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.411Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@vite/client","status":200,"duration":"62ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.437Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.501Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@react-refresh","status":304,"duration":"99ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.636Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"355ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.637Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"349ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.652Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"329ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.657Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"341ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.771Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.844Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"527ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.926Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.927Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.965Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"38ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.974Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:33.994Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.035Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.036Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@vite/client","status":304,"duration":"44ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.075Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.078Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.121Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"78ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.155Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.156Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.222Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.256Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@react-refresh","status":304,"duration":"33ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.259Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.303Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.305Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.332Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.334Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.390Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.399Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/main.tsx","status":200,"duration":"56ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.402Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.404Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.404Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.406Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.406Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.414Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.418Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.435Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.437Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.438Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.443Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.443Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.444Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.449Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.451Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"27ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.453Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.459Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.462Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.463Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.470Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.478Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.484Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/main.tsx","status":200,"duration":"14ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.486Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.487Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.496Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.497Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.515Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.519Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.529Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.534Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.537Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.540Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.542Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.550Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.553Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.562Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.564Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.572Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.574Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.582Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.584Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.592Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.596Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.606Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.615Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/App.tsx","status":200,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.655Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"12ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.660Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/index.css","status":200,"duration":"11ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.812Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/App.tsx","status":200,"duration":"137ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.936Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/index.css","status":200,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:34.940Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/i18n.ts","status":200,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.221Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.231Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.241Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/i18n.ts","status":200,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.433Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"12ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.440Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.486Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.506Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"16ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.639Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.648Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.689Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.711Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.850Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.853Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.903Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:35.924Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.053Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.058Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.117Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.131Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.275Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.312Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.324Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.332Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.484Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.518Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.522Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.534Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.686Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.758Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.765Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"14ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.769Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"17ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.896Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+10:42:36 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:42:36.952Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:36.957Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.007Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.009Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.011Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.105Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.229Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.245Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.248Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.318Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"9ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.436Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.454Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.466Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.559Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.648Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.655Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.686Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.763Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.851Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.859Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.893Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:37.983Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"12ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.060Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.079Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.119Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.192Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.277Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.281Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.329Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.401Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.498Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.501Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.541Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.618Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.708Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.746Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.834Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.931Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:38.963Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.014Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.046Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.150Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.180Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.222Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.242Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.263Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.408Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.442Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.445Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.549Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.636Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.647Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.665Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.771Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"12ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.848Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.851Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:39.950Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.015Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.054Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.057Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.167Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.233Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.264Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.275Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.377Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.457Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.474Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.499Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.600Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.674Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.700Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.745Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.833Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.914Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.939Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:40.947Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.048Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.118Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.139Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.150Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.252Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.324Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.351Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.357Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.477Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.550Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.552Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.555Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.693Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.754Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.757Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.765Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.963Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.965Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.972Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:41.974Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.179Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.183Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.187Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.189Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.391Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.396Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.400Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.487Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.604Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.609Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"10ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.613Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"12ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.699Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.830Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.919Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:42.984Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:43.093Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:43.128Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"6ms","ip":"127.0.0.1"}
+10:42:56 PM [express] GET /api/auth/user 304 in 29ms :: {"id":"526fae16-5da1-4335-b878-5919afde1cb4",…
+✅ Access: {"timestamp":"2026-04-27T22:42:56.398Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/api/auth/user","status":304,"duration":"8ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:42:56.404Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:43:09.211Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"5ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:43:09.776Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"4ms","ip":"127.0.0.1"}
+10:43:22 PM [express] GET /api/auth/user 304 in 24ms :: {"id":"526fae16-5da1-4335-b878-5919afde1cb4",…
+✅ Access: {"timestamp":"2026-04-27T22:43:22.556Z","userId":"526fae16-5da1-4335-b878-5919afde1cb4","email":"admin@opuscapital.com","role":"admin","method":"GET","path":"/api/auth/user","status":304,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.923Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"7ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.960Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.971Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.980Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.982Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:01.983Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.008Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.009Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.010Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.044Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.045Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.047Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.061Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.062Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.063Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.070Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.074Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.075Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.077Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.079Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.080Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.086Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.087Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.095Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.097Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.105Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.106Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.108Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.109Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.110Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.110Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.142Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.142Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.143Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.146Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.147Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.147Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.178Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.179Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.182Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.184Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.186Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.191Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.195Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.200Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.201Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.201Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.204Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.212Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.217Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.225Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.226Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.226Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.231Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.231Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.234Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.247Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.249Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.256Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.259Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.259Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.260Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.273Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.275Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.284Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.288Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.298Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.300Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.302Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.313Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"3ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.320Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.321Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.328Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.328Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.330Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.333Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.347Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.348Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.379Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.627Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.648Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.663Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.673Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.683Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.722Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:02.727Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"5ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 8ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.736Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.745Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.754Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.763Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.774Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 10ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.798Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.810Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.821Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.832Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.841Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.850Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 2ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.858Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.866Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.876Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.886Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.894Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.903Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.912Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.920Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.929Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.937Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.946Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.955Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.963Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.971Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:02 PM [express] GET /api/auth/user 401 in 16ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:02.994Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.007Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.022Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.033Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.043Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.052Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.061Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.071Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.079Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.089Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.098Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.107Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.115Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.126Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.134Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.143Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.151Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.160Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.169Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.177Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.186Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.194Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.203Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.212Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.220Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.229Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.238Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.246Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.255Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.264Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.273Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.283Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.293Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.303Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.312Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.321Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.332Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.342Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.350Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.359Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.368Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.377Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.385Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.394Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.402Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.411Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.420Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.430Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.443Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.458Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.471Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.483Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.493Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.503Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.512Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.521Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.530Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.538Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.547Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.554Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.563Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.573Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.581Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.588Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.597Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.606Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.614Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.625Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.639Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 9ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.653Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.683Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.694Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.703Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.712Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.729Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"3ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.742Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.753Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.762Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 14ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.779Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.790Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.809Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.819Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.827Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.836Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.845Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.858Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.868Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.880Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.890Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.898Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.908Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.918Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.927Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.936Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.944Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.956Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.981Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:03 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:03.998Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.012Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.025Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.037Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.048Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.056Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.065Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.074Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.083Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.092Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.100Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.109Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.117Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.125Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.133Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.141Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.150Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.159Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.166Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.174Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.182Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.192Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.200Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.209Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.217Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.226Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.235Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.244Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.254Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.263Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.272Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.280Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.288Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.297Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.306Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.314Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.323Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.331Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.340Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.347Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.356Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.366Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.376Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.385Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.394Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.403Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.412Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:04 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:04.427Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.724Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"6ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.751Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/main.tsx","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.751Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@vite/client","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.752Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@replit/vite-plugin-dev-banner/banner-script.js","status":200,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.788Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@react-refresh","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.793Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/App.tsx","status":200,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.795Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/vite/dist/client/env.mjs","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.799Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/i18n.ts","status":200,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.804Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/index.css","status":200,"duration":"4ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.841Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/queryClient.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.847Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toaster.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.848Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tooltip.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.850Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useAuth.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.853Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/use-toast.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.869Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/sidebar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.871Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/layout/header.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.877Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/sheet.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.878Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/not-found.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.880Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/landing.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.882Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/login.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.889Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/register.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.890Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/dashboard.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.901Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/portfolio.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.902Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/tracking.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.905Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/assets.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.917Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/reports.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.918Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/financial.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.926Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/compliance.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.927Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/approvals.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.929Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/settings.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.930Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/investor-shares.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.946Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/gps-config.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.950Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-clients.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.961Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoices.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.962Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/rental-contracts.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.963Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/inspections.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.966Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/maintenance.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.986Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/broker.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.988Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/analytics.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.989Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-invoice.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.990Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/invoice-automation.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.992Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/checkout-share.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:04.993Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-debug.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.000Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/pages/admin-users.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.012Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/en-US.json","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.013Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/locales/pt-BR.json","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.013Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/utils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.014Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/toast.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.015Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/button.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.016Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/image_1759264185138.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.020Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/avatar.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.035Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/input.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.035Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/card.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.037Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dropdown-menu.tsx","status":304,"duration":"2ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.037Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/label.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.040Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/select.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.043Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/skeleton.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.047Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/progress.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.049Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/badge.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.050Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/performance-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.052Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/currency.ts","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.052Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/popover.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.057Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/world-map.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.065Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/radial-orbital-timeline.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.066Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/attached_assets/Design%20sem%20nome%20(18)_1763661820712.png","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.066Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.067Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/cookie-consent.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.067Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/maps/tracking-map.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.068Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/charts/revenue-chart.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/lib/exportUtils.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.093Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/command.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.094Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/hooks/useTheme.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.094Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/form.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.095Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/shared/schema.ts","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.095Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/switch.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.110Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/table.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.113Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/@fs/home/runner/workspace/node_modules/leaflet/dist/leaflet.css","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.113Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/textarea.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.114Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/alert-dialog.tsx","status":304,"duration":"0ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.115Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/src/components/ui/tabs.tsx","status":304,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.368Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.387Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.421Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+✅ Access: {"timestamp":"2026-04-27T22:48:05.426Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/","status":200,"duration":"3ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.437Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.446Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.455Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.465Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.474Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.483Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.493Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.501Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.510Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.518Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.526Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.535Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.544Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.553Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.561Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.571Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.579Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.586Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.594Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.604Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.613Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.622Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.631Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.639Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.648Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.658Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.667Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.675Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.684Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.691Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.700Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.707Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.715Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.723Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.732Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.741Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.749Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.758Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.764Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.772Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.781Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.790Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.798Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.807Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.815Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.824Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.832Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.841Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.851Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.861Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.869Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.879Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.888Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.898Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.906Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.916Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.926Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.935Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.943Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.953Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.965Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 10ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.982Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:05 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:05.994Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.003Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.012Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.020Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.030Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.039Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.048Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.058Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.067Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.076Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.094Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.103Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.111Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.119Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.129Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.139Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.148Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.163Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.174Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.184Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.194Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.201Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.210Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.218Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.226Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.235Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.244Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.252Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.260Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.268Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.277Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.285Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.294Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.303Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.312Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.320Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.330Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.338Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.347Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.356Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.369Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.379Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.388Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.397Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.406Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.414Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.434Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 7ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.450Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.465Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.477Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.495Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.506Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 8ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.520Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.531Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.542Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.554Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.571Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.581Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.591Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.602Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 6ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.612Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.626Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.639Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.649Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.658Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.666Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.677Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.686Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.695Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.704Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.713Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.722Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 9ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.735Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 11ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.763Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"2ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.775Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.783Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.791Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.799Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.807Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.815Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.823Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.831Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.839Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.847Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.855Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.863Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.870Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.878Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.885Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.893Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.901Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.909Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.916Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.924Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.933Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.942Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.951Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.960Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.968Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.976Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.983Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.992Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:06 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:06.999Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.010Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.019Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.025Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.033Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.041Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.049Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.058Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.066Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 4ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.075Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.085Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.094Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"1ms","ip":"127.0.0.1"}
+10:48:07 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+❌ Access Error: {"timestamp":"2026-04-27T22:48:07.104Z","userId":"anonymous","email":"unknown","role":"none","method":"GET","path":"/api/auth/user","status":401,"duration":"0ms","ip":"127.0.0.1"}

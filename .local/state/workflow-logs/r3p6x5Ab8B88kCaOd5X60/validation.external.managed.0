@@ -1,0 +1,37 @@
+VERDICT: APPROVED_WITH_COMMENTS
+The diff implements the task objective correctly: in “Nova fatura”, contract options now render as `{contractNumber} — {cliente} — {trailer}`, and selecting a contract auto-fills `amount`, `referenceMonth` (UTC `VERDICT: APPROVED_WITH_COMMENTS
+YYYY-MM`), and `dueDate` (UTC date + `paymentDueDays`, fallback 15). The fields remain editable, and switching contracts re-applies computed values as requested.
+
+Critical analysis:
+- ✅ Contract select label issue (duplicated contract number) is fixed with joined client/trailer metadata.
+- ✅ Auto-fill behavior is implemented with `form.watch("contractId")` + `useEffect` and updates all 3 target fields.
+- ✅ Manual override remains possible because fields are still normal form inputs.
+- ✅ i18n coverage was added for new UI strings in both `pt-BR` and `en-US`.
+
+Non-blocking comments:
+1) `amount` assignment uses `contract.monthlyRate ? ... : ""`. If a contract could ever have numeric `0` (unlikely, but possible), this would clear instead of setting `0`. Safer check would be nullish (`!= null`) instead of truthy.
+2) `contractLabel` performs `find()` lookups per option render (acceptable at current scale, but can become inefficient with many contracts; a memoized map would be cleaner if performance issues appear).
+
+Security: none observed.
+
+Next actions:
+1) Merge as-is.
+2) Optionally harden monthlyRate check to nullish logic to avoid edge-case zero-value clearing.
+3) Run a quick manual smoke test in UI (select/switch contract, override fields, save, verify persisted invoice values).The diff implements the task objective correctly: in “Nova fatura”, contract options now render as `{contractNumber} — {cliente} — {trailer}`, and selecting a contract auto-fills `amount`, `referenceMonth` (UTC `YYYY-MM`), and `dueDate` (UTC date + `paymentDueDays`, fallback 15). The fields remain editable, and switching contracts re-applies computed values as requested.
+
+Critical analysis:
+- ✅ Contract select label issue (duplicated contract number) is fixed with joined client/trailer metadata.
+- ✅ Auto-fill behavior is implemented with `form.watch("contractId")` + `useEffect` and updates all 3 target fields.
+- ✅ Manual override remains possible because fields are still normal form inputs.
+- ✅ i18n coverage was added for new UI strings in both `pt-BR` and `en-US`.
+
+Non-blocking comments:
+1) `amount` assignment uses `contract.monthlyRate ? ... : ""`. If a contract could ever have numeric `0` (unlikely, but possible), this would clear instead of setting `0`. Safer check would be nullish (`!= null`) instead of truthy.
+2) `contractLabel` performs `find()` lookups per option render (acceptable at current scale, but can become inefficient with many contracts; a memoized map would be cleaner if performance issues appear).
+
+Security: none observed.
+
+Next actions:
+1) Merge as-is.
+2) Optionally harden monthlyRate check to nullish logic to avoid edge-case zero-value clearing.
+3) Run a quick manual smoke test in UI (select/switch contract, override fields, save, verify persisted invoice values).

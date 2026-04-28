@@ -1,0 +1,39 @@
+VERDICT: REJECTED
+The diff is close, but it does not fully satisfy core functional requirements for contract-driven auto-fill in “Nova fatura”.
+
+Critical findings:
+- **Blocking behavior mismatch on `amount` recalculation**: In `invoices.tsx`, aVERDICT: REJECTED
+uto-fill only sets `amount` when `contract.monthlyRate` is truthy:
+  -The diff is close, but it does not fully satisfy core functional requirements for contract-driven auto-fill in “Nova fatura”.
+ `if (contract.monthlyRate) form.setValue("
+amount", ...)`
+  - There is no `else` brCritical findings:
+anch to clear/reset `amount`.
+  - Result:- **Blocking behavior mismatch on `amount` recalculation**: In `invoices.tsx`, auto-fill only sets `amount` when `contract.monthlyRate` is truthy:
+ if a manager selects contract A (with rat  - `if (contract.monthlyRate) form.setValue("amount", ...)`
+e), then switches to contract B (without r  - There is no `else` branch to clear/reset `amount`.
+ate), amount remains stale from A. This violates both:
+    - “Trocar o contrato ... recalcula os 3 campos”
+    - “Para contratos sem `monthlyRate`, campo fica vazio para edição”.
+- Contract select label improvement is correctly implemented (contract + client + trailer identifier), and i18n strings for new labels/hints are present in both `pt-BR` and `en-US`.
+- `referenceMonth` (UTC `YYYY-MM`) and `dueDate` (+`paymentDueDays`, default 15) calculations are implemented as requested.
+
+Security:
+- None observed (no serious authz/injection/secrets regressions introduced by this diff).
+
+Next actions (high impact):
+1. In the auto-fill `useEffect`, always set `amount` on contract change, including explicit clear when monthly rate is missing (e.g., `form.setValue("amount", contract.monthlyRate ? String(contract.monthlyRate) : "")`).
+2. Ensure this logic handles contract switches deterministically (no stale amount from previous selection).
+3. Run a quick manual smoke test for the two-path scenario: switch from contract with rate -> contract without rate, confirm amount becomes empty and save remains possible after manual entry.  - Result: if a manager selects contract A (with rate), then switches to contract B (without rate), amount remains stale from A. This violates both:
+    - “Trocar o contrato ... recalcula os 3 campos”
+    - “Para contratos sem `monthlyRate`, campo fica vazio para edição”.
+- Contract select label improvement is correctly implemented (contract + client + trailer identifier), and i18n strings for new labels/hints are present in both `pt-BR` and `en-US`.
+- `referenceMonth` (UTC `YYYY-MM`) and `dueDate` (+`paymentDueDays`, default 15) calculations are implemented as requested.
+
+Security:
+- None observed (no serious authz/injection/secrets regressions introduced by this diff).
+
+Next actions (high impact):
+1. In the auto-fill `useEffect`, always set `amount` on contract change, including explicit clear when monthly rate is missing (e.g., `form.setValue("amount", contract.monthlyRate ? String(contract.monthlyRate) : "")`).
+2. Ensure this logic handles contract switches deterministically (no stale amount from previous selection).
+3. Run a quick manual smoke test for the two-path scenario: switch from contract with rate -> contract without rate, confirm amount becomes empty and save remains possible after manual entry.

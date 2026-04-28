@@ -1,0 +1,39 @@
+VERDICT: APPROVED
+The diff correctly implements the task objective: in “Nova fatura”, selecting a contract now auto-fills `amount`, `referenceMonth`, and `dueDate`, and contract options now show a richer label (`contractNumber — client — traileVERDICT: APPROVED
+r`) instead of duplicated contract number.
+
+Critical findings / analysis:
+- **Contract select label fixed**: `contractLabel()` composes data from `rentalContracts`, `rentalClients`, and `trailers`, matching the requested UX improvement.
+- **Auto-fill behavior implemented**: a `useEffect` tied to `form.watch("contractId")` sets:
+  - `amount` from `contract.monthlyRate` (or empty string if absent),
+  - `referenceMonth` as current UTC month in `YYYY-MM`,
+  - `dueDate` as current date + `paymentDueDays` (fallback `15`) in `YYYY-MM-DD`.
+- **Recompute on contract switch**: behavior is “always recalculate,” which is explicitly acceptable per task description.
+- **Manual override preserved**: fields remain editable after auto-fill (no locking/disabling introduced).
+- **i18n completed**: new/updated strings were added in both `pt-BR` and `en-US` for contract field/hint and notes labels/placeholders.
+
+Security:
+- None observed (no authz path changes, no dangerous sink additions, no secrets handling changes).
+
+Next actions:
+1. Execute the manual smoke test from the task (select contract, verify 3 fields auto-fill, override values, save, verify invoice list result).
+2. Add/adjust a UI test for contract selection auto-fill to prevent regressions in `invoices.tsx`.
+3. (Optional) Validate with real tenant data where related client/trailer queries load slowly, ensuring labels update as expected after cache hydration.The diff correctly implements the task objective: in “Nova fatura”, selecting a contract now auto-fills `amount`, `referenceMonth`, and `dueDate`, and contract options now show a richer label (`contractNumber — client — trailer`) instead of duplicated contract number.
+
+Critical findings / analysis:
+- **Contract select label fixed**: `contractLabel()` composes data from `rentalContracts`, `rentalClients`, and `trailers`, matching the requested UX improvement.
+- **Auto-fill behavior implemented**: a `useEffect` tied to `form.watch("contractId")` sets:
+  - `amount` from `contract.monthlyRate` (or empty string if absent),
+  - `referenceMonth` as current UTC month in `YYYY-MM`,
+  - `dueDate` as current date + `paymentDueDays` (fallback `15`) in `YYYY-MM-DD`.
+- **Recompute on contract switch**: behavior is “always recalculate,” which is explicitly acceptable per task description.
+- **Manual override preserved**: fields remain editable after auto-fill (no locking/disabling introduced).
+- **i18n completed**: new/updated strings were added in both `pt-BR` and `en-US` for contract field/hint and notes labels/placeholders.
+
+Security:
+- None observed (no authz path changes, no dangerous sink additions, no secrets handling changes).
+
+Next actions:
+1. Execute the manual smoke test from the task (select contract, verify 3 fields auto-fill, override values, save, verify invoice list result).
+2. Add/adjust a UI test for contract selection auto-fill to prevent regressions in `invoices.tsx`.
+3. (Optional) Validate with real tenant data where related client/trailer queries load slowly, ensuring labels update as expected after cache hydration.

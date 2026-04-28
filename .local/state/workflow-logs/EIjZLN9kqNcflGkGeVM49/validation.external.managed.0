@@ -1,0 +1,27 @@
+VERDICT: APPROVED_WITH_COMMENTS
+
+A implementação atende ao objetivo funcional da tarefa: foi criado o endpoint `POST /api/rental-contracts/:id/generate-invoice` com `authorize()` + `isManager`, escopo por tenant, reutilização explícita de `InvoiceVERDICT: APPROVED_WITH_COMMENTS
+AutomationService.generateInvoiceForContract`, tratamento de duplicidade com `409`, tratamento de 
+contrato sem mensalidade com `422`, auditoria via `createAuditLog`, e retorno de `201` com a fatura em sucesso.
+
+No front (`rental-contracts.tsx`), o botão de geração foi adicionado na coluna de ações condicionado a contrato ativo + perfil manager/admin, com confirmação (`AlertDialog`), estado de loading, toast de sucesso/erro/duplicata e invalidação de cache de `['/api/invoices']` após sucesso (além de contratos). As novas strings i18n foram adicionadas em `pt-BR` e `en-US` e cobrem rótulo, confirmação e toasts.
+
+Ponto de atenção não bloqueante: o requisito textual de “botão ‘Gerar fatura agora’” pode ser interpretado como rótulo visível, mas a implementação está como botão de ícone com `title` (tooltip nativo). Funcionalmente está correto, porém pode divergir da expectativa de UX/QA se exigirem texto explícito no botão.
+
+Segurança: nenhuma violação séria observada. O endpoint está protegido por role e tenant scoping; não há exposição óbvia de dados sensíveis nem bypass de autorização.
+
+Next actions:
+1) Confirmar com QA/PO se o botão deve exibir texto visível (“Gerar fatura agora”) ou se ícone + tooltip é aceitável.
+2) Executar smoke test manual solicitado (gerar 1x, gerar 2x para duplicata, validar campos da fatura na tela de Faturas).
+3) (Opcional) Adicionar teste de integração para o endpoint cobrindo sucesso, duplicata (409) e missing_rate (422).A implementação atende ao objetivo funcional da tarefa: foi criado o endpoint `POST /api/rental-contracts/:id/generate-invoice` com `authorize()` + `isManager`, escopo por tenant, reutilização explícita de `InvoiceAutomationService.generateInvoiceForContract`, tratamento de duplicidade com `409`, tratamento de contrato sem mensalidade com `422`, auditoria via `createAuditLog`, e retorno de `201` com a fatura em sucesso.
+
+No front (`rental-contracts.tsx`), o botão de geração foi adicionado na coluna de ações condicionado a contrato ativo + perfil manager/admin, com confirmação (`AlertDialog`), estado de loading, toast de sucesso/erro/duplicata e invalidação de cache de `['/api/invoices']` após sucesso (além de contratos). As novas strings i18n foram adicionadas em `pt-BR` e `en-US` e cobrem rótulo, confirmação e toasts.
+
+Ponto de atenção não bloqueante: o requisito textual de “botão ‘Gerar fatura agora’” pode ser interpretado como rótulo visível, mas a implementação está como botão de ícone com `title` (tooltip nativo). Funcionalmente está correto, porém pode divergir da expectativa de UX/QA se exigirem texto explícito no botão.
+
+Segurança: nenhuma violação séria observada. O endpoint está protegido por role e tenant scoping; não há exposição óbvia de dados sensíveis nem bypass de autorização.
+
+Next actions:
+1) Confirmar com QA/PO se o botão deve exibir texto visível (“Gerar fatura agora”) ou se ícone + tooltip é aceitável.
+2) Executar smoke test manual solicitado (gerar 1x, gerar 2x para duplicata, validar campos da fatura na tela de Faturas).
+3) (Opcional) Adicionar teste de integração para o endpoint cobrindo sucesso, duplicata (409) e missing_rate (422).
