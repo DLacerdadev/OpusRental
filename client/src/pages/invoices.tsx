@@ -746,7 +746,7 @@ export default function Invoices() {
     .filter((i: any) => i.status === "paid")
     .reduce((sum: number, i: any) => sum + parseFloat(i.amount || "0"), 0);
 
-  const formatBRL = (value: number | string) =>
+  const formatUSD = (value: number | string) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -1058,7 +1058,7 @@ export default function Invoices() {
                       className="px-4 py-3 text-sm font-medium text-foreground"
                       data-testid={`text-invoice-amount-${invoice.id}`}
                     >
-                      {formatBRL(invoice.amount || "0")}
+                      {formatUSD(invoice.amount || "0")}
                     </td>
                     <td
                       className="px-4 py-3 text-sm text-muted-foreground"
@@ -1138,7 +1138,7 @@ export default function Invoices() {
                           className="text-sm font-bold text-foreground"
                           data-testid={`text-invoice-amount-mobile-${invoice.id}`}
                         >
-                          {formatBRL(invoice.amount || "0")}
+                          {formatUSD(invoice.amount || "0")}
                         </p>
                       </div>
                     </div>

@@ -45,7 +45,7 @@ const formatUSD = (n: number) =>
 
 const formatUSDate = (input: string | Date) => {
   const d = typeof input === "string" ? new Date(input) : input;
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" });
 };
 
 function StripePaymentForm({

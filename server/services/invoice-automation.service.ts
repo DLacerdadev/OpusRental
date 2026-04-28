@@ -290,7 +290,7 @@ export class InvoiceAutomationService {
         const emailLog = EmailService.createEmailLog(
           client.email,
           client.tradeName || client.companyName,
-          `Invoice ${invoice.invoiceNumber} - ${referenceMonth}`,
+          `Invoice #${invoice.invoiceNumber} - ${referenceMonth}`,
           "invoice",
           "invoice",
           invoice.id,
@@ -485,7 +485,7 @@ export class InvoiceAutomationService {
           const emailLog = EmailService.createEmailLog(
             client.email,
             client.tradeName || client.companyName,
-            `Payment Reminder - Invoice ${invoice.invoiceNumber} (${daysOverdue} days overdue)`,
+            `Payment Reminder - Invoice #${invoice.invoiceNumber} (${daysOverdue} days overdue)`,
             "payment_reminder",
             "invoice",
             invoice.id,
@@ -586,7 +586,7 @@ export class InvoiceAutomationService {
           const emailLog = EmailService.createEmailLog(
             client.email,
             client.tradeName || client.companyName,
-            `Reminder: Invoice ${invoice.invoiceNumber} due in 3 days`,
+            `Reminder: Invoice #${invoice.invoiceNumber} due in 3 days`,
             "due_reminder",
             "invoice",
             invoice.id,

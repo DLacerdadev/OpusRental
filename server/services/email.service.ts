@@ -326,7 +326,7 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Invoice ${invoice.invoiceNumber}</h1>
+      <h1>Invoice #${invoice.invoiceNumber}</h1>
       <p>${brandName}</p>
     </div>
     <div class="content">
@@ -408,7 +408,7 @@ export class EmailService {
   <div class="container">
     <div class="header">
       <h1>Payment reminder</h1>
-      <p>Invoice ${invoice.invoiceNumber} is overdue</p>
+      <p>Invoice #${invoice.invoiceNumber} is overdue</p>
     </div>
     <div class="content">
       <h2>Hello ${client.tradeName || client.companyName},</h2>
@@ -494,7 +494,7 @@ export class EmailService {
   <div class="container">
     <div class="header">
       <h1>Friendly reminder</h1>
-      <p>Invoice ${invoice.invoiceNumber} is due ${dayLabel}</p>
+      <p>Invoice #${invoice.invoiceNumber} is due ${dayLabel}</p>
     </div>
     <div class="content">
       <h2>Hello ${client.tradeName || client.companyName},</h2>
@@ -577,7 +577,7 @@ export class EmailService {
   <div class="container">
     <div class="header">
       <h1>Reissued invoice</h1>
-      <p>Invoice ${invoice.invoiceNumber} — new due date</p>
+      <p>Invoice #${invoice.invoiceNumber} — new due date</p>
     </div>
     <div class="content">
       <h2>Hello ${client.tradeName || client.companyName},</h2>
@@ -634,7 +634,7 @@ export class EmailService {
     const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generateInvoiceEmail(data);
     const text = `
-Invoice ${data.invoice.invoiceNumber}
+Invoice #${data.invoice.invoiceNumber}
 
 Hello ${data.client.tradeName || data.client.companyName},
 
@@ -655,7 +655,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Invoice ${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
+      subject: `Invoice #${data.invoice.invoiceNumber} — ${data.invoice.referenceMonth}`,
       html,
       text,
       attachments: data.attachments,
@@ -670,7 +670,7 @@ ${brandName}
     const paymentUrl = publicPaymentLinkFor(data.invoice.id);
     const html = this.generatePaymentReminderEmail(data, daysOverdue);
     const text = `
-PAYMENT REMINDER — Invoice ${data.invoice.invoiceNumber}
+PAYMENT REMINDER — Invoice #${data.invoice.invoiceNumber}
 
 Hello ${data.client.tradeName || data.client.companyName},
 
@@ -690,7 +690,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Payment reminder — Invoice ${data.invoice.invoiceNumber} (${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due)`,
+      subject: `Payment reminder — Invoice #${data.invoice.invoiceNumber} (${daysOverdue} day${daysOverdue > 1 ? 's' : ''} past due)`,
       html,
       text,
       attachments: data.attachments,
@@ -710,11 +710,11 @@ ${brandName}
     const dayLabel = daysUntilDue === 1 ? "tomorrow" : `in ${daysUntilDue} days`;
     const dueDateStr = formatUSDate(data.invoice.dueDate);
     const text = `
-Friendly reminder — Invoice ${data.invoice.invoiceNumber}
+Friendly reminder — Invoice #${data.invoice.invoiceNumber}
 
 Hello ${data.client.tradeName || data.client.companyName},
 
-Invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) is due ${dayLabel} (${dueDateStr}).
+Invoice #${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) is due ${dayLabel} (${dueDateStr}).
 
 ${renderInvoiceTotalsText(data.invoice)}
 Due date: ${dueDateStr}
@@ -731,7 +731,7 @@ ${brandName}
       toName: data.client.tradeName || data.client.companyName,
       fromName: brandName,
       fromAddress: data.tenant?.billingEmail?.trim() || undefined,
-      subject: `Reminder: Invoice ${data.invoice.invoiceNumber} due ${dayLabel} (${dueDateStr})`,
+      subject: `Reminder: Invoice #${data.invoice.invoiceNumber} due ${dayLabel} (${dueDateStr})`,
       html,
       text,
       attachments: data.attachments,
@@ -752,7 +752,7 @@ Reissued invoice — ${data.invoice.invoiceNumber}
 
 Hello ${data.client.tradeName || data.client.companyName},
 
-Invoice ${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
+Invoice #${data.invoice.invoiceNumber} (Contract ${data.contract.contractNumber}) has been reissued with a new due date.
 
 ${renderInvoiceTotalsText(data.invoice)}
 Previous due date: ${oldDueDateStr}
