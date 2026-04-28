@@ -657,21 +657,36 @@ export class PDFService {
     }
 
     // Sales tax: prefer the per-invoice values stored on the invoice itself
-    // (so historical invoices stay frozen). Fall back to the tenant's default
-    // rate applied to the items subtotal for invoices created before tax
-    // localization was rolled out.
+    // so historical invoices stay frozen. For legacy invoices created before
+    // tax localization was rolled out (no stored subtotal/salesTaxAmount), we
+    // intentionally do NOT retroactively apply the tenant's current default
+    // rate — the PDF total must always equal `invoice.amount` so the customer
+    // never sees a number different from what Stripe will actually charge.
+    // In that legacy case we treat the entire stored amount as the line total
+    // with zero sales tax.
     const itemsSubtotal = items.reduce((sum, item) => sum + item.amount, 0);
     const storedSubtotal = data.subtotal != null ? parseFloat(data.subtotal.toString()) : null;
     const storedTax = data.salesTaxAmount != null ? parseFloat(data.salesTaxAmount.toString()) : null;
-    const tenantRate = data.tenant?.salesTaxRate != null ? parseFloat(data.tenant.salesTaxRate.toString()) : 0;
+    const storedAmount = parseFloat((data.amount ?? "0").toString());
+    const hasStoredBreakdown = storedSubtotal != null && Number.isFinite(storedSubtotal)
+      && storedTax != null && Number.isFinite(storedTax);
 
-    const subtotal = storedSubtotal != null && Number.isFinite(storedSubtotal) ? storedSubtotal : itemsSubtotal;
-    const tax = storedTax != null && Number.isFinite(storedTax)
-      ? storedTax
-      : Number.isFinite(tenantRate) && tenantRate > 0
-        ? Number((itemsSubtotal * (tenantRate / 100)).toFixed(2))
-        : 0;
-    const total = subtotal + tax;
+    let subtotal: number;
+    let tax: number;
+    let total: number;
+    if (hasStoredBreakdown) {
+      subtotal = storedSubtotal!;
+      tax = storedTax!;
+      total = subtotal + tax;
+    } else {
+      // Legacy invoice: prefer the amount stored on the invoice (= what
+      // Stripe charges) so PDF and charge always agree. If for some reason
+      // the stored amount is not parseable, fall back to the items subtotal.
+      const safeAmount = Number.isFinite(storedAmount) ? storedAmount : itemsSubtotal;
+      total = safeAmount;
+      subtotal = safeAmount;
+      tax = 0;
+    }
 
     const dueDate = this.toISO(data.dueDate);
     if (!dueDate) {

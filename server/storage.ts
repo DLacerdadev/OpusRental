@@ -1509,9 +1509,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async reissueInvoice(id: string, newDueDate: string, tenantId: string): Promise<Invoice> {
+    // Read the current row first so we can backfill the US-flow tax breakdown
+    // for legacy invoices (created before salesTaxRate/Amount/subtotal
+    // existed). For those rows we freeze subtotal = amount and tax = 0 so the
+    // reissued PDF/email/charge stay in lockstep — never retroactively
+    // applying a different tenant tax rate to a charge the customer was
+    // already quoted. Newer invoices that already have a stored breakdown
+    // are left untouched: their amount/subtotal/tax stay frozen.
+    const existing = await this.getInvoice(id, tenantId);
+    if (!existing) throw new Error("Invoice not found or access denied");
+
+    const updateSet: Partial<typeof invoices.$inferInsert> & { dueDate: string; status: string } = {
+      dueDate: newDueDate,
+      status: "reissued",
+    };
+    const hasBreakdown = existing.subtotal != null && existing.salesTaxAmount != null;
+    if (!hasBreakdown) {
+      updateSet.subtotal = existing.amount;
+      updateSet.salesTaxRate = "0";
+      updateSet.salesTaxAmount = "0";
+    }
+
     const [updated] = await db
       .update(invoices)
-      .set({ dueDate: newDueDate, status: "reissued" })
+      .set(updateSet)
       .from(rentalContracts)
       .where(and(eq(invoices.id, id), eq(invoices.contractId, rentalContracts.id), eq(rentalContracts.tenantId, tenantId)))
       .returning();

@@ -1701,7 +1701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const emailLog = EmailService.createEmailLog(
             client.email,
             client.tradeName || client.companyName,
-            `📄 Invoice Reissued (2ª Via) - ${invoice.invoiceNumber} - New Due Date ${newDueDateLocale}`,
+            `Invoice Reissued - ${invoice.invoiceNumber} - New Due Date ${newDueDateLocale}`,
             "invoice_reissued",
             "invoice",
             invoice.id,
