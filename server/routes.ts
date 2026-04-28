@@ -401,11 +401,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         salesTaxRate: z
           .union([z.string(), z.number()])
           .optional()
-          .transform((v) => {
+          .transform((v, ctx) => {
             if (v === undefined) return undefined;
             const n = typeof v === "number" ? v : parseFloat(v === "" ? "0" : v);
             if (!Number.isFinite(n) || n < 0 || n > 100) {
-              throw new Error("salesTaxRate must be between 0 and 100");
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "salesTaxRate must be between 0 and 100",
+              });
+              return z.NEVER;
             }
             return n.toFixed(2);
           }),
@@ -451,6 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bankAccount: updatedTenant.bankAccount ?? null,
         bankAccountHolder: updatedTenant.bankAccountHolder ?? null,
         bankAccountType: updatedTenant.bankAccountType ?? null,
+        salesTaxRate: updatedTenant.salesTaxRate ?? "0",
       };
 
       res.json(tenantData);
