@@ -2336,6 +2336,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/trailers/:id/audit-logs — chronological history of who changed
+  // this trailer and what fields/details were affected. Used by the asset
+  // details dialog "History" tab so managers/admins can audit edits without
+  // leaving the page. Tenant isolation is enforced inside the storage query
+  // (audit_logs.tenantId = req.tenantId), so cross-tenant trailer ids will
+  // always return an empty list rather than leaking history rows.
+  app.get("/api/trailers/:id/audit-logs", authorize(), async (req, res) => {
+    try {
+      // Clamp the limit between 1 and 500 so a malformed/negative ?limit
+      // can't either return zero rows silently or blow up the response.
+      const rawLimit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 100, 1), 500);
+      const logs = await storage.getAuditLogsForEntity("trailer", req.params.id, req.tenantId!, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Get trailer audit logs error:", error);
+      res.status(500).json({ message: "Failed to fetch trailer audit logs" });
+    }
+  });
+
   // ----------------------------------------------------------------------
   // Trailer documents — file attachments per trailer (Object Storage)
   // ----------------------------------------------------------------------

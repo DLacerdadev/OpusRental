@@ -45,6 +45,7 @@ export const Policy = {
   "GET /api/trailers/:id": ["manager", "admin"],
   "POST /api/trailers": ["manager", "admin"],
   "PATCH /api/trailers/:id": ["manager", "admin"],
+  "GET /api/trailers/:id/audit-logs": ["manager", "admin"],
 
   // ===== Trailer Documents =====
   "GET /api/trailers/:id/documents": ["manager", "admin"],

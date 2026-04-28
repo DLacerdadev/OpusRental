@@ -273,6 +273,27 @@
       "inspection": "Inspection",
       "purchase_invoice": "Purchase Invoice",
       "other": "Other"
+    },
+    "tabHistory": "History",
+    "history": {
+      "title": "Edit History",
+      "description": "Who changed this asset, when, and which fields were updated.",
+      "loading": "Loading history...",
+      "empty": "No changes have been recorded for this asset yet.",
+      "loadError": "Failed to load history.",
+      "unknownUser": "Removed user",
+      "systemUser": "System",
+      "changedFields": "Changed fields",
+      "noFieldsChanged": "No field details",
+      "showDetails": "Show details",
+      "hideDetails": "Hide details",
+      "actions": {
+        "create_trailer": "Created the asset",
+        "update_trailer": "Updated the asset",
+        "delete_trailer": "Deleted the asset",
+        "import_trailers": "Imported assets",
+        "export_trailers": "Exported assets"
+      }
     }
   },
   "tracking": {

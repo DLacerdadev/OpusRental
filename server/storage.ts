@@ -137,6 +137,12 @@ export interface IStorage {
   // Audit log operations
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getRecentAuditLogs(tenantId: string, limit?: number): Promise<AuditLog[]>;
+  getAuditLogsForEntity(
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+    limit?: number,
+  ): Promise<Array<AuditLog & { user: { id: string; username: string; email: string; role: string } | null }>>;
   
   // Financial operations
   getFinancialRecordByMonth(month: string, tenantId: string): Promise<FinancialRecord | undefined>;
@@ -681,6 +687,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(auditLogs.tenantId, tenantId))
       .orderBy(desc(auditLogs.timestamp))
       .limit(limit);
+  }
+
+  async getAuditLogsForEntity(
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+    limit: number = 100,
+  ): Promise<Array<AuditLog & { user: { id: string; username: string; email: string; role: string } | null }>> {
+    const rows = await db
+      .select({
+        log: auditLogs,
+        user: {
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          role: users.role,
+        },
+      })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .where(
+        and(
+          eq(auditLogs.tenantId, tenantId),
+          eq(auditLogs.entityType, entityType),
+          eq(auditLogs.entityId, entityId),
+        ),
+      )
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(limit);
+
+    return rows.map((r) => ({
+      ...r.log,
+      user: r.user && r.user.id ? r.user : null,
+    }));
   }
 
   // Financial operations

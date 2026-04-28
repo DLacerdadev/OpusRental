@@ -270,6 +270,27 @@
       "inspection": "Inspeção",
       "purchase_invoice": "Nota de Compra",
       "other": "Outro"
+    },
+    "tabHistory": "Histórico",
+    "history": {
+      "title": "Histórico de Edições",
+      "description": "Quem alterou este ativo, quando e quais campos foram modificados.",
+      "loading": "Carregando histórico...",
+      "empty": "Nenhuma alteração registrada para este ativo ainda.",
+      "loadError": "Não foi possível carregar o histórico.",
+      "unknownUser": "Usuário removido",
+      "systemUser": "Sistema",
+      "changedFields": "Campos alterados",
+      "noFieldsChanged": "Sem detalhes de campos",
+      "showDetails": "Ver detalhes",
+      "hideDetails": "Ocultar detalhes",
+      "actions": {
+        "create_trailer": "Criou o ativo",
+        "update_trailer": "Atualizou o ativo",
+        "delete_trailer": "Excluiu o ativo",
+        "import_trailers": "Importou ativos",
+        "export_trailers": "Exportou ativos"
+      }
     }
   },
   "tracking": {

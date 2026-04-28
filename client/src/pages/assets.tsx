@@ -29,7 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw, GripVertical } from "lucide-react";
+import { Download, Eye, Plus, Check, ChevronsUpDown, ChevronDown, Upload, FileText, Trash2, Search, Pencil, RefreshCw, GripVertical, History as HistoryIcon, User as UserIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,6 +169,13 @@ export default function Assets() {
     },
     onSuccess: (updated: Trailer) => {
       queryClient.invalidateQueries({ queryKey: ["/api/trailers"] });
+      // The PATCH endpoint writes a new audit log entry, so refresh the
+      // History tab's cached query for this trailer too — otherwise the
+      // tab keeps showing stale data because audit-log queries reuse the
+      // global Infinity staleTime.
+      queryClient.invalidateQueries({
+        queryKey: ["/api/trailers", updated.id, "audit-logs"],
+      });
       toast({
         title: t('assets.editSuccessTitle', 'Ativo atualizado'),
         description: t('assets.editSuccessDescription', 'As alterações foram salvas com sucesso.'),
@@ -990,12 +997,15 @@ export default function Assets() {
           
           {selectedTrailer && (
             <Tabs defaultValue="overview" className="mt-4">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="overview" data-testid="tab-overview">
                   {t('assets.tabOverview', 'Visão Geral')}
                 </TabsTrigger>
                 <TabsTrigger value="documents" data-testid="tab-documents">
                   {t('assets.tabDocuments', 'Documentos')}
+                </TabsTrigger>
+                <TabsTrigger value="history" data-testid="tab-history">
+                  {t('assets.tabHistory', 'Histórico')}
                 </TabsTrigger>
               </TabsList>
 
@@ -1172,6 +1182,10 @@ export default function Assets() {
 
               <TabsContent value="documents" className="mt-4">
                 <TrailerDocumentsTab trailerId={selectedTrailer.id} />
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-4">
+                <TrailerHistoryTab trailerId={selectedTrailer.id} />
               </TabsContent>
             </Tabs>
           )}
@@ -1855,6 +1869,197 @@ function SortableDocumentRow({
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+    </div>
+  );
+}
+
+type TrailerAuditLogEntry = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  details: any;
+  ipAddress: string | null;
+  timestamp: string;
+  user: { id: string; username: string; email: string; role: string } | null;
+};
+
+function TrailerHistoryTab({ trailerId }: { trailerId: string }) {
+  const { t } = useTranslation();
+
+  const { data: logs, isLoading, isError } = useQuery<TrailerAuditLogEntry[]>({
+    queryKey: ["/api/trailers", trailerId, "audit-logs"],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3" data-testid="history-loading">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div
+        className="p-4 rounded-md bg-destructive/10 text-destructive text-sm"
+        data-testid="history-error"
+      >
+        {t('assets.history.loadError', 'Failed to load history.')}
+      </div>
+    );
+  }
+
+  if (!logs || logs.length === 0) {
+    return (
+      <div
+        className="p-6 text-center text-sm text-muted-foreground border border-dashed rounded-md"
+        data-testid="history-empty"
+      >
+        {t('assets.history.empty', 'No changes have been recorded for this asset yet.')}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-semibold text-lg" data-testid="text-history-title">
+          {t('assets.history.title', 'Edit History')}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {t('assets.history.description', 'Who changed this asset, when, and which fields were updated.')}
+        </p>
+      </div>
+
+      <div className="space-y-3" data-testid="list-history-entries">
+        {logs.map((entry) => (
+          <HistoryEntry key={entry.id} entry={entry} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HistoryEntry({ entry }: { entry: TrailerAuditLogEntry }) {
+  const { t } = useTranslation();
+  const [showDetails, setShowDetails] = useState(false);
+
+  // entry.user is null in two cases: (a) the originating user was deleted,
+  // and (b) the audit log row was written without a userId (system jobs
+  // such as the cron-driven invoice/payment generators). We can tell them
+  // apart by looking at entry.userId — present-but-not-joined means the
+  // user was deleted, missing means it was a system action.
+  const userLabel = entry.user
+    ? entry.user.username || entry.user.email
+    : (entry as any).userId
+      ? t('assets.history.unknownUser', 'Removed user')
+      : t('assets.history.systemUser', 'System');
+
+  const actionLabel = t(
+    `assets.history.actions.${entry.action}`,
+    entry.action.replace(/_/g, ' '),
+  );
+
+  const changedFields: string[] = Array.isArray(entry.details?.changedFields)
+    ? entry.details.changedFields
+    : [];
+
+  let formattedTime = entry.timestamp;
+  try {
+    formattedTime = format(new Date(entry.timestamp), "dd/MM/yyyy HH:mm");
+  } catch {
+    /* fall back to raw string */
+  }
+
+  const hasDetailsPayload =
+    entry.details && typeof entry.details === "object" && Object.keys(entry.details).length > 0;
+
+  return (
+    <div
+      className="border rounded-md p-3 bg-muted/20 space-y-2"
+      data-testid={`history-entry-${entry.id}`}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0">
+          <div className="mt-0.5 text-muted-foreground">
+            <HistoryIcon className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <p
+              className="font-medium text-sm"
+              data-testid={`text-history-action-${entry.id}`}
+            >
+              {actionLabel}
+            </p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+              <UserIcon className="h-3 w-3" />
+              <span data-testid={`text-history-user-${entry.id}`}>{userLabel}</span>
+              {entry.user?.role && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                  {entry.user.role}
+                </Badge>
+              )}
+            </p>
+          </div>
+        </div>
+        <div
+          className="text-xs text-muted-foreground font-mono whitespace-nowrap"
+          data-testid={`text-history-timestamp-${entry.id}`}
+        >
+          {formattedTime}
+        </div>
+      </div>
+
+      <div className="text-xs">
+        <span className="text-muted-foreground">
+          {t('assets.history.changedFields', 'Changed fields')}:
+        </span>{" "}
+        {changedFields.length > 0 ? (
+          <span className="flex flex-wrap gap-1 mt-1" data-testid={`list-history-fields-${entry.id}`}>
+            {changedFields.map((field) => (
+              <Badge key={field} variant="secondary" className="text-[10px]">
+                {field}
+              </Badge>
+            ))}
+          </span>
+        ) : (
+          <span className="text-muted-foreground italic">
+            {t('assets.history.noFieldsChanged', 'No field details')}
+          </span>
+        )}
+      </div>
+
+      {hasDetailsPayload && (
+        <Collapsible open={showDetails} onOpenChange={setShowDetails}>
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              data-testid={`button-toggle-history-details-${entry.id}`}
+            >
+              <ChevronDown
+                className={`h-3 w-3 mr-1 transition-transform ${showDetails ? "rotate-180" : ""}`}
+              />
+              {showDetails
+                ? t('assets.history.hideDetails', 'Hide details')
+                : t('assets.history.showDetails', 'Show details')}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <pre
+              className="mt-2 p-2 rounded bg-background/60 border text-[11px] font-mono overflow-x-auto"
+              data-testid={`text-history-details-${entry.id}`}
+            >
+              {JSON.stringify(entry.details, null, 2)}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </div>
   );
 }
