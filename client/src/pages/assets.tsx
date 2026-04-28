@@ -35,6 +35,12 @@ import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTrailerSchema, type InsertTrailer, type Trailer, type TrailerDocument } from "@shared/schema";
+import {
+  DOCUMENT_CATEGORIES,
+  DOCUMENT_TYPE_CATALOG,
+  type DocumentCategory,
+  type DocumentStatus,
+} from "@shared/document-types";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1447,518 +1453,587 @@ export default function Assets() {
   );
 }
 
-const DOCUMENT_CATEGORIES = [
-  "title",
-  "registration",
-  "insurance",
-  "inspection",
-  "purchase_invoice",
-  "other",
-] as const;
+// ---------------------------------------------------------------------------
+// Trailer Documents — tabbed checklist UI
+// ---------------------------------------------------------------------------
+//
+// Replaces the old free-form drag-reorder list. Documents are now bucketed
+// into 4 fixed categories (Vehicle / Insurance / Contracts / Tracking) and
+// inside each category every supported document_type from
+// DOCUMENT_TYPE_CATALOG is rendered as a row — with or without a current
+// upload — so the user always sees the full required+optional checklist.
+//
+// Each row owns:
+//  - the current version (filename, status badge, version number, uploader)
+//  - approve/reject controls (managers only) for pending documents
+//  - a version-history popover listing every prior version
+//  - upload / replace / delete actions
+//
+// "Replace" is implemented as a plain new upload because the storage layer
+// auto-detects the existing chain by (trailer, document_type) and
+// transparently bumps the version + flips is_current.
+
+type EnrichedDocument = TrailerDocument & {
+  uploader?: { id: string; name: string; email: string | null } | null;
+  reviewer?: { id: string; name: string; email: string | null } | null;
+};
+
+type GroupedByType = Record<
+  string,
+  { current: EnrichedDocument | null; history: EnrichedDocument[] }
+>;
+
+function statusBadgeVariant(
+  status: DocumentStatus,
+): "default" | "secondary" | "destructive" {
+  if (status === "approved") return "default";
+  if (status === "rejected") return "destructive";
+  return "secondary"; // pending
+}
 
 function TrailerDocumentsTab({ trailerId }: { trailerId: string }) {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const [category, setCategory] = useState<string>("other");
-  const { uploadFile, isUploading } = useUpload();
-  // Hidden <input type="file"> used by the per-document "Replace" button.
-  // We reuse a single input and stash the target document id on the element
-  // so we don't have to render N inputs.
-  const replaceInputRef = useRef<HTMLInputElement | null>(null);
-  const [replacingDocId, setReplacingDocId] = useState<string | null>(null);
-
-  type EnrichedDocument = TrailerDocument & {
-    uploader?: { id: string; name: string; email: string | null } | null;
-  };
+  const [activeTab, setActiveTab] = useState<DocumentCategory>("vehicle");
 
   const { data: documents, isLoading } = useQuery<EnrichedDocument[]>({
     queryKey: ["/api/trailers", trailerId, "documents"],
   });
 
-  // Local copy of the document list used to drive the rendered order. We
-  // keep our own copy (rather than rendering directly from the query data)
-  // so an in-flight reorder feels instant: the user sees the new order the
-  // moment they release the drag, and we only fall back to server data once
-  // the mutation completes (or fails).
-  const [orderedDocs, setOrderedDocs] = useState<EnrichedDocument[]>([]);
+  // Bucket every document by (category, documentType) into { current, history }.
+  // `current` is the row with is_current=true (there is at most one per type).
+  // `history` lists historical versions newest-first.
+  const grouped = useMemo<Record<DocumentCategory, GroupedByType>>(() => {
+    const byCat: Record<DocumentCategory, GroupedByType> = {
+      vehicle: {},
+      insurance: {},
+      contract: {},
+      tracking: {},
+    };
+    if (!documents) return byCat;
 
-  // Sort documents into a stable, category-grouped order. Within a category
-  // the server already returns rows in `sortOrder` ASC, so we just preserve
-  // the incoming order rather than re-sorting by upload date.
-  const sortedDocuments = useMemo(() => {
-    if (!documents) return [];
-    const idx: Record<string, number> = Object.fromEntries(
-      DOCUMENT_CATEGORIES.map((c, i) => [c, i]),
-    );
-    return [...documents].sort((a, b) => {
-      const catCmp = (idx[a.documentCategory] ?? 99) - (idx[b.documentCategory] ?? 99);
-      if (catCmp !== 0) return catCmp;
-      return 0;
-    });
-  }, [documents]);
-
-  // Sync local ordering whenever the server data changes (e.g. after an
-  // upload, delete, or reorder confirmation).
-  useEffect(() => {
-    setOrderedDocs(sortedDocuments);
-  }, [sortedDocuments]);
-
-  // Normalize a possibly-legacy documentCategory value into a known bucket.
-  // We have to use the same mapping in both the visual grouping AND the
-  // reorder rebuild loop, otherwise a row shown under "other" would never
-  // be matched when reordering that group.
-  const normalizeCategory = (cat: string) =>
-    (DOCUMENT_CATEGORIES as readonly string[]).includes(cat) ? cat : "other";
-
-  // Group the ordered list by category so each category renders inside its
-  // own SortableContext (drag is restricted to within a category).
-  const docsByCategory = useMemo(() => {
-    const groups: Record<string, EnrichedDocument[]> = {};
-    for (const cat of DOCUMENT_CATEGORIES) groups[cat] = [];
-    for (const doc of orderedDocs) {
-      groups[normalizeCategory(doc.documentCategory)].push(doc);
+    for (const doc of documents) {
+      const cat = (doc.category ?? "vehicle") as DocumentCategory;
+      const type = doc.documentType ?? "other";
+      // Skip rows that landed under an unknown category (shouldn't happen
+      // post-backfill, but defensive in case the catalog shrinks).
+      if (!byCat[cat]) continue;
+      const bucket = byCat[cat][type] ?? { current: null, history: [] };
+      if (doc.isCurrent) bucket.current = doc;
+      else bucket.history.push(doc);
+      byCat[cat][type] = bucket;
     }
-    return groups;
-  }, [orderedDocs]);
 
-  const createDocMutation = useMutation({
-    mutationFn: async (payload: {
-      fileUrl: string;
-      fileName: string;
-      documentCategory: string;
-    }) => {
-      return apiRequest("POST", `/api/trailers/${trailerId}/documents`, payload);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-      toast({
-        title: t('assets.docUploadSuccess', 'Documento enviado'),
-        description: t('assets.docUploadSuccessDesc', 'O documento foi salvo com sucesso.'),
-      });
-    },
-    onError: (err: any) => {
-      toast({
-        title: t('assets.docUploadError', 'Falha no upload'),
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
-    },
-  });
-
-  const deleteDocMutation = useMutation({
-    mutationFn: async (docId: string) => {
-      return apiRequest("DELETE", `/api/trailers/${trailerId}/documents/${docId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-      toast({ title: t('assets.docDeleted', 'Documento excluído') });
-    },
-    onError: (err: any) => {
-      toast({
-        title: t('assets.docDeleteError', 'Falha ao excluir'),
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
-    },
-  });
-
-  const updateDocMutation = useMutation({
-    mutationFn: async ({ docId, documentCategory }: { docId: string; documentCategory: string }) => {
-      return apiRequest("PATCH", `/api/trailers/${trailerId}/documents/${docId}`, {
-        documentCategory,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-      toast({ title: t('assets.docUpdated', 'Documento atualizado') });
-    },
-    onError: (err: any) => {
-      toast({
-        title: t('assets.docUpdateError', 'Falha ao atualizar'),
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
-    },
-  });
-
-  const reorderDocsMutation = useMutation({
-    mutationFn: async (orderedIds: string[]) => {
-      return apiRequest("PATCH", `/api/trailers/${trailerId}/documents/reorder`, {
-        orderedIds,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-    },
-    onError: (err: any) => {
-      // Roll back the optimistic order by re-syncing from the server.
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-      toast({
-        title: t('assets.docReorderError', 'Falha ao reordenar'),
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Stable sensors so React doesn't recreate them on every render.
-  const dndSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
-  const handleDragEnd = (cat: string) => (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const group = docsByCategory[cat];
-    const oldIndex = group.findIndex((d) => d.id === active.id);
-    const newIndex = group.findIndex((d) => d.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const reorderedGroup = arrayMove(group, oldIndex, newIndex);
-
-    // Rebuild the full ordered list, swapping in the reordered group for
-    // the affected category — other categories stay where they are. Use
-    // the normalized category here so legacy/unknown values that visually
-    // sit in "other" are matched correctly.
-    const newOrdered: EnrichedDocument[] = [];
-    let groupCursor = 0;
-    for (const doc of orderedDocs) {
-      if (normalizeCategory(doc.documentCategory) === cat) {
-        newOrdered.push(reorderedGroup[groupCursor++]);
-      } else {
-        newOrdered.push(doc);
+    // Sort history newest-version-first inside every bucket so the popover
+    // reads top-down: v3 (latest) → v2 → v1.
+    for (const cat of DOCUMENT_CATEGORIES) {
+      for (const type of Object.keys(byCat[cat])) {
+        byCat[cat][type].history.sort(
+          (a, b) => (b.version ?? 0) - (a.version ?? 0),
+        );
       }
     }
-    setOrderedDocs(newOrdered);
-    reorderDocsMutation.mutate(newOrdered.map((d) => d.id));
-  };
+    return byCat;
+  }, [documents]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    const result = await uploadFile(file);
-    if (!result) return;
-    await createDocMutation.mutateAsync({
-      fileUrl: result.objectPath,
-      fileName: file.name,
-      documentCategory: category,
-    });
-  };
-
-  const startReplace = (docId: string) => {
-    setReplacingDocId(docId);
-    replaceInputRef.current?.click();
-  };
-
-  const handleReplaceFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    const docId = replacingDocId;
-    if (!file || !docId) {
-      setReplacingDocId(null);
-      return;
-    }
-    const target = documents?.find((d) => d.id === docId);
-    if (!target) {
-      setReplacingDocId(null);
-      return;
-    }
-
-    // Use apiRequest directly (instead of the per-document mutations) so
-    // the replace flow surfaces a single consolidated toast and triggers
-    // exactly one cache invalidation at the end. `replacingDocId` is kept
-    // set throughout so the replace buttons stay disabled while the
-    // upload + create + delete chain is in flight.
-    try {
-      const result = await uploadFile(file);
-      if (!result) return;
-      // Create the replacement first; only delete the previous record after
-      // the new one is persisted, so a failure mid-flight never leaves the
-      // category empty.
-      await apiRequest("POST", `/api/trailers/${trailerId}/documents`, {
-        fileUrl: result.objectPath,
-        fileName: file.name,
-        documentCategory: target.documentCategory,
-      });
-      await apiRequest("DELETE", `/api/trailers/${trailerId}/documents/${docId}`);
-      queryClient.invalidateQueries({ queryKey: ["/api/trailers", trailerId, "documents"] });
-      toast({
-        title: t('assets.docReplaceSuccess', 'Documento substituído'),
-        description: t('assets.docReplaceSuccessDesc', 'O arquivo foi atualizado mantendo a mesma categoria.'),
-      });
-    } catch (err: any) {
-      console.error("Replace document failed:", err);
-      toast({
-        title: t('assets.docReplaceError', 'Falha ao substituir'),
-        description: err?.message ?? String(err),
-        variant: "destructive",
-      });
-    } finally {
-      setReplacingDocId(null);
-    }
-  };
-
-  const categoryLabel = (cat: string) =>
-    t(`assets.docCategory.${cat}`, cat);
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="bg-muted/30 p-4 rounded-lg flex flex-col sm:flex-row gap-3 sm:items-end">
-        <div className="flex-1">
-          <label className="text-sm font-medium mb-1 block">
-            {t('assets.docCategoryLabel', 'Categoria')}
-          </label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger data-testid="select-document-category">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DOCUMENT_CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {categoryLabel(cat)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex-1">
-          <label className="text-sm font-medium mb-1 block">
-            {t('assets.uploadDocument', 'Enviar documento')}
-          </label>
-          <div className="relative">
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              disabled={isUploading || createDocMutation.isPending}
-              data-testid="input-upload-document"
-              accept="image/*,application/pdf"
-            />
-          </div>
-        </div>
-      </div>
+    <Tabs
+      value={activeTab}
+      onValueChange={(v) => setActiveTab(v as DocumentCategory)}
+      className="space-y-4"
+    >
+      <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full">
+        {DOCUMENT_CATEGORIES.map((cat) => (
+          <TabsTrigger
+            key={cat}
+            value={cat}
+            data-testid={`tab-document-category-${cat}`}
+          >
+            {t(`assets.docs.category.${cat}`, cat)}
+          </TabsTrigger>
+        ))}
+      </TabsList>
 
-      {/* Hidden replace input — shared across all rows; the active doc id is
-          tracked in `replacingDocId`. */}
-      <input
-        ref={replaceInputRef}
-        type="file"
-        className="hidden"
-        accept="image/*,application/pdf"
-        onChange={handleReplaceFileChange}
-        data-testid="input-replace-document"
-      />
+      {DOCUMENT_CATEGORIES.map((cat) => (
+        <TabsContent key={cat} value={cat} className="space-y-3">
+          <DocumentCategoryPanel
+            trailerId={trailerId}
+            category={cat}
+            byType={grouped[cat]}
+          />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
 
-      {isLoading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      ) : !documents || documents.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          {t('assets.noDocuments', 'Nenhum documento anexado ainda.')}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {DOCUMENT_CATEGORIES.map((cat) => {
-            const group = docsByCategory[cat];
-            if (!group || group.length === 0) return null;
-            return (
-              <div key={cat} className="space-y-2" data-testid={`group-document-category-${cat}`}>
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {categoryLabel(cat)}
-                </h4>
-                <DndContext
-                  sensors={dndSensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd(cat)}
-                >
-                  <SortableContext
-                    items={group.map((d) => d.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-2">
-                      {group.map((doc) => (
-                        <SortableDocumentRow
-                          key={doc.id}
-                          doc={doc}
-                          onView={() => window.open(doc.fileUrl, "_blank")}
-                          onReplace={() => startReplace(doc.id)}
-                          onDelete={() => {
-                            if (confirm(t('assets.confirmDeleteDoc', 'Excluir este documento?'))) {
-                              deleteDocMutation.mutate(doc.id);
-                            }
-                          }}
-                          onCategoryChange={(value) => {
-                            if (value === doc.documentCategory) return;
-                            updateDocMutation.mutate({ docId: doc.id, documentCategory: value });
-                          }}
-                          replaceDisabled={
-                            isUploading ||
-                            createDocMutation.isPending ||
-                            deleteDocMutation.isPending ||
-                            replacingDocId !== null
-                          }
-                          deleteDisabled={deleteDocMutation.isPending}
-                          updateDisabled={updateDocMutation.isPending}
-                          dragDisabled={reorderDocsMutation.isPending}
-                          categories={DOCUMENT_CATEGORIES as readonly string[]}
-                          categoryLabel={categoryLabel}
-                          t={t}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </div>
-            );
-          })}
-        </div>
+function DocumentCategoryPanel({
+  trailerId,
+  category,
+  byType,
+}: {
+  trailerId: string;
+  category: DocumentCategory;
+  byType: GroupedByType;
+}) {
+  const { t } = useTranslation();
+  const types = DOCUMENT_TYPE_CATALOG[category];
+
+  return (
+    <div className="space-y-3" data-testid={`panel-document-category-${category}`}>
+      {types.map((typeDef) => {
+        const bucket = byType[typeDef.type] ?? { current: null, history: [] };
+        // The catalog has no human-readable label — labels come from i18n.
+        // We pass the raw type id as the fallback so the UI never shows a
+        // blank cell if a translation key is missing.
+        return (
+          <DocumentTypeRow
+            key={typeDef.type}
+            trailerId={trailerId}
+            category={category}
+            typeId={typeDef.type}
+            typeLabel={t(`assets.docs.type.${typeDef.type}`, typeDef.type)}
+            required={typeDef.required}
+            current={bucket.current}
+            history={bucket.history}
+          />
+        );
+      })}
+      {types.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          {t("assets.docs.noTypes", "No document types configured for this section.")}
+        </p>
       )}
     </div>
   );
 }
 
-type SortableDocumentRowProps = {
-  doc: TrailerDocument & {
-    uploader?: { id: string; name: string; email: string | null } | null;
-  };
-  onView: () => void;
-  onReplace: () => void;
-  onDelete: () => void;
-  onCategoryChange: (value: string) => void;
-  replaceDisabled: boolean;
-  deleteDisabled: boolean;
-  updateDisabled: boolean;
-  dragDisabled: boolean;
-  categories: readonly string[];
-  categoryLabel: (cat: string) => string;
-  t: ReturnType<typeof useTranslation>["t"];
-};
+function DocumentTypeRow({
+  trailerId,
+  category,
+  typeId,
+  typeLabel,
+  required,
+  current,
+  history,
+}: {
+  trailerId: string;
+  category: DocumentCategory;
+  typeId: string;
+  typeLabel: string;
+  required: boolean;
+  current: EnrichedDocument | null;
+  history: EnrichedDocument[];
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const isManager = user?.role === "manager" || user?.role === "admin";
+  const { uploadFile, isUploading } = useUpload();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
-function SortableDocumentRow({
-  doc,
-  onView,
-  onReplace,
-  onDelete,
-  onCategoryChange,
-  replaceDisabled,
-  deleteDisabled,
-  updateDisabled,
-  dragDisabled,
-  categories,
-  categoryLabel,
-  t,
-}: SortableDocumentRowProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: doc.id, disabled: dragDisabled });
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["/api/trailers", trailerId, "documents"],
+    });
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.6 : 1,
-    zIndex: isDragging ? 10 : "auto",
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const result = await uploadFile(file);
+      if (!result) throw new Error("Upload aborted");
+      return apiRequest("POST", `/api/trailers/${trailerId}/documents`, {
+        category,
+        documentType: typeId,
+        fileName: file.name,
+        fileUrl: result.objectPath,
+        fileSize: file.size,
+        mimeType: file.type || null,
+      });
+    },
+    onSuccess: () => {
+      invalidate();
+      toast({
+        title: t("assets.docs.uploadSuccess", "Document uploaded"),
+        description: t(
+          "assets.docs.uploadSuccessDesc",
+          "The document was saved and is awaiting review.",
+        ),
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t("assets.docs.uploadError", "Upload failed"),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (docId: string) =>
+      apiRequest("DELETE", `/api/trailers/${trailerId}/documents/${docId}`),
+    onSuccess: () => {
+      invalidate();
+      toast({ title: t("assets.docs.deleted", "Document deleted") });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t("assets.docs.deleteError", "Delete failed"),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async (args: {
+      docId: string;
+      status: DocumentStatus;
+      rejectionReason?: string;
+    }) =>
+      apiRequest(
+        "PATCH",
+        `/api/trailers/${trailerId}/documents/${args.docId}/status`,
+        { status: args.status, rejectionReason: args.rejectionReason },
+      ),
+    onSuccess: (_data, vars) => {
+      invalidate();
+      setRejectOpen(false);
+      setRejectReason("");
+      toast({
+        title:
+          vars.status === "approved"
+            ? t("assets.docs.approved", "Document approved")
+            : t("assets.docs.rejected", "Document rejected"),
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: t("assets.docs.statusError", "Failed to update status"),
+        description: err?.message ?? String(err),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    uploadMutation.mutate(file);
   };
+
+  const status = (current?.status ?? "pending") as DocumentStatus;
+  const busy =
+    isUploading ||
+    uploadMutation.isPending ||
+    deleteMutation.isPending ||
+    statusMutation.isPending;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg bg-background hover-elevate"
-      data-testid={`row-document-${doc.id}`}
-    >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <button
-          type="button"
-          disabled={dragDisabled}
-          className={`touch-none p-1 -m-1 text-muted-foreground ${dragDisabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing hover:text-foreground"}`}
-          aria-label={t('assets.dragDocument', 'Arrastar para reordenar')}
-          data-testid={`drag-handle-document-${doc.id}`}
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="h-4 w-4" />
-        </button>
-        <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
-        <div className="min-w-0 flex-1">
-          <p className="font-medium truncate" data-testid={`text-document-name-${doc.id}`}>
-            {doc.fileName}
-          </p>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-            {doc.uploadedAt && (
-              <span data-testid={`text-document-date-${doc.id}`}>
-                {format(new Date(doc.uploadedAt), "dd/MM/yyyy HH:mm")}
-              </span>
-            )}
-            {doc.uploader && (
-              <>
-                <span>•</span>
-                <span data-testid={`text-document-uploader-${doc.id}`}>
-                  {t('assets.docUploadedBy', 'por')} {doc.uploader.name}
+    <Card data-testid={`row-document-type-${typeId}`}>
+      <CardContent className="p-4 flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4
+                className="font-medium truncate"
+                data-testid={`text-document-type-${typeId}`}
+              >
+                {typeLabel}
+              </h4>
+              {required && (
+                <Badge variant="outline" className="text-xs">
+                  {t("assets.docs.required", "Required")}
+                </Badge>
+              )}
+              {current ? (
+                <Badge
+                  variant={statusBadgeVariant(status)}
+                  data-testid={`status-document-${typeId}`}
+                >
+                  {t(`assets.docs.status.${status}`, status)}
+                </Badge>
+              ) : (
+                <Badge
+                  variant={required ? "destructive" : "secondary"}
+                  data-testid={`status-document-${typeId}`}
+                >
+                  {required
+                    ? t("assets.docs.missing", "Missing")
+                    : t("assets.docs.notUploaded", "Not uploaded")}
+                </Badge>
+              )}
+              {current && (current.version ?? 1) > 1 && (
+                <Badge variant="outline" className="text-xs">
+                  v{current.version}
+                </Badge>
+              )}
+            </div>
+
+            {current ? (
+              <div className="mt-2 flex items-center gap-2 min-w-0 text-sm">
+                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span
+                  className="truncate"
+                  data-testid={`text-document-name-${typeId}`}
+                >
+                  {current.fileName}
                 </span>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-2">
+                {t(
+                  "assets.docs.noFile",
+                  "No file uploaded yet for this document type.",
+                )}
+              </p>
+            )}
+
+            {current && (
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                {current.uploadedAt && (
+                  <span>
+                    {format(new Date(current.uploadedAt), "MM/dd/yyyy HH:mm")}
+                  </span>
+                )}
+                {current.uploader && (
+                  <span data-testid={`text-document-uploader-${typeId}`}>
+                    {t("assets.docs.uploadedBy", "by")} {current.uploader.name}
+                  </span>
+                )}
+                {current.reviewer && current.reviewedAt && (
+                  <span data-testid={`text-document-reviewer-${typeId}`}>
+                    {status === "approved"
+                      ? t("assets.docs.approvedBy", "approved by")
+                      : t("assets.docs.rejectedBy", "rejected by")}{" "}
+                    {current.reviewer.name} ·{" "}
+                    {format(new Date(current.reviewedAt), "MM/dd/yyyy")}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {current?.status === "rejected" && current.rejectionReason && (
+              <p className="mt-1 text-xs text-destructive">
+                {t("assets.docs.reason", "Reason")}: {current.rejectionReason}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              className="hidden"
+              onChange={onFilePicked}
+              data-testid={`input-upload-document-${typeId}`}
+            />
+            <Button
+              size="sm"
+              variant={current ? "outline" : "default"}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={busy}
+              data-testid={`button-${current ? "replace" : "upload"}-document-${typeId}`}
+            >
+              {current ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  {t("assets.docs.replace", "Replace")}
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-1" />
+                  {t("assets.docs.upload", "Upload")}
+                </>
+              )}
+            </Button>
+
+            {current && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.open(current.fileUrl, "_blank")}
+                  data-testid={`button-view-document-${typeId}`}
+                  title={t("assets.docs.view", "View")}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                {history.length > 0 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        data-testid={`button-history-document-${typeId}`}
+                        title={t("assets.docs.history", "Version history")}
+                      >
+                        <HistoryIcon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80" align="end">
+                      <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                        {t("assets.docs.history", "Version history")}
+                      </p>
+                      <ul className="space-y-2">
+                        {history.map((v) => (
+                          <li
+                            key={v.id}
+                            className="flex items-center justify-between gap-2 text-sm"
+                            data-testid={`row-document-history-${v.id}`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate">
+                                <span className="font-mono text-xs mr-1.5">
+                                  v{v.version}
+                                </span>
+                                {v.fileName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {v.uploadedAt &&
+                                  format(
+                                    new Date(v.uploadedAt),
+                                    "MM/dd/yyyy",
+                                  )}
+                                {v.uploader ? ` · ${v.uploader.name}` : ""}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                window.open(v.fileUrl, "_blank")
+                              }
+                              data-testid={`button-view-document-version-${v.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (
+                      confirm(
+                        t(
+                          "assets.docs.confirmDelete",
+                          "Delete this document version?",
+                        ),
+                      )
+                    ) {
+                      deleteMutation.mutate(current.id);
+                    }
+                  }}
+                  disabled={busy}
+                  data-testid={`button-delete-document-${typeId}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </>
             )}
           </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <Select
-          value={doc.documentCategory}
-          onValueChange={onCategoryChange}
-          disabled={updateDisabled}
-        >
-          <SelectTrigger
-            className="h-8 min-w-[140px] text-xs"
-            data-testid={`select-document-category-${doc.id}`}
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {categoryLabel(cat)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onView}
-          data-testid={`button-view-document-${doc.id}`}
-          title={t('assets.viewDocument', 'Visualizar')}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onReplace}
-          disabled={replaceDisabled}
-          data-testid={`button-replace-document-${doc.id}`}
-          title={t('assets.replaceDocument', 'Substituir arquivo')}
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
-          disabled={deleteDisabled}
-          data-testid={`button-delete-document-${doc.id}`}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+
+        {/* Approve / Reject controls — managers only, only meaningful while
+            the document is pending. */}
+        {current && isManager && status === "pending" && (
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() =>
+                statusMutation.mutate({
+                  docId: current.id,
+                  status: "approved",
+                })
+              }
+              disabled={busy}
+              data-testid={`button-approve-document-${typeId}`}
+            >
+              <CheckCircle className="h-4 w-4 mr-1" />
+              {t("assets.docs.approve", "Approve")}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setRejectOpen(true)}
+              disabled={busy}
+              data-testid={`button-reject-document-${typeId}`}
+            >
+              {t("assets.docs.reject", "Reject")}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+
+      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("assets.docs.rejectTitle", "Reject document")}
+            </DialogTitle>
+            <DialogDescription>
+              {t(
+                "assets.docs.rejectDesc",
+                "Tell the uploader why this document is being rejected.",
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder={t(
+              "assets.docs.reasonPlaceholder",
+              "e.g., expired, illegible, wrong document",
+            )}
+            maxLength={500}
+            data-testid={`input-reject-reason-${typeId}`}
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setRejectOpen(false)}
+              data-testid={`button-cancel-reject-${typeId}`}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!rejectReason.trim() || statusMutation.isPending}
+              onClick={() =>
+                current &&
+                statusMutation.mutate({
+                  docId: current.id,
+                  status: "rejected",
+                  rejectionReason: rejectReason.trim(),
+                })
+              }
+              data-testid={`button-confirm-reject-${typeId}`}
+            >
+              {t("assets.docs.confirmReject", "Reject document")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }
 

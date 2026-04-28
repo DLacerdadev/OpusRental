@@ -117,20 +117,48 @@ export const trailers = pgTable("trailers", {
   uniqTenantTrailerId: uniqueIndex("uniq_tenant_trailer_id").on(t.tenantId, t.trailerId),
 }));
 
-// Trailer Documents table — file attachments per trailer, by category
+// Trailer Documents table — file attachments per trailer, organized by
+// 4 categories (vehicle | insurance | contract | tracking) and a typed
+// catalog within each category (see shared/document-types.ts).
+//
+// Versioning: each (trailer, document_type) pair forms a chain. The first
+// upload is v1 with parent_document_id = NULL; every subsequent upload of
+// the same type bumps `version`, sets `parent_document_id` to v1's id and
+// flips the previous row's `is_current` to false. Approval status lives on
+// the row itself; rejection_reason / reviewed_by / reviewed_at are filled
+// when a manager approves or rejects a version.
 export const trailerDocuments = pgTable("trailer_documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull().references(() => tenants.id),
   trailerId: varchar("trailer_id").notNull().references(() => trailers.id, { onDelete: "cascade" }),
-  documentCategory: text("document_category").notNull(), // title, registration, insurance, inspection, purchase_invoice, other
+  // New tabbed model
+  category: text("category"), // 'vehicle' | 'insurance' | 'contract' | 'tracking' — populated by migration; required for new rows via Zod
+  documentType: text("document_type"), // catalog id (e.g. 'title', 'liability_insurance', 'master_lease', 'tracker_certificate')
+  status: text("status").notNull().default("pending"), // 'pending' | 'approved' | 'rejected'
+  version: integer("version").notNull().default(1),
+  parentDocumentId: varchar("parent_document_id"), // FK to v1 of the same chain; NULL on v1 itself
+  isCurrent: boolean("is_current").notNull().default(true),
+  rejectionReason: text("rejection_reason"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  // File metadata
   fileName: text("file_name").notNull(),
   fileUrl: text("file_url").notNull(), // Object storage path (e.g. /objects/uploads/<uuid>)
+  fileSize: integer("file_size"),
+  mimeType: text("mime_type"),
+  // Bookkeeping
   sortOrder: integer("sort_order").notNull().default(0),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
+  // DEPRECATED — legacy single-category column. Kept nullable so the
+  // backfill migration can map it to (category, documentType). New writes
+  // must not depend on this field.
+  documentCategory: text("document_category"),
 }, (t) => ({
   idxTenant: index("idx_trailer_documents_tenant").on(t.tenantId),
   idxTrailerId: index("idx_trailer_documents_trailer").on(t.trailerId),
+  idxTrailerType: index("idx_trailer_documents_trailer_type").on(t.trailerId, t.documentType),
+  idxCurrent: index("idx_trailer_documents_current").on(t.trailerId, t.documentType, t.isCurrent),
 }));
 
 // Shares (Cotas) table
@@ -778,13 +806,34 @@ export const insertTrailerSchema = createInsertSchema(trailers, {
   updatedAt: true,
 });
 
-export const insertTrailerDocumentSchema = createInsertSchema(trailerDocuments).omit({
-  id: true,
-  tenantId: true,
-  sortOrder: true,
-  uploadedAt: true,
-  uploadedBy: true,
-});
+// Insert schema for the new tabbed model. The legacy `documentCategory`
+// column is excluded entirely — new code only writes `category` /
+// `documentType`. Versioning + status fields default at the storage layer
+// or via the table defaults, so callers never set them directly.
+export const insertTrailerDocumentSchema = createInsertSchema(trailerDocuments)
+  .omit({
+    id: true,
+    tenantId: true,
+    status: true,
+    version: true,
+    parentDocumentId: true,
+    isCurrent: true,
+    rejectionReason: true,
+    reviewedBy: true,
+    reviewedAt: true,
+    sortOrder: true,
+    uploadedAt: true,
+    uploadedBy: true,
+    documentCategory: true,
+  })
+  .extend({
+    category: z.enum(["vehicle", "insurance", "contract", "tracking"]),
+    documentType: z.string().min(1).max(64),
+    fileName: z.string().min(1).max(255),
+    fileUrl: z.string().min(1),
+    fileSize: z.number().int().positive().optional().nullable(),
+    mimeType: z.string().max(128).optional().nullable(),
+  });
 
 export const insertShareSchema = createInsertSchema(shares).omit({
   id: true,

@@ -298,6 +298,63 @@
         "import_trailers": "Importou ativos",
         "export_trailers": "Exportou ativos"
       }
+    },
+    "docs": {
+      "category": {
+        "vehicle": "Veículo",
+        "insurance": "Seguro",
+        "contract": "Contratos",
+        "tracking": "Rastreamento"
+      },
+      "type": {
+        "title": "Title (Título do Veículo)",
+        "registration": "Registration (Registro)",
+        "inspection_report": "Laudo de Inspeção Anual",
+        "purchase_invoice": "Nota Fiscal de Compra",
+        "vin_plate_photo": "Foto da Placa VIN",
+        "odometer_photo": "Foto do Hodômetro",
+        "liability_insurance": "Seguro de Responsabilidade",
+        "cargo_insurance": "Seguro de Carga",
+        "master_lease": "Master Lease (Contrato Mestre)",
+        "rental_contract": "Contrato de Locação",
+        "addendum": "Aditivo",
+        "tracker_certificate": "Certificado do Rastreador",
+        "tracker_install_photo": "Foto da Instalação do Rastreador",
+        "other": "Outro"
+      },
+      "status": {
+        "pending": "Pendente",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado"
+      },
+      "required": "Obrigatório",
+      "missing": "Faltando",
+      "notUploaded": "Não enviado",
+      "noFile": "Nenhum arquivo enviado para este tipo de documento.",
+      "noTypes": "Nenhum tipo de documento configurado para esta seção.",
+      "upload": "Enviar",
+      "replace": "Substituir",
+      "view": "Visualizar",
+      "history": "Histórico de versões",
+      "approve": "Aprovar",
+      "reject": "Rejeitar",
+      "approved": "Documento aprovado",
+      "rejected": "Documento rejeitado",
+      "deleted": "Documento excluído",
+      "uploadSuccess": "Documento enviado",
+      "uploadSuccessDesc": "O documento foi salvo e aguarda revisão.",
+      "uploadError": "Falha no upload",
+      "deleteError": "Falha ao excluir",
+      "statusError": "Falha ao atualizar status",
+      "uploadedBy": "por",
+      "approvedBy": "aprovado por",
+      "rejectedBy": "rejeitado por",
+      "reason": "Motivo",
+      "confirmDelete": "Excluir esta versão do documento?",
+      "rejectTitle": "Rejeitar documento",
+      "rejectDesc": "Informe ao remetente por que este documento está sendo rejeitado.",
+      "reasonPlaceholder": "ex.: vencido, ilegível, documento incorreto",
+      "confirmReject": "Rejeitar documento"
     }
   },
   "tracking": {

@@ -301,6 +301,63 @@
         "import_trailers": "Imported assets",
         "export_trailers": "Exported assets"
       }
+    },
+    "docs": {
+      "category": {
+        "vehicle": "Vehicle",
+        "insurance": "Insurance",
+        "contract": "Contracts",
+        "tracking": "Tracking"
+      },
+      "type": {
+        "title": "Title",
+        "registration": "Registration",
+        "inspection_report": "Annual Inspection Report",
+        "purchase_invoice": "Purchase Invoice",
+        "vin_plate_photo": "VIN Plate Photo",
+        "odometer_photo": "Odometer Photo",
+        "liability_insurance": "Liability Insurance",
+        "cargo_insurance": "Cargo Insurance",
+        "master_lease": "Master Lease Agreement",
+        "rental_contract": "Rental Contract",
+        "addendum": "Addendum",
+        "tracker_certificate": "Tracker Certificate",
+        "tracker_install_photo": "Tracker Installation Photo",
+        "other": "Other"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "required": "Required",
+      "missing": "Missing",
+      "notUploaded": "Not uploaded",
+      "noFile": "No file uploaded yet for this document type.",
+      "noTypes": "No document types configured for this section.",
+      "upload": "Upload",
+      "replace": "Replace",
+      "view": "View",
+      "history": "Version history",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Document approved",
+      "rejected": "Document rejected",
+      "deleted": "Document deleted",
+      "uploadSuccess": "Document uploaded",
+      "uploadSuccessDesc": "The document was saved and is awaiting review.",
+      "uploadError": "Upload failed",
+      "deleteError": "Delete failed",
+      "statusError": "Failed to update status",
+      "uploadedBy": "by",
+      "approvedBy": "approved by",
+      "rejectedBy": "rejected by",
+      "reason": "Reason",
+      "confirmDelete": "Delete this document version?",
+      "rejectTitle": "Reject document",
+      "rejectDesc": "Tell the uploader why this document is being rejected.",
+      "reasonPlaceholder": "e.g., expired, illegible, wrong document",
+      "confirmReject": "Reject document"
     }
   },
   "tracking": {

@@ -52,6 +52,15 @@ import { GpsAdapterFactory, type GpsProvider } from "./services/gps/factory";
 import multer from "multer";
 import { ObjectStorageService, ObjectNotFoundError } from "./replit_integrations/object_storage/objectStorage";
 import { insertTrailerDocumentSchema, trailerDocuments } from "@shared/schema";
+import {
+  DOCUMENT_CATEGORIES,
+  DOCUMENT_STATUSES,
+  isDocumentCategory,
+  isDocumentStatus,
+  isKnownDocumentType,
+  type DocumentCategory,
+  type DocumentStatus,
+} from "@shared/document-types";
 
 // Warn if SESSION_SECRET is not set in production
 if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
@@ -2547,31 +2556,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // List documents for a trailer
+  // List documents for a trailer.
+  //
+  // Returns a flat array of EVERY document (current + historical versions),
+  // each enriched with `uploader` and `reviewer` user info. The client
+  // groups them by category/type using the catalog from
+  // `shared/document-types.ts`, so we don't pre-bucket here.
   app.get("/api/trailers/:id/documents", authorize(), async (req, res) => {
     try {
       const trailer = await storage.getTrailer(req.params.id, req.tenantId!);
       if (!trailer) return res.status(404).json({ message: "Trailer not found" });
       const docs = await storage.getTrailerDocuments(req.params.id, req.tenantId!);
 
-      // Enrich each document with the uploader's displayable name. We
-      // resolve user records once per unique uploader to keep this route
-      // O(unique users) instead of O(documents).
-      const uploaderIds = Array.from(
-        new Set(docs.map((d) => d.uploadedBy).filter((id): id is string => !!id))
+      // Resolve uploader + reviewer user records in a single pass — the
+      // same person can appear in either role so we de-dupe before fetching.
+      const userIds = Array.from(
+        new Set(
+          [
+            ...docs.map((d) => d.uploadedBy),
+            ...docs.map((d) => d.reviewedBy),
+          ].filter((id): id is string => !!id),
+        ),
       );
-      const uploaderMap: Record<string, { id: string; name: string; email: string | null }> = {};
-      for (const uid of uploaderIds) {
+      const userMap: Record<string, { id: string; name: string; email: string | null }> = {};
+      for (const uid of userIds) {
         const u = await storage.getUser(uid, req.tenantId!);
         if (u) {
-          const name = [u.firstName, u.lastName].filter(Boolean).join(" ").trim() || u.username || u.email || "—";
-          uploaderMap[uid] = { id: u.id, name, email: u.email ?? null };
+          const name =
+            [u.firstName, u.lastName].filter(Boolean).join(" ").trim() ||
+            u.username ||
+            u.email ||
+            "—";
+          userMap[uid] = { id: u.id, name, email: u.email ?? null };
         }
       }
 
       const enriched = docs.map((d) => ({
         ...d,
-        uploader: d.uploadedBy ? (uploaderMap[d.uploadedBy] ?? null) : null,
+        uploader: d.uploadedBy ? (userMap[d.uploadedBy] ?? null) : null,
+        reviewer: d.reviewedBy ? (userMap[d.reviewedBy] ?? null) : null,
       }));
 
       res.json(enriched);
@@ -2581,7 +2604,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Persist a trailer document AFTER the client uploaded the file via presigned URL
+  // Persist a trailer document AFTER the client uploaded the file via
+  // presigned URL. If a current document already exists for the same
+  // (trailer, documentType), this becomes a NEW VERSION of that chain
+  // (handled inside `storage.createTrailerDocument`).
   app.post("/api/trailers/:id/documents", authorize(), async (req, res) => {
     try {
       const trailer = await storage.getTrailer(req.params.id, req.tenantId!);
@@ -2589,15 +2615,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = insertTrailerDocumentSchema.parse({
         trailerId: req.params.id,
-        documentCategory: req.body.documentCategory,
+        category: req.body.category,
+        documentType: req.body.documentType,
         fileName: req.body.fileName,
         fileUrl: req.body.fileUrl,
+        fileSize: req.body.fileSize ?? null,
+        mimeType: req.body.mimeType ?? null,
       });
 
-      // Validate the category is one of the supported values.
-      const allowed = ["title", "registration", "insurance", "inspection", "purchase_invoice", "other"];
-      if (!allowed.includes(validated.documentCategory)) {
-        return res.status(400).json({ message: "Invalid documentCategory" });
+      // The Zod enum already constrains `category` but we still validate the
+      // (category, type) pair against the catalog so a typo in `documentType`
+      // can never land an orphaned row that the UI cannot place into a tab.
+      if (!isKnownDocumentType(validated.category, validated.documentType)) {
+        return res.status(400).json({
+          message: "Unknown document type for category",
+          category: validated.category,
+          documentType: validated.documentType,
+        });
       }
 
       // Normalize raw bucket URLs (https://storage.googleapis.com/...) to
@@ -2617,10 +2651,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createAuditLog({
         tenantId: req.tenantId!,
         userId: req.session.userId!,
-        action: "create_trailer_document",
+        action:
+          created.version > 1 ? "document_version_added" : "document_uploaded",
         entityType: "trailer_document",
         entityId: created.id,
-        details: { trailerId: req.params.id, category: validated.documentCategory, fileName: validated.fileName },
+        details: {
+          trailerId: req.params.id,
+          category: created.category,
+          documentType: created.documentType,
+          version: created.version,
+          fileName: created.fileName,
+        },
         ipAddress: req.ip,
       });
 
@@ -2633,6 +2674,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to save document" });
     }
   });
+
+  // Approve or reject a document version. Only managers can review.
+  // The route is registered BEFORE the catch-all `:docId` PATCH so
+  // `:docId = "status"` doesn't match it accidentally.
+  app.patch(
+    "/api/trailers/:id/documents/:docId/status",
+    authorize(),
+    isManager,
+    async (req, res) => {
+      try {
+        const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
+        if (!doc || doc.trailerId !== req.params.id) {
+          return res.status(404).json({ message: "Document not found" });
+        }
+
+        const status = String(req.body?.status ?? "");
+        if (!isDocumentStatus(status)) {
+          return res.status(400).json({
+            message: `status must be one of ${DOCUMENT_STATUSES.join(", ")}`,
+          });
+        }
+
+        const rejectionReason =
+          typeof req.body?.rejectionReason === "string"
+            ? req.body.rejectionReason.trim().slice(0, 500)
+            : null;
+
+        if (status === "rejected" && !rejectionReason) {
+          return res.status(400).json({
+            message: "rejectionReason is required when rejecting a document",
+          });
+        }
+
+        const updated = await storage.setTrailerDocumentStatus(
+          req.params.docId,
+          req.tenantId!,
+          {
+            status,
+            reviewedBy: req.session.userId ?? null,
+            rejectionReason,
+          },
+        );
+        if (!updated) return res.status(404).json({ message: "Document not found" });
+
+        await storage.createAuditLog({
+          tenantId: req.tenantId!,
+          userId: req.session.userId!,
+          action: "document_status_changed",
+          entityType: "trailer_document",
+          entityId: updated.id,
+          details: {
+            trailerId: req.params.id,
+            category: updated.category,
+            documentType: updated.documentType,
+            version: updated.version,
+            fromStatus: doc.status,
+            toStatus: updated.status,
+            rejectionReason: updated.rejectionReason,
+          },
+          ipAddress: req.ip,
+        });
+
+        res.json(updated);
+      } catch (error) {
+        console.error("Update trailer document status error:", error);
+        res.status(500).json({ message: "Failed to update status" });
+      }
+    },
+  );
 
   // Reorder trailer documents — accepts an array of document ids in the
   // desired order and persists each one's `sortOrder`. Same role policy as
@@ -2700,50 +2810,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PATCH a trailer document — currently used to recategorize a document
-  // without re-uploading the file. Same role policy as POST.
-  app.patch("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
-    try {
-      const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
-      if (!doc || doc.trailerId !== req.params.id) {
-        return res.status(404).json({ message: "Document not found" });
-      }
-
-      const allowed = ["title", "registration", "insurance", "inspection", "purchase_invoice", "other"];
-      const updates: Record<string, any> = {};
-
-      if (typeof req.body?.documentCategory === "string") {
-        if (!allowed.includes(req.body.documentCategory)) {
-          return res.status(400).json({ message: "Invalid documentCategory" });
-        }
-        updates.documentCategory = req.body.documentCategory;
-      }
-
-      if (Object.keys(updates).length === 0) {
-        return res.status(400).json({ message: "No supported fields to update" });
-      }
-
-      const updated = await storage.updateTrailerDocument(req.params.docId, updates, req.tenantId!);
-      if (!updated) return res.status(404).json({ message: "Document not found" });
-
-      await storage.createAuditLog({
-        tenantId: req.tenantId!,
-        userId: req.session.userId!,
-        action: "update_trailer_document",
-        entityType: "trailer_document",
-        entityId: updated.id,
-        details: { trailerId: req.params.id, changedFields: Object.keys(updates) },
-        ipAddress: req.ip,
-      });
-
-      res.json(updated);
-    } catch (error) {
-      console.error("Update trailer document error:", error);
-      res.status(500).json({ message: "Failed to update document" });
-    }
-  });
-
-  // Delete a trailer document (and best-effort delete the underlying object)
+  // Delete a single document version. Behaviour:
+  //  - Deletes the underlying object best-effort (never blocks the row delete)
+  //  - If the deleted row was `is_current=true` AND another version of the
+  //    same chain exists, the most recent remaining version is promoted to
+  //    `is_current=true` so the type does not silently disappear from the
+  //    checklist.
+  //  - If it was the only version, the chain is gone (the type goes back to
+  //    showing as "missing" in the UI).
   app.delete("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
     try {
       const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
@@ -2751,8 +2825,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
 
-      // Best-effort: delete the underlying object — never block deletion of
-      // the metadata row if the underlying object is already gone.
       try {
         const file = await objectStorageService.getObjectEntityFile(doc.fileUrl);
         await file.delete();
@@ -2765,13 +2837,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ok = await storage.deleteTrailerDocument(req.params.docId, req.tenantId!);
       if (!ok) return res.status(404).json({ message: "Document not found" });
 
+      // Promote the latest remaining version of this chain to current.
+      if (doc.isCurrent && doc.documentType) {
+        const siblings = await db
+          .select()
+          .from(trailerDocuments)
+          .where(
+            and(
+              eq(trailerDocuments.trailerId, req.params.id),
+              eq(trailerDocuments.tenantId, req.tenantId!),
+              eq(trailerDocuments.documentType, doc.documentType),
+            ),
+          )
+          .orderBy(sql`version desc`)
+          .limit(1);
+        if (siblings.length > 0) {
+          await db
+            .update(trailerDocuments)
+            .set({ isCurrent: true })
+            .where(
+              and(
+                eq(trailerDocuments.id, siblings[0].id),
+                eq(trailerDocuments.tenantId, req.tenantId!),
+              ),
+            );
+        }
+      }
+
       await storage.createAuditLog({
         tenantId: req.tenantId!,
         userId: req.session.userId!,
-        action: "delete_trailer_document",
+        action: "document_deleted",
         entityType: "trailer_document",
         entityId: req.params.docId,
-        details: { trailerId: req.params.id },
+        details: {
+          trailerId: req.params.id,
+          category: doc.category,
+          documentType: doc.documentType,
+          version: doc.version,
+        },
         ipAddress: req.ip,
       });
 

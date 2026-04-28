@@ -103,8 +103,29 @@ export interface IStorage {
   // Trailer document operations
   getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]>;
   getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined>;
+  /**
+   * Persists a trailer document. If a row already exists for the same
+   * (trailer, document_type), this becomes a NEW VERSION: the previous
+   * row is flipped to `is_current=false` and the new row gets
+   * `version = previous + 1` plus `parent_document_id` pointing at the
+   * v1 of the chain. Otherwise it is the v1 of a fresh chain.
+   */
   createTrailerDocument(doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }): Promise<TrailerDocument>;
   updateTrailerDocument(id: string, data: Partial<TrailerDocument>, tenantId: string): Promise<TrailerDocument | undefined>;
+  /**
+   * Approve or reject a document version. Records the reviewer + timestamp
+   * and (when rejecting) the reason. Status transitions are not validated
+   * here — any of pending → approved / rejected is allowed.
+   */
+  setTrailerDocumentStatus(
+    id: string,
+    tenantId: string,
+    args: {
+      status: "pending" | "approved" | "rejected";
+      reviewedBy: string | null;
+      rejectionReason?: string | null;
+    },
+  ): Promise<TrailerDocument | undefined>;
   deleteTrailerDocument(id: string, tenantId: string): Promise<boolean>;
   reorderTrailerDocuments(
     trailerId: string,
@@ -446,23 +467,73 @@ export class DatabaseStorage implements IStorage {
   async createTrailerDocument(
     doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }
   ): Promise<TrailerDocument> {
-    // Place new uploads at the end of the trailer's existing list so they
-    // never collide with reordered rows (which might also start at 0).
-    const [{ maxSort }] = await db
-      .select({ maxSort: sql<number>`COALESCE(MAX(${trailerDocuments.sortOrder}), -1)` })
-      .from(trailerDocuments)
-      .where(
-        and(
-          eq(trailerDocuments.trailerId, doc.trailerId),
-          eq(trailerDocuments.tenantId, doc.tenantId),
-        ),
-      );
-    const nextSort = (Number(maxSort) ?? -1) + 1;
-    const [created] = await db
-      .insert(trailerDocuments)
-      .values({ ...doc, sortOrder: nextSort })
-      .returning();
-    return created;
+    // Auto-versioning: if there is already a current document for the same
+    // (trailer, document_type), the new upload becomes vN+1 of that chain
+    // and the previous current row is flipped to is_current=false. The
+    // chain is identified by `parent_document_id` which always points at
+    // v1 (so vN's parent is v1, never vN-1). All of this runs inside a
+    // single transaction so a partial failure can never leave two rows
+    // marked is_current=true for the same type.
+    return await db.transaction(async (tx) => {
+      const [previous] = await tx
+        .select()
+        .from(trailerDocuments)
+        .where(
+          and(
+            eq(trailerDocuments.trailerId, doc.trailerId),
+            eq(trailerDocuments.tenantId, doc.tenantId),
+            eq(trailerDocuments.documentType, doc.documentType!),
+            eq(trailerDocuments.isCurrent, true),
+          ),
+        )
+        .limit(1);
+
+      let version = 1;
+      let parentDocumentId: string | null = null;
+      let sortOrder = 0;
+
+      if (previous) {
+        version = (previous.version ?? 1) + 1;
+        parentDocumentId = previous.parentDocumentId ?? previous.id;
+        sortOrder = previous.sortOrder ?? 0;
+
+        await tx
+          .update(trailerDocuments)
+          .set({ isCurrent: false })
+          .where(
+            and(
+              eq(trailerDocuments.id, previous.id),
+              eq(trailerDocuments.tenantId, doc.tenantId),
+            ),
+          );
+      } else {
+        // Brand-new chain: place at the end of the trailer's list so the
+        // new card sits below any existing types in the same category.
+        const [{ maxSort }] = await tx
+          .select({ maxSort: sql<number>`COALESCE(MAX(${trailerDocuments.sortOrder}), -1)` })
+          .from(trailerDocuments)
+          .where(
+            and(
+              eq(trailerDocuments.trailerId, doc.trailerId),
+              eq(trailerDocuments.tenantId, doc.tenantId),
+            ),
+          );
+        sortOrder = (Number(maxSort) ?? -1) + 1;
+      }
+
+      const [created] = await tx
+        .insert(trailerDocuments)
+        .values({
+          ...doc,
+          version,
+          parentDocumentId,
+          isCurrent: true,
+          status: "pending",
+          sortOrder,
+        })
+        .returning();
+      return created;
+    });
   }
 
   async updateTrailerDocument(
@@ -479,6 +550,30 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(trailerDocuments)
       .set(rest)
+      .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async setTrailerDocumentStatus(
+    id: string,
+    tenantId: string,
+    args: {
+      status: "pending" | "approved" | "rejected";
+      reviewedBy: string | null;
+      rejectionReason?: string | null;
+    },
+  ): Promise<TrailerDocument | undefined> {
+    const [updated] = await db
+      .update(trailerDocuments)
+      .set({
+        status: args.status,
+        reviewedBy: args.reviewedBy,
+        reviewedAt: new Date(),
+        // Only attach the rejection_reason on a reject; clear it on the
+        // other transitions so an old reason never lingers on an approved doc.
+        rejectionReason: args.status === "rejected" ? (args.rejectionReason ?? null) : null,
+      })
       .where(and(eq(trailerDocuments.id, id), eq(trailerDocuments.tenantId, tenantId)))
       .returning();
     return updated;
