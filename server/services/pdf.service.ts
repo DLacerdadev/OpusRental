@@ -198,11 +198,7 @@ export async function fetchLogoAsDataUrl(url: string | null | undefined): Promis
     if (!res) return null; // exhausted redirect budget
     if (!res.ok) return null;
 
-    // Normalize the MIME by stripping any parameters (`charset=...`, etc.)
-    // so downstream consumers can rely on the bare type/subtype when the
-    // upstream server appends extras like `image/jpeg; charset=binary`.
-    const rawContentType = res.headers.get('content-type') ?? '';
-    const contentType = rawContentType.split(';')[0].trim().toLowerCase();
+    const contentType = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
     if (!contentType.startsWith('image/')) return null;
 
     const declaredLength = Number(res.headers.get('content-length') ?? '0');

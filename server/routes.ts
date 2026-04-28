@@ -4071,24 +4071,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
 
-            // Webhook idempotency + side-effect recovery:
-            //
-            // The ledger is the **source of truth** for "this Stripe event
-            // already produced a payment". We check it FIRST so re-deliveries
-            // never re-validate (which would reject because the invoice
-            // status already flipped to `paid`) and never duplicate audit /
-            // notification side-effects. If a previous run inserted the
-            // ledger row but crashed before marking the invoice paid /
-            // notifying, we detect that here and complete the missing steps.
+            // Idempotency: ledger is the source of truth for "this event
+            // already produced a payment". Check it before validation so
+            // re-deliveries skip the status gate and partial failures are
+            // recovered.
             const existingLedger = await storage.getInvoicePaymentByStripePaymentIntent(
               paymentIntent.id,
             );
 
             let validation;
             if (existingLedger) {
-              // Re-delivery (or recovery from a partial failure). Skip
-              // validation — invoice status will already be `paid` in the
-              // success case, which the validator would otherwise refuse.
               validation = {
                 valid: true as const,
                 details: {
@@ -4142,13 +4134,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 break;
               }
 
-              // Insert ledger BEFORE flipping invoice status. The unique
-              // index on `stripe_payment_intent_id` covers the race where two
-              // concurrent webhook deliveries pass the upfront check at the
-              // same time. On 23505 the loser does NOT just exit — it
-              // re-reads the invoice and, if the winner crashed before
-              // completing side-effects, finishes them itself. This keeps
-              // mark-paid/audit/notify guaranteed even under retries.
+              // Ledger insert first; on UNIQUE race, recover side-effects
+              // if the racing winner did not finish them.
               try {
                 await storage.createInvoicePayment({
                   tenantId,
@@ -4164,9 +4151,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   /duplicate key value/i.test(ledgerError?.message ?? "");
                 if (!isUniqueViolation) throw ledgerError;
 
-                // Concurrent delivery already inserted the ledger row.
-                // Re-fetch the invoice; if the winner already marked it
-                // paid, we are done. Otherwise fall through to recovery.
                 const refreshed = await storage.getInvoice(invoice.id, tenantId);
                 if (!refreshed || refreshed.status === "paid") {
                   console.log(
