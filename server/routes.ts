@@ -2688,6 +2688,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!doc || doc.trailerId !== req.params.id) {
           return res.status(404).json({ message: "Document not found" });
         }
+        // Soft-deleted versions must not be reviewable — they are hidden
+        // from listings and the workflow has effectively moved on.
+        // Treating them as 404 keeps the soft-delete contract consistent
+        // (callers cannot tell a soft-deleted row from a missing one).
+        if (doc.deletedAt) {
+          return res.status(404).json({ message: "Document not found" });
+        }
 
         const status = String(req.body?.status ?? "");
         if (!isDocumentStatus(status)) {

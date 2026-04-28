@@ -165,6 +165,14 @@ export const trailerDocuments = pgTable("trailer_documents", {
   idxTrailerId: index("idx_trailer_documents_trailer").on(t.trailerId),
   idxTrailerType: index("idx_trailer_documents_trailer_type").on(t.trailerId, t.documentType),
   idxCurrent: index("idx_trailer_documents_current").on(t.trailerId, t.documentType, t.isCurrent),
+  // Hard guarantee: at most one row per (trailer, document_type) may be
+  // both `is_current=true` AND not soft-deleted. Without this, race
+  // conditions (concurrent uploads of the same type) or bad migration
+  // state could leave two "current" rows, which would silently break the
+  // checklist UI (it picks one and hides the other from history).
+  uniqOneCurrent: uniqueIndex("idx_trailer_documents_one_current")
+    .on(t.trailerId, t.documentType)
+    .where(sql`${t.isCurrent} AND ${t.deletedAt} IS NULL`),
 }));
 
 // Shares (Cotas) table
