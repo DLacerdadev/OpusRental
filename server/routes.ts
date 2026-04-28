@@ -1352,7 +1352,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (supplied(incoming.salesTaxRate)) {
         salesTaxRate = parseFloat(String(incoming.salesTaxRate));
-        if (!Number.isFinite(salesTaxRate) || salesTaxRate < 0) salesTaxRate = 0;
+        // Mirror the tenant-level constraint: 0 ≤ rate ≤ 100. Anything
+        // outside that window is a client bug, so reject loudly instead
+        // of silently clamping and charging a wrong total.
+        if (!Number.isFinite(salesTaxRate) || salesTaxRate < 0 || salesTaxRate > 100) {
+          return res.status(400).json({
+            message: "salesTaxRate must be a number between 0 and 100",
+          });
+        }
       } else {
         salesTaxRate = Number.isFinite(tenantDefaultRate) && tenantDefaultRate >= 0 ? tenantDefaultRate : 0;
       }
