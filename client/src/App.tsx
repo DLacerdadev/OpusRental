@@ -94,12 +94,12 @@ function ProtectedRoute({ component: Component, titleKey, allowedRoles }: { comp
       </Sheet>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header 
-          title={t(titleKey)} 
-          user={user} 
+        <Header
+          title={t(titleKey)}
+          user={user}
           onMenuClick={() => setIsMobileMenuOpen(true)}
         />
-        <main className="flex-1 overflow-auto bg-background p-6">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden bg-background">
           <Component />
         </main>
       </div>
