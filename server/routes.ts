@@ -2675,9 +2675,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Approve or reject a document version. Only managers can review.
-  // The route is registered BEFORE the catch-all `:docId` PATCH so
-  // `:docId = "status"` doesn't match it accidentally.
+  // Manager-only approve/reject. Registered before the catch-all `:docId`
+  // PATCH so `:docId = "status"` doesn't match it accidentally.
   app.patch(
     "/api/trailers/:id/documents/:docId/status",
     authorize(),
@@ -2685,14 +2684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
       try {
         const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
-        if (!doc || doc.trailerId !== req.params.id) {
-          return res.status(404).json({ message: "Document not found" });
-        }
-        // Soft-deleted versions must not be reviewable — they are hidden
-        // from listings and the workflow has effectively moved on.
-        // Treating them as 404 keeps the soft-delete contract consistent
-        // (callers cannot tell a soft-deleted row from a missing one).
-        if (doc.deletedAt) {
+        if (!doc || doc.trailerId !== req.params.id || doc.deletedAt) {
           return res.status(404).json({ message: "Document not found" });
         }
 
@@ -2817,18 +2809,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Soft-delete a single document version. Behaviour:
-  //  - Sets `deleted_at` so the row is hidden from listings/version chain
-  //    lookups but stays in the table to preserve audit history. The
-  //    underlying object in storage is intentionally NOT deleted so the
-  //    history can still be reviewed if needed.
-  //  - If the deleted row was `is_current=true` AND another non-deleted
-  //    version of the same chain exists, the most recent remaining version
-  //    (highest `version`) is promoted to `is_current=true` so the
-  //    document type does not silently disappear from the checklist.
-  //  - If it was the only non-deleted version, the chain is gone and the
-  //    type returns to "missing" in the UI checklist.
-  //  - Re-deleting an already soft-deleted row is a no-op (idempotent).
+  // Soft-delete: sets deleted_at, leaves the object in storage, and if the
+  // deleted row was current, promotes the latest non-deleted sibling.
+  // Idempotent on already-deleted rows.
   app.delete("/api/trailers/:id/documents/:docId", authorize(), async (req, res) => {
     try {
       const doc = await storage.getTrailerDocument(req.params.docId, req.tenantId!);
@@ -2836,8 +2819,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
 
-      // Idempotent: re-deleting already-deleted row returns success
-      // without rewriting `deletedAt` or re-emitting an audit log.
       if (doc.deletedAt) {
         return res.json({ success: true, alreadyDeleted: true });
       }
@@ -2855,8 +2836,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .returning();
       if (!updated) return res.status(404).json({ message: "Document not found" });
 
-      // Promote the latest remaining (non-deleted) version of this chain
-      // to current — only relevant if the deleted row was the current one.
       if (doc.isCurrent && doc.documentType) {
         const siblings = await db
           .select()

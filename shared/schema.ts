@@ -13,6 +13,7 @@ import {
   uniqueIndex,
   index,
   check,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -136,7 +137,7 @@ export const trailerDocuments = pgTable("trailer_documents", {
   documentType: text("document_type"), // catalog id (e.g. 'title', 'liability_insurance', 'master_lease', 'tracker_certificate')
   status: text("status").notNull().default("pending"), // 'pending' | 'approved' | 'rejected'
   version: integer("version").notNull().default(1),
-  parentDocumentId: varchar("parent_document_id"), // FK to v1 of the same chain; NULL on v1 itself
+  parentDocumentId: varchar("parent_document_id").references((): AnyPgColumn => trailerDocuments.id), // FK to v1 of the same chain; NULL on v1 itself
   isCurrent: boolean("is_current").notNull().default(true),
   rejectionReason: text("rejection_reason"),
   reviewedBy: varchar("reviewed_by").references(() => users.id),
@@ -150,26 +151,14 @@ export const trailerDocuments = pgTable("trailer_documents", {
   sortOrder: integer("sort_order").notNull().default(0),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
-  // Soft-delete marker. When non-null, the row is treated as deleted by
-  // the application: it is hidden from listings, ignored by version-chain
-  // lookups (so a new upload starts a fresh chain), and ignored when
-  // promoting a previous version to current after a delete. The row stays
-  // in the table to preserve audit history.
-  deletedAt: timestamp("deleted_at"),
-  // DEPRECATED — legacy single-category column. Kept nullable so the
-  // backfill migration can map it to (category, documentType). New writes
-  // must not depend on this field.
-  documentCategory: text("document_category"),
+  deletedAt: timestamp("deleted_at"), // Soft-delete; row hidden from listings but kept for audit
+  documentCategory: text("document_category"), // DEPRECATED — legacy column, mapped by backfill
 }, (t) => ({
   idxTenant: index("idx_trailer_documents_tenant").on(t.tenantId),
   idxTrailerId: index("idx_trailer_documents_trailer").on(t.trailerId),
   idxTrailerType: index("idx_trailer_documents_trailer_type").on(t.trailerId, t.documentType),
   idxCurrent: index("idx_trailer_documents_current").on(t.trailerId, t.documentType, t.isCurrent),
-  // Hard guarantee: at most one row per (trailer, document_type) may be
-  // both `is_current=true` AND not soft-deleted. Without this, race
-  // conditions (concurrent uploads of the same type) or bad migration
-  // state could leave two "current" rows, which would silently break the
-  // checklist UI (it picks one and hides the other from history).
+  // At most one is_current row per (trailer, type) among non-deleted rows.
   uniqOneCurrent: uniqueIndex("idx_trailer_documents_one_current")
     .on(t.trailerId, t.documentType)
     .where(sql`${t.isCurrent} AND ${t.deletedAt} IS NULL`),

@@ -1,54 +1,39 @@
 /**
- * One-shot backfill: migrate the legacy `document_category` column into the
- * new `(category, document_type, version, parent_document_id, is_current,
- * status)` shape WITHOUT losing version history when a single trailer had
- * several legacy uploads under the same category.
+ * One-shot backfill: migrate legacy `document_category` rows into the new
+ * `(category, document_type, version, parent_document_id, is_current,
+ * status)` model while preserving version history for trailers that had
+ * multiple legacy uploads of the same kind.
  *
- * Algorithm per (tenant, trailer, mapped_document_type) group:
- *   1. Sort legacy rows by `uploaded_at ASC` (oldest first).
- *   2. The oldest becomes v1 with `parent_document_id=NULL`.
- *   3. Each later row gets sequential `version` and `parent_document_id`
- *      pointing at v1 (matches the live createTrailerDocument convention).
- *   4. Only the newest row keeps `is_current=true`. All older rows are
- *      flipped to `is_current=false` so they appear as History in the UI.
- *   5. Every row gets `status='approved'` so historical uploads do not
- *      suddenly all appear as Pending.
- *
- * Idempotent: a row that already has `category` AND `document_type` set is
- * skipped, so re-running the script after a partial run is safe.
+ * Idempotent: a group whose rows are all already migrated is skipped, and
+ * a partially-migrated group is reprocessed by including its already-
+ * migrated siblings so the chain is rebuilt from the full set.
  *
  * Run with:  npx tsx server/migrations/backfill-trailer-docs.ts
  */
 
 import { db } from "../db";
 import { trailerDocuments } from "@shared/schema";
-import { and, eq, isNull, isNotNull, or } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { LEGACY_CATEGORY_MAP, type DocumentCategory } from "@shared/document-types";
 
-interface GroupedRow {
+interface ChainRow {
   id: string;
   uploadedAt: Date | null;
   category: DocumentCategory;
   type: string;
+  alreadyMigrated: boolean;
 }
 
 async function main() {
-  // Pull every row that hasn't been migrated yet (missing category OR
-  // missing documentType). We need the full row data to group + chain.
+  // Pull every row that still carries the legacy column. Some may already
+  // be migrated (have category+documentType set) — we still need them when
+  // rebuilding chains for groups that contain at least one un-migrated row.
   const legacyRows = await db
     .select()
     .from(trailerDocuments)
-    .where(
-      and(
-        isNotNull(trailerDocuments.documentCategory),
-        or(isNull(trailerDocuments.category), isNull(trailerDocuments.documentType)),
-      ),
-    );
+    .where(isNotNull(trailerDocuments.documentCategory));
 
-  // Group by (tenantId, trailerId, mapped_document_type). The mapped type
-  // — not the raw legacy category — is the right grouping key because
-  // multiple legacy categories could conceivably map onto the same new type.
-  const groups = new Map<string, GroupedRow[]>();
+  const groups = new Map<string, ChainRow[]>();
   for (const row of legacyRows) {
     const mapped = LEGACY_CATEGORY_MAP[row.documentCategory!] ?? {
       category: "vehicle" as const,
@@ -61,42 +46,58 @@ async function main() {
       uploadedAt: row.uploadedAt,
       category: mapped.category,
       type: mapped.type,
+      alreadyMigrated: row.category != null && row.documentType != null,
     });
     groups.set(key, arr);
   }
 
-  let updated = 0;
+  let groupsProcessed = 0;
+  let rowsUpdated = 0;
   for (const rows of Array.from(groups.values())) {
-    // Oldest first; fall back to id for stable ordering when uploadedAt
-    // collides or is null.
-    rows.sort((a: GroupedRow, b: GroupedRow) => {
+    if (rows.every((r) => r.alreadyMigrated)) continue;
+
+    rows.sort((a: ChainRow, b: ChainRow) => {
       const aTime = a.uploadedAt?.getTime() ?? 0;
       const bTime = b.uploadedAt?.getTime() ?? 0;
       if (aTime !== bTime) return aTime - bTime;
       return a.id.localeCompare(b.id);
     });
 
-    const v1Id = rows[0].id;
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const isLatest = i === rows.length - 1;
-      await db
+    await db.transaction(async (tx) => {
+      // Drop is_current on every sibling first to avoid colliding with the
+      // partial unique index while we reassign the chain.
+      await tx
         .update(trailerDocuments)
-        .set({
-          category: row.category,
-          documentType: row.type,
-          version: i + 1,
-          parentDocumentId: i === 0 ? null : v1Id,
-          isCurrent: isLatest,
-          status: "approved",
-        })
-        .where(eq(trailerDocuments.id, row.id));
-      updated++;
-    }
+        .set({ isCurrent: false })
+        .where(
+          sql`${trailerDocuments.id} IN (${sql.join(
+            rows.map((r) => sql`${r.id}`),
+            sql`, `,
+          )})`,
+        );
+
+      const v1Id = rows[0].id;
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        await tx
+          .update(trailerDocuments)
+          .set({
+            category: row.category,
+            documentType: row.type,
+            version: i + 1,
+            parentDocumentId: i === 0 ? null : v1Id,
+            isCurrent: i === rows.length - 1,
+            status: "approved",
+          })
+          .where(eq(trailerDocuments.id, row.id));
+        rowsUpdated++;
+      }
+    });
+    groupsProcessed++;
   }
 
   console.log(
-    `backfill-trailer-docs: groups=${groups.size} rows updated=${updated}`,
+    `backfill-trailer-docs: groups processed=${groupsProcessed} rows updated=${rowsUpdated}`,
   );
 }
 

@@ -449,9 +449,6 @@ export class DatabaseStorage implements IStorage {
 
   // Trailer document operations
   async getTrailerDocuments(trailerId: string, tenantId: string): Promise<TrailerDocument[]> {
-    // Soft-deleted rows are hidden from listings — they exist only to
-    // preserve audit history. The DELETE route sets `deletedAt`; nothing
-    // else writes to that column.
     return await db
       .select()
       .from(trailerDocuments)
@@ -465,12 +462,9 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(trailerDocuments.sortOrder), desc(trailerDocuments.uploadedAt));
   }
 
+  // Returns soft-deleted rows too; callers that need to exclude them must
+  // check `deletedAt` themselves (status PATCH, DELETE).
   async getTrailerDocument(id: string, tenantId: string): Promise<TrailerDocument | undefined> {
-    // Note: this method INCLUDES soft-deleted rows on purpose so the
-    // DELETE route can still look them up if hit twice, and so an audit
-    // viewer can resolve a deleted entityId. Callers that should not see
-    // deleted docs (e.g. status mutations, object-stream ACL check) must
-    // filter on `deletedAt` themselves.
     const [doc] = await db
       .select()
       .from(trailerDocuments)
@@ -481,17 +475,9 @@ export class DatabaseStorage implements IStorage {
   async createTrailerDocument(
     doc: InsertTrailerDocument & { tenantId: string; uploadedBy?: string | null }
   ): Promise<TrailerDocument> {
-    // Auto-versioning: if there is already a current document for the same
-    // (trailer, document_type), the new upload becomes vN+1 of that chain
-    // and the previous current row is flipped to is_current=false. The
-    // chain is identified by `parent_document_id` which always points at
-    // v1 (so vN's parent is v1, never vN-1). All of this runs inside a
-    // single transaction so a partial failure can never leave two rows
-    // marked is_current=true for the same type.
+    // Auto-version: new uploads of an existing chain become vN+1 with
+    // parent_document_id pointing at v1; previous current row is flipped.
     return await db.transaction(async (tx) => {
-      // Look up the existing current row IGNORING soft-deleted ones, so a
-      // brand-new upload after a soft-delete starts a fresh chain rather
-      // than re-resurrecting the old (deleted) one.
       const [previous] = await tx
         .select()
         .from(trailerDocuments)
